@@ -77,6 +77,13 @@ describe('Storage des réglages (règle 4 : rien dans le bundle)', () => {
     const loaded = await loadStoredSettings();
     expect(loaded.backend).toBe('mock');
     expect(loaded.apiUrl).toBe('');
+    expect(loaded.autoApplyModel).toBe(true); // actif par défaut (décision v2)
+  });
+
+  it('auto-apply : actif par défaut, désactivé UNIQUEMENT sur refus explicite', async () => {
+    expect((await loadStoredSettings()).autoApplyModel).toBe(true);
+    memoryStore.set('sobrio_settings', { autoApplyModel: false });
+    expect((await loadStoredSettings()).autoApplyModel).toBe(false);
   });
 });
 

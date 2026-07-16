@@ -18,11 +18,11 @@ court dans un fil mathématique ne part pas naïvement sur Haiku.
    fermées sont transmis (`tests/extension_zerotext.test.ts` l'atteste).
 2. **Lecture seule PAR DÉFAUT** vis-à-vis de claude.ai — badge/panneau à nous (Shadow
    DOM), aucun clic simulé, aucune pré-sélection, aucun DOM fonctionnel modifié.
-   _Amendement opt-in (2026-07-16, `docs/decisions.md`)_ : la case « Appliquer
-   automatiquement le modèle » du popup (désactivée par défaut) autorise Sobrio à
-   changer le modèle dans le sélecteur de claude.ai — uniquement au clic
-   « Utiliser… » de l'utilisateur, via le seul module `src/modelSwitcher.ts`
-   (résultat vérifié, abandon silencieux au moindre doute).
+   _Amendements (2026-07-16, `docs/decisions.md`)_ : l'application automatique du
+   modèle est **activée par défaut** — Sobrio change le modèle dans le sélecteur de
+   claude.ai, uniquement au clic « Utiliser… » de l'utilisateur, via le seul module
+   `src/modelSwitcher.ts` (résultat vérifié, abandon silencieux au moindre doute).
+   Décocher la case du popup rétablit la lecture seule stricte.
 3. **Jamais bloquante** — timeout 400 ms, échec ⇒ silence total (aucun toast, rien).
 4. **Aucun secret dans le bundle** — URL d'API + jeton vivent dans le storage (popup).
 5. **Fourchettes obligatoires** — tout coût/énergie affiché est un min–max + périmètre.

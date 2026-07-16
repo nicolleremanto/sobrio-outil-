@@ -18,11 +18,12 @@
  *    l'action est TOUJOURS déclenchée par son geste, jamais spontanée.
  */
 import { debugLog } from './debugLog';
-import { MODEL_LABEL_SELECTORS, resolveFirst } from './selectors';
+import { resolveModelButton } from './selectors';
 import { normalizeModelLabel } from './signals';
 
 /** Sélecteurs des items de menu candidats (menu du sélecteur de modèle). */
-const MENU_ITEM_SELECTORS = '[role="menuitem"], [role="option"], [role="menuitemradio"]';
+const MENU_ITEM_SELECTORS =
+  '[role="menuitem"], [role="option"], [role="menuitemradio"], [role="radio"]';
 
 export interface ApplyModelOptions {
   /** Attente maximale de l'apparition du menu (ms). */
@@ -33,6 +34,31 @@ export interface ApplyModelOptions {
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Clic réaliste : les composants de claude.ai (Radix UI) réagissent au
+ * `pointerdown`, pas seulement au `click`. On envoie la séquence complète —
+ * pointerdown → pointerup → click — chacune en best-effort.
+ */
+function simulateClick(element: HTMLElement): void {
+  const base = { bubbles: true, cancelable: true, composed: true };
+  try {
+    if (typeof PointerEvent === 'function') {
+      element.dispatchEvent(new PointerEvent('pointerdown', { ...base, pointerId: 1 }));
+      element.dispatchEvent(new PointerEvent('pointerup', { ...base, pointerId: 1 }));
+    } else {
+      element.dispatchEvent(new MouseEvent('mousedown', base));
+      element.dispatchEvent(new MouseEvent('mouseup', base));
+    }
+  } catch {
+    // Certains environnements refusent PointerEvent : le click suffit alors.
+  }
+  try {
+    element.click();
+  } catch {
+    // Dégradation silencieuse.
+  }
 }
 
 /** Cherche un item de menu dont le libellé correspond au modèle cible. */
@@ -69,17 +95,20 @@ export async function applyModelInPage(
   targetId: string,
   options: ApplyModelOptions = {},
 ): Promise<boolean> {
-  const menuTimeoutMs = options.menuTimeoutMs ?? 1500;
-  const settleMs = options.settleMs ?? 150;
+  const menuTimeoutMs = options.menuTimeoutMs ?? 2500;
+  const settleMs = options.settleMs ?? 200;
   try {
-    const selector = resolveFirst(MODEL_LABEL_SELECTORS, document);
-    if (!selector) return false;
+    const selector = resolveModelButton();
+    if (!selector) {
+      debugLog('auto_apply_abandon', { bouton_trouve: false });
+      return false;
+    }
 
     // Déjà le bon modèle : rien à faire.
     if (normalizeModelLabel(selector.textContent) === targetId) return true;
 
-    // Ouverture du menu — premier des deux seuls clics simulés du module.
-    selector.click();
+    // Ouverture du menu — première des deux seules actions simulées.
+    simulateClick(selector);
 
     // Attente de l'item cible (le menu peut se monter de façon asynchrone).
     const deadline = Date.now() + menuTimeoutMs;
@@ -94,12 +123,12 @@ export async function applyModelInPage(
       return false;
     }
 
-    // Sélection de l'item — second et dernier clic.
-    item.click();
+    // Sélection de l'item — seconde et dernière action.
+    simulateClick(item);
     await delay(settleMs);
 
     // Vérification : l'étiquette relue doit correspondre au modèle demandé.
-    const after = resolveFirst(MODEL_LABEL_SELECTORS, document);
+    const after = resolveModelButton();
     const applied = normalizeModelLabel(after?.textContent ?? null) === targetId;
     debugLog('auto_apply', { applique: applied });
     if (!applied) tryCloseMenu();

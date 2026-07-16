@@ -16,11 +16,11 @@ export interface StoredSettings {
   orgId: string;
   token: string;
   /**
-   * Application AUTOMATIQUE du modèle choisi dans la page hôte (amendement
-   * opt-in de la règle 2, décision du 2026-07-16 — voir docs/decisions.md).
-   * DÉSACTIVÉ par défaut : sans opt-in explicite de l'utilisateur,
-   * l'extension reste en lecture seule. TODO(V1) : gating par politique org
-   * (`allow_auto_apply`, proposé dans la RFC-0001).
+   * Application AUTOMATIQUE du modèle choisi dans la page hôte (amendements
+   * de la règle 2 des 2026-07-16 — voir docs/decisions.md). ACTIVÉ par
+   * défaut (décision fondateur v2) ; désactivable dans le popup — décoché,
+   * l'extension redevient strictement lecture seule. TODO(V1) : gating par
+   * politique org (`allow_auto_apply`, proposé dans la RFC-0001).
    */
   autoApplyModel: boolean;
 }
@@ -32,7 +32,7 @@ const DEFAULTS: StoredSettings = {
   apiUrl: '',
   orgId: '',
   token: '',
-  autoApplyModel: false,
+  autoApplyModel: true,
 };
 
 /** Lit les réglages (fusionnés avec les défauts) — ne throw jamais. */
@@ -45,7 +45,7 @@ export async function loadStoredSettings(): Promise<StoredSettings> {
       apiUrl: raw.apiUrl ?? '',
       orgId: raw.orgId ?? '',
       token: raw.token ?? '',
-      autoApplyModel: raw.autoApplyModel === true, // opt-in strict
+      autoApplyModel: raw.autoApplyModel !== false, // actif sauf refus explicite
     };
   } catch {
     return { ...DEFAULTS }; // dégradation silencieuse

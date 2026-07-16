@@ -21,12 +21,13 @@ module d'impact en fourchettes (`sobrio_impact`, Lot D), ops (Lot F).
    On manipule des *features* (longueur, langue, flags) et des hash salés.
 2. **Extension en lecture seule PAR DÉFAUT** vis-à-vis de claude.ai : elle affiche, ne
    clique pas, ne pré-sélectionne rien, ne modifie pas le DOM fonctionnel. Aucun secret
-   dans le bundle. *Amendement du 2026-07-16 (décision fondateur, voir
-   `docs/decisions.md`)* : l'application automatique du modèle choisi est possible en
-   **opt-in strict** (case dédiée du popup, désactivée par défaut), déclenchée
-   uniquement par un clic de l'utilisateur dans le panneau Sobrio, implémentée dans le
-   SEUL module `extension/src/modelSwitcher.ts` (échec ⇒ abandon silencieux). Gating
-   par politique org (`allow_auto_apply`) proposé dans la RFC-0001.
+   dans le bundle. *Amendements du 2026-07-16 (décisions fondateur, voir
+   `docs/decisions.md`)* : l'application automatique du modèle choisi est **activée
+   par défaut** (désactivable dans le popup — décochée, retour à la lecture seule
+   stricte), déclenchée uniquement par un clic de l'utilisateur dans le panneau
+   Sobrio, implémentée dans le SEUL module `extension/src/modelSwitcher.ts`
+   (résultat vérifié, échec ⇒ abandon silencieux). Gating par politique org
+   (`allow_auto_apply`) proposé dans la RFC-0001.
 3. **Tout chiffre d'impact est un intervalle min–max avec périmètre** (type `Range`).
    Jamais d'équivalents grand public (litres, arbres, km) dans le code ou les gabarits.
 4. **Rapport : deux blocs distincts, jamais fusionnés** — empreinte totale MESURÉE

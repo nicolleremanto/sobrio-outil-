@@ -15,6 +15,7 @@
  * courant et ajouter un test de fumée manuel dans la checklist de release.
  */
 import type { BubbleView, PageView } from './conversationMemory';
+import { normalizeModelLabel } from './signals';
 
 /**
  * Zone de saisie du prompt — STRATÉGIE 1 : sélecteurs candidats ordonnés,
@@ -162,14 +163,35 @@ export const BUBBLE_SELECTORS: readonly string[] = [
   '[data-testid="user-message"], [data-testid="assistant-message"]',
 ];
 
-/** Étiquette du modèle courant (lue, jamais modifiée — règle n°2). */
+/** Étiquette du modèle courant — candidats ordonnés (claude.ai + testpage). */
 export const MODEL_LABEL_SELECTORS: readonly string[] = [
+  '[data-testid="model-selector-dropdown"]',
   '[data-testid="model-selector"]',
   'button[aria-haspopup="menu"][class*="model"]',
 ];
 
 /** Conteneur porteur d'un identifiant de fil (page d'entraînement). */
 export const THREAD_ID_SELECTORS: readonly string[] = ['[data-thread-id]'];
+
+/**
+ * Résout le BOUTON du sélecteur de modèle : candidats ordonnés, puis
+ * heuristique de repli — premier bouton de la page dont le libellé évoque un
+ * modèle du catalogue (les boutons de NOTRE panneau vivent dans un Shadow DOM
+ * et ne sont donc jamais capturés par ce scan). `null` si introuvable.
+ */
+export function resolveModelButton(root: ParentNode = document): HTMLElement | null {
+  const direct = resolveFirst(MODEL_LABEL_SELECTORS, root);
+  if (direct) return direct;
+  try {
+    for (const button of root.querySelectorAll('button')) {
+      if (!(button instanceof HTMLElement)) continue;
+      if (normalizeModelLabel(button.textContent) !== null) return button;
+    }
+  } catch {
+    // Dégradation silencieuse.
+  }
+  return null;
+}
 
 /** Rôle d'une bulle depuis ses attributs ; 'unknown' par défaut. */
 function bubbleRole(element: HTMLElement): BubbleView['role'] {
@@ -216,7 +238,7 @@ export function collectPageView(
       }
       break; // première stratégie qui matche
     }
-    const label = resolveFirst(MODEL_LABEL_SELECTORS, root);
+    const label = resolveModelButton(root);
     return {
       threadId: resolveThreadId(root, pathname),
       bubbles,
