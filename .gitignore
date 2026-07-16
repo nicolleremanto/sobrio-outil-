@@ -1,0 +1,29 @@
+# Secrets & environnement — JAMAIS de .env commité (règle n°5)
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+
+# Node / extension (WXT)
+node_modules/
+extension/.output/
+extension/.wxt/
+
+# Sorties générées
+report/out/
+out/
+
+# macOS / IDE
+.DS_Store
+.idea/
+.vscode/
