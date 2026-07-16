@@ -43,6 +43,37 @@ pnpm lint      # eslint + prettier --check
 pnpm format    # prettier --write
 ```
 
+## Démo humaine V0 — page d'entraînement (boucle 3)
+
+Aucune dépendance à claude.ai : tout se joue en local, en mode **mock** (défaut).
+
+```bash
+pnpm dev:page   # terminal 1 — sert le faux chat sur http://localhost:8788
+pnpm dev        # terminal 2 — Chrome dédié avec l'extension (matche aussi le faux chat)
+```
+
+Scénario complet à dérouler sur `http://localhost:8788` :
+
+1. **Reco simple** — taper « Quelle heure est-il à Tokyo ? », attendre ~600 ms :
+   le panneau propose **Claude Haiku 4.5** (règle `mock:short_simple`), avec
+   jauge de confiance, fourchettes coût/énergie (min–max) et jauge budget.
+2. **Mémoire de conversation (LE scénario)** — cliquer « + bulle maths », puis
+   taper « démontre-le » : la reco passe à **Claude Sonnet 4.6**
+   (`mock:reasoning_context`) alors que le prompt est court — la mémoire du fil
+   a parlé. « Pourquoi ? » explique la règle en langage clair.
+3. **Dérogation** — dans le panneau, « Choisir un autre modèle… » → Opus :
+   accusé discret, événement `followed=false, overridden_to=opus-4-8` capturé
+   par le mock (visible dans les tests ; en mode api : `events_reco`).
+4. **Suivi** — « Utiliser Claude Sonnet 4.6 » : note l'intention (aucune action
+   sur la page — règle 2) et télémètre `followed=true`.
+5. **Fil long** — cliquer « + fil long (20 bulles) », retaper un mot : bandeau
+   discret « Conversation longue — repartir de zéro coûtera probablement moins ».
+6. **Nouvelle conversation** — cliquer « Nouvelle conversation » : la mémoire se
+   réinitialise, « démontre-le » seul repart sur un signal ambigu (ton humble).
+7. **Jamais bloquant** — couper `pnpm dev:page`… la page disparaît, mais pour
+   simuler l'API muette : popup → mode `api` avec une URL invalide → plus AUCUN
+   panneau, aucune erreur visible, la saisie reste fluide.
+
 ## Checklist de validation (démo Lot A)
 
 - [ ] La reco s'affiche sur claude.ai après une pause de saisie (~600 ms), dans un
