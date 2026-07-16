@@ -1,0 +1,9 @@
+# Dépendances de l'API Sobrio (Lot B) — compatibles avec le venv racine.
+fastapi
+uvicorn[standard]
+pydantic>=2
+sqlalchemy>=2
+psycopg[binary]
+pyyaml
+# Tests (TestClient httpx)
+httpx

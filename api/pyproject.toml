@@ -1,0 +1,11 @@
+[project]
+name = "sobrio-api"
+version = "0.1.0"
+description = "API Sobrio — Lot B (squelette). Mock officiel du Lot A."
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B"]
