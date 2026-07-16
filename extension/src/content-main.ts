@@ -21,7 +21,7 @@ import {
 import { ConversationMemory } from './conversationMemory';
 import { debugLog } from './debugLog';
 import { mergeMessages, type Messages } from './messages';
-import { removeBadge, removePanel, renderBadge, renderPanel } from './panel';
+import { removeBadge, removePanel, renderBadge, renderPanel, repositionBadge } from './panel';
 import {
   collectPageView,
   noteInputResolution,
@@ -136,7 +136,10 @@ function observeInputArea(deps: FlowDeps): void {
   const debouncer = createDebouncer(onPause);
 
   const ensureAttached = () => {
-    if (currentInput?.isConnected) return;
+    if (currentInput?.isConnected) {
+      repositionBadge(); // la barre a pu bouger (layout, panneau latéral…)
+      return;
+    }
     const input = resolveInputArea();
     if (noteInputResolution(Boolean(input))) {
       // Seuil franchi À L'INSTANT : un seul log debug, un seul signal.
@@ -148,7 +151,8 @@ function observeInputArea(deps: FlowDeps): void {
       return; // dégradation silencieuse (voir src/selectors.ts)
     }
     currentInput = input;
-    renderBadge(deps.messages);
+    // Badge ancré sur la barre de saisie (overlay — règle 2).
+    renderBadge(deps.messages, input);
     // Écoute PASSIVE de la saisie — on lit, on ne modifie rien (règle 2).
     input.addEventListener('input', () => debouncer.schedule());
   };
@@ -157,11 +161,17 @@ function observeInputArea(deps: FlowDeps): void {
   // mute en continu. Observer unique, déconnecté à la fermeture (zéro fuite).
   const observer = new MutationObserver(createThrottle(ensureAttached, OBSERVER_THROTTLE_MS));
   observer.observe(document.documentElement, { childList: true, subtree: true });
+  // Le badge suit la barre de saisie au scroll et au redimensionnement.
+  const throttledReposition = createThrottle(repositionBadge, 100);
+  window.addEventListener('resize', throttledReposition, { passive: true });
+  document.addEventListener('scroll', throttledReposition, { capture: true, passive: true });
   window.addEventListener(
     'pagehide',
     () => {
       observer.disconnect();
       debouncer.cancel();
+      window.removeEventListener('resize', throttledReposition);
+      document.removeEventListener('scroll', throttledReposition, { capture: true });
       removePanel();
       removeBadge();
     },

@@ -75,10 +75,20 @@ const STYLE = `
   .ack { font-style: italic; color: #4a6d51; margin-top: 8px; }
   .badge {
     position: fixed; right: 16px; bottom: 48px; z-index: 2147483646;
-    width: 34px; height: 34px; border-radius: 50%;
-    background: #2b2a27; color: #faf8f5; border: none; cursor: pointer;
-    font: 700 15px/34px system-ui, sans-serif; text-align: center;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    width: 26px; height: 26px; border-radius: 50%;
+    background: #faf8f5; color: #2b2a27;
+    border: 1px solid rgba(43, 42, 39, 0.28); cursor: pointer;
+    font: 600 12px/24px system-ui, sans-serif; text-align: center;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+    opacity: 0.88;
+    transition: opacity 0.15s ease, transform 0.15s ease, background 0.15s ease, color 0.15s ease;
+    padding: 0;
+  }
+  .badge:hover {
+    opacity: 1;
+    transform: scale(1.08);
+    background: #2b2a27;
+    color: #faf8f5;
   }
 `;
 
@@ -113,15 +123,62 @@ export function removePanel(): void {
 /** Retire le badge (sans jamais throw). */
 export function removeBadge(): void {
   try {
+    badgeAnchor = null;
     document.getElementById(BADGE_HOST_ID)?.remove();
   } catch {
     // Dégradation silencieuse.
   }
 }
 
-/** Badge « S » discret — présence de Sobrio, clic = replier le panneau. */
-export function renderBadge(messages: Messages): void {
-  if (document.getElementById(BADGE_HOST_ID)) return; // déjà en place
+/** Taille du badge (px) — utilisée par le calcul d'ancrage. */
+const BADGE_SIZE = 26;
+
+/** Marge intérieure entre le badge et le bord droit de la zone de saisie. */
+const BADGE_INSET = 10;
+
+/** Zone de saisie sur laquelle le badge est ancré (overlay, jamais inséré
+ * dans le DOM de la page hôte — règle 2 ; son React nous éjecterait). */
+let badgeAnchor: HTMLElement | null = null;
+
+/**
+ * (Re)positionne le badge sur le bord droit de la barre de saisie, centré
+ * verticalement. Si l'ancre a disparu ou n'est pas mesurable (tests),
+ * retombe sur le coin bas-droit. Ne throw jamais.
+ */
+export function repositionBadge(): void {
+  try {
+    const host = document.getElementById(BADGE_HOST_ID);
+    const badge = host?.shadowRoot?.querySelector<HTMLElement>('.badge');
+    if (!badge) return;
+    const rect = badgeAnchor?.isConnected ? badgeAnchor.getBoundingClientRect() : null;
+    if (rect && rect.width > 0 && rect.height > 0) {
+      badge.style.top = `${Math.round(rect.top + (rect.height - BADGE_SIZE) / 2)}px`;
+      badge.style.left = `${Math.round(rect.right - BADGE_SIZE - BADGE_INSET)}px`;
+      badge.style.right = 'auto';
+      badge.style.bottom = 'auto';
+    } else {
+      // Repli : coin bas-droit (comportement d'origine).
+      badge.style.top = '';
+      badge.style.left = '';
+      badge.style.right = '16px';
+      badge.style.bottom = '48px';
+    }
+  } catch {
+    // Dégradation silencieuse.
+  }
+}
+
+/**
+ * Badge « S » discret, ANCRÉ dans la barre de saisie (bord droit, centré) —
+ * présence de Sobrio, clic = replier le panneau. Overlay positionné sur le
+ * rectangle de la zone de saisie : rien n'est inséré dans le DOM fonctionnel.
+ */
+export function renderBadge(messages: Messages, anchor: HTMLElement | null = null): void {
+  badgeAnchor = anchor ?? badgeAnchor;
+  if (document.getElementById(BADGE_HOST_ID)) {
+    repositionBadge(); // déjà en place : on met simplement à jour l'ancrage
+    return;
+  }
   const shadow = mountHost(BADGE_HOST_ID);
   if (!shadow) return;
   const badge = document.createElement('button');
@@ -131,6 +188,7 @@ export function renderBadge(messages: Messages): void {
   badge.title = messages['badge_title'] ?? 'Sobrio';
   badge.addEventListener('click', () => removePanel());
   shadow.appendChild(badge);
+  repositionBadge();
 }
 
 /** Fourchette min–max (règle 5 : jamais de valeur unique). */

@@ -128,6 +128,37 @@ describe('renderPanel — états particuliers', () => {
     // La page hôte ne reçoit que nos hôtes à nous — rien d'autre.
     expect(document.querySelector('main')!.children.length).toBe(1);
   });
+
+  it('badge ancré : positionné sur le bord droit de la barre de saisie, centré', () => {
+    const input = document.createElement('div');
+    input.setAttribute('contenteditable', 'true');
+    document.querySelector('main')!.appendChild(input);
+    vi.spyOn(input, 'getBoundingClientRect').mockReturnValue({
+      top: 500,
+      height: 52,
+      right: 800,
+      width: 600,
+      left: 200,
+      bottom: 552,
+    } as DOMRect);
+
+    renderBadge(FR_MESSAGES, input);
+    const badge = document
+      .getElementById('sobrio-badge-host')!
+      .shadowRoot!.querySelector<HTMLElement>('.badge')!;
+    // top = 500 + (52 − 26)/2 = 513 ; left = 800 − 26 − 10 = 764.
+    expect(badge.style.top).toBe('513px');
+    expect(badge.style.left).toBe('764px');
+  });
+
+  it('badge sans ancre mesurable : repli sur le coin bas-droit', () => {
+    renderBadge(FR_MESSAGES, null);
+    const badge = document
+      .getElementById('sobrio-badge-host')!
+      .shadowRoot!.querySelector<HTMLElement>('.badge')!;
+    expect(badge.style.right).toBe('16px');
+    expect(badge.style.bottom).toBe('48px');
+  });
 });
 
 describe('runRecommendationFlow — silence et kill-switch', () => {
