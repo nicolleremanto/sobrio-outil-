@@ -1,0 +1,73 @@
+/* Popup Sobrio — style minimal. TODO(LotA) : design final. */
+body {
+  margin: 0;
+  min-width: 320px;
+  font:
+    13px/1.5 system-ui,
+    sans-serif;
+  color: #2b2a27;
+  background: #faf8f5;
+}
+
+main {
+  padding: 14px 16px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.tagline {
+  margin: 2px 0 12px;
+  color: #6b675f;
+  font-style: italic;
+}
+
+form label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+form input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 2px;
+  padding: 6px 8px;
+  border: 1px solid #b8b2a7;
+  border-radius: 6px;
+  font: inherit;
+  font-weight: 400;
+}
+
+form button {
+  margin-top: 4px;
+  padding: 6px 14px;
+  border: 1px solid #2b2a27;
+  border-radius: 6px;
+  background: #2b2a27;
+  color: #faf8f5;
+  font: inherit;
+  cursor: pointer;
+}
+
+#status {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid #d5d0c8;
+}
+
+#status h2 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6b675f;
+}
+
+.support {
+  margin-top: 12px;
+  font-size: 12px;
+}

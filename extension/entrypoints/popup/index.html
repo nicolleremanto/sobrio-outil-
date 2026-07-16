@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sobrio</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Sobrio</h1>
+      <p class="tagline">Recommande, n'automatise jamais.</p>
+
+      <!-- Règle n°2 : aucun secret dans le bundle — la config est saisie ici
+           et stockée dans browser.storage.local. -->
+      <form id="settings-form">
+        <label>
+          URL de l'API
+          <input id="api-url" type="url" placeholder="http://localhost:8000" required />
+        </label>
+        <label>
+          Organisation (org_id)
+          <input id="org-id" type="text" placeholder="demo" required />
+        </label>
+        <label>
+          Token d'organisation
+          <input id="token" type="password" autocomplete="off" required />
+        </label>
+        <button type="submit">Enregistrer</button>
+      </form>
+
+      <section id="status" aria-live="polite">
+        <h2>État</h2>
+        <p id="status-text">Chargement…</p>
+      </section>
+
+      <!-- TODO(LotA) : adresse support réelle + page d'aide. -->
+      <p class="support">
+        <a href="mailto:support@sobrio.example?subject=Extension%20Sobrio">Contacter le support</a>
+      </p>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

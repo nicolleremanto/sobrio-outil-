@@ -1,0 +1,6 @@
+# Extension Sobrio — artefacts locaux
+node_modules/
+.output/
+.wxt/
+stats.html
+stats-*.json

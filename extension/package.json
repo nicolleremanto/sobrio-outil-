@@ -1,0 +1,33 @@
+{
+  "name": "@sobrio/extension",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Extension navigateur Sobrio — recommandation de modèle sur claude.ai (Lot A, squelette)",
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "build": "wxt build",
+    "test": "vitest run",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "postinstall": "wxt prepare"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.1.1",
+    "eslint": "^10.7.0",
+    "happy-dom": "^20.10.6",
+    "prettier": "^3.9.5",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.64.0",
+    "vitest": "^4.1.10",
+    "wxt": "^0.20.27"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp",
+      "@parcel/watcher"
+    ]
+  }
+}
