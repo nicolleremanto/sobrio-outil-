@@ -1,0 +1,79 @@
+# Sobrio — CI (Lot 0). Deux jobs : python (lint + tests, Postgres 16 en service)
+# et node (extension : install, lint, test, build).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: sobrio
+          POSTGRES_PASSWORD: sobrio_dev_password
+          POSTGRES_DB: sobrio
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql+psycopg://sobrio:sobrio_dev_password@localhost:5432/sobrio
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dépendances système WeasyPrint
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpango-1.0-0 libpangocairo-1.0-0 libharfbuzz-subset0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Installation des dépendances Python
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r api/requirements.txt -r connector/requirements.txt \
+                      -r warehouse/requirements.txt -r report/requirements.txt
+          pip install -e ./warehouse
+
+      - name: Lint (ruff)
+        run: ruff check api connector warehouse report
+
+      - name: Tests (pytest)
+        run: pytest api/tests connector/tests warehouse/tests report/tests
+
+  node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: extension/pnpm-lock.yaml
+
+      - name: Installation
+        run: pnpm -C extension install
+
+      - name: Lint
+        run: pnpm -C extension lint
+
+      - name: Tests
+        run: pnpm -C extension test
+
+      - name: Build
+        run: pnpm -C extension build

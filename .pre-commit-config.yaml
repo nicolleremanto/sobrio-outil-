@@ -1,0 +1,25 @@
+# Sobrio — hooks pre-commit (Lot 0).
+# gitleaks n'est pas installable sur la machine de bootstrap : la détection de
+# secrets est assurée par une regex simple (language: pygrep). Voir docs/decisions.md.
+repos:
+  - repo: local
+    hooks:
+      - id: sobrio-detect-secrets
+        name: "Sobrio : détection de secrets (regex simple, règle n°5)"
+        description: >
+          Bloque les motifs de secrets connus : clés Anthropic (sk-ant-...),
+          AWS (AKIA...), GitHub (ghp_...), Slack (xoxb-...), clés privées PEM.
+        language: pygrep
+        entry: "(sk-ant-[A-Za-z0-9_-]{8,}|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{20,}|xoxb-[A-Za-z0-9-]{10,}|BEGIN [A-Z ]*PRIVATE KEY)"
+        types: [text]
+        exclude: '^(\.pre-commit-config\.yaml|\.env\.example)$'
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-added-large-files
+      - id: detect-private-key
+        exclude: '^\.pre-commit-config\.yaml$'
+      - id: check-merge-conflict
