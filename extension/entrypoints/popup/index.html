@@ -11,20 +11,33 @@
       <h1>Sobrio</h1>
       <p class="tagline">Recommande, n'automatise jamais.</p>
 
-      <!-- Règle n°2 : aucun secret dans le bundle — la config est saisie ici
+      <!-- Règle 4 : aucun secret dans le bundle — la config est saisie ici
            et stockée dans browser.storage.local. -->
       <form id="settings-form">
         <label>
-          URL de l'API
-          <input id="api-url" type="url" placeholder="http://localhost:8000" required />
+          Backend
+          <select id="backend">
+            <option value="mock">Démonstration (mock, sans serveur)</option>
+            <option value="api">API Sobrio (réelle)</option>
+          </select>
         </label>
-        <label>
-          Organisation (org_id)
-          <input id="org-id" type="text" placeholder="demo" required />
-        </label>
-        <label>
-          Token d'organisation
-          <input id="token" type="password" autocomplete="off" required />
+        <fieldset id="api-fields">
+          <label>
+            URL de l'API
+            <input id="api-url" type="url" placeholder="http://localhost:8000" />
+          </label>
+          <label>
+            Organisation (org_id)
+            <input id="org-id" type="text" placeholder="demo" />
+          </label>
+          <label>
+            Token d'organisation
+            <input id="token" type="password" autocomplete="off" />
+          </label>
+        </fieldset>
+        <label class="inline">
+          <input id="debug" type="checkbox" />
+          Journal de debug local (nombres et drapeaux uniquement — jamais de contenu)
         </label>
         <button type="submit">Enregistrer</button>
       </form>
@@ -32,9 +45,10 @@
       <section id="status" aria-live="polite">
         <h2>État</h2>
         <p id="status-text">Chargement…</p>
+        <p id="version-text" class="muted"></p>
       </section>
 
-      <!-- TODO(LotA) : adresse support réelle + page d'aide. -->
+      <!-- TODO(V1) : adresse support réelle + page d'aide. -->
       <p class="support">
         <a href="mailto:support@sobrio.example?subject=Extension%20Sobrio">Contacter le support</a>
       </p>

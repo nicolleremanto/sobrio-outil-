@@ -10,8 +10,6 @@
  * - Dégradation silencieuse : tout échec réseau/timeout retourne `null`/`false`,
  *   ne throw jamais vers l'appelant, ne logge jamais de contenu.
  */
-import { browser } from 'wxt/browser';
-
 // ---------------------------------------------------------------------------
 // Types fidèles à contracts/openapi.yaml (v1.0) — ne pas modifier sans RFC.
 // ---------------------------------------------------------------------------
@@ -91,7 +89,8 @@ export interface ExtensionConfig {
 }
 
 // ---------------------------------------------------------------------------
-// Réglages locaux (browser.storage.local) — jamais en dur dans le bundle.
+// Réglages d'accès à l'API — la persistance vit dans src/settings.ts
+// (browser.storage.local, saisie via le popup ; jamais en dur — règle 4).
 // ---------------------------------------------------------------------------
 
 export interface ApiSettings {
@@ -100,27 +99,8 @@ export interface ApiSettings {
   token: string;
 }
 
-const SETTINGS_KEY = 'sobrio_settings';
-
 /** Timeout court : la reco ne doit JAMAIS ralentir l'utilisateur (400 ms). */
 export const DEFAULT_TIMEOUT_MS = 400;
-
-/** Lit les réglages depuis storage.local ; `null` si absents/incomplets. */
-export async function loadSettings(): Promise<ApiSettings | null> {
-  try {
-    const stored = await browser.storage.local.get(SETTINGS_KEY);
-    const raw = stored[SETTINGS_KEY] as Partial<ApiSettings> | undefined;
-    if (!raw || !raw.apiUrl || !raw.orgId || !raw.token) return null;
-    return { apiUrl: raw.apiUrl, orgId: raw.orgId, token: raw.token };
-  } catch {
-    return null; // dégradation silencieuse
-  }
-}
-
-/** Écrit les réglages dans storage.local (utilisé par le popup). */
-export async function saveSettings(settings: ApiSettings): Promise<void> {
-  await browser.storage.local.set({ [SETTINGS_KEY]: settings });
-}
 
 // ---------------------------------------------------------------------------
 // Requêtes — AbortController + timeout, Authorization: Bearer, échec ⇒ null.
