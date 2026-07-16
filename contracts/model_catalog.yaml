@@ -1,0 +1,24 @@
+version: "2026-07"
+models:
+  - id: haiku-4-5
+    provider: anthropic
+    display_name: "Claude Haiku 4.5"
+    price_in_usd_mtok: 1.0
+    price_out_usd_mtok: 5.0
+    impact:
+      wh_per_ktok_out: {min: 0.3, max: 1.4}
+      scope: "inference"
+      source: "EcoLogits + littérature publique — à recalibrer (TODO Lot D)"
+  - id: sonnet-4-6
+    provider: anthropic
+    display_name: "Claude Sonnet 4.6"
+    price_in_usd_mtok: 3.0
+    price_out_usd_mtok: 15.0
+    impact: {wh_per_ktok_out: {min: 0.8, max: 3.5}, scope: "inference", source: "idem"}
+  - id: opus-4-8
+    provider: anthropic
+    display_name: "Claude Opus 4.8"
+    price_in_usd_mtok: 5.0
+    price_out_usd_mtok: 25.0
+    impact: {wh_per_ktok_out: {min: 1.5, max: 6.0}, scope: "inference", source: "idem"}
+# Règle : toute valeur d'impact est un couple min/max. Un seul nombre = PR refusée.

@@ -1,0 +1,289 @@
+openapi: 3.1.0
+info:
+  title: Sobrio API — Phase 1
+  version: "1.0"
+  description: |
+    Contrat d'interface de l'API Sobrio : recommandation de modèle, télémétrie,
+    configuration de l'extension. Source de vérité pour les Lots A (extension)
+    et B (API). **Figé en v1.0** — tout changement exige une RFC (`docs/rfc/`)
+    et une entrée dans `contracts/CHANGELOG.md`.
+
+    Règles non négociables encodées dans ce contrat :
+    - `prompt_text` est OPTIONNEL (v1 uniquement), envoyé seulement si la
+      politique de l'organisation l'autorise ; traité en mémoire, JAMAIS
+      stocké ni loggé.
+    - La télémétrie est STRICTE : tout champ non prévu ⇒ 422. C'est le
+      garde-fou anti-fuite de contenu.
+    - Tout chiffre d'impact est une fourchette min–max, jamais une valeur unique.
+
+servers:
+  - url: http://localhost:8000
+    description: Développement local
+
+security:
+  - bearerAuth: []
+
+paths:
+  /v1/recommend:
+    post:
+      operationId: recommend
+      summary: Recommande le modèle adapté aux caractéristiques du prompt
+      description: >
+        L'extension envoie des *features* calculées localement (longueur, langue,
+        indicateurs) — jamais le texte du prompt par défaut. La réponse est
+        explicable (`rule`) et chiffrée en fourchettes.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecommendRequest"
+      responses:
+        "200":
+          description: Recommandation calculée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecommendResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /v1/telemetry/reco_event:
+    post:
+      operationId: recordRecoEvent
+      summary: Enregistre la suite donnée à une recommandation
+      description: >
+        Schéma STRICT (`additionalProperties: false`) : tout champ supplémentaire
+        ⇒ 422. C'est le garde-fou anti-fuite de contenu — aucun texte de prompt
+        ne peut transiter par cet endpoint.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecoEvent"
+      responses:
+        "204":
+          description: Événement enregistré
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: reco_id inconnu
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /v1/extension/config:
+    get:
+      operationId: getExtensionConfig
+      summary: Configuration à distance de l'extension (kill-switch inclus)
+      parameters:
+        - name: org
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Identifiant de l'organisation
+      responses:
+        "200":
+          description: Configuration courante de l'organisation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtensionConfig"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Organisation inconnue
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: "`Authorization: Bearer <org_token>` — token d'organisation."
+
+  responses:
+    Unauthorized:
+      description: Token absent ou invalide
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+    ValidationError:
+      description: Corps de requête non conforme au contrat (champ inconnu inclus)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: array
+                items:
+                  type: object
+
+  schemas:
+    Features:
+      type: object
+      description: >
+        Caractéristiques du prompt calculées LOCALEMENT par l'extension.
+        Aucun contenu textuel — uniquement des mesures et des indicateurs.
+      additionalProperties: false
+      required: [char_len, token_est, lang, has_code, has_attachment_hint, keyword_flags]
+      properties:
+        char_len:
+          type: integer
+          minimum: 0
+        token_est:
+          type: integer
+          minimum: 0
+        lang:
+          type: string
+          enum: [fr, en, other]
+        has_code:
+          type: boolean
+        has_attachment_hint:
+          type: boolean
+        keyword_flags:
+          type: array
+          description: "Liste fermée de mots-clés détectés."
+          items:
+            type: string
+            enum: [contrat, analyse, code, resume, traduction]
+
+    RecommendRequest:
+      type: object
+      additionalProperties: false
+      required: [org_id, surface, features]
+      properties:
+        org_id:
+          type: string
+        surface:
+          type: string
+          enum: [claude_web]
+        features:
+          $ref: "#/components/schemas/Features"
+        prompt_text:
+          type: ["string", "null"]
+          description: >
+            OPTIONNEL, v1 uniquement, si la politique de l'organisation l'autorise
+            (`send_prompt_text` dans la config). Traité en mémoire, JAMAIS stocké
+            ni loggé.
+
+    Alternative:
+      type: object
+      additionalProperties: false
+      required: [model, delta_cost_eur_per_call_min, delta_cost_eur_per_call_max]
+      properties:
+        model:
+          type: string
+          description: Id présent dans model_catalog.yaml
+        delta_cost_eur_per_call_min:
+          type: number
+        delta_cost_eur_per_call_max:
+          type: number
+
+    ImpactEstimate:
+      type: object
+      description: Fourchettes uniquement — jamais de valeur unique (règle n°3).
+      additionalProperties: false
+      required: [energy_wh_min, energy_wh_max, cost_eur_min, cost_eur_max]
+      properties:
+        energy_wh_min:
+          type: number
+        energy_wh_max:
+          type: number
+        cost_eur_min:
+          type: number
+        cost_eur_max:
+          type: number
+
+    Budget:
+      type: ["object", "null"]
+      additionalProperties: false
+      required: [team_label, pct_used]
+      properties:
+        team_label:
+          type: string
+        pct_used:
+          type: number
+          minimum: 0
+
+    RecommendResponse:
+      type: object
+      additionalProperties: false
+      required: [reco_id, recommended_model, confidence, rule, alternatives, impact_estimate, budget]
+      properties:
+        reco_id:
+          type: string
+          format: uuid
+        recommended_model:
+          type: string
+          description: Id présent dans model_catalog.yaml
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        rule:
+          type: string
+          description: >
+            Explicabilité obligatoire — ex. "heuristic:short_simple".
+        alternatives:
+          type: array
+          items:
+            $ref: "#/components/schemas/Alternative"
+        impact_estimate:
+          $ref: "#/components/schemas/ImpactEstimate"
+        budget:
+          $ref: "#/components/schemas/Budget"
+
+    RecoEvent:
+      type: object
+      description: >
+        STRICT — tout champ supplémentaire ⇒ 422 (garde-fou anti-fuite de contenu).
+      additionalProperties: false
+      required: [reco_id, followed, overridden_to, ts]
+      properties:
+        reco_id:
+          type: string
+          format: uuid
+        followed:
+          type: boolean
+        overridden_to:
+          type: ["string", "null"]
+          description: Id du modèle choisi si dérogation, sinon null
+        ts:
+          type: string
+          format: date-time
+
+    ExtensionConfig:
+      type: object
+      additionalProperties: false
+      required: [enabled, mode, models_visible, send_prompt_text, messages, min_extension_version]
+      properties:
+        enabled:
+          type: boolean
+          description: Kill-switch à distance
+        mode:
+          type: string
+          enum: [eco, equilibre, qualite]
+        models_visible:
+          type: array
+          items:
+            type: string
+        send_prompt_text:
+          type: boolean
+          default: false
+          description: false par défaut — l'envoi du texte est un opt-in explicite de l'org
+        messages:
+          type: object
+          required: [fr]
+          properties:
+            fr:
+              type: object
+        min_extension_version:
+          type: string
