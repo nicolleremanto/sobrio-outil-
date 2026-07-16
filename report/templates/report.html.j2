@@ -1,0 +1,304 @@
+{#-
+  report.html.j2 — Gabarit du rapport mensuel Sobrio (Lot E, squelette Lot 0).
+
+  Règles non négociables encodées ici :
+  - n°3 : tout chiffre d'impact est une fourchette min–max avec périmètre ;
+    aucun équivalent grand public, nulle part (testé : test_report_antigreenwashing).
+  - n°4 : deux blocs environnementaux DISTINCTS aux libellés exacts, jamais
+    fusionnés ni comparés (testés : test_report_template).
+  TODO(LotE) : identité visuelle Sobrio définitive (logo, typographie).
+-#}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sobrio — Rapport mensuel {{ month }} — {{ org_id }}</title>
+<style>
+  @page {
+    size: A4;
+    margin: 22mm 18mm 26mm 18mm;
+    @bottom-center {
+      content: "Sobrio · {{ org_id }} · {{ month }} · catalogue {{ meta.catalog_version_agg }} · code {{ meta.code_version }} · généré le {{ meta.generated_at }} (J+10 ; données réconciliées jusqu'à J+30) · page " counter(page) "/" counter(pages);
+      font-size: 6.5pt;
+      color: #6b7280;
+    }
+  }
+  html { font-size: 10pt; }
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #1f2933;
+    line-height: 1.45;
+    margin: 0;
+  }
+  h1 { font-size: 21pt; margin: 0 0 4mm 0; font-weight: 600; }
+  h2 {
+    font-size: 13pt; font-weight: 600; color: #14532d;
+    border-bottom: 1.5pt solid #14532d; padding-bottom: 1.5mm;
+    margin: 8mm 0 4mm 0;
+  }
+  h3 { font-size: 11pt; font-weight: 600; margin: 5mm 0 2mm 0; }
+  p { margin: 0 0 2.5mm 0; }
+  table { border-collapse: collapse; width: 100%; margin: 2mm 0 4mm 0; }
+  th, td { border: 0.5pt solid #d1d5db; padding: 1.6mm 2.5mm; text-align: left; }
+  th { background: #f3f4f6; font-weight: 600; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .couverture { text-align: center; padding-top: 60mm; page-break-after: always; }
+  .couverture .marque { font-size: 26pt; font-weight: 700; letter-spacing: 0.08em; color: #14532d; }
+  .couverture .sous-titre { font-size: 13pt; color: #4b5563; margin-top: 3mm; }
+  .couverture .periode { font-size: 15pt; margin-top: 12mm; }
+  .couverture .cartouche { font-size: 9pt; color: #6b7280; margin-top: 30mm; }
+  .tuiles { margin: 4mm 0 5mm 0; }
+  .tuile {
+    display: inline-block; vertical-align: top; width: 31%;
+    border: 0.5pt solid #d1d5db; border-left: 2.5pt solid #14532d;
+    padding: 3mm; margin-right: 1.5%; box-sizing: border-box;
+  }
+  .tuile .libelle { font-size: 8pt; text-transform: uppercase; letter-spacing: 0.05em; color: #4b5563; }
+  .tuile .valeur { font-size: 13pt; font-weight: 600; margin: 1.5mm 0 1mm 0; }
+  .tuile .perimetre { font-size: 7.5pt; color: #6b7280; }
+  .bloc {
+    border: 0.5pt solid #d1d5db; padding: 4mm; margin: 3mm 0;
+    page-break-inside: avoid;
+  }
+  .bloc-mesure { border-left: 2.5pt solid #14532d; }
+  .bloc-evite { border-left: 2.5pt solid #1e40af; }
+  .bloc h3 { margin-top: 0; }
+  .bloc .valeur { font-size: 14pt; font-weight: 600; }
+  .note {
+    background: #f9fafb; border: 0.5pt solid #e5e7eb; padding: 3mm;
+    font-size: 8.5pt; color: #374151; margin: 3mm 0;
+  }
+  .section { page-break-before: always; }
+  .discret { color: #6b7280; font-size: 8.5pt; }
+  dl.meta dt { font-weight: 600; margin-top: 2mm; }
+  dl.meta dd { margin: 0.5mm 0 0 0; }
+  ul { margin: 1mm 0 3mm 0; padding-left: 6mm; }
+  li { margin-bottom: 1mm; }
+</style>
+</head>
+<body>
+
+  {# ============================ PAGE DE GARDE ============================ #}
+  <div class="couverture">
+    <div class="marque">SOBRIO</div>
+    <div class="sous-titre">Rapport mensuel — coût et empreinte de l'IA générative</div>
+    <div class="periode">{{ month_label|capitalize }} · organisation « {{ org_id }} »</div>
+    <div class="cartouche">
+      Généré le {{ meta.generated_at }} · catalogue d'impact {{ meta.catalog_version_agg }}
+      · code {{ meta.code_version }}<br>
+      Rapport produit à J+10 du mois suivant — données réconciliées jusqu'à J+30.
+    </div>
+  </div>
+
+  {# ======================= I. SYNTHÈSE EXÉCUTIVE ========================= #}
+  <h2>I. Synthèse exécutive</h2>
+  <p class="discret">
+    Tous les chiffres d'impact ci-dessous sont des fourchettes min–max avec
+    périmètre explicite (règle Sobrio n°3). La dépense mesurée du mois figure
+    au volet 1.
+  </p>
+  <div class="tuiles">
+    <div class="tuile">
+      <div class="libelle">Empreinte totale mesurée</div>
+      <div class="valeur">{{ total.energy_wh_min|nombre }} – {{ total.energy_wh_max|nombre }} Wh</div>
+      <div class="perimetre">100 % de l'usage mesuré (connecteur, API Anthropic)</div>
+    </div>
+    <div class="tuile">
+      <div class="libelle">Économies obtenues</div>
+      <div class="valeur">{{ savings.eur_min|nombre(2) }} – {{ savings.eur_max|nombre(2) }} EUR</div>
+      <div class="perimetre">Chat navigateur uniquement (extension) — {{ savings.n_followed|nombre }} recommandations suivies</div>
+    </div>
+    <div class="tuile">
+      <div class="libelle">Empreinte évitée</div>
+      <div class="valeur">{{ avoided.wh_min|nombre(1) }} – {{ avoided.wh_max|nombre(1) }} Wh</div>
+      <div class="perimetre">Chat navigateur uniquement (extension) — estimation contrefactuelle</div>
+    </div>
+  </div>
+
+  {# ======================= II. VOLET 1 — ÉCONOMIQUE ====================== #}
+  <div class="section">
+    <h2>II. Volet 1 — Économique</h2>
+
+    <h3>Dépense totale du mois (mesurée)</h3>
+    <p>
+      <span class="valeur" style="font-size: 14pt; font-weight: 600;">
+        {{ total.cost_usd|nombre(2) }} USD
+      </span>
+      <span class="discret">
+        (indicatif : ≈ {{ total.cost_eur_indicatif|nombre(2) }} EUR au taux
+        {{ meta.eur_per_usd }} — TODO Lot E : source de taux datée)
+      </span>
+    </p>
+    <p class="discret">
+      Source : connecteur de facturation Anthropic (lecture seule, Usage &amp; Cost).
+      {{ total.tokens_total|nombre }} tokens sur le mois.
+      Périmètre : 100 % de l'usage du compte Anthropic ; Bedrock/Vertex non couverts.
+    </p>
+
+    <h3>Ventilation par modèle</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Modèle</th><th class="num">Tokens</th><th class="num">Coût (USD)</th>
+          <th class="num">Énergie (Wh, min–max)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ligne in by_model %}
+        <tr>
+          <td>{{ ligne.model }}</td>
+          <td class="num">{{ ligne.tokens_total|nombre }}</td>
+          <td class="num">{{ ligne.cost_usd|nombre(2) }}</td>
+          <td class="num">{{ ligne.energy_wh_min|nombre }} – {{ ligne.energy_wh_max|nombre }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="discret">Aucune donnée pour ce mois.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h3>Ventilation par workspace</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Workspace</th><th class="num">Tokens</th><th class="num">Coût (USD)</th>
+          <th class="num">Énergie (Wh, min–max)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ligne in by_workspace %}
+        <tr>
+          <td>{{ ligne.workspace }}</td>
+          <td class="num">{{ ligne.tokens_total|nombre }}</td>
+          <td class="num">{{ ligne.cost_usd|nombre(2) }}</td>
+          <td class="num">{{ ligne.energy_wh_min|nombre }} – {{ ligne.energy_wh_max|nombre }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="discret">Aucune donnée pour ce mois.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h3>Économies obtenues (fourchette)</h3>
+    <p>
+      <span class="valeur" style="font-size: 14pt; font-weight: 600;">
+        {{ savings.eur_min|nombre(2) }} – {{ savings.eur_max|nombre(2) }} EUR
+      </span>
+    </p>
+    <p class="discret">
+      Périmètre : chat navigateur (claude.ai via l'extension Sobrio) UNIQUEMENT —
+      ces économies obtenues ne se comparent pas à la dépense totale mesurée
+      ci-dessus (règle n°4). Recommandations émises : {{ adoption.n_events|nombre }} ;
+      suivies : {{ adoption.n_followed|nombre }}
+      {%- if adoption.rate_pct is not none %} ; taux de suivi :
+      {{ adoption.rate_pct|nombre(1) }} % (sur {{ adoption.n_decided|nombre }} tranchées)
+      {%- else %} ; taux de suivi : non calculable (aucun retour){% endif %}.
+    </p>
+  </div>
+
+  {# ==================== III. VOLET 2 — ENVIRONNEMENTAL =================== #}
+  <div class="section">
+    <h2>III. Volet 2 — Environnemental</h2>
+    <p class="discret">
+      Deux indicateurs distincts, aux périmètres différents (règle Sobrio n°4) :
+      une mesure exhaustive et une estimation contrefactuelle. Ils ne
+      s'additionnent pas et ne se comparent pas directement.
+    </p>
+
+    <div class="bloc bloc-mesure">
+      <h3>Empreinte totale mesurée (100 % de l'usage)</h3>
+      <p><span class="valeur">{{ total.energy_wh_min|nombre }} – {{ total.energy_wh_max|nombre }} Wh</span></p>
+      <p class="discret">
+        Source : connecteur de facturation (API d'administration Anthropic) —
+        énergie d'inférence estimée sur l'intégralité des tokens mesurés du
+        compte, via le catalogue d'impact {{ meta.catalog_version_agg }}.
+        Fourchette min–max, périmètre « inférence ».
+      </p>
+    </div>
+
+    <div class="bloc bloc-evite">
+      <h3>Empreinte évitée — périmètre : chat navigateur uniquement</h3>
+      <p><span class="valeur">{{ avoided.wh_min|nombre(1) }} – {{ avoided.wh_max|nombre(1) }} Wh</span></p>
+      <p class="discret">
+        Source : extension navigateur (télémétrie sans contenu) — somme des
+        écarts estimés au moment de chaque recommandation suivie
+        ({{ avoided.n_followed|nombre }} événements). Estimation
+        contrefactuelle, fourchette min–max.
+      </p>
+    </div>
+
+    <div class="note">
+      <strong>Pourquoi ces deux chiffres ne s'additionnent pas et ne se comparent
+      pas directement :</strong> le premier est une <em>mesure</em> portant sur
+      100 % de l'usage facturé du compte Anthropic (toutes surfaces) ; le second
+      est une <em>estimation contrefactuelle</em> (« ce qui aurait été consommé
+      si la recommandation n'avait pas été suivie ») limitée au chat navigateur.
+      Périmètres, méthodes et natures (mesure vs hypothèse) diffèrent : les
+      fusionner ou les soustraire produirait un chiffre trompeur (règle Sobrio
+      n°4 ; directive UE 2024/825).
+    </div>
+  </div>
+
+  {# ===================== IV. ANNEXE MÉTHODOLOGIQUE ======================= #}
+  <div class="section">
+    <h2>IV. Annexe méthodologique</h2>
+
+    <dl class="meta">
+      <dt>Versions et traçabilité</dt>
+      <dd>
+        Catalogue d'impact utilisé par l'agrégation : {{ meta.catalog_version_agg }} ·
+        catalogue courant : {{ meta.catalog_version_courante }} ·
+        version du code : {{ meta.code_version }} ·
+        rapport généré le {{ meta.generated_at }}.
+      </dd>
+
+      <dt>Périmètres exacts</dt>
+      <dd>
+        <ul>
+          <li><strong>Volet économique et « Empreinte totale mesurée (100 % de l'usage) »</strong> :
+            usage facturé du compte Anthropic, collecté par le connecteur en
+            lecture seule (API d'administration, Usage &amp; Cost). Toutes
+            surfaces (API, claude.ai, Claude Code).</li>
+          <li><strong>« Empreinte évitée — périmètre : chat navigateur uniquement » et économies
+            obtenues</strong> : recommandations de l'extension sur claude.ai,
+            télémétrie stricte sans texte de prompt (règle n°1).</li>
+        </ul>
+      </dd>
+
+      <dt>Limites connues</dt>
+      <dd>
+        <ul>
+          <li>Usage via Bedrock/Vertex non couvert par le connecteur.</li>
+          <li>Pas de temps réel : rafraîchissement en ~4–24 h, réconciliation
+            des données jusqu'à J+30 ; ce rapport est produit à J+10 du mois
+            suivant (règle n°6). Les chiffres peuvent évoluer marginalement
+            après réconciliation (versionnage par snapshot_ts).</li>
+          <li>Facteurs d'impact énergétique à recalibrer (sources : EcoLogits et
+            littérature publique) — d'où les fourchettes larges.</li>
+          <li>Baseline exacte des économies et de l'empreinte évitée en cours de
+            définition (TODO Lot E) : sommes des écarts pré-calculés par
+            événement, sans re-calcul a posteriori.</li>
+        </ul>
+      </dd>
+
+      <dt>Conformité — directive UE 2024/825 (anti-écoblanchiment)</dt>
+      <dd>
+        Tout chiffre d'impact est présenté en fourchette min–max, accompagné de
+        son périmètre et de sa source (règle n°3). Aucune conversion en
+        « équivalents » du quotidien n'est présentée : ces analogies, non
+        vérifiables à ce périmètre, relèveraient de l'allégation environnementale
+        trompeuse. Les indicateurs mesurés et les estimations contrefactuelles
+        sont présentés séparément et jamais agrégés (règle n°4).
+      </dd>
+
+      <dt>Sources des chiffres</dt>
+      <dd>
+        Chaque chiffre de ce rapport provient d'une requête SQL versionnée dans
+        <code>report/queries/</code> (en-tête : mesure, périmètre, limites) —
+        aucun calcul opaque dans le code de génération.
+      </dd>
+    </dl>
+  </div>
+
+</body>
+</html>

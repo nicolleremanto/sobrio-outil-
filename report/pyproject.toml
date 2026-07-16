@@ -1,0 +1,12 @@
+[project]
+name = "sobrio-report"
+version = "0.1.0"
+description = "Lot E — rapport mensuel PDF Sobrio (squelette Lot 0) : Jinja2 + WeasyPrint"
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+# Règles de base + imports triés, cohérent avec le reste du monorepo.
+select = ["E", "F", "I", "W"]
