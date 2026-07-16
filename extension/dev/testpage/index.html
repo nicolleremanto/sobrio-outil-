@@ -104,10 +104,17 @@
       <button type="button" data-testid="model-selector" aria-haspopup="menu">
         Claude Opus 4.8
       </button>
+      <!-- Structure imitant claude.ai : modèle vedette + sous-menu « Plus de
+           modèles » (les modèles du catalogue sont au 2e niveau). -->
       <div id="model-menu" role="menu" hidden>
-        <button type="button" role="menuitem">Claude Haiku 4.5</button>
-        <button type="button" role="menuitem">Claude Sonnet 4.6</button>
         <button type="button" role="menuitem">Claude Opus 4.8</button>
+        <button type="button" role="menuitem" id="more-models" aria-haspopup="menu">
+          Plus de modèles ›
+        </button>
+        <div id="model-submenu" role="menu" hidden>
+          <button type="button" role="menuitem">Claude Haiku 4.5</button>
+          <button type="button" role="menuitem">Claude Sonnet 4.6</button>
+        </div>
       </div>
       <button type="button" id="new-conversation">Nouvelle conversation</button>
     </header>
@@ -150,20 +157,34 @@
       const input = document.querySelector('.ProseMirror');
       let thread = 1;
 
-      // Sélecteur de modèle factice (imite le menu de claude.ai).
+      // Sélecteur de modèle factice (imite le menu à deux niveaux de
+      // claude.ai : sous-menu « Plus de modèles » ouvert au survol ou clic).
       const modelButton = document.querySelector('[data-testid="model-selector"]');
       const modelMenu = document.getElementById('model-menu');
+      const moreModels = document.getElementById('more-models');
+      const modelSubmenu = document.getElementById('model-submenu');
       modelButton.addEventListener('click', () => {
         modelMenu.hidden = !modelMenu.hidden;
+        if (modelMenu.hidden) modelSubmenu.hidden = true;
       });
+      const openSubmenu = () => {
+        modelSubmenu.hidden = false;
+      };
+      moreModels.addEventListener('pointerover', openSubmenu);
+      moreModels.addEventListener('click', openSubmenu);
       modelMenu.querySelectorAll('[role="menuitem"]').forEach((item) => {
+        if (item === moreModels) return;
         item.addEventListener('click', () => {
           modelButton.textContent = item.textContent.trim();
           modelMenu.hidden = true;
+          modelSubmenu.hidden = true;
         });
       });
       document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') modelMenu.hidden = true;
+        if (event.key === 'Escape') {
+          modelMenu.hidden = true;
+          modelSubmenu.hidden = true;
+        }
       });
 
       const bubble = (role, text) => {

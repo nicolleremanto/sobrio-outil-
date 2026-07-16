@@ -40,6 +40,59 @@ function mountFakeModelSelector(initial = 'Claude Opus 4.8', itemsRespond = true
   document.body.appendChild(menu);
 }
 
+/**
+ * Variante à DEUX niveaux imitant claude.ai : le premier niveau ne contient
+ * que le modèle vedette + « Plus de modèles › » ; les items du sous-menu sont
+ * MONTÉS DYNAMIQUEMENT à l'ouverture (comme Radix), au survol ou au clic.
+ */
+function mountNestedModelSelector(initial = 'Fable 5 Max'): void {
+  document.body.innerHTML = '<main></main>';
+  const button = document.createElement('button');
+  button.setAttribute('data-testid', 'model-selector-dropdown');
+  button.textContent = initial;
+  document.body.appendChild(button);
+
+  const menu = document.createElement('div');
+  menu.setAttribute('role', 'menu');
+  menu.hidden = true;
+  const featured = document.createElement('button');
+  featured.setAttribute('role', 'menuitem');
+  featured.textContent = 'Fable 5 — Pour vos défis les plus difficiles';
+  menu.appendChild(featured);
+  const more = document.createElement('button');
+  more.setAttribute('role', 'menuitem');
+  more.setAttribute('aria-haspopup', 'menu');
+  more.textContent = 'Plus de modèles ›';
+  menu.appendChild(more);
+  document.body.appendChild(menu);
+
+  button.addEventListener('click', () => {
+    menu.hidden = false;
+  });
+
+  let submenu: HTMLElement | null = null;
+  const openSubmenu = () => {
+    if (submenu) return;
+    submenu = document.createElement('div');
+    submenu.setAttribute('role', 'menu');
+    for (const label of ['Claude Haiku 4.5', 'Claude Sonnet 4.6', 'Claude Opus 4.8']) {
+      const item = document.createElement('button');
+      item.setAttribute('role', 'menuitem');
+      item.textContent = label;
+      item.addEventListener('click', () => {
+        button.textContent = label;
+        menu.hidden = true;
+        submenu?.remove();
+        submenu = null;
+      });
+      submenu.appendChild(item);
+    }
+    document.body.appendChild(submenu);
+  };
+  more.addEventListener('pointerover', openSubmenu);
+  more.addEventListener('click', openSubmenu);
+}
+
 const FAST = { menuTimeoutMs: 200, settleMs: 0 };
 
 describe('applyModelInPage — succès vérifié', () => {
@@ -47,6 +100,14 @@ describe('applyModelInPage — succès vérifié', () => {
     mountFakeModelSelector('Claude Opus 4.8');
     await expect(applyModelInPage('sonnet-4-6', FAST)).resolves.toBe(true);
     expect(document.querySelector('[data-testid="model-selector"]')?.textContent).toBe(
+      'Claude Sonnet 4.6',
+    );
+  });
+
+  it('menu à DEUX niveaux (claude.ai réel) : ouvre « Plus de modèles » et sélectionne', async () => {
+    mountNestedModelSelector('Fable 5 Max');
+    await expect(applyModelInPage('sonnet-4-6', FAST)).resolves.toBe(true);
+    expect(document.querySelector('[data-testid="model-selector-dropdown"]')?.textContent).toBe(
       'Claude Sonnet 4.6',
     );
   });
