@@ -23,12 +23,21 @@ export interface RecoV0 {
   suggest_new_conversation: boolean;
 }
 
+/** Signaux de santé de l'extension — nom fermé, AUCUNE autre donnée. */
+export type HealthSignal = 'selector_broken';
+
 /** Interface commune mock/api — consommée par le content script. */
 export interface RecoClientV0 {
   recommend(signals: Signals): Promise<RecoV0 | null>;
   /** Fire-and-forget : ne retourne rien, n'affecte jamais l'utilisateur. */
   sendRecoEvent(event: RecoEvent): void;
   getConfig(): Promise<ExtensionConfig | null>;
+  /**
+   * Signal de santé léger (ex. sélecteurs cassés) — OPTIONNEL. Le contrat
+   * v1.0 ne le prévoit pas : le client API réel ne l'implémente PAS
+   * (proposé par la RFC v1.1) ; le mock le capture localement.
+   */
+  sendHealthSignal?(signal: HealthSignal): void;
 }
 
 /**
@@ -91,6 +100,9 @@ export class MockClient implements RecoClientV0 {
   /** Événements capturés — inspection en tests et en démo (jamais réseau). */
   readonly sentEvents: RecoEvent[] = [];
 
+  /** Signaux de santé capturés (ex. selector_broken). */
+  readonly healthSignals: HealthSignal[] = [];
+
   constructor(options: MockClientOptions = {}) {
     this.options = {
       latencyMs: options.latencyMs ?? 120,
@@ -127,6 +139,11 @@ export class MockClient implements RecoClientV0 {
   sendRecoEvent(event: RecoEvent): void {
     if (this.options.failure !== 'none') return; // panne : perdu, sans bruit
     this.sentEvents.push(event);
+  }
+
+  sendHealthSignal(signal: HealthSignal): void {
+    if (this.options.failure !== 'none') return;
+    this.healthSignals.push(signal);
   }
 
   async getConfig(): Promise<ExtensionConfig | null> {

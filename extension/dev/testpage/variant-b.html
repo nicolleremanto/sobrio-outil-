@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Variante B — markup alternatif (textarea)</title>
+    <style>
+      body {
+        font:
+          15px system-ui,
+          sans-serif;
+        margin: 0;
+        padding: 16px 16px 140px;
+        background: #eef1f4;
+      }
+      [data-testid$='-message'] {
+        margin: 8px 0;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #fff;
+      }
+      textarea {
+        position: fixed;
+        bottom: 12px;
+        left: 16px;
+        right: 16px;
+        height: 64px;
+        padding: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Variante B (résolution par heuristique de repli)</h1>
+      <button type="button" class="model-picker" aria-haspopup="menu">Claude Sonnet 4.6</button>
+    </header>
+    <section id="chat">
+      <div data-testid="user-message">Peux-tu m'aider à réviser l'intégrale de x² ?</div>
+      <div data-testid="assistant-message">Bien sûr : ∫ x² dx = x³/3 + C. Donc on procède…</div>
+    </section>
+    <!-- Pas de contenteditable ni d'attributs connus : seul le repli
+         « plus grand textarea visible » doit trouver cette zone. -->
+    <textarea placeholder="Votre message…"></textarea>
+  </body>
+</html>

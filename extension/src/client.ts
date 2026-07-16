@@ -62,6 +62,22 @@ export async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T
   }
 }
 
+/**
+ * Throttle « trailing » : au plus UN appel par fenêtre de `ms` — garde-fou
+ * perf pour l'observation des mutations DOM (boucle 5).
+ */
+export function createThrottle(callback: () => void, ms: number): () => void {
+  let scheduled = false;
+  return () => {
+    if (scheduled) return;
+    scheduled = true;
+    setTimeout(() => {
+      scheduled = false;
+      callback();
+    }, ms);
+  };
+}
+
 /** Débounceur simple : `schedule()` réarme, `cancel()` annule. */
 export function createDebouncer(
   callback: () => void,

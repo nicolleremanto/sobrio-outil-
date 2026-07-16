@@ -13,14 +13,21 @@ import {
   createClient,
   createConfigCache,
   createDebouncer,
+  createThrottle,
   withTimeout,
   RECOMMEND_TIMEOUT_MS,
   type RecoClientV0,
 } from './client';
 import { ConversationMemory } from './conversationMemory';
+import { debugLog } from './debugLog';
 import { mergeMessages, type Messages } from './messages';
 import { removeBadge, removePanel, renderBadge, renderPanel } from './panel';
-import { collectPageView, resolveInputArea } from './selectors';
+import {
+  collectPageView,
+  noteInputResolution,
+  resolveInputArea,
+  SELECTOR_BROKEN_THRESHOLD,
+} from './selectors';
 import { loadStoredSettings } from './settings';
 import { computePromptSignals, type Signals } from './signals';
 
@@ -102,10 +109,15 @@ export async function bootstrap(): Promise<void> {
   observeInputArea({ client, memory, config, messages });
 }
 
+/** Fenêtre du throttle d'observation DOM (garde-fou perf, boucle 5). */
+const OBSERVER_THROTTLE_MS = 300;
+
 /**
  * Observe le DOM (SPA : la zone de saisie apparaît/disparaît au fil de la
  * navigation) et attache l'écouteur de saisie dès qu'une zone est résolue.
  * Résolution `null` ⇒ on réessaie au prochain changement de DOM, sans erreur.
+ * Après SELECTOR_BROKEN_THRESHOLD échecs consécutifs : flag local + UN signal
+ * de santé léger (`selector_broken`, sans autre donnée) — puis silence.
  */
 function observeInputArea(deps: FlowDeps): void {
   let currentInput: HTMLElement | null = null;
@@ -126,6 +138,11 @@ function observeInputArea(deps: FlowDeps): void {
   const ensureAttached = () => {
     if (currentInput?.isConnected) return;
     const input = resolveInputArea();
+    if (noteInputResolution(Boolean(input))) {
+      // Seuil franchi À L'INSTANT : un seul log debug, un seul signal.
+      debugLog('selector_broken', { failures: SELECTOR_BROKEN_THRESHOLD });
+      deps.client.sendHealthSignal?.('selector_broken');
+    }
     if (!input) {
       removeBadge();
       return; // dégradation silencieuse (voir src/selectors.ts)
@@ -136,7 +153,19 @@ function observeInputArea(deps: FlowDeps): void {
     input.addEventListener('input', () => debouncer.schedule());
   };
 
-  const observer = new MutationObserver(ensureAttached);
+  // Throttle : au plus une résolution par fenêtre de 300 ms, même si la page
+  // mute en continu. Observer unique, déconnecté à la fermeture (zéro fuite).
+  const observer = new MutationObserver(createThrottle(ensureAttached, OBSERVER_THROTTLE_MS));
   observer.observe(document.documentElement, { childList: true, subtree: true });
+  window.addEventListener(
+    'pagehide',
+    () => {
+      observer.disconnect();
+      debouncer.cancel();
+      removePanel();
+      removeBadge();
+    },
+    { once: true },
+  );
   ensureAttached();
 }

@@ -16,14 +16,17 @@
  */
 import type { BubbleView, PageView } from './conversationMemory';
 
-/** Zone de saisie du prompt — du plus spécifique au plus générique. */
+/**
+ * Zone de saisie du prompt — STRATÉGIE 1 : sélecteurs candidats ordonnés,
+ * du plus spécifique au plus générique. La STRATÉGIE 2 (repli) est
+ * `fallbackLargestEditable` : « le plus grand textarea/contenteditable
+ * visible ». Si tout échoue : dégradation silencieuse (extension inerte).
+ */
 export const INPUT_SELECTORS: readonly string[] = [
   'div[contenteditable="true"].ProseMirror',
   'div[contenteditable="true"][role="textbox"]',
   'div[contenteditable="true"][aria-label]',
   'fieldset div[contenteditable="true"]',
-  'div[contenteditable="true"]',
-  'textarea',
 ];
 
 /**
@@ -49,9 +52,96 @@ export function resolveFirst(selectors: readonly string[], root: ParentNode): HT
   return null;
 }
 
-/** Résout la zone de saisie du prompt ; `null` si introuvable. */
+/** Vraisemblablement visible ? (heuristique prudente, jamais de throw) */
+function isLikelyVisible(element: HTMLElement): boolean {
+  try {
+    if (element.hidden) return false;
+    if (element.getAttribute('aria-hidden') === 'true') return false;
+    const inline = element.getAttribute('style') ?? '';
+    if (/display\s*:\s*none|visibility\s*:\s*hidden/.test(inline)) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Aire rendue (0 dans les environnements de test — départage par ordre). */
+function renderedArea(element: HTMLElement): number {
+  try {
+    const rect = element.getBoundingClientRect();
+    return Math.max(0, rect.width) * Math.max(0, rect.height);
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * STRATÉGIE 2 (repli) : le plus grand `textarea`/`contenteditable` visible.
+ * À aire égale (ou inconnue), le premier dans l'ordre du document gagne.
+ */
+export function fallbackLargestEditable(root: ParentNode = document): HTMLElement | null {
+  try {
+    const candidates = root.querySelectorAll('textarea, [contenteditable="true"]');
+    let best: HTMLElement | null = null;
+    let bestArea = -1;
+    for (const candidate of candidates) {
+      if (!(candidate instanceof HTMLElement) || !isLikelyVisible(candidate)) continue;
+      const area = renderedArea(candidate);
+      if (area > bestArea) {
+        best = candidate;
+        bestArea = area;
+      }
+    }
+    return best;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Résout la zone de saisie : sélecteurs ordonnés puis heuristique de repli ;
+ * `null` si tout échoue (dégradation silencieuse, extension inerte).
+ */
 export function resolveInputArea(root: ParentNode = document): HTMLElement | null {
-  return resolveFirst(INPUT_SELECTORS, root);
+  return resolveFirst(INPUT_SELECTORS, root) ?? fallbackLargestEditable(root);
+}
+
+// ---------------------------------------------------------------------------
+// Détecteur de casse — si la résolution échoue N fois de suite, on lève un
+// flag local (une seule fois) : un log debug + un signal de santé léger
+// `selector_broken` (SANS autre donnée) pour être alertés.
+// ---------------------------------------------------------------------------
+
+/** Échecs consécutifs avant de déclarer les sélecteurs cassés. */
+export const SELECTOR_BROKEN_THRESHOLD = 5;
+
+let consecutiveFailures = 0;
+let broken = false;
+
+/** À appeler à chaque tentative de résolution. Retourne true au moment
+ * précis où le seuil vient d'être franchi (déclencheur unique). */
+export function noteInputResolution(found: boolean): boolean {
+  if (found) {
+    consecutiveFailures = 0;
+    return false;
+  }
+  consecutiveFailures += 1;
+  if (!broken && consecutiveFailures >= SELECTOR_BROKEN_THRESHOLD) {
+    broken = true;
+    return true;
+  }
+  return false;
+}
+
+/** Les sélecteurs sont-ils déclarés cassés pour cette session ? */
+export function selectorsBroken(): boolean {
+  return broken;
+}
+
+/** Réinitialisation (tests). */
+export function resetSelectorHealth(): void {
+  consecutiveFailures = 0;
+  broken = false;
 }
 
 /** Résout le point d'ancrage du panneau ; `null` si introuvable. */
