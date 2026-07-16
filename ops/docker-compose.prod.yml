@@ -1,0 +1,61 @@
+# Sobrio — SQUELETTE de composition de production (Lot F — NON UTILISABLE EN L'ÉTAT).
+#
+# Principes (voir ops/README.md) :
+# - AUCUN secret en dur : tout vient d'un environnement externe (fichier .env hors
+#   repo, secret manager, variables d'orchestrateur). Règle n°5.
+# - Pas de ports de debug exposés : seul le reverse proxy publie 80/443.
+# - L'API n'est jamais exposée directement : elle reste sur le réseau interne,
+#   derrière un reverse proxy TLS.
+#
+# TODO(LotF) : choisir l'hébergeur (UE), le reverse proxy (Caddy/Traefik/nginx),
+# la stratégie de sauvegarde Postgres et la rotation des secrets, puis compléter.
+
+services:
+  postgres:
+    image: postgres:16
+    # Secrets via env externe uniquement — jamais de valeur ici.
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?défini hors repo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?défini hors repo}
+      POSTGRES_DB: ${POSTGRES_DB:?défini hors repo}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # Pas de "ports:" — Postgres n'est joignable que depuis le réseau interne.
+    # TODO(LotF) : sauvegardes (pg_dump planifié ou volume snapshoté + test de
+    # restauration), chiffrement au repos selon l'hébergeur, rétention.
+    restart: unless-stopped
+
+  api:
+    # TODO(LotF) : image construite en CI et publiée sur un registre
+    # (ex. ghcr.io/<org>/sobrio-api:<tag>), pas de build sur la machine de prod.
+    image: sobrio-api:TODO-LotF
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?défini hors repo}
+      MODEL_CATALOG_PATH: /repo/contracts/model_catalog.yaml
+      # ANTHROPIC_ADMIN_KEY : ACTIF CRITIQUE (règle n°5) — injectée par le
+      # secret manager de l'hébergeur, jamais dans un fichier du repo.
+      # TODO(LotF) : DSN Sentry avec scrubbing configuré (aucun contenu de
+      # prompt dans les événements — règle n°1).
+    # Pas de "ports:" — l'API n'est joignable que via le reverse proxy.
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  # TODO(LotF) : reverse proxy TLS devant l'API (Caddy, Traefik ou nginx).
+  # Seul service à publier des ports (80/443). Certificats automatiques (ACME),
+  # HSTS, et limitation de débit sur /v1/*.
+  # reverse-proxy:
+  #   image: caddy:2
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./Caddyfile:/etc/caddy/Caddyfile:ro
+  #     - caddy_data:/data
+  #   depends_on:
+  #     - api
+  #   restart: unless-stopped
+
+volumes:
+  pgdata:
+  # caddy_data:
