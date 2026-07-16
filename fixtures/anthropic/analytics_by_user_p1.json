@@ -1,0 +1,3669 @@
+{
+ "data": [
+  {
+   "date": "2026-05-12",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 3349,
+   "output_tokens": 6201,
+   "requests": 58
+  },
+  {
+   "date": "2026-05-12",
+   "user_email": "c.dubois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 16127,
+   "output_tokens": 13415,
+   "requests": 38
+  },
+  {
+   "date": "2026-05-12",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 12213,
+   "output_tokens": 14166,
+   "requests": 50
+  },
+  {
+   "date": "2026-05-12",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 23689,
+   "output_tokens": 12754,
+   "requests": 10
+  },
+  {
+   "date": "2026-05-12",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 18843,
+   "output_tokens": 2384,
+   "requests": 42
+  },
+  {
+   "date": "2026-05-12",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 20729,
+   "output_tokens": 5114,
+   "requests": 11
+  },
+  {
+   "date": "2026-05-12",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 35885,
+   "output_tokens": 2912,
+   "requests": 51
+  },
+  {
+   "date": "2026-05-12",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 31611,
+   "output_tokens": 11762,
+   "requests": 8
+  },
+  {
+   "date": "2026-05-12",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 19589,
+   "output_tokens": 11503,
+   "requests": 20
+  },
+  {
+   "date": "2026-05-12",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 9827,
+   "output_tokens": 9434,
+   "requests": 36
+  },
+  {
+   "date": "2026-05-12",
+   "user_email": "c.roux@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 27929,
+   "output_tokens": 9672,
+   "requests": 33
+  },
+  {
+   "date": "2026-05-12",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 8434,
+   "output_tokens": 8552,
+   "requests": 49
+  },
+  {
+   "date": "2026-05-13",
+   "user_email": "c.dubois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 18255,
+   "output_tokens": 8348,
+   "requests": 21
+  },
+  {
+   "date": "2026-05-13",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 30485,
+   "output_tokens": 8293,
+   "requests": 34
+  },
+  {
+   "date": "2026-05-13",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 16583,
+   "output_tokens": 13704,
+   "requests": 58
+  },
+  {
+   "date": "2026-05-13",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 15175,
+   "output_tokens": 6404,
+   "requests": 47
+  },
+  {
+   "date": "2026-05-13",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 2994,
+   "output_tokens": 13585,
+   "requests": 36
+  },
+  {
+   "date": "2026-05-13",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 21703,
+   "output_tokens": 8953,
+   "requests": 19
+  },
+  {
+   "date": "2026-05-13",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 31732,
+   "output_tokens": 3337,
+   "requests": 56
+  },
+  {
+   "date": "2026-05-13",
+   "user_email": "m.girard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 36264,
+   "output_tokens": 4545,
+   "requests": 29
+  },
+  {
+   "date": "2026-05-13",
+   "user_email": "v.bonnet@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 10008,
+   "output_tokens": 5294,
+   "requests": 6
+  },
+  {
+   "date": "2026-05-14",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 5392,
+   "output_tokens": 9756,
+   "requests": 38
+  },
+  {
+   "date": "2026-05-14",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 21962,
+   "output_tokens": 6437,
+   "requests": 45
+  },
+  {
+   "date": "2026-05-14",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 35223,
+   "output_tokens": 6662,
+   "requests": 47
+  },
+  {
+   "date": "2026-05-14",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 17895,
+   "output_tokens": 14714,
+   "requests": 27
+  },
+  {
+   "date": "2026-05-14",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 30271,
+   "output_tokens": 14288,
+   "requests": 23
+  },
+  {
+   "date": "2026-05-14",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 8334,
+   "output_tokens": 1533,
+   "requests": 51
+  },
+  {
+   "date": "2026-05-14",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 20182,
+   "output_tokens": 3617,
+   "requests": 50
+  },
+  {
+   "date": "2026-05-14",
+   "user_email": "c.roux@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 27354,
+   "output_tokens": 12499,
+   "requests": 39
+  },
+  {
+   "date": "2026-05-14",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 21508,
+   "output_tokens": 7347,
+   "requests": 34
+  },
+  {
+   "date": "2026-05-15",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 31596,
+   "output_tokens": 1335,
+   "requests": 35
+  },
+  {
+   "date": "2026-05-15",
+   "user_email": "c.dubois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 34546,
+   "output_tokens": 10954,
+   "requests": 49
+  },
+  {
+   "date": "2026-05-15",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 29753,
+   "output_tokens": 1251,
+   "requests": 42
+  },
+  {
+   "date": "2026-05-15",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 24666,
+   "output_tokens": 7170,
+   "requests": 27
+  },
+  {
+   "date": "2026-05-15",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 9135,
+   "output_tokens": 3951,
+   "requests": 11
+  },
+  {
+   "date": "2026-05-15",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 26276,
+   "output_tokens": 1846,
+   "requests": 53
+  },
+  {
+   "date": "2026-05-15",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 32634,
+   "output_tokens": 4705,
+   "requests": 58
+  },
+  {
+   "date": "2026-05-15",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 19231,
+   "output_tokens": 13193,
+   "requests": 38
+  },
+  {
+   "date": "2026-05-15",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 21469,
+   "output_tokens": 7445,
+   "requests": 14
+  },
+  {
+   "date": "2026-05-15",
+   "user_email": "c.roux@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 4304,
+   "output_tokens": 2062,
+   "requests": 57
+  },
+  {
+   "date": "2026-05-15",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 16280,
+   "output_tokens": 9329,
+   "requests": 43
+  },
+  {
+   "date": "2026-05-15",
+   "user_email": "m.girard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 24576,
+   "output_tokens": 14999,
+   "requests": 26
+  },
+  {
+   "date": "2026-05-16",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 31865,
+   "output_tokens": 8205,
+   "requests": 57
+  },
+  {
+   "date": "2026-05-16",
+   "user_email": "c.roux@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 25129,
+   "output_tokens": 7119,
+   "requests": 19
+  },
+  {
+   "date": "2026-05-17",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 9350,
+   "output_tokens": 13955,
+   "requests": 42
+  },
+  {
+   "date": "2026-05-17",
+   "user_email": "v.bonnet@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 23058,
+   "output_tokens": 14473,
+   "requests": 39
+  },
+  {
+   "date": "2026-05-17",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 8167,
+   "output_tokens": 6392,
+   "requests": 50
+  },
+  {
+   "date": "2026-05-18",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 30057,
+   "output_tokens": 7966,
+   "requests": 43
+  },
+  {
+   "date": "2026-05-18",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 9330,
+   "output_tokens": 13184,
+   "requests": 53
+  },
+  {
+   "date": "2026-05-18",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 35691,
+   "output_tokens": 3291,
+   "requests": 35
+  },
+  {
+   "date": "2026-05-18",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 35340,
+   "output_tokens": 9767,
+   "requests": 18
+  },
+  {
+   "date": "2026-05-19",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 28449,
+   "output_tokens": 4731,
+   "requests": 29
+  },
+  {
+   "date": "2026-05-19",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 19345,
+   "output_tokens": 6970,
+   "requests": 26
+  },
+  {
+   "date": "2026-05-19",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 38035,
+   "output_tokens": 3154,
+   "requests": 3
+  },
+  {
+   "date": "2026-05-19",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 20289,
+   "output_tokens": 10724,
+   "requests": 6
+  },
+  {
+   "date": "2026-05-19",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 11491,
+   "output_tokens": 8449,
+   "requests": 8
+  },
+  {
+   "date": "2026-05-19",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 23177,
+   "output_tokens": 4611,
+   "requests": 55
+  },
+  {
+   "date": "2026-05-19",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 35628,
+   "output_tokens": 1993,
+   "requests": 14
+  },
+  {
+   "date": "2026-05-19",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 33610,
+   "output_tokens": 14409,
+   "requests": 11
+  },
+  {
+   "date": "2026-05-19",
+   "user_email": "c.roux@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 31338,
+   "output_tokens": 4195,
+   "requests": 12
+  },
+  {
+   "date": "2026-05-19",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 34732,
+   "output_tokens": 5279,
+   "requests": 59
+  },
+  {
+   "date": "2026-05-20",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 12015,
+   "output_tokens": 7752,
+   "requests": 4
+  },
+  {
+   "date": "2026-05-20",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 13109,
+   "output_tokens": 6615,
+   "requests": 22
+  },
+  {
+   "date": "2026-05-20",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 11661,
+   "output_tokens": 3170,
+   "requests": 46
+  },
+  {
+   "date": "2026-05-20",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 20671,
+   "output_tokens": 10918,
+   "requests": 49
+  },
+  {
+   "date": "2026-05-20",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 34282,
+   "output_tokens": 2751,
+   "requests": 23
+  },
+  {
+   "date": "2026-05-20",
+   "user_email": "m.girard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 29011,
+   "output_tokens": 9872,
+   "requests": 49
+  },
+  {
+   "date": "2026-05-20",
+   "user_email": "v.bonnet@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 8939,
+   "output_tokens": 2870,
+   "requests": 30
+  },
+  {
+   "date": "2026-05-21",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 14791,
+   "output_tokens": 3453,
+   "requests": 25
+  },
+  {
+   "date": "2026-05-21",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 30613,
+   "output_tokens": 9667,
+   "requests": 36
+  },
+  {
+   "date": "2026-05-21",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 9236,
+   "output_tokens": 11963,
+   "requests": 56
+  },
+  {
+   "date": "2026-05-21",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 27927,
+   "output_tokens": 8653,
+   "requests": 35
+  },
+  {
+   "date": "2026-05-21",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 12423,
+   "output_tokens": 14570,
+   "requests": 36
+  },
+  {
+   "date": "2026-05-21",
+   "user_email": "c.roux@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 10376,
+   "output_tokens": 14377,
+   "requests": 55
+  },
+  {
+   "date": "2026-05-21",
+   "user_email": "m.girard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 5430,
+   "output_tokens": 10359,
+   "requests": 22
+  },
+  {
+   "date": "2026-05-21",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 24303,
+   "output_tokens": 3694,
+   "requests": 36
+  },
+  {
+   "date": "2026-05-22",
+   "user_email": "c.dubois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 22429,
+   "output_tokens": 3791,
+   "requests": 18
+  },
+  {
+   "date": "2026-05-22",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 19166,
+   "output_tokens": 14885,
+   "requests": 8
+  },
+  {
+   "date": "2026-05-22",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 29642,
+   "output_tokens": 7032,
+   "requests": 43
+  },
+  {
+   "date": "2026-05-22",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 32521,
+   "output_tokens": 3164,
+   "requests": 23
+  },
+  {
+   "date": "2026-05-22",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 34189,
+   "output_tokens": 6689,
+   "requests": 51
+  },
+  {
+   "date": "2026-05-22",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 13192,
+   "output_tokens": 14190,
+   "requests": 7
+  },
+  {
+   "date": "2026-05-22",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 25096,
+   "output_tokens": 8600,
+   "requests": 23
+  },
+  {
+   "date": "2026-05-22",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 30395,
+   "output_tokens": 9650,
+   "requests": 29
+  },
+  {
+   "date": "2026-05-22",
+   "user_email": "v.bonnet@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 29382,
+   "output_tokens": 5203,
+   "requests": 17
+  },
+  {
+   "date": "2026-05-23",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 4432,
+   "output_tokens": 3348,
+   "requests": 52
+  },
+  {
+   "date": "2026-05-24",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 21638,
+   "output_tokens": 3715,
+   "requests": 19
+  },
+  {
+   "date": "2026-05-24",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 39459,
+   "output_tokens": 14602,
+   "requests": 3
+  },
+  {
+   "date": "2026-05-25",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 28789,
+   "output_tokens": 1666,
+   "requests": 8
+  },
+  {
+   "date": "2026-05-25",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 21462,
+   "output_tokens": 2164,
+   "requests": 22
+  },
+  {
+   "date": "2026-05-25",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 13214,
+   "output_tokens": 7411,
+   "requests": 56
+  },
+  {
+   "date": "2026-05-25",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 28737,
+   "output_tokens": 12502,
+   "requests": 44
+  },
+  {
+   "date": "2026-05-25",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 13786,
+   "output_tokens": 9742,
+   "requests": 42
+  },
+  {
+   "date": "2026-05-25",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 15450,
+   "output_tokens": 14925,
+   "requests": 26
+  },
+  {
+   "date": "2026-05-25",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 31038,
+   "output_tokens": 9388,
+   "requests": 5
+  },
+  {
+   "date": "2026-05-25",
+   "user_email": "c.roux@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 34139,
+   "output_tokens": 5787,
+   "requests": 34
+  },
+  {
+   "date": "2026-05-25",
+   "user_email": "m.girard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 3595,
+   "output_tokens": 3462,
+   "requests": 7
+  },
+  {
+   "date": "2026-05-26",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 28143,
+   "output_tokens": 6147,
+   "requests": 30
+  },
+  {
+   "date": "2026-05-26",
+   "user_email": "c.dubois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 4852,
+   "output_tokens": 12346,
+   "requests": 18
+  },
+  {
+   "date": "2026-05-26",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 8162,
+   "output_tokens": 12781,
+   "requests": 24
+  },
+  {
+   "date": "2026-05-26",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 35001,
+   "output_tokens": 8742,
+   "requests": 10
+  },
+  {
+   "date": "2026-05-26",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 9176,
+   "output_tokens": 11871,
+   "requests": 22
+  },
+  {
+   "date": "2026-05-26",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 11883,
+   "output_tokens": 4669,
+   "requests": 60
+  },
+  {
+   "date": "2026-05-26",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 3823,
+   "output_tokens": 10241,
+   "requests": 36
+  },
+  {
+   "date": "2026-05-26",
+   "user_email": "c.roux@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 28118,
+   "output_tokens": 9636,
+   "requests": 18
+  },
+  {
+   "date": "2026-05-26",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 31181,
+   "output_tokens": 9291,
+   "requests": 32
+  },
+  {
+   "date": "2026-05-26",
+   "user_email": "m.girard@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 7779,
+   "output_tokens": 14882,
+   "requests": 57
+  },
+  {
+   "date": "2026-05-26",
+   "user_email": "v.bonnet@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 29719,
+   "output_tokens": 7119,
+   "requests": 15
+  },
+  {
+   "date": "2026-05-27",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 18129,
+   "output_tokens": 13099,
+   "requests": 45
+  },
+  {
+   "date": "2026-05-27",
+   "user_email": "c.dubois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 32372,
+   "output_tokens": 6137,
+   "requests": 26
+  },
+  {
+   "date": "2026-05-27",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 5356,
+   "output_tokens": 10505,
+   "requests": 36
+  },
+  {
+   "date": "2026-05-27",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 18640,
+   "output_tokens": 3665,
+   "requests": 30
+  },
+  {
+   "date": "2026-05-27",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 16794,
+   "output_tokens": 6492,
+   "requests": 36
+  },
+  {
+   "date": "2026-05-27",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 13840,
+   "output_tokens": 6082,
+   "requests": 47
+  },
+  {
+   "date": "2026-05-27",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 32316,
+   "output_tokens": 7951,
+   "requests": 58
+  },
+  {
+   "date": "2026-05-27",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 19218,
+   "output_tokens": 7112,
+   "requests": 58
+  },
+  {
+   "date": "2026-05-27",
+   "user_email": "c.roux@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 26408,
+   "output_tokens": 8647,
+   "requests": 47
+  },
+  {
+   "date": "2026-05-27",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 31159,
+   "output_tokens": 13268,
+   "requests": 56
+  },
+  {
+   "date": "2026-05-27",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 17572,
+   "output_tokens": 3513,
+   "requests": 58
+  },
+  {
+   "date": "2026-05-28",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 15766,
+   "output_tokens": 1664,
+   "requests": 27
+  },
+  {
+   "date": "2026-05-28",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 38552,
+   "output_tokens": 12938,
+   "requests": 6
+  },
+  {
+   "date": "2026-05-28",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 38466,
+   "output_tokens": 5658,
+   "requests": 40
+  },
+  {
+   "date": "2026-05-28",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 29515,
+   "output_tokens": 5092,
+   "requests": 45
+  },
+  {
+   "date": "2026-05-28",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 35080,
+   "output_tokens": 10460,
+   "requests": 7
+  },
+  {
+   "date": "2026-05-28",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 17598,
+   "output_tokens": 12313,
+   "requests": 48
+  },
+  {
+   "date": "2026-05-28",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 15050,
+   "output_tokens": 2543,
+   "requests": 21
+  },
+  {
+   "date": "2026-05-28",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 11160,
+   "output_tokens": 3868,
+   "requests": 12
+  },
+  {
+   "date": "2026-05-28",
+   "user_email": "m.girard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 26285,
+   "output_tokens": 6204,
+   "requests": 12
+  },
+  {
+   "date": "2026-05-28",
+   "user_email": "v.bonnet@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 20680,
+   "output_tokens": 1809,
+   "requests": 4
+  },
+  {
+   "date": "2026-05-28",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 17810,
+   "output_tokens": 12395,
+   "requests": 56
+  },
+  {
+   "date": "2026-05-29",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 31400,
+   "output_tokens": 10620,
+   "requests": 26
+  },
+  {
+   "date": "2026-05-29",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 35111,
+   "output_tokens": 8359,
+   "requests": 19
+  },
+  {
+   "date": "2026-05-29",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 7078,
+   "output_tokens": 7121,
+   "requests": 26
+  },
+  {
+   "date": "2026-05-29",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 20071,
+   "output_tokens": 3109,
+   "requests": 51
+  },
+  {
+   "date": "2026-05-29",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 27216,
+   "output_tokens": 3438,
+   "requests": 12
+  },
+  {
+   "date": "2026-05-29",
+   "user_email": "m.girard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 12904,
+   "output_tokens": 1436,
+   "requests": 28
+  },
+  {
+   "date": "2026-05-29",
+   "user_email": "v.bonnet@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 25195,
+   "output_tokens": 13722,
+   "requests": 54
+  },
+  {
+   "date": "2026-05-29",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 24095,
+   "output_tokens": 11657,
+   "requests": 20
+  },
+  {
+   "date": "2026-05-30",
+   "user_email": "v.bonnet@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 13944,
+   "output_tokens": 5047,
+   "requests": 42
+  },
+  {
+   "date": "2026-05-30",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 17232,
+   "output_tokens": 2996,
+   "requests": 22
+  },
+  {
+   "date": "2026-05-31",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 39498,
+   "output_tokens": 2647,
+   "requests": 29
+  },
+  {
+   "date": "2026-05-31",
+   "user_email": "c.dubois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 8863,
+   "output_tokens": 6784,
+   "requests": 4
+  },
+  {
+   "date": "2026-05-31",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 31299,
+   "output_tokens": 1801,
+   "requests": 53
+  },
+  {
+   "date": "2026-05-31",
+   "user_email": "v.bonnet@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 11991,
+   "output_tokens": 12447,
+   "requests": 49
+  },
+  {
+   "date": "2026-06-01",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 29684,
+   "output_tokens": 10892,
+   "requests": 28
+  },
+  {
+   "date": "2026-06-01",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 30719,
+   "output_tokens": 6483,
+   "requests": 16
+  },
+  {
+   "date": "2026-06-01",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 24733,
+   "output_tokens": 13086,
+   "requests": 16
+  },
+  {
+   "date": "2026-06-01",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 7397,
+   "output_tokens": 5185,
+   "requests": 7
+  },
+  {
+   "date": "2026-06-01",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 15080,
+   "output_tokens": 2501,
+   "requests": 35
+  },
+  {
+   "date": "2026-06-01",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 36449,
+   "output_tokens": 10001,
+   "requests": 4
+  },
+  {
+   "date": "2026-06-01",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 19834,
+   "output_tokens": 14353,
+   "requests": 53
+  },
+  {
+   "date": "2026-06-01",
+   "user_email": "m.girard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 31340,
+   "output_tokens": 9920,
+   "requests": 29
+  },
+  {
+   "date": "2026-06-01",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 28014,
+   "output_tokens": 5956,
+   "requests": 35
+  },
+  {
+   "date": "2026-06-02",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 7395,
+   "output_tokens": 5683,
+   "requests": 59
+  },
+  {
+   "date": "2026-06-02",
+   "user_email": "c.dubois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 13468,
+   "output_tokens": 9460,
+   "requests": 5
+  },
+  {
+   "date": "2026-06-02",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 29050,
+   "output_tokens": 3516,
+   "requests": 41
+  },
+  {
+   "date": "2026-06-02",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 32404,
+   "output_tokens": 1000,
+   "requests": 34
+  },
+  {
+   "date": "2026-06-02",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 4503,
+   "output_tokens": 11598,
+   "requests": 53
+  },
+  {
+   "date": "2026-06-02",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 26360,
+   "output_tokens": 5527,
+   "requests": 54
+  },
+  {
+   "date": "2026-06-02",
+   "user_email": "m.girard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 35803,
+   "output_tokens": 3128,
+   "requests": 26
+  },
+  {
+   "date": "2026-06-02",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 29434,
+   "output_tokens": 6188,
+   "requests": 30
+  },
+  {
+   "date": "2026-06-03",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 26173,
+   "output_tokens": 7867,
+   "requests": 41
+  },
+  {
+   "date": "2026-06-03",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 27419,
+   "output_tokens": 2122,
+   "requests": 51
+  },
+  {
+   "date": "2026-06-03",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 2520,
+   "output_tokens": 8549,
+   "requests": 36
+  },
+  {
+   "date": "2026-06-03",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 23350,
+   "output_tokens": 3022,
+   "requests": 49
+  },
+  {
+   "date": "2026-06-03",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 37443,
+   "output_tokens": 11657,
+   "requests": 36
+  },
+  {
+   "date": "2026-06-03",
+   "user_email": "m.girard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 34682,
+   "output_tokens": 7051,
+   "requests": 58
+  },
+  {
+   "date": "2026-06-03",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 18972,
+   "output_tokens": 3449,
+   "requests": 39
+  },
+  {
+   "date": "2026-06-04",
+   "user_email": "c.dubois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 24790,
+   "output_tokens": 3525,
+   "requests": 8
+  },
+  {
+   "date": "2026-06-04",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 2185,
+   "output_tokens": 13325,
+   "requests": 47
+  },
+  {
+   "date": "2026-06-04",
+   "user_email": "c.roux@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 4488,
+   "output_tokens": 10444,
+   "requests": 11
+  },
+  {
+   "date": "2026-06-04",
+   "user_email": "m.girard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 7471,
+   "output_tokens": 7441,
+   "requests": 5
+  },
+  {
+   "date": "2026-06-04",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 37903,
+   "output_tokens": 14517,
+   "requests": 38
+  },
+  {
+   "date": "2026-06-05",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 2151,
+   "output_tokens": 13077,
+   "requests": 23
+  },
+  {
+   "date": "2026-06-05",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 14715,
+   "output_tokens": 8714,
+   "requests": 10
+  },
+  {
+   "date": "2026-06-05",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 9879,
+   "output_tokens": 11015,
+   "requests": 10
+  },
+  {
+   "date": "2026-06-05",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 34440,
+   "output_tokens": 14361,
+   "requests": 6
+  },
+  {
+   "date": "2026-06-05",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 36609,
+   "output_tokens": 2828,
+   "requests": 56
+  },
+  {
+   "date": "2026-06-05",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 8703,
+   "output_tokens": 7144,
+   "requests": 31
+  },
+  {
+   "date": "2026-06-05",
+   "user_email": "c.roux@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 12814,
+   "output_tokens": 5635,
+   "requests": 31
+  },
+  {
+   "date": "2026-06-05",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 9730,
+   "output_tokens": 13400,
+   "requests": 3
+  },
+  {
+   "date": "2026-06-05",
+   "user_email": "v.bonnet@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 36719,
+   "output_tokens": 1071,
+   "requests": 3
+  },
+  {
+   "date": "2026-06-05",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 24019,
+   "output_tokens": 3145,
+   "requests": 9
+  },
+  {
+   "date": "2026-06-06",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 35120,
+   "output_tokens": 6683,
+   "requests": 9
+  },
+  {
+   "date": "2026-06-07",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 23885,
+   "output_tokens": 3448,
+   "requests": 17
+  },
+  {
+   "date": "2026-06-08",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 19173,
+   "output_tokens": 9939,
+   "requests": 25
+  },
+  {
+   "date": "2026-06-08",
+   "user_email": "c.dubois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 11281,
+   "output_tokens": 12898,
+   "requests": 55
+  },
+  {
+   "date": "2026-06-08",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 18205,
+   "output_tokens": 3445,
+   "requests": 51
+  },
+  {
+   "date": "2026-06-08",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 39059,
+   "output_tokens": 8858,
+   "requests": 48
+  },
+  {
+   "date": "2026-06-08",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 21880,
+   "output_tokens": 13981,
+   "requests": 42
+  },
+  {
+   "date": "2026-06-08",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 5138,
+   "output_tokens": 1857,
+   "requests": 31
+  },
+  {
+   "date": "2026-06-08",
+   "user_email": "m.girard@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 38944,
+   "output_tokens": 14028,
+   "requests": 27
+  },
+  {
+   "date": "2026-06-08",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 24520,
+   "output_tokens": 14154,
+   "requests": 41
+  },
+  {
+   "date": "2026-06-09",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 38362,
+   "output_tokens": 6010,
+   "requests": 44
+  },
+  {
+   "date": "2026-06-09",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 29185,
+   "output_tokens": 6078,
+   "requests": 60
+  },
+  {
+   "date": "2026-06-09",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 22012,
+   "output_tokens": 2667,
+   "requests": 18
+  },
+  {
+   "date": "2026-06-09",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 18153,
+   "output_tokens": 10049,
+   "requests": 57
+  },
+  {
+   "date": "2026-06-09",
+   "user_email": "m.girard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 2266,
+   "output_tokens": 14409,
+   "requests": 6
+  },
+  {
+   "date": "2026-06-09",
+   "user_email": "v.bonnet@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 10780,
+   "output_tokens": 10108,
+   "requests": 51
+  },
+  {
+   "date": "2026-06-10",
+   "user_email": "c.dubois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 29907,
+   "output_tokens": 9416,
+   "requests": 36
+  },
+  {
+   "date": "2026-06-10",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 17230,
+   "output_tokens": 7109,
+   "requests": 45
+  },
+  {
+   "date": "2026-06-10",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 4098,
+   "output_tokens": 13234,
+   "requests": 32
+  },
+  {
+   "date": "2026-06-10",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 25970,
+   "output_tokens": 2497,
+   "requests": 26
+  },
+  {
+   "date": "2026-06-10",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 7036,
+   "output_tokens": 14782,
+   "requests": 50
+  },
+  {
+   "date": "2026-06-10",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 10674,
+   "output_tokens": 8859,
+   "requests": 51
+  },
+  {
+   "date": "2026-06-10",
+   "user_email": "v.bonnet@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 10778,
+   "output_tokens": 1051,
+   "requests": 42
+  },
+  {
+   "date": "2026-06-10",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 12758,
+   "output_tokens": 9967,
+   "requests": 3
+  },
+  {
+   "date": "2026-06-11",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 10978,
+   "output_tokens": 6084,
+   "requests": 57
+  },
+  {
+   "date": "2026-06-11",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 29246,
+   "output_tokens": 4777,
+   "requests": 39
+  },
+  {
+   "date": "2026-06-11",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 14242,
+   "output_tokens": 13919,
+   "requests": 57
+  },
+  {
+   "date": "2026-06-11",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 16782,
+   "output_tokens": 1345,
+   "requests": 10
+  },
+  {
+   "date": "2026-06-11",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 22633,
+   "output_tokens": 2145,
+   "requests": 17
+  },
+  {
+   "date": "2026-06-11",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 20027,
+   "output_tokens": 2338,
+   "requests": 39
+  },
+  {
+   "date": "2026-06-11",
+   "user_email": "c.roux@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 38699,
+   "output_tokens": 4198,
+   "requests": 12
+  },
+  {
+   "date": "2026-06-11",
+   "user_email": "v.bonnet@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 21792,
+   "output_tokens": 5393,
+   "requests": 59
+  },
+  {
+   "date": "2026-06-12",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 26640,
+   "output_tokens": 12373,
+   "requests": 50
+  },
+  {
+   "date": "2026-06-12",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 17401,
+   "output_tokens": 3452,
+   "requests": 26
+  },
+  {
+   "date": "2026-06-12",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 12103,
+   "output_tokens": 8933,
+   "requests": 21
+  },
+  {
+   "date": "2026-06-12",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 25731,
+   "output_tokens": 3738,
+   "requests": 36
+  },
+  {
+   "date": "2026-06-12",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 5208,
+   "output_tokens": 1916,
+   "requests": 58
+  },
+  {
+   "date": "2026-06-12",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 14700,
+   "output_tokens": 1677,
+   "requests": 28
+  },
+  {
+   "date": "2026-06-12",
+   "user_email": "c.roux@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 5511,
+   "output_tokens": 6382,
+   "requests": 45
+  },
+  {
+   "date": "2026-06-12",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 15208,
+   "output_tokens": 7956,
+   "requests": 50
+  },
+  {
+   "date": "2026-06-12",
+   "user_email": "m.girard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 8568,
+   "output_tokens": 12408,
+   "requests": 55
+  },
+  {
+   "date": "2026-06-12",
+   "user_email": "v.bonnet@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 2954,
+   "output_tokens": 11173,
+   "requests": 11
+  },
+  {
+   "date": "2026-06-12",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 9905,
+   "output_tokens": 9832,
+   "requests": 14
+  },
+  {
+   "date": "2026-06-13",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 21670,
+   "output_tokens": 1363,
+   "requests": 59
+  },
+  {
+   "date": "2026-06-13",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 14188,
+   "output_tokens": 11187,
+   "requests": 25
+  },
+  {
+   "date": "2026-06-14",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 22354,
+   "output_tokens": 4089,
+   "requests": 59
+  },
+  {
+   "date": "2026-06-15",
+   "user_email": "c.dubois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 5356,
+   "output_tokens": 3224,
+   "requests": 57
+  },
+  {
+   "date": "2026-06-15",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 20042,
+   "output_tokens": 7852,
+   "requests": 29
+  },
+  {
+   "date": "2026-06-15",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 4355,
+   "output_tokens": 12295,
+   "requests": 4
+  },
+  {
+   "date": "2026-06-15",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 39955,
+   "output_tokens": 8652,
+   "requests": 17
+  },
+  {
+   "date": "2026-06-15",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 25146,
+   "output_tokens": 12886,
+   "requests": 32
+  },
+  {
+   "date": "2026-06-15",
+   "user_email": "m.girard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 4771,
+   "output_tokens": 1588,
+   "requests": 6
+  },
+  {
+   "date": "2026-06-15",
+   "user_email": "v.bonnet@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 29795,
+   "output_tokens": 5558,
+   "requests": 55
+  },
+  {
+   "date": "2026-06-15",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 37620,
+   "output_tokens": 13385,
+   "requests": 33
+  },
+  {
+   "date": "2026-06-16",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 36130,
+   "output_tokens": 3305,
+   "requests": 44
+  },
+  {
+   "date": "2026-06-16",
+   "user_email": "c.dubois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 22467,
+   "output_tokens": 13689,
+   "requests": 46
+  },
+  {
+   "date": "2026-06-16",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 10478,
+   "output_tokens": 6540,
+   "requests": 32
+  },
+  {
+   "date": "2026-06-16",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 19175,
+   "output_tokens": 4011,
+   "requests": 44
+  },
+  {
+   "date": "2026-06-16",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 19086,
+   "output_tokens": 14803,
+   "requests": 41
+  },
+  {
+   "date": "2026-06-16",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 13575,
+   "output_tokens": 10891,
+   "requests": 17
+  },
+  {
+   "date": "2026-06-16",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 12368,
+   "output_tokens": 2909,
+   "requests": 22
+  },
+  {
+   "date": "2026-06-16",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 9956,
+   "output_tokens": 4811,
+   "requests": 15
+  },
+  {
+   "date": "2026-06-16",
+   "user_email": "c.roux@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 15512,
+   "output_tokens": 9070,
+   "requests": 31
+  },
+  {
+   "date": "2026-06-16",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 17700,
+   "output_tokens": 4141,
+   "requests": 14
+  },
+  {
+   "date": "2026-06-16",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 21007,
+   "output_tokens": 12175,
+   "requests": 3
+  },
+  {
+   "date": "2026-06-17",
+   "user_email": "c.dubois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 26463,
+   "output_tokens": 9500,
+   "requests": 57
+  },
+  {
+   "date": "2026-06-17",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 29971,
+   "output_tokens": 14644,
+   "requests": 27
+  },
+  {
+   "date": "2026-06-17",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 4825,
+   "output_tokens": 10711,
+   "requests": 41
+  },
+  {
+   "date": "2026-06-17",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 39265,
+   "output_tokens": 7726,
+   "requests": 9
+  },
+  {
+   "date": "2026-06-17",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 34490,
+   "output_tokens": 11894,
+   "requests": 14
+  },
+  {
+   "date": "2026-06-17",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 34266,
+   "output_tokens": 5862,
+   "requests": 27
+  },
+  {
+   "date": "2026-06-17",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 39307,
+   "output_tokens": 14042,
+   "requests": 8
+  },
+  {
+   "date": "2026-06-17",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 12907,
+   "output_tokens": 10213,
+   "requests": 54
+  },
+  {
+   "date": "2026-06-18",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 39992,
+   "output_tokens": 14497,
+   "requests": 34
+  },
+  {
+   "date": "2026-06-18",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 13968,
+   "output_tokens": 1140,
+   "requests": 17
+  },
+  {
+   "date": "2026-06-18",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 30435,
+   "output_tokens": 2343,
+   "requests": 36
+  },
+  {
+   "date": "2026-06-18",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 32151,
+   "output_tokens": 14972,
+   "requests": 50
+  },
+  {
+   "date": "2026-06-18",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 12372,
+   "output_tokens": 12601,
+   "requests": 17
+  },
+  {
+   "date": "2026-06-18",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 28544,
+   "output_tokens": 9946,
+   "requests": 11
+  },
+  {
+   "date": "2026-06-18",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 5753,
+   "output_tokens": 7489,
+   "requests": 56
+  },
+  {
+   "date": "2026-06-18",
+   "user_email": "c.roux@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 3401,
+   "output_tokens": 11267,
+   "requests": 52
+  },
+  {
+   "date": "2026-06-18",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 23872,
+   "output_tokens": 6907,
+   "requests": 31
+  },
+  {
+   "date": "2026-06-18",
+   "user_email": "m.girard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 17621,
+   "output_tokens": 3419,
+   "requests": 25
+  },
+  {
+   "date": "2026-06-18",
+   "user_email": "v.bonnet@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 38887,
+   "output_tokens": 7160,
+   "requests": 47
+  },
+  {
+   "date": "2026-06-18",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 3833,
+   "output_tokens": 3163,
+   "requests": 30
+  },
+  {
+   "date": "2026-06-19",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 23833,
+   "output_tokens": 2463,
+   "requests": 52
+  },
+  {
+   "date": "2026-06-19",
+   "user_email": "c.dubois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 21339,
+   "output_tokens": 9206,
+   "requests": 48
+  },
+  {
+   "date": "2026-06-19",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 27338,
+   "output_tokens": 11633,
+   "requests": 31
+  },
+  {
+   "date": "2026-06-19",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 17582,
+   "output_tokens": 5791,
+   "requests": 5
+  },
+  {
+   "date": "2026-06-19",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 35434,
+   "output_tokens": 4777,
+   "requests": 23
+  },
+  {
+   "date": "2026-06-19",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 16331,
+   "output_tokens": 6229,
+   "requests": 27
+  },
+  {
+   "date": "2026-06-19",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 14183,
+   "output_tokens": 2772,
+   "requests": 53
+  },
+  {
+   "date": "2026-06-19",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 26072,
+   "output_tokens": 10713,
+   "requests": 26
+  },
+  {
+   "date": "2026-06-19",
+   "user_email": "c.roux@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 31858,
+   "output_tokens": 4117,
+   "requests": 11
+  },
+  {
+   "date": "2026-06-19",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 14663,
+   "output_tokens": 3631,
+   "requests": 25
+  },
+  {
+   "date": "2026-06-19",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 37934,
+   "output_tokens": 11710,
+   "requests": 4
+  },
+  {
+   "date": "2026-06-22",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 28869,
+   "output_tokens": 8589,
+   "requests": 34
+  },
+  {
+   "date": "2026-06-22",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 18465,
+   "output_tokens": 10332,
+   "requests": 54
+  },
+  {
+   "date": "2026-06-22",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 38207,
+   "output_tokens": 12834,
+   "requests": 6
+  },
+  {
+   "date": "2026-06-22",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 4296,
+   "output_tokens": 8391,
+   "requests": 45
+  },
+  {
+   "date": "2026-06-22",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 32428,
+   "output_tokens": 10164,
+   "requests": 20
+  },
+  {
+   "date": "2026-06-22",
+   "user_email": "m.girard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 7294,
+   "output_tokens": 2343,
+   "requests": 17
+  },
+  {
+   "date": "2026-06-22",
+   "user_email": "v.bonnet@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 39464,
+   "output_tokens": 14419,
+   "requests": 36
+  },
+  {
+   "date": "2026-06-22",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 10855,
+   "output_tokens": 1674,
+   "requests": 30
+  },
+  {
+   "date": "2026-06-23",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 5771,
+   "output_tokens": 6068,
+   "requests": 49
+  },
+  {
+   "date": "2026-06-23",
+   "user_email": "c.dubois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 20395,
+   "output_tokens": 14460,
+   "requests": 41
+  },
+  {
+   "date": "2026-06-23",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 3939,
+   "output_tokens": 5466,
+   "requests": 11
+  },
+  {
+   "date": "2026-06-23",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 28499,
+   "output_tokens": 14462,
+   "requests": 16
+  },
+  {
+   "date": "2026-06-23",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 14150,
+   "output_tokens": 4545,
+   "requests": 9
+  },
+  {
+   "date": "2026-06-23",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 8687,
+   "output_tokens": 3400,
+   "requests": 55
+  },
+  {
+   "date": "2026-06-23",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 38756,
+   "output_tokens": 8380,
+   "requests": 11
+  },
+  {
+   "date": "2026-06-23",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 19764,
+   "output_tokens": 2497,
+   "requests": 54
+  },
+  {
+   "date": "2026-06-23",
+   "user_email": "m.girard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 38820,
+   "output_tokens": 8040,
+   "requests": 32
+  },
+  {
+   "date": "2026-06-24",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 6146,
+   "output_tokens": 5891,
+   "requests": 19
+  },
+  {
+   "date": "2026-06-24",
+   "user_email": "c.dubois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 32358,
+   "output_tokens": 13210,
+   "requests": 53
+  },
+  {
+   "date": "2026-06-24",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 16522,
+   "output_tokens": 1635,
+   "requests": 17
+  },
+  {
+   "date": "2026-06-24",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 5028,
+   "output_tokens": 10367,
+   "requests": 23
+  },
+  {
+   "date": "2026-06-24",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 25094,
+   "output_tokens": 2126,
+   "requests": 13
+  },
+  {
+   "date": "2026-06-24",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 27939,
+   "output_tokens": 2973,
+   "requests": 9
+  },
+  {
+   "date": "2026-06-24",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 13737,
+   "output_tokens": 1676,
+   "requests": 10
+  },
+  {
+   "date": "2026-06-24",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 39526,
+   "output_tokens": 3016,
+   "requests": 56
+  },
+  {
+   "date": "2026-06-24",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 6675,
+   "output_tokens": 12273,
+   "requests": 37
+  },
+  {
+   "date": "2026-06-24",
+   "user_email": "m.girard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 25896,
+   "output_tokens": 12401,
+   "requests": 52
+  },
+  {
+   "date": "2026-06-24",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 18798,
+   "output_tokens": 4260,
+   "requests": 56
+  },
+  {
+   "date": "2026-06-25",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 17345,
+   "output_tokens": 2786,
+   "requests": 39
+  },
+  {
+   "date": "2026-06-25",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 6475,
+   "output_tokens": 3980,
+   "requests": 55
+  },
+  {
+   "date": "2026-06-25",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 9966,
+   "output_tokens": 7799,
+   "requests": 52
+  },
+  {
+   "date": "2026-06-25",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 2885,
+   "output_tokens": 1000,
+   "requests": 19
+  },
+  {
+   "date": "2026-06-25",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 23524,
+   "output_tokens": 4453,
+   "requests": 53
+  },
+  {
+   "date": "2026-06-25",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 6088,
+   "output_tokens": 3999,
+   "requests": 20
+  },
+  {
+   "date": "2026-06-25",
+   "user_email": "c.roux@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 20360,
+   "output_tokens": 6210,
+   "requests": 29
+  },
+  {
+   "date": "2026-06-25",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 26215,
+   "output_tokens": 13121,
+   "requests": 40
+  },
+  {
+   "date": "2026-06-25",
+   "user_email": "v.bonnet@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 35579,
+   "output_tokens": 14664,
+   "requests": 44
+  },
+  {
+   "date": "2026-06-25",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 31315,
+   "output_tokens": 3807,
+   "requests": 3
+  },
+  {
+   "date": "2026-06-26",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 9728,
+   "output_tokens": 13894,
+   "requests": 40
+  },
+  {
+   "date": "2026-06-26",
+   "user_email": "c.dubois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 25314,
+   "output_tokens": 13417,
+   "requests": 50
+  },
+  {
+   "date": "2026-06-26",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 35715,
+   "output_tokens": 5806,
+   "requests": 35
+  },
+  {
+   "date": "2026-06-26",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 21896,
+   "output_tokens": 7480,
+   "requests": 4
+  },
+  {
+   "date": "2026-06-26",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 6498,
+   "output_tokens": 9178,
+   "requests": 59
+  },
+  {
+   "date": "2026-06-26",
+   "user_email": "c.roux@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 9713,
+   "output_tokens": 6381,
+   "requests": 60
+  },
+  {
+   "date": "2026-06-26",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 30671,
+   "output_tokens": 6125,
+   "requests": 7
+  },
+  {
+   "date": "2026-06-26",
+   "user_email": "v.bonnet@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 26329,
+   "output_tokens": 6761,
+   "requests": 46
+  },
+  {
+   "date": "2026-06-26",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 33833,
+   "output_tokens": 14446,
+   "requests": 54
+  },
+  {
+   "date": "2026-06-27",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 34473,
+   "output_tokens": 8636,
+   "requests": 22
+  },
+  {
+   "date": "2026-06-27",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 6845,
+   "output_tokens": 1998,
+   "requests": 44
+  },
+  {
+   "date": "2026-06-29",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 2652,
+   "output_tokens": 6386,
+   "requests": 57
+  },
+  {
+   "date": "2026-06-29",
+   "user_email": "c.dubois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 30092,
+   "output_tokens": 2283,
+   "requests": 6
+  },
+  {
+   "date": "2026-06-29",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 15109,
+   "output_tokens": 5661,
+   "requests": 37
+  },
+  {
+   "date": "2026-06-29",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 19230,
+   "output_tokens": 12521,
+   "requests": 16
+  },
+  {
+   "date": "2026-06-29",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 7634,
+   "output_tokens": 13344,
+   "requests": 60
+  },
+  {
+   "date": "2026-06-29",
+   "user_email": "c.roux@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 39583,
+   "output_tokens": 4184,
+   "requests": 17
+  },
+  {
+   "date": "2026-06-29",
+   "user_email": "v.bonnet@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 22866,
+   "output_tokens": 13523,
+   "requests": 27
+  },
+  {
+   "date": "2026-06-30",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 14361,
+   "output_tokens": 1797,
+   "requests": 21
+  },
+  {
+   "date": "2026-06-30",
+   "user_email": "c.dubois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 13298,
+   "output_tokens": 4317,
+   "requests": 5
+  },
+  {
+   "date": "2026-06-30",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 13561,
+   "output_tokens": 1819,
+   "requests": 22
+  },
+  {
+   "date": "2026-06-30",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 35721,
+   "output_tokens": 6776,
+   "requests": 7
+  },
+  {
+   "date": "2026-06-30",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 30701,
+   "output_tokens": 2813,
+   "requests": 9
+  },
+  {
+   "date": "2026-06-30",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 24956,
+   "output_tokens": 8520,
+   "requests": 25
+  },
+  {
+   "date": "2026-06-30",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 21577,
+   "output_tokens": 1326,
+   "requests": 50
+  },
+  {
+   "date": "2026-06-30",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 22178,
+   "output_tokens": 9848,
+   "requests": 31
+  },
+  {
+   "date": "2026-06-30",
+   "user_email": "c.roux@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 28374,
+   "output_tokens": 4285,
+   "requests": 37
+  },
+  {
+   "date": "2026-06-30",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 9535,
+   "output_tokens": 9596,
+   "requests": 54
+  },
+  {
+   "date": "2026-07-01",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 17812,
+   "output_tokens": 14902,
+   "requests": 31
+  },
+  {
+   "date": "2026-07-01",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 36512,
+   "output_tokens": 10280,
+   "requests": 58
+  },
+  {
+   "date": "2026-07-01",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 16755,
+   "output_tokens": 8082,
+   "requests": 41
+  },
+  {
+   "date": "2026-07-01",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 34034,
+   "output_tokens": 7199,
+   "requests": 56
+  },
+  {
+   "date": "2026-07-01",
+   "user_email": "c.roux@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 3364,
+   "output_tokens": 4509,
+   "requests": 36
+  },
+  {
+   "date": "2026-07-01",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 16143,
+   "output_tokens": 12080,
+   "requests": 10
+  },
+  {
+   "date": "2026-07-01",
+   "user_email": "v.bonnet@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 24177,
+   "output_tokens": 3051,
+   "requests": 13
+  },
+  {
+   "date": "2026-07-02",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 15240,
+   "output_tokens": 6045,
+   "requests": 31
+  },
+  {
+   "date": "2026-07-02",
+   "user_email": "c.dubois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 27614,
+   "output_tokens": 1144,
+   "requests": 3
+  },
+  {
+   "date": "2026-07-02",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 23150,
+   "output_tokens": 4794,
+   "requests": 37
+  },
+  {
+   "date": "2026-07-02",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 22441,
+   "output_tokens": 8518,
+   "requests": 37
+  },
+  {
+   "date": "2026-07-02",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 23172,
+   "output_tokens": 12220,
+   "requests": 13
+  },
+  {
+   "date": "2026-07-02",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 15676,
+   "output_tokens": 3275,
+   "requests": 28
+  },
+  {
+   "date": "2026-07-02",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 19824,
+   "output_tokens": 3883,
+   "requests": 21
+  },
+  {
+   "date": "2026-07-02",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 31936,
+   "output_tokens": 14830,
+   "requests": 36
+  },
+  {
+   "date": "2026-07-02",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 22727,
+   "output_tokens": 9033,
+   "requests": 17
+  },
+  {
+   "date": "2026-07-02",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 23324,
+   "output_tokens": 5960,
+   "requests": 3
+  },
+  {
+   "date": "2026-07-02",
+   "user_email": "c.roux@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 22147,
+   "output_tokens": 10611,
+   "requests": 52
+  },
+  {
+   "date": "2026-07-02",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 12886,
+   "output_tokens": 1374,
+   "requests": 39
+  },
+  {
+   "date": "2026-07-03",
+   "user_email": "c.dubois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 10409,
+   "output_tokens": 7851,
+   "requests": 53
+  },
+  {
+   "date": "2026-07-03",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 5283,
+   "output_tokens": 13129,
+   "requests": 45
+  },
+  {
+   "date": "2026-07-03",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 2961,
+   "output_tokens": 8430,
+   "requests": 52
+  },
+  {
+   "date": "2026-07-03",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 13344,
+   "output_tokens": 12223,
+   "requests": 31
+  },
+  {
+   "date": "2026-07-03",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 6839,
+   "output_tokens": 7756,
+   "requests": 3
+  },
+  {
+   "date": "2026-07-03",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 35363,
+   "output_tokens": 13777,
+   "requests": 57
+  },
+  {
+   "date": "2026-07-03",
+   "user_email": "m.girard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 2323,
+   "output_tokens": 13533,
+   "requests": 39
+  },
+  {
+   "date": "2026-07-03",
+   "user_email": "v.bonnet@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 23742,
+   "output_tokens": 10959,
+   "requests": 18
+  },
+  {
+   "date": "2026-07-03",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 19893,
+   "output_tokens": 14216,
+   "requests": 7
+  },
+  {
+   "date": "2026-07-04",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 36005,
+   "output_tokens": 11128,
+   "requests": 6
+  },
+  {
+   "date": "2026-07-05",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 7521,
+   "output_tokens": 12440,
+   "requests": 38
+  },
+  {
+   "date": "2026-07-06",
+   "user_email": "a.martin@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 2755,
+   "output_tokens": 3784,
+   "requests": 39
+  },
+  {
+   "date": "2026-07-06",
+   "user_email": "c.dubois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 10332,
+   "output_tokens": 14490,
+   "requests": 43
+  },
+  {
+   "date": "2026-07-06",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 13590,
+   "output_tokens": 13751,
+   "requests": 29
+  },
+  {
+   "date": "2026-07-06",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 6733,
+   "output_tokens": 7142,
+   "requests": 13
+  },
+  {
+   "date": "2026-07-06",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 39108,
+   "output_tokens": 4512,
+   "requests": 49
+  },
+  {
+   "date": "2026-07-06",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 5981,
+   "output_tokens": 5136,
+   "requests": 14
+  },
+  {
+   "date": "2026-07-06",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 34370,
+   "output_tokens": 4998,
+   "requests": 37
+  },
+  {
+   "date": "2026-07-06",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 29205,
+   "output_tokens": 5281,
+   "requests": 34
+  },
+  {
+   "date": "2026-07-06",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 34204,
+   "output_tokens": 12500,
+   "requests": 43
+  },
+  {
+   "date": "2026-07-06",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 11237,
+   "output_tokens": 14592,
+   "requests": 36
+  },
+  {
+   "date": "2026-07-06",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 27836,
+   "output_tokens": 2190,
+   "requests": 20
+  },
+  {
+   "date": "2026-07-06",
+   "user_email": "m.girard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 9404,
+   "output_tokens": 13390,
+   "requests": 39
+  },
+  {
+   "date": "2026-07-06",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-opus-4-8",
+   "input_tokens": 24227,
+   "output_tokens": 9593,
+   "requests": 54
+  },
+  {
+   "date": "2026-07-07",
+   "user_email": "m.bernard@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 4052,
+   "output_tokens": 6408,
+   "requests": 18
+  },
+  {
+   "date": "2026-07-07",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 3409,
+   "output_tokens": 5095,
+   "requests": 28
+  },
+  {
+   "date": "2026-07-07",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 7221,
+   "output_tokens": 11491,
+   "requests": 42
+  },
+  {
+   "date": "2026-07-07",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 24952,
+   "output_tokens": 11978,
+   "requests": 51
+  },
+  {
+   "date": "2026-07-07",
+   "user_email": "p.simon@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 29058,
+   "output_tokens": 6101,
+   "requests": 6
+  },
+  {
+   "date": "2026-07-07",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 32208,
+   "output_tokens": 4704,
+   "requests": 59
+  },
+  {
+   "date": "2026-07-07",
+   "user_email": "c.roux@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 5558,
+   "output_tokens": 2891,
+   "requests": 25
+  },
+  {
+   "date": "2026-07-07",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 39247,
+   "output_tokens": 11940,
+   "requests": 50
+  },
+  {
+   "date": "2026-07-07",
+   "user_email": "v.bonnet@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 20146,
+   "output_tokens": 14677,
+   "requests": 23
+  },
+  {
+   "date": "2026-07-07",
+   "user_email": "k.francois@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 10501,
+   "output_tokens": 12371,
+   "requests": 4
+  },
+  {
+   "date": "2026-07-08",
+   "user_email": "c.dubois@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 15639,
+   "output_tokens": 11612,
+   "requests": 43
+  },
+  {
+   "date": "2026-07-08",
+   "user_email": "s.petit@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 32789,
+   "output_tokens": 2860,
+   "requests": 43
+  },
+  {
+   "date": "2026-07-08",
+   "user_email": "l.durand@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-haiku-4-5",
+   "input_tokens": 39033,
+   "output_tokens": 5545,
+   "requests": 59
+  },
+  {
+   "date": "2026-07-08",
+   "user_email": "e.leroy@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 22221,
+   "output_tokens": 2993,
+   "requests": 45
+  },
+  {
+   "date": "2026-07-08",
+   "user_email": "n.moreau@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 28110,
+   "output_tokens": 12245,
+   "requests": 6
+  },
+  {
+   "date": "2026-07-08",
+   "user_email": "j.laurent@exemple-client.eu",
+   "product": "claude_ai",
+   "model": "claude-opus-4-8",
+   "input_tokens": 33248,
+   "output_tokens": 6954,
+   "requests": 3
+  },
+  {
+   "date": "2026-07-08",
+   "user_email": "t.lefebvre@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 3441,
+   "output_tokens": 6140,
+   "requests": 22
+  },
+  {
+   "date": "2026-07-08",
+   "user_email": "a.fournier@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 21779,
+   "output_tokens": 5023,
+   "requests": 56
+  },
+  {
+   "date": "2026-07-08",
+   "user_email": "m.girard@exemple-client.eu",
+   "product": "claude_code",
+   "model": "claude-sonnet-4-6",
+   "input_tokens": 29832,
+   "output_tokens": 14995,
+   "requests": 47
+  }
+ ],
+ "has_more": false,
+ "next_page": null
+}

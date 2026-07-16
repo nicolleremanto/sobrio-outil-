@@ -1,0 +1,2077 @@
+{
+ "data": [
+  {
+   "starting_at": "2026-06-12T00:00:00Z",
+   "ending_at": "2026-06-13T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 33387,
+     "cached_input_tokens": 31020,
+     "cache_creation_input_tokens": 4359,
+     "output_tokens": 13351
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 14240,
+     "cached_input_tokens": 10539,
+     "cache_creation_input_tokens": 2662,
+     "output_tokens": 3694
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 5149,
+     "cached_input_tokens": 1652,
+     "cache_creation_input_tokens": 659,
+     "output_tokens": 1428
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 32102,
+     "cached_input_tokens": 27720,
+     "cache_creation_input_tokens": 4043,
+     "output_tokens": 10301
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 20056,
+     "cached_input_tokens": 16226,
+     "cache_creation_input_tokens": 2200,
+     "output_tokens": 6381
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 4222,
+     "cached_input_tokens": 2313,
+     "cache_creation_input_tokens": 940,
+     "output_tokens": 1074
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 30462,
+     "cached_input_tokens": 9648,
+     "cache_creation_input_tokens": 7311,
+     "output_tokens": 12150
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 15876,
+     "cached_input_tokens": 5261,
+     "cache_creation_input_tokens": 3610,
+     "output_tokens": 5368
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 31993,
+     "cached_input_tokens": 14118,
+     "cache_creation_input_tokens": 12121,
+     "output_tokens": 13270
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 8140,
+     "cached_input_tokens": 8358,
+     "cache_creation_input_tokens": 1041,
+     "output_tokens": 2538
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-13T00:00:00Z",
+   "ending_at": "2026-06-14T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 26191,
+     "cached_input_tokens": 26546,
+     "cache_creation_input_tokens": 8083,
+     "output_tokens": 6918
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 20127,
+     "cached_input_tokens": 18420,
+     "cache_creation_input_tokens": 6136,
+     "output_tokens": 6113
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-14T00:00:00Z",
+   "ending_at": "2026-06-15T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 39002,
+     "cached_input_tokens": 38111,
+     "cache_creation_input_tokens": 5529,
+     "output_tokens": 12647
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 18625,
+     "cached_input_tokens": 13639,
+     "cache_creation_input_tokens": 6816,
+     "output_tokens": 5403
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 8866,
+     "cached_input_tokens": 4650,
+     "cache_creation_input_tokens": 1443,
+     "output_tokens": 3277
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 8778,
+     "cached_input_tokens": 9518,
+     "cache_creation_input_tokens": 2542,
+     "output_tokens": 3072
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-15T00:00:00Z",
+   "ending_at": "2026-06-16T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 24801,
+     "cached_input_tokens": 13921,
+     "cache_creation_input_tokens": 8397,
+     "output_tokens": 9427
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 18141,
+     "cached_input_tokens": 11201,
+     "cache_creation_input_tokens": 3522,
+     "output_tokens": 5537
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 3952,
+     "cached_input_tokens": 4049,
+     "cache_creation_input_tokens": 605,
+     "output_tokens": 706
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 11708,
+     "cached_input_tokens": 11437,
+     "cache_creation_input_tokens": 4118,
+     "output_tokens": 4094
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 13742,
+     "cached_input_tokens": 11070,
+     "cache_creation_input_tokens": 4536,
+     "output_tokens": 4458
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 6034,
+     "cached_input_tokens": 2210,
+     "cache_creation_input_tokens": 1312,
+     "output_tokens": 1147
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 49375,
+     "cached_input_tokens": 28077,
+     "cache_creation_input_tokens": 18668,
+     "output_tokens": 14149
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 18276,
+     "cached_input_tokens": 19579,
+     "cache_creation_input_tokens": 6184,
+     "output_tokens": 4885
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 4013,
+     "cached_input_tokens": 3078,
+     "cache_creation_input_tokens": 1303,
+     "output_tokens": 993
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 38790,
+     "cached_input_tokens": 13593,
+     "cache_creation_input_tokens": 13809,
+     "output_tokens": 14708
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 7051,
+     "cached_input_tokens": 7763,
+     "cache_creation_input_tokens": 801,
+     "output_tokens": 1965
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-16T00:00:00Z",
+   "ending_at": "2026-06-17T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 22571,
+     "cached_input_tokens": 21160,
+     "cache_creation_input_tokens": 3418,
+     "output_tokens": 8329
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 12233,
+     "cached_input_tokens": 3713,
+     "cache_creation_input_tokens": 4158,
+     "output_tokens": 3307
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 4988,
+     "cached_input_tokens": 5530,
+     "cache_creation_input_tokens": 1634,
+     "output_tokens": 1081
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 23235,
+     "cached_input_tokens": 18903,
+     "cache_creation_input_tokens": 3222,
+     "output_tokens": 8164
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 44271,
+     "cached_input_tokens": 23017,
+     "cache_creation_input_tokens": 12258,
+     "output_tokens": 13277
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 1100,
+     "cached_input_tokens": 585,
+     "cache_creation_input_tokens": 245,
+     "output_tokens": 292
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 24008,
+     "cached_input_tokens": 21034,
+     "cache_creation_input_tokens": 4994,
+     "output_tokens": 8544
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 17829,
+     "cached_input_tokens": 14356,
+     "cache_creation_input_tokens": 2968,
+     "output_tokens": 5189
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-17T00:00:00Z",
+   "ending_at": "2026-06-18T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 29038,
+     "cached_input_tokens": 30621,
+     "cache_creation_input_tokens": 6555,
+     "output_tokens": 10669
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 8644,
+     "cached_input_tokens": 5302,
+     "cache_creation_input_tokens": 3449,
+     "output_tokens": 2859
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 2769,
+     "cached_input_tokens": 1570,
+     "cache_creation_input_tokens": 994,
+     "output_tokens": 802
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 15321,
+     "cached_input_tokens": 15265,
+     "cache_creation_input_tokens": 5433,
+     "output_tokens": 6392
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 6212,
+     "cached_input_tokens": 2140,
+     "cache_creation_input_tokens": 1456,
+     "output_tokens": 1806
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 4126,
+     "cached_input_tokens": 1543,
+     "cache_creation_input_tokens": 896,
+     "output_tokens": 1104
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 26291,
+     "cached_input_tokens": 11719,
+     "cache_creation_input_tokens": 10478,
+     "output_tokens": 10434
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 14063,
+     "cached_input_tokens": 4353,
+     "cache_creation_input_tokens": 4292,
+     "output_tokens": 5422
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 820,
+     "cached_input_tokens": 788,
+     "cache_creation_input_tokens": 266,
+     "output_tokens": 209
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 18552,
+     "cached_input_tokens": 11043,
+     "cache_creation_input_tokens": 2834,
+     "output_tokens": 5777
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 7718,
+     "cached_input_tokens": 8559,
+     "cache_creation_input_tokens": 1851,
+     "output_tokens": 2047
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 4932,
+     "cached_input_tokens": 2248,
+     "cache_creation_input_tokens": 1824,
+     "output_tokens": 917
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-18T00:00:00Z",
+   "ending_at": "2026-06-19T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 28594,
+     "cached_input_tokens": 21011,
+     "cache_creation_input_tokens": 11149,
+     "output_tokens": 13612
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 13022,
+     "cached_input_tokens": 6434,
+     "cache_creation_input_tokens": 4902,
+     "output_tokens": 3940
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 4084,
+     "cached_input_tokens": 2726,
+     "cache_creation_input_tokens": 504,
+     "output_tokens": 1030
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 23926,
+     "cached_input_tokens": 27572,
+     "cache_creation_input_tokens": 2544,
+     "output_tokens": 8423
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 8510,
+     "cached_input_tokens": 10087,
+     "cache_creation_input_tokens": 1269,
+     "output_tokens": 3392
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 3730,
+     "cached_input_tokens": 2663,
+     "cache_creation_input_tokens": 822,
+     "output_tokens": 923
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 25288,
+     "cached_input_tokens": 19916,
+     "cache_creation_input_tokens": 8622,
+     "output_tokens": 8388
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 25556,
+     "cached_input_tokens": 15949,
+     "cache_creation_input_tokens": 6097,
+     "output_tokens": 6979
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 2957,
+     "cached_input_tokens": 2043,
+     "cache_creation_input_tokens": 938,
+     "output_tokens": 925
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 13268,
+     "cached_input_tokens": 15824,
+     "cache_creation_input_tokens": 2149,
+     "output_tokens": 6539
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 4923,
+     "cached_input_tokens": 1914,
+     "cache_creation_input_tokens": 560,
+     "output_tokens": 960
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-19T00:00:00Z",
+   "ending_at": "2026-06-20T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 17979,
+     "cached_input_tokens": 19201,
+     "cache_creation_input_tokens": 5283,
+     "output_tokens": 4518
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 4301,
+     "cached_input_tokens": 3767,
+     "cache_creation_input_tokens": 1129,
+     "output_tokens": 1118
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 27461,
+     "cached_input_tokens": 21902,
+     "cache_creation_input_tokens": 8221,
+     "output_tokens": 9315
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 13075,
+     "cached_input_tokens": 7519,
+     "cache_creation_input_tokens": 4995,
+     "output_tokens": 4700
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 28017,
+     "cached_input_tokens": 9886,
+     "cache_creation_input_tokens": 9515,
+     "output_tokens": 11912
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 9669,
+     "cached_input_tokens": 3996,
+     "cache_creation_input_tokens": 1213,
+     "output_tokens": 3291
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 4320,
+     "cached_input_tokens": 4388,
+     "cache_creation_input_tokens": 1307,
+     "output_tokens": 1269
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 28554,
+     "cached_input_tokens": 18894,
+     "cache_creation_input_tokens": 9011,
+     "output_tokens": 8563
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 10126,
+     "cached_input_tokens": 8738,
+     "cache_creation_input_tokens": 3019,
+     "output_tokens": 3026
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-20T00:00:00Z",
+   "ending_at": "2026-06-21T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 17061,
+     "cached_input_tokens": 13343,
+     "cache_creation_input_tokens": 6780,
+     "output_tokens": 4599
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 17290,
+     "cached_input_tokens": 13436,
+     "cache_creation_input_tokens": 6291,
+     "output_tokens": 6263
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-21T00:00:00Z",
+   "ending_at": "2026-06-22T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 38837,
+     "cached_input_tokens": 20450,
+     "cache_creation_input_tokens": 7543,
+     "output_tokens": 14840
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 23258,
+     "cached_input_tokens": 18278,
+     "cache_creation_input_tokens": 8861,
+     "output_tokens": 6506
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-22T00:00:00Z",
+   "ending_at": "2026-06-23T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 22851,
+     "cached_input_tokens": 19353,
+     "cache_creation_input_tokens": 4281,
+     "output_tokens": 9019
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 5878,
+     "cached_input_tokens": 5776,
+     "cache_creation_input_tokens": 608,
+     "output_tokens": 2037
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 5272,
+     "cached_input_tokens": 3446,
+     "cache_creation_input_tokens": 1953,
+     "output_tokens": 1001
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 2427,
+     "cached_input_tokens": 2513,
+     "cache_creation_input_tokens": 641,
+     "output_tokens": 636
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 15892,
+     "cached_input_tokens": 5440,
+     "cache_creation_input_tokens": 2768,
+     "output_tokens": 7052
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 6154,
+     "cached_input_tokens": 3342,
+     "cache_creation_input_tokens": 1342,
+     "output_tokens": 2293
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 5539,
+     "cached_input_tokens": 2347,
+     "cache_creation_input_tokens": 1766,
+     "output_tokens": 1118
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 12526,
+     "cached_input_tokens": 7647,
+     "cache_creation_input_tokens": 3373,
+     "output_tokens": 6069
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 16196,
+     "cached_input_tokens": 12351,
+     "cache_creation_input_tokens": 4227,
+     "output_tokens": 5333
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-23T00:00:00Z",
+   "ending_at": "2026-06-24T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 13227,
+     "cached_input_tokens": 4118,
+     "cache_creation_input_tokens": 3991,
+     "output_tokens": 4670
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 15420,
+     "cached_input_tokens": 17275,
+     "cache_creation_input_tokens": 2500,
+     "output_tokens": 4055
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 14799,
+     "cached_input_tokens": 16690,
+     "cache_creation_input_tokens": 4515,
+     "output_tokens": 5643
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 7552,
+     "cached_input_tokens": 5351,
+     "cache_creation_input_tokens": 1789,
+     "output_tokens": 2198
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 3282,
+     "cached_input_tokens": 3421,
+     "cache_creation_input_tokens": 535,
+     "output_tokens": 595
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 21932,
+     "cached_input_tokens": 7534,
+     "cache_creation_input_tokens": 7414,
+     "output_tokens": 10627
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 5802,
+     "cached_input_tokens": 5052,
+     "cache_creation_input_tokens": 1341,
+     "output_tokens": 2312
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 35899,
+     "cached_input_tokens": 22547,
+     "cache_creation_input_tokens": 3779,
+     "output_tokens": 12233
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 10297,
+     "cached_input_tokens": 11830,
+     "cache_creation_input_tokens": 2590,
+     "output_tokens": 2728
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-24T00:00:00Z",
+   "ending_at": "2026-06-25T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 40028,
+     "cached_input_tokens": 20613,
+     "cache_creation_input_tokens": 13551,
+     "output_tokens": 12154
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 5489,
+     "cached_input_tokens": 5320,
+     "cache_creation_input_tokens": 1058,
+     "output_tokens": 1519
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 1822,
+     "cached_input_tokens": 1851,
+     "cache_creation_input_tokens": 682,
+     "output_tokens": 475
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 16038,
+     "cached_input_tokens": 12438,
+     "cache_creation_input_tokens": 5145,
+     "output_tokens": 5834
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 20365,
+     "cached_input_tokens": 20388,
+     "cache_creation_input_tokens": 2973,
+     "output_tokens": 6796
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 5476,
+     "cached_input_tokens": 4788,
+     "cache_creation_input_tokens": 1397,
+     "output_tokens": 1187
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 21042,
+     "cached_input_tokens": 6851,
+     "cache_creation_input_tokens": 8339,
+     "output_tokens": 7842
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 10879,
+     "cached_input_tokens": 8613,
+     "cache_creation_input_tokens": 3178,
+     "output_tokens": 3811
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 27971,
+     "cached_input_tokens": 32418,
+     "cache_creation_input_tokens": 8265,
+     "output_tokens": 9412
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 11454,
+     "cached_input_tokens": 9452,
+     "cache_creation_input_tokens": 2677,
+     "output_tokens": 3337
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-25T00:00:00Z",
+   "ending_at": "2026-06-26T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 13262,
+     "cached_input_tokens": 12055,
+     "cache_creation_input_tokens": 3471,
+     "output_tokens": 4130
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 31780,
+     "cached_input_tokens": 28329,
+     "cache_creation_input_tokens": 8861,
+     "output_tokens": 14000
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 6783,
+     "cached_input_tokens": 5106,
+     "cache_creation_input_tokens": 1300,
+     "output_tokens": 1745
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 25686,
+     "cached_input_tokens": 29528,
+     "cache_creation_input_tokens": 6658,
+     "output_tokens": 10563
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 20192,
+     "cached_input_tokens": 20468,
+     "cache_creation_input_tokens": 6216,
+     "output_tokens": 5786
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 2023,
+     "cached_input_tokens": 1785,
+     "cache_creation_input_tokens": 698,
+     "output_tokens": 408
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 38116,
+     "cached_input_tokens": 25365,
+     "cache_creation_input_tokens": 12903,
+     "output_tokens": 11261
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 6490,
+     "cached_input_tokens": 7106,
+     "cache_creation_input_tokens": 2079,
+     "output_tokens": 1327
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-26T00:00:00Z",
+   "ending_at": "2026-06-27T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 11906,
+     "cached_input_tokens": 8202,
+     "cache_creation_input_tokens": 4609,
+     "output_tokens": 4440
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 16391,
+     "cached_input_tokens": 13635,
+     "cache_creation_input_tokens": 1914,
+     "output_tokens": 5003
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 39767,
+     "cached_input_tokens": 28193,
+     "cache_creation_input_tokens": 4149,
+     "output_tokens": 13039
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 15538,
+     "cached_input_tokens": 10603,
+     "cache_creation_input_tokens": 4736,
+     "output_tokens": 4385
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 3200,
+     "cached_input_tokens": 2014,
+     "cache_creation_input_tokens": 812,
+     "output_tokens": 780
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 35386,
+     "cached_input_tokens": 17313,
+     "cache_creation_input_tokens": 4828,
+     "output_tokens": 13546
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 10294,
+     "cached_input_tokens": 3539,
+     "cache_creation_input_tokens": 1580,
+     "output_tokens": 3676
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 5728,
+     "cached_input_tokens": 5460,
+     "cache_creation_input_tokens": 1794,
+     "output_tokens": 1353
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 10425,
+     "cached_input_tokens": 11240,
+     "cache_creation_input_tokens": 2369,
+     "output_tokens": 4347
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 13260,
+     "cached_input_tokens": 13611,
+     "cache_creation_input_tokens": 3896,
+     "output_tokens": 4660
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-27T00:00:00Z",
+   "ending_at": "2026-06-28T00:00:00Z",
+   "results": []
+  },
+  {
+   "starting_at": "2026-06-28T00:00:00Z",
+   "ending_at": "2026-06-29T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 1293,
+     "cached_input_tokens": 512,
+     "cache_creation_input_tokens": 309,
+     "output_tokens": 352
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 5482,
+     "cached_input_tokens": 2966,
+     "cache_creation_input_tokens": 888,
+     "output_tokens": 2162
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 8807,
+     "cached_input_tokens": 2892,
+     "cache_creation_input_tokens": 3375,
+     "output_tokens": 4128
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-29T00:00:00Z",
+   "ending_at": "2026-06-30T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 35581,
+     "cached_input_tokens": 33969,
+     "cache_creation_input_tokens": 7740,
+     "output_tokens": 12408
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 9234,
+     "cached_input_tokens": 8248,
+     "cache_creation_input_tokens": 2454,
+     "output_tokens": 3054
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 4195,
+     "cached_input_tokens": 3136,
+     "cache_creation_input_tokens": 1405,
+     "output_tokens": 1167
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 20999,
+     "cached_input_tokens": 16873,
+     "cache_creation_input_tokens": 4482,
+     "output_tokens": 6189
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 19756,
+     "cached_input_tokens": 19801,
+     "cache_creation_input_tokens": 4802,
+     "output_tokens": 4953
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 21763,
+     "cached_input_tokens": 11105,
+     "cache_creation_input_tokens": 5994,
+     "output_tokens": 9721
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 4755,
+     "cached_input_tokens": 4224,
+     "cache_creation_input_tokens": 1692,
+     "output_tokens": 1528
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 28519,
+     "cached_input_tokens": 33577,
+     "cache_creation_input_tokens": 2935,
+     "output_tokens": 11095
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 21731,
+     "cached_input_tokens": 14337,
+     "cache_creation_input_tokens": 6023,
+     "output_tokens": 6155
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-30T00:00:00Z",
+   "ending_at": "2026-07-01T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 17082,
+     "cached_input_tokens": 11036,
+     "cache_creation_input_tokens": 5435,
+     "output_tokens": 5336
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 12615,
+     "cached_input_tokens": 9835,
+     "cache_creation_input_tokens": 1988,
+     "output_tokens": 4894
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 12062,
+     "cached_input_tokens": 5465,
+     "cache_creation_input_tokens": 2781,
+     "output_tokens": 5265
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 17887,
+     "cached_input_tokens": 5829,
+     "cache_creation_input_tokens": 4351,
+     "output_tokens": 5251
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 7262,
+     "cached_input_tokens": 8015,
+     "cache_creation_input_tokens": 2254,
+     "output_tokens": 1368
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 10602,
+     "cached_input_tokens": 8476,
+     "cache_creation_input_tokens": 1376,
+     "output_tokens": 4408
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 22234,
+     "cached_input_tokens": 9419,
+     "cache_creation_input_tokens": 3068,
+     "output_tokens": 6393
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 2613,
+     "cached_input_tokens": 1107,
+     "cache_creation_input_tokens": 463,
+     "output_tokens": 749
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 27317,
+     "cached_input_tokens": 17551,
+     "cache_creation_input_tokens": 9620,
+     "output_tokens": 10319
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 15482,
+     "cached_input_tokens": 14680,
+     "cache_creation_input_tokens": 3163,
+     "output_tokens": 4378
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-07-01T00:00:00Z",
+   "ending_at": "2026-07-02T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 16721,
+     "cached_input_tokens": 12307,
+     "cache_creation_input_tokens": 4564,
+     "output_tokens": 6217
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 5710,
+     "cached_input_tokens": 1958,
+     "cache_creation_input_tokens": 637,
+     "output_tokens": 1123
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 32526,
+     "cached_input_tokens": 32758,
+     "cache_creation_input_tokens": 12685,
+     "output_tokens": 12416
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 5294,
+     "cached_input_tokens": 5680,
+     "cache_creation_input_tokens": 1851,
+     "output_tokens": 1778
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 16361,
+     "cached_input_tokens": 19202,
+     "cache_creation_input_tokens": 5035,
+     "output_tokens": 5454
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 16558,
+     "cached_input_tokens": 6065,
+     "cache_creation_input_tokens": 3365,
+     "output_tokens": 4870
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 11566,
+     "cached_input_tokens": 12860,
+     "cache_creation_input_tokens": 2464,
+     "output_tokens": 4883
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-07-02T00:00:00Z",
+   "ending_at": "2026-07-03T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 29688,
+     "cached_input_tokens": 29247,
+     "cache_creation_input_tokens": 11808,
+     "output_tokens": 10534
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 8188,
+     "cached_input_tokens": 6750,
+     "cache_creation_input_tokens": 2321,
+     "output_tokens": 2985
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 35756,
+     "cached_input_tokens": 34991,
+     "cache_creation_input_tokens": 5499,
+     "output_tokens": 10601
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 27036,
+     "cached_input_tokens": 18967,
+     "cache_creation_input_tokens": 9657,
+     "output_tokens": 12992
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 4918,
+     "cached_input_tokens": 1756,
+     "cache_creation_input_tokens": 1176,
+     "output_tokens": 918
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 17077,
+     "cached_input_tokens": 7752,
+     "cache_creation_input_tokens": 2401,
+     "output_tokens": 8425
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 12586,
+     "cached_input_tokens": 7897,
+     "cache_creation_input_tokens": 2879,
+     "output_tokens": 4356
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-07-03T00:00:00Z",
+   "ending_at": "2026-07-04T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 28005,
+     "cached_input_tokens": 26017,
+     "cache_creation_input_tokens": 8230,
+     "output_tokens": 12686
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 3576,
+     "cached_input_tokens": 4247,
+     "cache_creation_input_tokens": 971,
+     "output_tokens": 896
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 12058,
+     "cached_input_tokens": 11558,
+     "cache_creation_input_tokens": 3297,
+     "output_tokens": 5281
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 37177,
+     "cached_input_tokens": 34676,
+     "cache_creation_input_tokens": 12624,
+     "output_tokens": 11828
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 11806,
+     "cached_input_tokens": 13077,
+     "cache_creation_input_tokens": 3498,
+     "output_tokens": 4184
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 30771,
+     "cached_input_tokens": 33691,
+     "cache_creation_input_tokens": 4247,
+     "output_tokens": 9025
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 14597,
+     "cached_input_tokens": 17286,
+     "cache_creation_input_tokens": 2139,
+     "output_tokens": 5485
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-07-04T00:00:00Z",
+   "ending_at": "2026-07-05T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 20466,
+     "cached_input_tokens": 17279,
+     "cache_creation_input_tokens": 3537,
+     "output_tokens": 5948
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 12375,
+     "cached_input_tokens": 13314,
+     "cache_creation_input_tokens": 4683,
+     "output_tokens": 3480
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-07-05T00:00:00Z",
+   "ending_at": "2026-07-06T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 24078,
+     "cached_input_tokens": 11339,
+     "cache_creation_input_tokens": 3263,
+     "output_tokens": 9454
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 11672,
+     "cached_input_tokens": 11813,
+     "cache_creation_input_tokens": 1686,
+     "output_tokens": 3231
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 16097,
+     "cached_input_tokens": 15447,
+     "cache_creation_input_tokens": 3167,
+     "output_tokens": 6265
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-07-06T00:00:00Z",
+   "ending_at": "2026-07-07T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 28557,
+     "cached_input_tokens": 18803,
+     "cache_creation_input_tokens": 4616,
+     "output_tokens": 10902
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 17430,
+     "cached_input_tokens": 17221,
+     "cache_creation_input_tokens": 6915,
+     "output_tokens": 6210
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 20078,
+     "cached_input_tokens": 13772,
+     "cache_creation_input_tokens": 2049,
+     "output_tokens": 6213
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 23917,
+     "cached_input_tokens": 9710,
+     "cache_creation_input_tokens": 7660,
+     "output_tokens": 8069
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 15996,
+     "cached_input_tokens": 18075,
+     "cache_creation_input_tokens": 3515,
+     "output_tokens": 4372
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 16605,
+     "cached_input_tokens": 14879,
+     "cache_creation_input_tokens": 5825,
+     "output_tokens": 5233
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 24328,
+     "cached_input_tokens": 16904,
+     "cache_creation_input_tokens": 4893,
+     "output_tokens": 6130
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-07-07T00:00:00Z",
+   "ending_at": "2026-07-08T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 35522,
+     "cached_input_tokens": 29825,
+     "cache_creation_input_tokens": 4704,
+     "output_tokens": 12591
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 2469,
+     "cached_input_tokens": 1174,
+     "cache_creation_input_tokens": 540,
+     "output_tokens": 532
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 29301,
+     "cached_input_tokens": 29148,
+     "cache_creation_input_tokens": 6599,
+     "output_tokens": 12301
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 17795,
+     "cached_input_tokens": 16702,
+     "cache_creation_input_tokens": 3114,
+     "output_tokens": 4637
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 2296,
+     "cached_input_tokens": 1034,
+     "cache_creation_input_tokens": 727,
+     "output_tokens": 401
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 24713,
+     "cached_input_tokens": 9199,
+     "cache_creation_input_tokens": 2758,
+     "output_tokens": 10902
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 4355,
+     "cached_input_tokens": 4526,
+     "cache_creation_input_tokens": 1350,
+     "output_tokens": 1675
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 4492,
+     "cached_input_tokens": 4064,
+     "cache_creation_input_tokens": 1424,
+     "output_tokens": 1344
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 32385,
+     "cached_input_tokens": 9933,
+     "cache_creation_input_tokens": 8241,
+     "output_tokens": 14363
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 13701,
+     "cached_input_tokens": 8341,
+     "cache_creation_input_tokens": 1977,
+     "output_tokens": 4280
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-07-08T00:00:00Z",
+   "ending_at": "2026-07-09T00:00:00Z",
+   "results": [
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 15801,
+     "cached_input_tokens": 17254,
+     "cache_creation_input_tokens": 3258,
+     "output_tokens": 4983
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 7438,
+     "cached_input_tokens": 6556,
+     "cache_creation_input_tokens": 1463,
+     "output_tokens": 1899
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_01",
+     "service_tier": "standard",
+     "uncached_input_tokens": 5731,
+     "cached_input_tokens": 6614,
+     "cache_creation_input_tokens": 727,
+     "output_tokens": 1115
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 31099,
+     "cached_input_tokens": 21666,
+     "cache_creation_input_tokens": 11139,
+     "output_tokens": 11144
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_alpha",
+     "api_key_id": "apikey_02",
+     "service_tier": "standard",
+     "uncached_input_tokens": 12564,
+     "cached_input_tokens": 4043,
+     "cache_creation_input_tokens": 3202,
+     "output_tokens": 3551
+    },
+    {
+     "model": "claude-haiku-4-5",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 48893,
+     "cached_input_tokens": 14743,
+     "cache_creation_input_tokens": 16330,
+     "output_tokens": 14312
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 6624,
+     "cached_input_tokens": 7442,
+     "cache_creation_input_tokens": 1577,
+     "output_tokens": 2586
+    },
+    {
+     "model": "claude-opus-4-8",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_03",
+     "service_tier": "standard",
+     "uncached_input_tokens": 4814,
+     "cached_input_tokens": 4320,
+     "cache_creation_input_tokens": 1663,
+     "output_tokens": 943
+    },
+    {
+     "model": "claude-sonnet-4-6",
+     "workspace_id": "wrkspc_beta",
+     "api_key_id": "apikey_04",
+     "service_tier": "standard",
+     "uncached_input_tokens": 6447,
+     "cached_input_tokens": 7651,
+     "cache_creation_input_tokens": 1248,
+     "output_tokens": 1630
+    }
+   ]
+  }
+ ],
+ "has_more": false,
+ "next_page": null
+}

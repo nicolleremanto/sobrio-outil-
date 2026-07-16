@@ -1,0 +1,2144 @@
+{
+ "data": [
+  {
+   "starting_at": "2026-05-12T00:00:00Z",
+   "ending_at": "2026-05-13T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1488"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.3577"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2623"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2508"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0654"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-05-13T00:00:00Z",
+   "ending_at": "2026-05-14T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1832"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2203"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0536"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1953"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0874"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0285"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-05-14T00:00:00Z",
+   "ending_at": "2026-05-15T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2775"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0544"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1102"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1865"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0297"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-05-15T00:00:00Z",
+   "ending_at": "2026-05-16T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0431"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1348"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0246"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2284"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1184"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1583"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-05-16T00:00:00Z",
+   "ending_at": "2026-05-17T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0880"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-05-17T00:00:00Z",
+   "ending_at": "2026-05-18T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0587"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0515"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-05-18T00:00:00Z",
+   "ending_at": "2026-05-19T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0951"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0944"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1407"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0939"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2929"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0534"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-05-19T00:00:00Z",
+   "ending_at": "2026-05-20T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1001"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1714"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0371"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2313"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1486"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-05-20T00:00:00Z",
+   "ending_at": "2026-05-21T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1686"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1790"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2182"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2176"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0252"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-05-21T00:00:00Z",
+   "ending_at": "2026-05-22T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1309"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2212"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2212"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2955"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0479"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-05-22T00:00:00Z",
+   "ending_at": "2026-05-23T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1889"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1831"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0951"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1279"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2341"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0796"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-05-23T00:00:00Z",
+   "ending_at": "2026-05-24T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0477"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0872"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0994"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-05-24T00:00:00Z",
+   "ending_at": "2026-05-25T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1509"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1073"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-05-25T00:00:00Z",
+   "ending_at": "2026-05-26T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1273"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1255"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1198"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0944"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0553"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0345"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-05-26T00:00:00Z",
+   "ending_at": "2026-05-27T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1649"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.3262"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0629"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1448"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1872"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0801"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-05-27T00:00:00Z",
+   "ending_at": "2026-05-28T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0589"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2110"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1426"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0495"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0914"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-05-28T00:00:00Z",
+   "ending_at": "2026-05-29T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1775"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2987"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0766"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2336"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1067"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0862"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-05-29T00:00:00Z",
+   "ending_at": "2026-05-30T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1727"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2258"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2155"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2536"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1066"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-05-30T00:00:00Z",
+   "ending_at": "2026-05-31T00:00:00Z",
+   "results": []
+  },
+  {
+   "starting_at": "2026-05-31T00:00:00Z",
+   "ending_at": "2026-06-01T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.3800"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-01T00:00:00Z",
+   "ending_at": "2026-06-02T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0725"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2287"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0508"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2777"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.3037"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0408"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-02T00:00:00Z",
+   "ending_at": "2026-06-03T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1431"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1922"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1902"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0657"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-03T00:00:00Z",
+   "ending_at": "2026-06-04T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1428"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1518"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0478"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1809"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1747"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0908"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-04T00:00:00Z",
+   "ending_at": "2026-06-05T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1626"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0926"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0794"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1198"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1618"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0976"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-05T00:00:00Z",
+   "ending_at": "2026-06-06T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1474"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2418"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0380"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1236"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1632"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0630"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-06T00:00:00Z",
+   "ending_at": "2026-06-07T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.3049"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-07T00:00:00Z",
+   "ending_at": "2026-06-08T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1638"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-08T00:00:00Z",
+   "ending_at": "2026-06-09T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2127"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.3082"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0664"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1937"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2269"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0630"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-09T00:00:00Z",
+   "ending_at": "2026-06-10T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1642"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0732"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0226"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1693"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1836"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-10T00:00:00Z",
+   "ending_at": "2026-06-11T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2005"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2236"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0605"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1801"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2677"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0579"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-11T00:00:00Z",
+   "ending_at": "2026-06-12T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1838"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.3343"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0624"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2126"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2758"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-12T00:00:00Z",
+   "ending_at": "2026-06-13T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2001"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2803"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1214"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2162"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2122"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-13T00:00:00Z",
+   "ending_at": "2026-06-14T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2206"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1806"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-14T00:00:00Z",
+   "ending_at": "2026-06-15T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1130"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0555"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1674"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-15T00:00:00Z",
+   "ending_at": "2026-06-16T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1223"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2825"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1114"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2772"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2131"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0546"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-16T00:00:00Z",
+   "ending_at": "2026-06-17T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1406"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1030"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0649"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2034"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1468"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0146"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-17T00:00:00Z",
+   "ending_at": "2026-06-18T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1492"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1352"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0955"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1448"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2043"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0715"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-18T00:00:00Z",
+   "ending_at": "2026-06-19T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1847"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2027"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0989"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1302"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2090"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0979"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-19T00:00:00Z",
+   "ending_at": "2026-06-20T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0865"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2780"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0584"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1850"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1738"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0637"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-20T00:00:00Z",
+   "ending_at": "2026-06-21T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.3230"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-21T00:00:00Z",
+   "ending_at": "2026-06-22T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1245"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2061"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-22T00:00:00Z",
+   "ending_at": "2026-06-23T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0752"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0522"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0986"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1030"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2070"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0679"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-23T00:00:00Z",
+   "ending_at": "2026-06-24T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0923"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1856"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0363"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1891"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1437"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-24T00:00:00Z",
+   "ending_at": "2026-06-25T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1727"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2251"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0944"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1600"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2016"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-25T00:00:00Z",
+   "ending_at": "2026-06-26T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1551"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0529"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2029"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1768"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1077"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-26T00:00:00Z",
+   "ending_at": "2026-06-27T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1537"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2688"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0416"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1471"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2214"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0764"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-27T00:00:00Z",
+   "ending_at": "2026-06-28T00:00:00Z",
+   "results": []
+  },
+  {
+   "starting_at": "2026-06-28T00:00:00Z",
+   "ending_at": "2026-06-29T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0531"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0175"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0340"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-29T00:00:00Z",
+   "ending_at": "2026-06-30T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1699"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2427"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0605"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1700"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2292"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-06-30T00:00:00Z",
+   "ending_at": "2026-07-01T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0941"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2722"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0886"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1279"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.3053"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0352"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-07-01T00:00:00Z",
+   "ending_at": "2026-07-02T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1137"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2154"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0616"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0922"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1372"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-07-02T00:00:00Z",
+   "ending_at": "2026-07-03T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1992"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0801"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1689"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1163"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0558"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-07-03T00:00:00Z",
+   "ending_at": "2026-07-04T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1481"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0485"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2001"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2545"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-07-04T00:00:00Z",
+   "ending_at": "2026-07-05T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2799"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-07-05T00:00:00Z",
+   "ending_at": "2026-07-06T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0766"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0933"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1588"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-07-06T00:00:00Z",
+   "ending_at": "2026-07-07T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0907"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.3418"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1263"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.3205"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-07-07T00:00:00Z",
+   "ending_at": "2026-07-08T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.2093"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1396"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0562"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1991"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1598"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0670"
+    }
+   ]
+  },
+  {
+   "starting_at": "2026-07-08T00:00:00Z",
+   "ending_at": "2026-07-09T00:00:00Z",
+   "results": [
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1494"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1624"
+    },
+    {
+     "workspace_id": "wrkspc_alpha",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0644"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-haiku-4-5",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1423"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-sonnet-4-6",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.1176"
+    },
+    {
+     "workspace_id": "wrkspc_beta",
+     "model": "claude-opus-4-8",
+     "cost_type": "tokens",
+     "currency": "USD",
+     "amount": "0.0602"
+    }
+   ]
+  }
+ ],
+ "has_more": false,
+ "next_page": null
+}

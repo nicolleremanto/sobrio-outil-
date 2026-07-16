@@ -1,0 +1,4 @@
+# Dépendances du connecteur (compatibles avec le venv racine .venv)
+httpx
+sqlalchemy>=2
+psycopg[binary]
