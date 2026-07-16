@@ -18,7 +18,7 @@ export const KEYWORD_FLAGS: readonly KeywordFlag[] = [
 ];
 
 /** Normalise : minuscules + suppression des diacritiques (é → e, ç → c…). */
-function normalize(text: string): string {
+export function normalize(text: string): string {
   return text
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
