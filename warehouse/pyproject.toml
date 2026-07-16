@@ -1,0 +1,24 @@
+[project]
+name = "sobrio-warehouse"
+version = "0.1.0"
+description = "Lot D — entrepôt Postgres (Alembic) + module d'impact (fourchettes min–max)"
+requires-python = ">=3.12"
+dependencies = [
+  "SQLAlchemy>=2.0",
+  "alembic>=1.13",
+  "psycopg[binary]>=3.2",
+  "PyYAML>=6.0",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["sobrio_impact"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
