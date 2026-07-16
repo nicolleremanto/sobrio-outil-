@@ -22,7 +22,12 @@ export default tseslint.config(
     // node) : hors bundle de l'extension — globals Node et console autorisés.
     files: ['dev/**/*.mjs'],
     languageOptions: {
-      globals: { console: 'readonly', process: 'readonly', URL: 'readonly' },
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+        URL: 'readonly',
+        Buffer: 'readonly',
+      },
     },
   },
 );

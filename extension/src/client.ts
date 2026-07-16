@@ -11,7 +11,7 @@
  *
  * Mode `api` et contrat : le backend v1.0 (contracts/openapi.yaml) ne connaît
  * pas encore le bloc `signals.conversation` — la RFC v1.1
- * (docs/rfc/2026-07-16-extension-signals-v1_1.md) propose son adoption. En
+ * (docs/rfc/RFC-0001-signals-conversation.md) propose son adoption. En
  * attendant, ce client mappe les signaux vers les `features` v1.0 : la
  * mémoire de conversation reste LOCALE et le mock (défaut V0) consomme, lui,
  * le bloc complet. Aucun champ hors contrat ne part vers l'API réelle.

@@ -1,47 +1,48 @@
-# Extension Sobrio — Lot A (squelette Lot 0)
+# Extension Sobrio — V0 (Lot A)
 
 Extension navigateur (Chrome/Edge, Manifest V3, [WXT](https://wxt.dev) + TypeScript) qui
-recommande sur **claude.ai** le modèle adapté à chaque prompt. Elle **affiche et
-conseille, n'automatise JAMAIS**.
+recommande sur **claude.ai** le modèle adapté à chaque prompt — coût et énergie **en
+fourchettes**, budget d'équipe, suivi des recommandations. Elle **affiche et conseille,
+n'automatise JAMAIS**.
 
-## Rappel — règle n°2 (non négociable)
+La recommandation ne se fonde pas sur le seul dernier prompt : l'extension entretient une
+**mémoire de signaux de la conversation** (`src/conversationMemory.ts`) — nombre de
+messages, taille de contexte estimée, code/maths/raisonnement vus au fil des tours,
+modèle courant, historique recos/dérogations — **jamais le texte**. Un « démontre-le »
+court dans un fil mathématique ne part pas naïvement sur Haiku.
 
-L'extension est en **lecture seule** vis-à-vis de claude.ai :
+## Les règles non négociables (encodées dans le code et les tests)
 
-- elle **affiche** une recommandation, ne clique pas, ne pré-sélectionne rien ;
-- elle ne modifie **jamais** le DOM fonctionnel de claude.ai — le panneau vit dans un
-  hôte dédié + Shadow DOM ajouté à côté (`src/panel.ts`) ;
-- **aucun secret dans le bundle** : URL de l'API, `org_id` et token sont saisis dans le
-  popup et stockés dans `browser.storage.local`.
+1. **Aucun texte ne quitte le poste** — seuls des nombres et des drapeaux de listes
+   fermées sont transmis (`tests/extension_zerotext.test.ts` l'atteste).
+2. **Lecture seule** vis-à-vis de claude.ai — badge/panneau à nous (Shadow DOM), aucun
+   clic simulé, aucune pré-sélection, aucun DOM fonctionnel modifié.
+3. **Jamais bloquante** — timeout 400 ms, échec ⇒ silence total (aucun toast, rien).
+4. **Aucun secret dans le bundle** — URL d'API + jeton vivent dans le storage (popup).
+5. **Fourchettes obligatoires** — tout coût/énergie affiché est un min–max + périmètre.
+6. **Permissions minimales** — `storage` + `https://claude.ai/*` uniquement (le zip de
+   prod ne matche jamais la page d'entraînement).
+7. **Ton humble** — « recommandé », « suffit probablement » ; signal ambigu ⇒ on le dit.
 
-Et règle n°1 : le texte du prompt reste **local**. Il est réduit en _features_
-(`src/features.ts`) et seules ces features partent vers l'API — jamais le texte,
-jamais dans les logs (`prompt_text` est omis en v0).
-
-## Périmètre Lot A (Lot 0 = squelette)
-
-| Fichier                  | Rôle                                                                                                                                                                                                               |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `entrypoints/content.ts` | Content script `https://claude.ai/*` : observe la saisie (debounce 600 ms), features locales, `POST /v1/recommend` (timeout 400 ms), panneau Shadow DOM. Échec/timeout ⇒ **rien n'est affiché** (jamais bloquant). |
-| `entrypoints/popup/`     | Popup : config (URL API, org, token → storage), état (`GET /v1/extension/config`, kill-switch, mode), lien support placeholder.                                                                                    |
-| `src/selectors.ts`       | Module dédié des sélecteurs claude.ai, fallbacks, résolution `null` sans throw (dégradation silencieuse).                                                                                                          |
-| `src/features.ts`        | Fonctions pures : `char_len`, `token_est` (≈ chars/4), `lang` fr/en/other, `has_code`, `has_attachment_hint`, `keyword_flags` (liste fermée du contrat).                                                           |
-| `src/api.ts`             | Client typé des 3 endpoints de `contracts/openapi.yaml` (source de vérité), Bearer, AbortController 400 ms.                                                                                                        |
-| `src/panel.ts`           | Panneau isolé : modèle + confiance + fourchettes coût/énergie (min–max, périmètre — règle n°3), boutons « je suis la reco » / « déroger » (télémétrie stricte).                                                    |
-
-La logique métier finale est hors Lot 0 — voir les marqueurs `TODO(LotA)` dans le code
-(tokenizer réel, i18n, cache du kill-switch, opt-in `send_prompt_text`, UX finale…).
-
-## Commandes
+## Installation
 
 ```bash
-pnpm install   # dépendances (pnpm ≥ 10 ; postinstall lance `wxt prepare`)
-pnpm dev       # développement (rechargement à chaud, profil Chrome dédié)
-pnpm build     # build production → .output/chrome-mv3
-pnpm test      # tests unitaires (vitest, features + sélecteurs)
-pnpm lint      # eslint + prettier --check
-pnpm format    # prettier --write
+pnpm install        # pnpm ≥ 10 (postinstall : wxt prepare)
 ```
+
+**Dev (rechargement à chaud)** : `pnpm dev` — ouvre un Chrome dédié, extension chargée,
+qui matche claude.ai **et** la page d'entraînement locale.
+
+**V0 installable** : `pnpm zip` → `.output/sobrioextension-0.1.0-chrome.zip`. Dézipper,
+puis `chrome://extensions` → mode développeur → « Charger l'extension non empaquetée »
+→ pointer le dossier dézippé (ou directement `.output/chrome-mv3` après `pnpm build`).
+
+## Modes de backend (commutables dans le popup)
+
+| Mode               | Effet                                                                                                                                                                                                                                                                        |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mock` (défaut V0) | `src/mockClient.ts` répond localement, conforme au contrat — tout se démontre **sans serveur**. Latence simulée, mode panne pour la recette.                                                                                                                                 |
+| `api`              | API Sobrio réelle (`make dev` du monorepo, `http://localhost:8000`, org `demo`). Les signaux sont mappés vers les `features` v1.0 du contrat figé — le bloc `conversation` reste local tant que la RFC v1.1 n'est pas adoptée (`docs/rfc/RFC-0001-signals-conversation.md`). |
 
 ## Démo humaine V0 — page d'entraînement (boucle 3)
 
@@ -70,28 +71,65 @@ Scénario complet à dérouler sur `http://localhost:8788` :
    discret « Conversation longue — repartir de zéro coûtera probablement moins ».
 6. **Nouvelle conversation** — cliquer « Nouvelle conversation » : la mémoire se
    réinitialise, « démontre-le » seul repart sur un signal ambigu (ton humble).
-7. **Jamais bloquant** — couper `pnpm dev:page`… la page disparaît, mais pour
-   simuler l'API muette : popup → mode `api` avec une URL invalide → plus AUCUN
+7. **Jamais bloquant** — popup → mode `api` avec une URL invalide → plus AUCUN
    panneau, aucune erreur visible, la saisie reste fluide.
 
-## Checklist de validation (démo Lot A)
+Variantes de robustesse : `/variant-b.html` (markup alternatif, résolution par
+heuristique de repli) et `/variant-broken.html` (extension totalement inerte).
 
-- [ ] La reco s'affiche sur claude.ai après une pause de saisie (~600 ms), dans un
-      panneau isolé, sans toucher au DOM fonctionnel de la page.
-- [ ] La dérogation est télémétrée (`followed=false`, `overridden_to` = modèle choisi) ;
-      le suivi aussi (`followed=true`, `overridden_to=null`).
-- [ ] La configuration (URL API, org, token) se fait via le popup et atterrit dans
-      `browser.storage.local` — rien en dur dans le bundle.
-- [ ] Jamais bloquant : API coupée ou lente (> 400 ms) ⇒ aucun panneau, aucune erreur
-      visible, la saisie sur claude.ai n'est jamais ralentie.
-- [ ] Zéro secret dans le bundle : vérifier `.output/chrome-mv3` (pas de token, pas
-      de clé, pas d'URL d'API en dur).
+## Recette manuelle sur claude.ai RÉEL (checklist V0)
 
-## Notes
+- [ ] Badge « S » discret visible près de la zone de saisie après chargement.
+- [ ] Panneau à la pause de saisie (~600 ms) : modèle recommandé + confiance +
+      fourchettes ; **aucune** valeur unique affichée.
+- [ ] Scénario mémoire : conversation contenant des maths, puis « démontre-le » →
+      la reco n'est pas Haiku.
+- [ ] Dérogation : « Choisir un autre modèle… » → accusé, événement
+      `followed=false, overridden_to=…` (mode api : visible dans `events_reco`).
+- [ ] Kill-switch : `enabled=false` dans la config org → extension invisible.
+- [ ] API coupée (arrêter `make dev`) : silence total, zéro erreur console visible,
+      saisie jamais ralentie.
+- [ ] **Aucune interaction avec l'interface du site** : pas de clic, pas de
+      pré-sélection de modèle, DOM fonctionnel intact (inspecter : seuls
+      `#sobrio-badge-host` et `#sobrio-reco-host` sont ajoutés).
+- [ ] Bundle : `pnpm build` puis vérifier `.output/chrome-mv3` — aucun secret,
+      permissions `storage` + `https://claude.ai/*` uniquement.
 
-- Contrat d'API : `contracts/openapi.yaml` (v1.0, figé) — tout changement passe par une
-  RFC (`docs/rfc/`) + `contracts/CHANGELOG.md` (règle n°7).
-- L'appel `fetch` du content script vers l'API suppose que l'API autorise l'origine
-  `https://claude.ai` (CORS, côté Lot B). En cas de refus : dégradation silencieuse.
-- Permissions minimales : `storage` uniquement ; le content script est limité à
-  `https://claude.ai/*`.
+## Commandes
+
+```bash
+pnpm dev        # dev Chrome dédié (matche claude.ai + page d'entraînement)
+pnpm dev:page   # sert la page d'entraînement sur :8788
+pnpm build      # build production (claude.ai uniquement)
+pnpm build:dev  # build avec l'entrypoint page d'entraînement
+pnpm zip        # artefact installable .output/sobrioextension-0.1.0-chrome.zip
+pnpm test       # vitest (109 tests)
+pnpm lint       # eslint + prettier --check
+pnpm format     # prettier --write
+node dev/make-icons.mjs  # régénère les icônes placeholder
+```
+
+## Architecture
+
+| Module                                | Rôle                                                                                                                                           |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/signals.ts`                      | Bloc `signals` du contrat : mesures + drapeaux (listes fermées), `has_math`, normalisation du modèle courant vers le vocabulaire du catalogue. |
+| `src/conversationMemory.ts`           | Mémoire par fil (session uniquement) : compteurs, drapeaux vus, historique recos/dérogations ; reset sur nouveau fil.                          |
+| `src/mockRules.ts`                    | Règles de décision pures du mock (4 règles vivantes).                                                                                          |
+| `src/mockClient.ts` / `src/client.ts` | Clients mock/api derrière une interface commune ; timeout 400 ms, debounce 600 ms, retry télémétrie ≤ 3, cache config + kill-switch.           |
+| `src/panel.ts` / `src/messages.ts`    | Badge + panneau (Shadow DOM) ; textes FR centralisés, surchargeables par `config.messages.fr`, ton humble.                                     |
+| `src/selectors.ts`                    | Sélecteurs ordonnés + repli « plus grand éditable visible » + détecteur de casse (`selector_broken`).                                          |
+| `src/content-main.ts`                 | Orchestration (observer throttlé, nettoyage pagehide), injectable pour les tests.                                                              |
+| `entrypoints/`                        | `content.ts` (prod, claude.ai), `testpage.content.ts` (dev uniquement, filtré du zip), `popup/`.                                               |
+| `dev/`                                | Page d'entraînement + variantes robustesse + serveur statique + générateur d'icônes — hors bundle.                                             |
+
+## Limites connues de la V0 (TODO(V1))
+
+- `token_est` ≈ chars/4 (pas de tokenizer réel) ; langue/maths/code heuristiques.
+- Le mode `api` n'envoie que les `features` v1.0 : la mémoire de conversation
+  n'influence que le mock tant que la **RFC v1.1** n'est pas adoptée côté serveur
+  (`signals`, `suggest_new_conversation`, `demonstration`, signal `selector_broken`).
+- Sélecteurs claude.ai plausibles mais à valider en fumée manuelle (recette ci-dessus).
+- `seen_reasoning` : heuristique grossière (maths, réponses longues, marqueurs).
+- Pas de cache/rafraîchissement périodique du kill-switch au-delà du TTL de 5 min.
+- i18n EN, Firefox/Safari : hors périmètre V0.

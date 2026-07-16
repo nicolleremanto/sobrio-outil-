@@ -9,7 +9,7 @@
  * texte libre. Le test « zéro texte » l'atteste.
  *
  * NOTE CONTRAT : ce bloc `signals` étend le contrat v1.0 (`features`) — voir
- * la RFC docs/rfc/2026-07-16-extension-signals-v1_1.md. En attendant son
+ * la RFC docs/rfc/RFC-0001-signals-conversation.md. En attendant son
  * adoption, le mode `api` mappe ces signaux vers les `features` v1.0
  * (src/client.ts) ; le mode `mock` consomme le bloc complet.
  */
