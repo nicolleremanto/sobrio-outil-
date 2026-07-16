@@ -61,6 +61,7 @@ async function initForm(): Promise<void> {
   const apiUrlInput = element<HTMLInputElement>('api-url');
   const orgIdInput = element<HTMLInputElement>('org-id');
   const tokenInput = element<HTMLInputElement>('token');
+  const autoApplyCheckbox = element<HTMLInputElement>('auto-apply');
   const debugCheckbox = element<HTMLInputElement>('debug');
 
   const settings = await loadStoredSettings();
@@ -68,6 +69,7 @@ async function initForm(): Promise<void> {
   apiUrlInput.value = settings.apiUrl;
   orgIdInput.value = settings.orgId;
   tokenInput.value = settings.token;
+  autoApplyCheckbox.checked = settings.autoApplyModel;
   refreshApiFieldsVisibility(settings.backend);
 
   try {
@@ -89,6 +91,8 @@ async function initForm(): Promise<void> {
         apiUrl: apiUrlInput.value.trim(),
         orgId: orgIdInput.value.trim(),
         token: tokenInput.value,
+        // Opt-in explicite (amendement règle 2) — décoché = lecture seule.
+        autoApplyModel: autoApplyCheckbox.checked,
       });
       await saveDebugLogEnabled(debugCheckbox.checked);
       await refreshStatus();

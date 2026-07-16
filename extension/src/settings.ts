@@ -15,11 +15,25 @@ export interface StoredSettings {
   apiUrl: string;
   orgId: string;
   token: string;
+  /**
+   * Application AUTOMATIQUE du modèle choisi dans la page hôte (amendement
+   * opt-in de la règle 2, décision du 2026-07-16 — voir docs/decisions.md).
+   * DÉSACTIVÉ par défaut : sans opt-in explicite de l'utilisateur,
+   * l'extension reste en lecture seule. TODO(V1) : gating par politique org
+   * (`allow_auto_apply`, proposé dans la RFC-0001).
+   */
+  autoApplyModel: boolean;
 }
 
 export const SETTINGS_KEY = 'sobrio_settings';
 
-const DEFAULTS: StoredSettings = { backend: 'mock', apiUrl: '', orgId: '', token: '' };
+const DEFAULTS: StoredSettings = {
+  backend: 'mock',
+  apiUrl: '',
+  orgId: '',
+  token: '',
+  autoApplyModel: false,
+};
 
 /** Lit les réglages (fusionnés avec les défauts) — ne throw jamais. */
 export async function loadStoredSettings(): Promise<StoredSettings> {
@@ -31,6 +45,7 @@ export async function loadStoredSettings(): Promise<StoredSettings> {
       apiUrl: raw.apiUrl ?? '',
       orgId: raw.orgId ?? '',
       token: raw.token ?? '',
+      autoApplyModel: raw.autoApplyModel === true, // opt-in strict
     };
   } catch {
     return { ...DEFAULTS }; // dégradation silencieuse

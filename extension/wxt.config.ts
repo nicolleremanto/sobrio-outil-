@@ -23,7 +23,7 @@ export default defineConfig({
   manifest: {
     name: 'Sobrio',
     description:
-      "Recommande le modèle Claude adapté à chaque prompt — affiche et conseille, n'automatise jamais.",
+      "Recommande le modèle Claude adapté à chaque prompt — n'agit que si vous l'y autorisez.",
     permissions: ['storage'],
   },
   filterEntrypoints: withTestpage ? undefined : ['content', 'popup'],

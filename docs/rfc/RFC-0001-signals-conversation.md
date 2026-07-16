@@ -47,6 +47,10 @@ routeur réel bénéficie du contexte, le contrat doit évoluer.
    `{signal: enum["selector_broken"]}` — alerte sans AUCUNE autre donnée quand les
    sélecteurs claude.ai cassent (détecteur boucle 5). Alternative discutable : champ
    optionnel sur reco_event — rejetée car reco_event est volontairement STRICT.
+4. `ExtensionConfig` : nouveau champ `allow_auto_apply: bool` (défaut **false**) —
+   permet à l'organisation d'interdire l'application automatique du modèle même si
+   l'utilisateur l'a activée localement (amendement règle n°2 du 2026-07-16, voir
+   `docs/decisions.md`). Tant que ce champ n'existe pas, l'opt-in est purement local.
 
 ## Version proposée
 

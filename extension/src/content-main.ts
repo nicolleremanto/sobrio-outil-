@@ -21,6 +21,7 @@ import {
 import { ConversationMemory } from './conversationMemory';
 import { debugLog } from './debugLog';
 import { mergeMessages, type Messages } from './messages';
+import { applyModelInPage } from './modelSwitcher';
 import { removeBadge, removePanel, renderBadge, renderPanel, repositionBadge } from './panel';
 import {
   collectPageView,
@@ -39,6 +40,12 @@ export interface FlowDeps {
   messages: Messages;
   /** Horloge injectable (horodatage ISO des événements). */
   now?: () => Date;
+  /**
+   * Application automatique du modèle dans la page hôte — présent UNIQUEMENT
+   * si l'utilisateur a activé l'opt-in (amendement règle 2, 2026-07-16).
+   * Absent ⇒ lecture seule stricte (comportement par défaut).
+   */
+  applyModel?: (model: string) => Promise<boolean>;
 }
 
 /** Construit le bloc `signals` complet : prompt + mémoire de conversation. */
@@ -82,10 +89,14 @@ export async function runRecommendationFlow(text: string, deps: FlowDeps) {
       onFollow: () => {
         deps.memory.noteFollowed();
         deps.client.sendRecoEvent(buildRecoEvent(reco.reco_id, true, null, now));
+        // Opt-in uniquement : action déclenchée par le clic de l'utilisateur,
+        // fire-and-forget, échec silencieux (il garde la main).
+        void deps.applyModel?.(reco.recommended_model);
       },
       onOverride: (model) => {
         deps.memory.noteDerogation(reco.recommended_model, model);
         deps.client.sendRecoEvent(buildRecoEvent(reco.reco_id, false, model, now));
+        void deps.applyModel?.(model);
       },
     },
   });
@@ -106,7 +117,13 @@ export async function bootstrap(): Promise<void> {
   const messages = mergeMessages(config?.messages?.fr as Record<string, unknown> | undefined);
   const memory = new ConversationMemory();
 
-  observeInputArea({ client, memory, config, messages });
+  // Application automatique du modèle : OPT-IN STRICT (popup), sinon absent
+  // ⇒ lecture seule (amendement règle 2 du 2026-07-16, docs/decisions.md).
+  const applyModel = settings.autoApplyModel
+    ? (model: string) => applyModelInPage(model)
+    : undefined;
+
+  observeInputArea({ client, memory, config, messages, applyModel });
 }
 
 /** Fenêtre du throttle d'observation DOM (garde-fou perf, boucle 5). */

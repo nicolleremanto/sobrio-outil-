@@ -9,7 +9,7 @@
   <body>
     <main>
       <h1>Sobrio</h1>
-      <p class="tagline">Recommande, n'automatise jamais.</p>
+      <p class="tagline">Recommande. N'agit que si vous l'activez.</p>
 
       <!-- Règle 4 : aucun secret dans le bundle — la config est saisie ici
            et stockée dans browser.storage.local. -->
@@ -35,6 +35,14 @@
             <input id="token" type="password" autocomplete="off" />
           </label>
         </fieldset>
+        <label class="inline">
+          <input id="auto-apply" type="checkbox" />
+          Appliquer automatiquement le modèle choisi dans claude.ai
+          <small
+            >Expérimental, désactivé par défaut. Sobrio clique alors le sélecteur de modèle à votre
+            place — uniquement quand vous cliquez « Utiliser… » dans le panneau.</small
+          >
+        </label>
         <label class="inline">
           <input id="debug" type="checkbox" />
           Journal de debug local (nombres et drapeaux uniquement — jamais de contenu)

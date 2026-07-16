@@ -64,6 +64,7 @@ describe('Storage des réglages (règle 4 : rien dans le bundle)', () => {
       apiUrl: 'http://localhost:8010',
       orgId: 'demo',
       token: 'demo-token-not-a-secret',
+      autoApplyModel: false,
     });
     const loaded = await loadStoredSettings();
     expect(loaded.backend).toBe('api');

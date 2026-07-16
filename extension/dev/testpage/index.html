@@ -98,10 +98,17 @@
   <body>
     <header>
       <h1>Faux chat (page d'entraînement Sobrio)</h1>
-      <!-- Étiquette de modèle courant, lue (jamais modifiée) par l'extension. -->
+      <!-- Étiquette de modèle courant. Lue par l'extension ; modifiable par
+           elle UNIQUEMENT via le menu ci-dessous quand l'opt-in
+           « appliquer automatiquement » est activé dans le popup. -->
       <button type="button" data-testid="model-selector" aria-haspopup="menu">
         Claude Opus 4.8
       </button>
+      <div id="model-menu" role="menu" hidden>
+        <button type="button" role="menuitem">Claude Haiku 4.5</button>
+        <button type="button" role="menuitem">Claude Sonnet 4.6</button>
+        <button type="button" role="menuitem">Claude Opus 4.8</button>
+      </div>
       <button type="button" id="new-conversation">Nouvelle conversation</button>
     </header>
 
@@ -142,6 +149,22 @@
       const messages = document.getElementById('messages');
       const input = document.querySelector('.ProseMirror');
       let thread = 1;
+
+      // Sélecteur de modèle factice (imite le menu de claude.ai).
+      const modelButton = document.querySelector('[data-testid="model-selector"]');
+      const modelMenu = document.getElementById('model-menu');
+      modelButton.addEventListener('click', () => {
+        modelMenu.hidden = !modelMenu.hidden;
+      });
+      modelMenu.querySelectorAll('[role="menuitem"]').forEach((item) => {
+        item.addEventListener('click', () => {
+          modelButton.textContent = item.textContent.trim();
+          modelMenu.hidden = true;
+        });
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') modelMenu.hidden = true;
+      });
 
       const bubble = (role, text) => {
         const el = document.createElement('div');

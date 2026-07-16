@@ -2,8 +2,9 @@
 
 Extension navigateur (Chrome/Edge, Manifest V3, [WXT](https://wxt.dev) + TypeScript) qui
 recommande sur **claude.ai** le modèle adapté à chaque prompt — coût et énergie **en
-fourchettes**, budget d'équipe, suivi des recommandations. Elle **affiche et conseille,
-n'automatise JAMAIS**.
+fourchettes**, budget d'équipe, suivi des recommandations. Elle **affiche et conseille —
+et n'agit que si vous l'y autorisez** (application automatique du modèle en opt-in
+strict, désactivée par défaut).
 
 La recommandation ne se fonde pas sur le seul dernier prompt : l'extension entretient une
 **mémoire de signaux de la conversation** (`src/conversationMemory.ts`) — nombre de
@@ -15,8 +16,13 @@ court dans un fil mathématique ne part pas naïvement sur Haiku.
 
 1. **Aucun texte ne quitte le poste** — seuls des nombres et des drapeaux de listes
    fermées sont transmis (`tests/extension_zerotext.test.ts` l'atteste).
-2. **Lecture seule** vis-à-vis de claude.ai — badge/panneau à nous (Shadow DOM), aucun
-   clic simulé, aucune pré-sélection, aucun DOM fonctionnel modifié.
+2. **Lecture seule PAR DÉFAUT** vis-à-vis de claude.ai — badge/panneau à nous (Shadow
+   DOM), aucun clic simulé, aucune pré-sélection, aucun DOM fonctionnel modifié.
+   _Amendement opt-in (2026-07-16, `docs/decisions.md`)_ : la case « Appliquer
+   automatiquement le modèle » du popup (désactivée par défaut) autorise Sobrio à
+   changer le modèle dans le sélecteur de claude.ai — uniquement au clic
+   « Utiliser… » de l'utilisateur, via le seul module `src/modelSwitcher.ts`
+   (résultat vérifié, abandon silencieux au moindre doute).
 3. **Jamais bloquante** — timeout 400 ms, échec ⇒ silence total (aucun toast, rien).
 4. **Aucun secret dans le bundle** — URL d'API + jeton vivent dans le storage (popup).
 5. **Fourchettes obligatoires** — tout coût/énergie affiché est un min–max + périmètre.
@@ -89,9 +95,13 @@ heuristique de repli) et `/variant-broken.html` (extension totalement inerte).
 - [ ] Kill-switch : `enabled=false` dans la config org → extension invisible.
 - [ ] API coupée (arrêter `make dev`) : silence total, zéro erreur console visible,
       saisie jamais ralentie.
-- [ ] **Aucune interaction avec l'interface du site** : pas de clic, pas de
+- [ ] **Aucune interaction avec l'interface du site par défaut** : pas de clic, pas de
       pré-sélection de modèle, DOM fonctionnel intact (inspecter : seuls
       `#sobrio-badge-host` et `#sobrio-reco-host` sont ajoutés).
+- [ ] **Auto-apply (opt-in)** : cocher « Appliquer automatiquement… » dans le popup,
+      cliquer « Utiliser [modèle] » → le sélecteur de claude.ai change réellement de
+      modèle ; décocher → plus aucune action sur la page. En cas de menu introuvable :
+      abandon silencieux (le modèle ne bouge pas, aucune erreur visible).
 - [ ] Bundle : `pnpm build` puis vérifier `.output/chrome-mv3` — aucun secret,
       permissions `storage` + `https://claude.ai/*` uniquement.
 
@@ -103,7 +113,7 @@ pnpm dev:page   # sert la page d'entraînement sur :8788
 pnpm build      # build production (claude.ai uniquement)
 pnpm build:dev  # build avec l'entrypoint page d'entraînement
 pnpm zip        # artefact installable .output/sobrioextension-0.1.0-chrome.zip
-pnpm test       # vitest (109 tests)
+pnpm test       # vitest (119 tests)
 pnpm lint       # eslint + prettier --check
 pnpm format     # prettier --write
 node dev/make-icons.mjs  # régénère les icônes placeholder
