@@ -11,6 +11,14 @@ import { defineConfig } from 'wxt';
  * déclaré sur claude.ai via ses `matches` (entrypoints/content.ts) — pas
  * de host_permissions supplémentaires.
  */
+/**
+ * L'entrypoint `testpage` (page d'entraînement locale) n'est inclus que si
+ * SOBRIO_TESTPAGE=1 — posé par le script `pnpm dev` (et `pnpm build:dev`).
+ * `pnpm build` et `pnpm zip` produisent donc un manifest strictement limité
+ * à https://claude.ai/* (règle 6 — permissions minimales).
+ */
+const withTestpage = process.env.SOBRIO_TESTPAGE === '1';
+
 export default defineConfig({
   manifest: {
     name: 'Sobrio',
@@ -18,4 +26,5 @@ export default defineConfig({
       "Recommande le modèle Claude adapté à chaque prompt — affiche et conseille, n'automatise jamais.",
     permissions: ['storage'],
   },
+  filterEntrypoints: withTestpage ? undefined : ['content', 'popup'],
 });

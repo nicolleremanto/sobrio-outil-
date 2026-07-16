@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Page d'entraînement Sobrio — faux chat</title>
+    <style>
+      :root {
+        color-scheme: light;
+      }
+      body {
+        margin: 0;
+        font:
+          15px/1.5 system-ui,
+          sans-serif;
+        background: #f3f0ea;
+        color: #26251f;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 16px;
+        background: #fff;
+        border-bottom: 1px solid #ddd6ca;
+      }
+      header h1 {
+        font-size: 15px;
+        margin: 0;
+      }
+      main {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 16px 16px 180px;
+      }
+      [data-message-author-role] {
+        margin: 10px 0;
+        padding: 10px 14px;
+        border-radius: 12px;
+        white-space: pre-wrap;
+      }
+      [data-message-author-role='user'] {
+        background: #e7e1d6;
+        margin-left: 15%;
+      }
+      [data-message-author-role='assistant'] {
+        background: #fff;
+        border: 1px solid #e3ddd1;
+        margin-right: 15%;
+      }
+      .composer {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #fff;
+        border-top: 1px solid #ddd6ca;
+        padding: 12px 16px 18px;
+      }
+      .composer-inner {
+        max-width: 760px;
+        margin: 0 auto;
+      }
+      .ProseMirror {
+        min-height: 52px;
+        max-height: 160px;
+        overflow-y: auto;
+        border: 1px solid #c9c2b4;
+        border-radius: 10px;
+        padding: 10px 12px;
+        background: #faf8f5;
+        outline: none;
+      }
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .toolbar button,
+      [data-testid='model-selector'] {
+        font:
+          13px system-ui,
+          sans-serif;
+        padding: 4px 10px;
+        border-radius: 8px;
+        border: 1px solid #b8b2a7;
+        background: #fff;
+        cursor: pointer;
+      }
+      .hint {
+        color: #7a7468;
+        font-size: 12px;
+        margin-top: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Faux chat (page d'entraînement Sobrio)</h1>
+      <!-- Étiquette de modèle courant, lue (jamais modifiée) par l'extension. -->
+      <button type="button" data-testid="model-selector" aria-haspopup="menu">
+        Claude Opus 4.8
+      </button>
+      <button type="button" id="new-conversation">Nouvelle conversation</button>
+    </header>
+
+    <main data-thread-id="t-001">
+      <div id="messages">
+        <div data-message-author-role="user">Bonjour, peux-tu m'aider sur un exercice ?</div>
+        <div data-message-author-role="assistant">
+          Bien sûr ! Donnez-moi l'énoncé et je vous accompagne pas à pas.
+        </div>
+      </div>
+    </main>
+
+    <div class="composer">
+      <div class="composer-inner">
+        <!-- Zone de saisie identique dans l'esprit à claude.ai (ProseMirror). -->
+        <div
+          class="ProseMirror"
+          contenteditable="true"
+          role="textbox"
+          aria-label="Écrivez votre message"
+          data-placeholder="Écrivez votre message…"
+        ></div>
+        <div class="toolbar">
+          <button type="button" id="send">Envoyer (fake)</button>
+          <button type="button" id="inject-math">+ bulle maths</button>
+          <button type="button" id="inject-code">+ bulle code</button>
+          <button type="button" id="inject-long">+ fil long (20 bulles)</button>
+        </div>
+        <p class="hint">
+          Scénario clé : « + bulle maths », puis tapez « démontre-le » — la reco ne doit PAS être
+          Haiku. L'extension n'agit jamais sur cette page : elle affiche, c'est tout.
+        </p>
+      </div>
+    </div>
+
+    <script>
+      // Petit harnais de démo — AUCUN lien avec le code de l'extension.
+      const messages = document.getElementById('messages');
+      const input = document.querySelector('.ProseMirror');
+      let thread = 1;
+
+      const bubble = (role, text) => {
+        const el = document.createElement('div');
+        el.setAttribute('data-message-author-role', role);
+        el.textContent = text;
+        messages.appendChild(el);
+      };
+
+      document.getElementById('send').addEventListener('click', () => {
+        const text = input.textContent.trim();
+        if (!text) return;
+        bubble('user', text);
+        input.textContent = '';
+        bubble('assistant', 'Réponse factice de la page d’entraînement.');
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+
+      document.getElementById('inject-math').addEventListener('click', () => {
+        bubble('user', 'Soit f(x) = x² + 3x. Calcule la dérivée et ∫ f(x) dx sur [0,1].');
+        bubble(
+          'assistant',
+          "f'(x) = 2x + 3. Pour l'intégrale : ∫ (x² + 3x) dx = x³/3 + 3x²/2, donc 1/3 + 3/2 = 11/6 sur [0,1]. La preuve suit le théorème fondamental de l'analyse.",
+        );
+      });
+
+      document.getElementById('inject-code').addEventListener('click', () => {
+        bubble('user', 'Écris une fonction Python qui inverse une liste.');
+        bubble('assistant', '```python\ndef inverse(liste):\n    return liste[::-1]\n```');
+      });
+
+      document.getElementById('inject-long').addEventListener('click', () => {
+        for (let i = 0; i < 20; i += 1) {
+          bubble(
+            i % 2 ? 'assistant' : 'user',
+            'Analyse détaillée du dossier, section ' +
+              i +
+              ' : contexte, hypothèses, chiffrage, risques, plan de mise en œuvre et annexes. '.repeat(
+                6,
+              ),
+          );
+        }
+      });
+
+      document.getElementById('new-conversation').addEventListener('click', () => {
+        thread += 1;
+        document.querySelector('main').setAttribute('data-thread-id', 't-00' + thread);
+        messages.replaceChildren();
+        bubble('assistant', 'Nouvelle conversation (fil t-00' + thread + ').');
+      });
+    </script>
+  </body>
+</html>

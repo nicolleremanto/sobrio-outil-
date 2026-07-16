@@ -17,4 +17,12 @@ export default tseslint.config(
       'no-console': 'error',
     },
   },
+  {
+    // Outillage de développement (serveur de la page d'entraînement, scripts
+    // node) : hors bundle de l'extension — globals Node et console autorisés.
+    files: ['dev/**/*.mjs'],
+    languageOptions: {
+      globals: { console: 'readonly', process: 'readonly', URL: 'readonly' },
+    },
+  },
 );

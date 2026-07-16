@@ -5,8 +5,11 @@
   "description": "Extension navigateur Sobrio — recommandation de modèle sur claude.ai (Lot A, squelette)",
   "type": "module",
   "scripts": {
-    "dev": "wxt",
+    "dev": "SOBRIO_TESTPAGE=1 wxt",
+    "dev:page": "node dev/serve.mjs",
     "build": "wxt build",
+    "build:dev": "SOBRIO_TESTPAGE=1 wxt build",
+    "zip": "wxt zip",
     "test": "vitest run",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
