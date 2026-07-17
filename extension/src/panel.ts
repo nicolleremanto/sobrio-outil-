@@ -12,7 +12,14 @@
  * Règle 7 : ton humble — les textes viennent de src/messages.ts.
  */
 import type { RecoV0 } from './mockClient';
-import { formatMessage, modelDisplayName, ruleExplanation, type Messages } from './messages';
+import {
+  formatMessage,
+  modeNote,
+  modelDisplayName,
+  ruleExplanation,
+  type ExtensionMode,
+  type Messages,
+} from './messages';
 import { resolvePanelAnchor } from './selectors';
 
 const PANEL_HOST_ID = 'sobrio-reco-host';
@@ -31,6 +38,8 @@ export interface PanelOptions {
   modelsVisible: string[];
   messages: Messages;
   callbacks: PanelCallbacks;
+  /** Mode d'organisation (config.mode) — infléchit le ton affiché. */
+  mode?: ExtensionMode;
 }
 
 const STYLE = `
@@ -50,7 +59,14 @@ const STYLE = `
     font: 13px/1.5 system-ui, sans-serif;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
   }
+  .header { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
   .title { font-weight: 600; color: #6b675f; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .close { background: none; border: none; padding: 0; width: auto; color: #6b675f; cursor: pointer; font-size: 16px; line-height: 1; }
+  .close:hover, .close:focus-visible { color: #2b2a27; }
+  .mode-note { color: #6b675f; font-size: 11px; margin: 2px 0 6px; }
+  button:focus-visible, select:focus-visible, .why:focus-visible {
+    outline: 2px solid #4a6d51; outline-offset: 1px;
+  }
   .model { font-size: 16px; font-weight: 700; margin: 4px 0 2px; }
   .model small { font-weight: 400; color: #6b675f; }
   .gauge { height: 6px; border-radius: 3px; background: #e6e1d7; overflow: hidden; margin: 4px 0 2px; }
@@ -210,11 +226,40 @@ export function renderPanel(reco: RecoV0, options: PanelOptions): void {
     const panel = document.createElement('div');
     panel.className = 'panel';
     panel.setAttribute('data-sobrio-panel', '');
+    // Accessibilité : panneau non modal (le focus n'est JAMAIS piégé), nommé.
+    panel.setAttribute('role', 'complementary');
+    panel.setAttribute('aria-label', messages['panel_aria_label'] ?? 'Recommandation Sobrio');
 
+    const header = document.createElement('div');
+    header.className = 'header';
     const title = document.createElement('div');
     title.className = 'title';
     title.textContent = messages['panel_title'] ?? 'Sobrio';
-    panel.appendChild(title);
+    header.appendChild(title);
+    const closeButton = document.createElement('button');
+    closeButton.className = 'close';
+    closeButton.type = 'button';
+    closeButton.setAttribute('data-sobrio-close', '');
+    closeButton.setAttribute('aria-label', messages['close_label'] ?? 'Fermer');
+    closeButton.textContent = '×';
+    closeButton.addEventListener('click', () => removePanel());
+    header.appendChild(closeButton);
+    panel.appendChild(header);
+
+    // Échap ferme le panneau (accessibilité clavier), sans piéger le focus.
+    panel.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') removePanel();
+    });
+
+    // Note de ton selon le mode d'organisation (eco/equilibre/qualite).
+    const note = modeNote(options.mode, messages);
+    if (note) {
+      const modeLine = document.createElement('div');
+      modeLine.className = 'mode-note';
+      modeLine.setAttribute('data-sobrio-mode', options.mode ?? '');
+      modeLine.textContent = note;
+      panel.appendChild(modeLine);
+    }
 
     const model = document.createElement('div');
     model.className = 'model';
@@ -226,12 +271,18 @@ export function renderPanel(reco: RecoV0, options: PanelOptions): void {
     model.appendChild(small);
     panel.appendChild(model);
 
-    // Jauge de confiance.
+    // Jauge de confiance (accessible : progressbar 0–100).
     const gauge = document.createElement('div');
     gauge.className = 'gauge';
     gauge.setAttribute('data-sobrio-confidence', String(reco.confidence));
+    const confidencePct = Math.round(Math.min(1, Math.max(0, reco.confidence)) * 100);
+    gauge.setAttribute('role', 'progressbar');
+    gauge.setAttribute('aria-valuemin', '0');
+    gauge.setAttribute('aria-valuemax', '100');
+    gauge.setAttribute('aria-valuenow', String(confidencePct));
+    gauge.setAttribute('aria-label', messages['confidence_label'] ?? 'Confiance');
     const fill = document.createElement('div');
-    fill.style.width = `${Math.round(Math.min(1, Math.max(0, reco.confidence)) * 100)}%`;
+    fill.style.width = `${confidencePct}%`;
     gauge.appendChild(fill);
     panel.appendChild(gauge);
     const gaugeLabel = document.createElement('div');

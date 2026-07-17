@@ -1,5 +1,9 @@
 /**
- * Textes FR de l'UI — centralisés, surchargeables par `config.messages.fr`.
+ * Textes de l'UI — centralisés, surchargeables par `config.messages.{locale}`.
+ *
+ * i18n : le FR est la locale complète ; l'EN est un squelette prêt à compléter
+ * (TODO(V2) : traduction intégrale). `getMessages(locale, overrides)` retourne
+ * la base de la locale demandée (repli FR) fusionnée avec les surcharges.
  *
  * Règle 7 : TON HUMBLE. « recommandé », « suffit probablement », jamais
  * péremptoire ; sur signal ambigu, on le dit. Les textes ne contiennent
@@ -8,9 +12,15 @@
 
 export type Messages = Record<string, string>;
 
+export type Locale = 'fr' | 'en';
+
+/** Modes de l'organisation (config `mode`) — inflèchissent le ton affiché. */
+export type ExtensionMode = 'eco' | 'equilibre' | 'qualite';
+
 export const FR_MESSAGES: Messages = {
   badge_title: 'Sobrio — recommandation de modèle (n’agit jamais à votre place)',
   panel_title: 'Sobrio',
+  panel_aria_label: 'Recommandation de modèle Sobrio',
   recommended_suffix: 'recommandé',
   probably_enough: 'suffit probablement pour cette demande.',
   confidence_label: 'Confiance',
@@ -23,13 +33,19 @@ export const FR_MESSAGES: Messages = {
   budget_label: 'Budget',
   budget_used_suffix: '% utilisé',
   use_model: 'Utiliser {model}',
-  use_model_hint: 'Note votre intention — ne change rien dans la page.',
+  use_model_hint: 'Note votre intention.',
   choose_other: 'Choisir un autre modèle…',
   why_link: 'Pourquoi ?',
+  close_label: 'Fermer le panneau',
   followed_ack: 'Merci, c’est noté.',
   overridden_ack: 'C’est noté — votre choix compte pour ajuster nos recommandations.',
   long_conversation_banner:
     'Conversation longue — repartir d’une nouvelle conversation coûtera probablement moins.',
+
+  // Ton par mode d'organisation (config.mode).
+  'mode:eco': 'Priorité à la sobriété : on privilégie le modèle le plus léger qui suffit.',
+  'mode:equilibre': 'Équilibre coût / qualité : le modèle proposé vise le juste nécessaire.',
+  'mode:qualite': 'Priorité à la qualité : un modèle plus capable est proposé en cas de doute.',
 
   // Explications des règles en langage clair (clé = `rule` de la réponse).
   'rule:mock:short_simple':
@@ -50,6 +66,24 @@ export const FR_MESSAGES: Messages = {
   rule_fallback: 'Recommandation fondée sur des signaux sans contenu (longueur, code, contexte).',
 };
 
+/**
+ * Squelette EN — prêt à compléter. Volontairement PARTIEL en V1 (TODO(V2)) :
+ * les clés absentes retombent sur le FR via `getMessages`.
+ */
+export const EN_MESSAGES: Messages = {
+  badge_title: 'Sobrio — model recommendation (never acts for you)',
+  panel_title: 'Sobrio',
+  recommended_suffix: 'recommended',
+  confidence_label: 'Confidence',
+  cost_label: 'Estimated cost',
+  energy_label: 'Estimated energy',
+  use_model: 'Use {model}',
+  why_link: 'Why?',
+  close_label: 'Close panel',
+};
+
+const LOCALES: Readonly<Record<Locale, Messages>> = { fr: FR_MESSAGES, en: EN_MESSAGES };
+
 /** Noms d'affichage des modèles (ids du catalogue → libellés lisibles). */
 export const MODEL_DISPLAY_NAMES: Readonly<Record<string, string>> = {
   'haiku-4-5': 'Claude Haiku 4.5',
@@ -63,17 +97,34 @@ export function modelDisplayName(modelId: string): string {
 }
 
 /**
- * Fusionne les textes par défaut avec les surcharges de la config distante
- * (seules les valeurs string sont retenues — jamais d'objet inattendu).
+ * Fusionne les textes par défaut (FR) avec les surcharges de la config
+ * distante (seules les valeurs string sont retenues). Conservé pour
+ * compatibilité — préférer `getMessages`.
  */
 export function mergeMessages(overrides: Record<string, unknown> | undefined): Messages {
-  const merged: Messages = { ...FR_MESSAGES };
+  return getMessages('fr', overrides);
+}
+
+/**
+ * Messages pour une locale : base FR complète, EN complété par repli FR, plus
+ * surcharges de la config d'organisation (`config.messages.{locale}`).
+ */
+export function getMessages(
+  locale: Locale = 'fr',
+  overrides: Record<string, unknown> | undefined = undefined,
+): Messages {
+  const base: Messages = locale === 'en' ? { ...FR_MESSAGES, ...LOCALES.en } : { ...FR_MESSAGES };
   if (overrides) {
     for (const [key, value] of Object.entries(overrides)) {
-      if (typeof value === 'string') merged[key] = value;
+      if (typeof value === 'string') base[key] = value;
     }
   }
-  return merged;
+  return base;
+}
+
+/** Note de ton correspondant au mode d'organisation (ou chaîne vide). */
+export function modeNote(mode: ExtensionMode | undefined, messages: Messages): string {
+  return mode ? (messages[`mode:${mode}`] ?? '') : '';
 }
 
 /** Explication en langage clair d'une clé `rule` (ton humble). */

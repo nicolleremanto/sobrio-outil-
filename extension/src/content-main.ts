@@ -86,6 +86,7 @@ export async function runRecommendationFlow(text: string, deps: FlowDeps) {
   renderPanel(reco, {
     modelsVisible: deps.config?.models_visible ?? [],
     messages: deps.messages,
+    mode: deps.config?.mode,
     callbacks: {
       onFollow: () => {
         deps.memory.noteFollowed();

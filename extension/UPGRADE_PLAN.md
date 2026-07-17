@@ -103,5 +103,5 @@ extension/
 ## Suivi (coché au fil des boucles)
 
 - [x] B2 migration harnais · [x] B3 SPA & mémoire · [x] B4 sélecteurs & diagnostic
-- [ ] B5 panneau & modes · [ ] B6 config distante · [ ] B7 télémétrie
+- [x] B5 panneau & modes · [ ] B6 config distante · [ ] B7 télémétrie
 - [ ] B8 perf & robustesse · [ ] B9 packaging
