@@ -4,8 +4,10 @@
  * enveloppés) + popstate + hashchange, et on notifie l'appelant à chaque
  * changement de clé de conversation.
  *
- * `poll()` permet une vérification manuelle (tests déterministes, et
- * filet de sécurité périodique si un routeur SPA contourne History).
+ * `poll()` permet une vérification manuelle. Il est CÂBLÉ en production comme
+ * filet de sécurité périodique (voir `ConversationController.pollIntervalMs`,
+ * 2 s) au cas où un routeur SPA contournerait History ; en tests, le polling
+ * est désactivé (détection purement événementielle, déterministe).
  */
 
 /** Dérive une clé de conversation STABLE depuis un chemin d'URL. */

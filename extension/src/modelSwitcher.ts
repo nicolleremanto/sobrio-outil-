@@ -115,7 +115,14 @@ function simulateHover(element: HTMLElement): void {
   }
 }
 
-/** Cherche un item de menu dont le libellé correspond au modèle cible. */
+/**
+ * Cherche un item de menu dont le libellé correspond au modèle cible.
+ * TODO(V2) : `normalizeModelLabel` matche par FAMILLE (haiku/sonnet/opus/fable).
+ * Si claude.ai affichait un jour DEUX versions d'une même famille (ex. Opus 4.1
+ * ET Opus 4.8), on cliquerait la première rencontrée. La gamme actuelle n'a
+ * qu'une version par famille ; sinon, préférer un abandon silencieux à un choix
+ * ambigu (matcher l'id complet, version incluse).
+ */
 function findMenuItem(targetId: string): HTMLElement | null {
   try {
     for (const element of document.querySelectorAll(MENU_ITEM_SELECTORS)) {

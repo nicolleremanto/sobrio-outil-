@@ -44,6 +44,9 @@ import { TelemetryQueue, telemetryAllowed } from './telemetryQueue';
 /** Seuil de confiance par défaut de la bascule `auto` (RFC-0003). */
 export const DEFAULT_AUTO_THRESHOLD = 0.75;
 
+/** Filet de sécurité SPA : re-vérifie la conversation toutes les 2 s. */
+const SPA_POLL_INTERVAL_MS = 2000;
+
 /**
  * Mode d'assistance EFFECTIF (RFC-0003) : intersection du consentement local et
  * de la politique org. L'opt-out local strict (`autoApplyModel=false`, règle 2)
@@ -175,12 +178,17 @@ export async function runRecommendationFlow(text: string, deps: FlowDeps) {
     if (!deps.applyModel) return false; // mode guide : aucun contact page
     try {
       const ok = await deps.applyModel(model, isCurrent);
-      if (!ok) deps.client.sendHealthSignal?.('selector_broken');
+      // `selector_broken` = casse RÉELLE de l'UI claude.ai (signal ops). Un
+      // `false` dû à l'ABANDON par garde de currency (nav SPA en cours de
+      // bascule) est BÉNIN : ne pas le compter comme casse (sinon fausses
+      // alertes à chaque changement de fil pendant une bascule).
+      if (!ok && isCurrent()) deps.client.sendHealthSignal?.('selector_broken');
       return ok;
     } catch {
       // applyModel ne devrait JAMAIS rejeter (l'impl réelle renvoie false), mais
       // ceinture+bretelles : aucun rejet non géré, jamais bloquant (règle 3).
-      deps.client.sendHealthSignal?.('selector_broken');
+      // Même règle que ci-dessus : pas de faux signal si le fil a déjà changé.
+      if (isCurrent()) deps.client.sendHealthSignal?.('selector_broken');
       return false;
     }
   };
@@ -335,6 +343,9 @@ export async function bootstrap(): Promise<void> {
       flushPendingAutoAccept();
       removePanel();
     },
+    // Filet de sécurité : re-vérifie la conversation toutes les 2 s au cas où un
+    // routeur SPA contournerait History (détection événementielle par défaut).
+    pollIntervalMs: SPA_POLL_INTERVAL_MS,
   });
 
   // Mode d'assistance EFFECTIF (RFC-0003) : opt-in local ∧ politique org.

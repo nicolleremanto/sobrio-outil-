@@ -27,7 +27,14 @@ module d'impact en fourchettes (`sobrio_impact`, Lot D), ops (Lot F).
    stricte), déclenchée uniquement par un clic de l'utilisateur dans le panneau
    Sobrio, implémentée dans le SEUL module `extension/src/modelSwitcher.ts`
    (résultat vérifié, échec ⇒ abandon silencieux). Gating par politique org
-   (`allow_auto_apply`) proposé dans la RFC-0001.
+   (`allow_auto_apply`) proposé dans la RFC-0001. *Amendement du 2026-07-17
+   (RFC-0003)* : le mode `assist_mode: auto` bascule le modèle **sans clic** (si
+   confiance ≥ seuil), avec confirmation discrète et **Annuler** (restaure le
+   précédent) ; gaté par la politique org (`assist_mode`) ET l'opt-in local ;
+   `one_click` = bascule au clic ; `guide` = repli SANS contact page (kill-switch
+   prudence CGU) ; repli `guide` si sélecteurs cassés. Le badge et le panneau
+   l'annoncent honnêtement (pas de « n'agit jamais » en auto). Voir
+   `docs/rfc/RFC-0003-assist-mode.md`.
 3. **Tout chiffre d'impact est un intervalle min–max avec périmètre** (type `Range`).
    Jamais d'équivalents grand public (litres, arbres, km) dans le code ou les gabarits.
 4. **Rapport : deux blocs distincts, jamais fusionnés** — empreinte totale MESURÉE

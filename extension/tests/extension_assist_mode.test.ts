@@ -274,6 +274,33 @@ describe('auto — UI optimiste + acceptation différée (un seul événement ne
     expect(events).toEqual([]);
   });
 
+  it('nav PENDANT la bascule (abandon par garde de currency) → PAS de faux selector_broken', async () => {
+    // La bascule s'abandonne (false) parce que le fil a changé en cours de route
+    // — cas BÉNIN. Le signal de santé ne doit PAS partir (réservé aux vraies
+    // casses de l'UI claude.ai sur le fil COURANT).
+    let current = true;
+    const { client, events, health } = fakeClient(BASE_RECO);
+    const applyModel = vi.fn().mockImplementation(async () => {
+      current = false; // la conversation change pendant la navigation des menus
+      return false; // applyModelInPage abandonne (garde de currency) → false
+    });
+    const deps: FlowDeps = {
+      client,
+      memory: new ConversationMemory(),
+      config: CONFIG,
+      messages: FR_MESSAGES,
+      now: () => new Date('2026-07-17T10:00:00.000Z'),
+      assistMode: 'auto',
+      applyModel,
+      readCurrentModel: () => 'claude-haiku-4-5',
+      isCurrent: () => current,
+    };
+    await runRecommendationFlow('Refactore ce module', deps);
+    expect(applyModel).toHaveBeenCalled();
+    expect(health).not.toContain('selector_broken'); // abandon bénin, pas une casse
+    expect(events).toEqual([]);
+  });
+
   it('GARDE SPA : conversation changée pendant l’appel réseau → rien affiché, aucune bascule', async () => {
     const { deps, applyModel, events } = autoDeps({ isCurrent: () => false });
     const reco = await runRecommendationFlow('Refactore ce module', deps);
