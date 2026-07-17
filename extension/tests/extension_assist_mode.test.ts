@@ -395,11 +395,19 @@ describe('badge — honnêteté du libellé selon le mode (règle 7)', () => {
     expect(onDismiss).toHaveBeenCalled();
   });
 
-  it('hors auto (one_click), le titre lecture-seule « n’agit jamais » reste correct', () => {
+  it('one_click : « applique … à votre clic » (agit au clic) ; guide : « n’agit jamais » (aucun contact)', () => {
     renderBadge(FR_MESSAGES, document.querySelector('main'), { assistMode: 'one_click' });
-    const badge = document
+    const oneClick = document
       .getElementById('sobrio-badge-host')!
       .shadowRoot!.querySelector('.badge') as HTMLButtonElement;
-    expect(badge.title).toContain('n’agit jamais');
+    expect(oneClick.title).toContain('à votre clic');
+    expect(oneClick.title).not.toContain('n’agit jamais');
+
+    removeBadge();
+    renderBadge(FR_MESSAGES, document.querySelector('main'), { assistMode: 'guide' });
+    const guide = document
+      .getElementById('sobrio-badge-host')!
+      .shadowRoot!.querySelector('.badge') as HTMLButtonElement;
+    expect(guide.title).toContain('n’agit jamais');
   });
 });

@@ -119,6 +119,23 @@ describe('applyModelInPage — succès vérifié', () => {
     await expect(applyModelInPage('claude-sonnet-5', FAST)).resolves.toBe(true);
     expect(clickSpy).not.toHaveBeenCalled();
   });
+
+  it('SÉRIALISATION inter-flux : deux bascules concurrentes ne se chevauchent pas — modèle final déterministe', async () => {
+    mountFakeModelSelector('Claude Opus 4.8');
+    // Deux bascules lancées EN MÊME TEMPS (saisie rapide) vers des modèles
+    // différents. Sans verrou, elles se disputeraient le menu → état final
+    // indéterministe / menu laissé ouvert. La file garantit : l'une puis
+    // l'autre, le DERNIER demandé gagne.
+    const p1 = applyModelInPage('claude-haiku-4-5', FAST);
+    const p2 = applyModelInPage('claude-sonnet-5', FAST);
+    const [r1, r2] = await Promise.all([p1, p2]);
+    expect(r1).toBe(true);
+    expect(r2).toBe(true);
+    // Ordre déterministe : la 2e bascule (sonnet) est la dernière appliquée.
+    expect(document.querySelector('[data-testid="model-selector"]')?.textContent).toBe(
+      'Claude Sonnet 5',
+    );
+  });
 });
 
 describe('applyModelInPage — abandons silencieux', () => {

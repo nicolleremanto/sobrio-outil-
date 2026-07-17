@@ -17,11 +17,11 @@ Fable 5 (10/50), Opus 4.8 (5/25), Sonnet 5 (3/15 · intro 2/10), Haiku 4.5 (1/5)
 
 ## État des chantiers
 
-| Chantier | Sujet                             | Rondes vertes consécutives    | Statut       |
-| -------- | --------------------------------- | ----------------------------- | ------------ |
-| C        | Catalogue de modèles à jour       | 2/2 (rondes 1 & 2)            | **CONVERGÉ** |
-| A        | Refonte graphique du panneau      | 2/2 (rondes 3 & 4)            | **CONVERGÉ** |
-| B        | Bascule instantanée + assist_mode | 0/2 (ronde 2 RED concurrence) | en cours     |
+| Chantier | Sujet                             | Rondes vertes consécutives | Statut       |
+| -------- | --------------------------------- | -------------------------- | ------------ |
+| C        | Catalogue de modèles à jour       | 2/2 (rondes 1 & 2)         | **CONVERGÉ** |
+| A        | Refonte graphique du panneau      | 2/2 (rondes 3 & 4)         | **CONVERGÉ** |
+| B        | Bascule instantanée + assist_mode | 0/2 (ronde 3 YELLOW DOM)   | en cours     |
 
 ---
 
@@ -332,3 +332,31 @@ descendent d'un cran : **flux CONCURRENTS de la même conversation** (debounce
   pendant bascule en vol → **corrigé** (flush du pending, posé après succès seul).
 - **[minor assumé]** nav SPA pendant la bascule → acceptation non committée
   (sous-comptage, sens sûr) : documenté comme choix conservateur.
+
+## Chantier B — round 3 (commit 071fdd4)
+
+| agent               | scores                                                                  | blocking | major | verdict    |
+| ------------------- | ----------------------------------------------------------------------- | -------- | ----- | ---------- |
+| robustness-redteam  | dégrad 4 · crash 5 · repli 5 · spa 5 · observers 5                      | 0        | 0     | **GREEN**  |
+| product-conformance | ton 5 · fourchettes 5 · mémoire 5 · démontre 5 · nouv-conv 5 · budget 5 | 0        | 0     | **GREEN**  |
+| qa-auditor          | couv 4 · contrat 4 · erreurs 4 · clarté 4 · régressions 4               | 0        | 1     | **YELLOW** |
+| privacy-sentinel    | —                                                                       | PASS     | —     | **PASS**   |
+
+→ Ronde **YELLOW**. redteam et product GREEN (spa remonte à 5) ; qa attrape un
+major que le jeton de génération ne couvrait pas :
+
+- **[major qa]** Sérialisation DOM INTER-flux : `switchInFlight` est local à un
+  flux → deux flux concurrents pouvaient lancer deux `applyModelInPage` sur le
+  même menu Radix → modèle final non déterministe, faux `selector_broken`. Le
+  jeton corrige la télémétrie, pas l'opération DOM. → **corrigé** verrou
+  module-level (`switchQueue`) dans `modelSwitcher.ts` : au plus une bascule DOM
+  en vol, ordre déterministe (le dernier demandé gagne) + test de sérialisation.
+- **[minor redteam]** arming du pending sans garde `isPanelPresent` (asymétrie) →
+  **corrigé** (arme si panneau présent ET dernier, sinon committe). · `applyModel`
+  sans try/catch → **corrigé** (défensif, jamais de rejet non géré).
+- **[minor qa]** `policy_json` non-objet → 500 possible → **corrigé** (normalisation
+  `isinstance dict`) + test.
+- **[minor product]** badge one_click « n'agit jamais » ambigu → **corrigé**
+  `badge_title_one_click` (« applique … à votre clic »). · silence télémétrie de
+  « déjà sur le modèle » → **documenté** comme choix assumé (issue neutre).
+- **[minor product, hors périmètre]** budget=None en prod (TODO Lot B).

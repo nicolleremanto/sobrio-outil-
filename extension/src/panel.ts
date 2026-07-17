@@ -218,12 +218,14 @@ export function renderBadge(
   badge.className = 'badge';
   badge.type = 'button';
   badge.textContent = 'S';
-  // En auto, l'extension AGIT (bascule) : le titre ne peut pas affirmer le
-  // contraire (règle 7). Sinon, libellé lecture-seule par défaut.
+  // Titre HONNÊTE selon le mode (règle 7) : auto = agit automatiquement ;
+  // one_click = agit sur clic ; guide (défaut) = ne touche jamais la page.
   badge.title =
     options.assistMode === 'auto'
       ? (messages['badge_title_auto'] ?? messages['badge_title'] ?? 'Sobrio')
-      : (messages['badge_title'] ?? 'Sobrio');
+      : options.assistMode === 'one_click'
+        ? (messages['badge_title_one_click'] ?? messages['badge_title'] ?? 'Sobrio')
+        : (messages['badge_title'] ?? 'Sobrio');
   badge.addEventListener('click', () => {
     // Écarter le panneau via le badge committe une acceptation auto en attente
     // (sinon orpheline), puis le retire.

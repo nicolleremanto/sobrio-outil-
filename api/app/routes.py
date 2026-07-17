@@ -182,8 +182,11 @@ def get_extension_config(
     # Fusion superficielle : policy_json prime sur les défauts, mais seules
     # les clés du contrat sont retenues (le schéma strict rejetterait le reste).
     # TODO(LotB) : fusion fine (messages par langue, politique par équipe).
+    # policy_json est censé être un objet JSON, mais on ne suppose rien (règle 3) :
+    # un tableau/scalaire mal saisi ne doit pas lever AttributeError → 500.
+    policy = org.policy_json if isinstance(org.policy_json, dict) else {}
     overrides = {
-        key: value for key, value in org.policy_json.items() if key in ExtensionConfig.model_fields
+        key: value for key, value in policy.items() if key in ExtensionConfig.model_fields
     }
     # Robustesse (règle 3) : un policy_json mal formé ne doit JAMAIS produire un
     # 500. On assainit CLÉ PAR CLÉ — chaque override valide est retenu, seule la

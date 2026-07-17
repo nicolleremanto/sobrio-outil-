@@ -201,12 +201,37 @@ function tryCloseMenu(): void {
 }
 
 /**
- * Applique `targetId` (id du catalogue) dans le sélecteur de modèle de la
- * page hôte. Retourne `true` UNIQUEMENT si le changement est vérifié
- * (l'étiquette relue correspond au modèle demandé). Toute incertitude ⇒
- * abandon silencieux et `false` — l'utilisateur garde la main.
+ * SÉRIALISATION INTER-FLUX de la bascule DOM : au plus UNE `applyModelInPage`
+ * en vol à la fois. Sous saisie rapide (debounce 600 ms < bascule ~2,7 s), deux
+ * flux concurrents lanceraient sinon deux navigations simultanées sur le même
+ * menu Radix → modèle final NON déterministe, menu laissé ouvert, faux
+ * `selector_broken`. La file garantit un ordre déterministe : les bascules
+ * s'appliquent l'une après l'autre (la dernière demandée gagne).
  */
-export async function applyModelInPage(
+let switchQueue: Promise<unknown> = Promise.resolve();
+
+/**
+ * Applique `targetId` (id du catalogue) dans le sélecteur de modèle de la page
+ * hôte, EN EXCLUSION MUTUELLE avec toute autre bascule (file `switchQueue`).
+ * Retourne `true` UNIQUEMENT si le changement est vérifié. Ne throw jamais.
+ */
+export function applyModelInPage(
+  targetId: string,
+  options: ApplyModelOptions = {},
+): Promise<boolean> {
+  const run = () => applyModelInPageExclusive(targetId, options);
+  // Chaîne les bascules (succès OU échec de la précédente) : jamais deux en vol.
+  const result = switchQueue.then(run, run);
+  switchQueue = result.catch(() => undefined); // la file ne reste jamais bloquée
+  return result;
+}
+
+/**
+ * Corps de la bascule (une seule à la fois, via `applyModelInPage`). Retourne
+ * `true` UNIQUEMENT si le changement est vérifié (l'étiquette relue correspond
+ * au modèle demandé). Toute incertitude ⇒ abandon silencieux et `false`.
+ */
+async function applyModelInPageExclusive(
   targetId: string,
   options: ApplyModelOptions = {},
 ): Promise<boolean> {

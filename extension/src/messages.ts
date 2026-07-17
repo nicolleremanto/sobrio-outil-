@@ -22,6 +22,9 @@ export const FR_MESSAGES: Messages = {
   // En mode auto, l'extension bascule le modèle : le titre du badge ne peut PAS
   // affirmer « n'agit jamais à votre place » (règle 7, honnêteté).
   badge_title_auto: 'Sobrio — bascule automatiquement le modèle recommandé (annulable)',
+  // En one_click, l'extension applique le modèle mais UNIQUEMENT sur clic : on le
+  // dit sans ambiguïté (distinct de guide, qui ne touche jamais la page).
+  badge_title_one_click: 'Sobrio — applique le modèle recommandé à votre clic',
   panel_title: 'Sobrio',
   panel_aria_label: 'Recommandation de modèle Sobrio',
   recommended_suffix: 'recommandé',
@@ -90,6 +93,7 @@ export const FR_MESSAGES: Messages = {
 export const EN_MESSAGES: Messages = {
   badge_title: 'Sobrio — model recommendation (never acts for you)',
   badge_title_auto: 'Sobrio — automatically switches to the recommended model (undoable)',
+  badge_title_one_click: 'Sobrio — applies the recommended model on your click',
   panel_title: 'Sobrio',
   recommended_suffix: 'recommended',
   confidence_label: 'Confidence',

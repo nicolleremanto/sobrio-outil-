@@ -171,9 +171,16 @@ export async function runRecommendationFlow(text: string, deps: FlowDeps) {
   // santé (`selector_broken`) — repli silencieux, jamais bloquant (règle 3).
   const applyAndReport = async (model: string): Promise<boolean> => {
     if (!deps.applyModel) return false; // mode guide : aucun contact page
-    const ok = await deps.applyModel(model);
-    if (!ok) deps.client.sendHealthSignal?.('selector_broken');
-    return ok;
+    try {
+      const ok = await deps.applyModel(model);
+      if (!ok) deps.client.sendHealthSignal?.('selector_broken');
+      return ok;
+    } catch {
+      // applyModel ne devrait JAMAIS rejeter (l'impl réelle renvoie false), mais
+      // ceinture+bretelles : aucun rejet non géré, jamais bloquant (règle 3).
+      deps.client.sendHealthSignal?.('selector_broken');
+      return false;
+    }
   };
 
   // Décision de bascule AUTO : mode auto + confiance ≥ seuil + modèle courant
@@ -194,6 +201,9 @@ export async function runRecommendationFlow(text: string, deps: FlowDeps) {
   }
   // Auto mais DÉJÀ sur le modèle recommandé : rien à basculer — on l'indique
   // plutôt que d'afficher « Utiliser {modèle} » pour un modèle déjà sélectionné.
+  // Choix ASSUMÉ : aucun reco_event n'est émis pour cet état (ni bascule, ni
+  // dérogation, ni clic) — `recos_shown` le compte, l'issue est neutre. Ne pas
+  // émettre un followed:true fantôme pour une reco qui n'a rien déclenché.
   const autoAlreadyCurrent =
     assistMode === 'auto' && previousModel !== null && previousModel === reco.recommended_model;
 
@@ -271,14 +281,15 @@ export async function runRecommendationFlow(text: string, deps: FlowDeps) {
     // followed=true sur un fil que l'utilisateur a quitté).
     if (outcomeCommitted || !isCurrent()) return reco;
     if (ok) {
-      if (isLatest()) {
-        // Flux le plus récent : l'acceptation reste EN ATTENTE (Annuler encore
-        // possible) — committée à la fermeture/nav (onDismiss) ou au flux suivant.
+      if (isLatest() && isPanelPresent()) {
+        // Panneau encore visible et flux le plus récent : l'acceptation reste EN
+        // ATTENTE (Annuler encore possible) — committée à la fermeture/nav ou au
+        // flux suivant.
         pendingAutoAccept = commitAccept;
       } else {
-        // Un flux plus récent a supplanté celui-ci (l'utilisateur est déjà passé
-        // à la reco suivante sans annuler) → accepter CETTE bascule maintenant,
-        // sinon son acceptation serait orpheline (écrasée sans être committée).
+        // Supplanté par un flux plus récent, OU panneau déjà écarté PENDANT la
+        // bascule (fermeture/badge/nav) : la bascule a réussi → on accepte
+        // maintenant (sinon acceptation orpheline / armée sur un panneau absent).
         commitAccept();
       }
     } else if (isLatest() && isPanelPresent()) {

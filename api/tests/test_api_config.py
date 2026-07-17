@@ -90,6 +90,21 @@ def test_config_invalid_policy_falls_back_not_500(client, test_engine):
             conn.execute(sa.text("UPDATE orgs SET policy_json = '{}'::jsonb WHERE org_id = 'demo'"))
 
 
+def test_config_non_object_policy_falls_back_not_500(client, test_engine):
+    """RÈGLE 3 : un policy_json non-objet (tableau/scalaire) → défauts, pas 500."""
+    with test_engine.begin() as conn:
+        conn.execute(
+            sa.text("UPDATE orgs SET policy_json = '[1, 2, 3]'::jsonb WHERE org_id = 'demo'")
+        )
+    try:
+        response = client.get("/v1/extension/config", params={"org": "demo"}, headers=AUTH_HEADERS)
+        assert response.status_code == 200  # jamais 500
+        assert response.json()["assist_mode"] == "one_click"
+    finally:
+        with test_engine.begin() as conn:
+            conn.execute(sa.text("UPDATE orgs SET policy_json = '{}'::jsonb WHERE org_id = 'demo'"))
+
+
 def test_config_partial_invalid_policy_preserves_guide(client, test_engine):
     """RFC-0003 : un seuil invalide ne doit PAS écraser assist_mode=guide (kill-switch).
 
