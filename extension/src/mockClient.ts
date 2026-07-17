@@ -31,6 +31,8 @@ export interface RecoClientV0 {
   recommend(signals: Signals): Promise<RecoV0 | null>;
   /** Fire-and-forget : ne retourne rien, n'affecte jamais l'utilisateur. */
   sendRecoEvent(event: RecoEvent): void;
+  /** Livraison avec accusé (utilisée par la file de télémétrie persistante). */
+  deliverRecoEvent(event: RecoEvent): Promise<boolean>;
   getConfig(): Promise<ExtensionConfig | null>;
   /**
    * Signal de santé léger (ex. sélecteurs cassés) — OPTIONNEL. Le contrat
@@ -139,6 +141,12 @@ export class MockClient implements RecoClientV0 {
   sendRecoEvent(event: RecoEvent): void {
     if (this.options.failure !== 'none') return; // panne : perdu, sans bruit
     this.sentEvents.push(event);
+  }
+
+  async deliverRecoEvent(event: RecoEvent): Promise<boolean> {
+    if (this.options.failure !== 'none') return false; // livraison échouée
+    this.sentEvents.push(event);
+    return true;
   }
 
   sendHealthSignal(signal: HealthSignal): void {

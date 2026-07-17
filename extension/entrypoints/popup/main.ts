@@ -11,6 +11,7 @@ import { browser } from 'wxt/browser';
 import { getExtensionConfig } from '../../src/api';
 import { initDebugLog, saveDebugLogEnabled } from '../../src/debugLog';
 import { isVersionSupported, localVersion } from '../../src/remoteConfig';
+import { TelemetryQueue } from '../../src/telemetryQueue';
 import { DIAGNOSE_MESSAGE, formatDiagnosis, type DiagnoseResponse } from '../../src/diagnostics';
 import { loadStoredSettings, saveStoredSettings, type BackendMode } from '../../src/settings';
 
@@ -142,6 +143,19 @@ function initDiagnostic(): void {
   });
 }
 
+/** Compteur de diagnostic télémétrie : envoyés / en attente. */
+async function showTelemetryCounter(): Promise<void> {
+  try {
+    // La livraison n'est jamais déclenchée ici : lecture seule des compteurs.
+    const queue = new TelemetryQueue(() => Promise.resolve(false));
+    const [sent, pending] = await Promise.all([queue.sentCount(), queue.pending()]);
+    element<HTMLParagraphElement>('telemetry-counter').textContent =
+      `Télémétrie — envoyés : ${sent} · en attente : ${pending}.`;
+  } catch {
+    // Dégradation silencieuse.
+  }
+}
+
 function showVersion(): void {
   try {
     const { version } = browser.runtime.getManifest();
@@ -157,4 +171,5 @@ void (async () => {
   initDiagnostic();
   showVersion();
   await refreshStatus();
+  await showTelemetryCounter();
 })();

@@ -32,6 +32,7 @@ import {
 } from './selectors';
 import { loadStoredSettings } from './settings';
 import { computePromptSignals, type Signals } from './signals';
+import { TelemetryQueue, telemetryAllowed } from './telemetryQueue';
 
 /** Dépendances injectables — tests et démo utilisent les mêmes chemins. */
 export interface FlowDeps {
@@ -47,6 +48,13 @@ export interface FlowDeps {
    * Absent ⇒ lecture seule stricte (comportement par défaut).
    */
   applyModel?: (model: string) => Promise<boolean>;
+  /**
+   * Émission d'un événement de télémétrie. Par défaut : `client.sendRecoEvent`
+   * (capture mock). En production, la file persistante (bootstrap) est
+   * branchée ici, et vaut noop si la télémétrie est interdite (kill-switch /
+   * opt-out org).
+   */
+  sendEvent?: (event: RecoEvent) => void;
 }
 
 /** Construit le bloc `signals` complet : prompt + mémoire de conversation. */
@@ -82,6 +90,7 @@ export async function runRecommendationFlow(text: string, deps: FlowDeps) {
 
   deps.memory.noteRecoShown();
   const now = deps.now ?? (() => new Date());
+  const send = deps.sendEvent ?? ((event: RecoEvent) => deps.client.sendRecoEvent(event));
 
   renderPanel(reco, {
     modelsVisible: deps.config?.models_visible ?? [],
@@ -90,14 +99,14 @@ export async function runRecommendationFlow(text: string, deps: FlowDeps) {
     callbacks: {
       onFollow: () => {
         deps.memory.noteFollowed();
-        deps.client.sendRecoEvent(buildRecoEvent(reco.reco_id, true, null, now));
+        send(buildRecoEvent(reco.reco_id, true, null, now));
         // Opt-in uniquement : action déclenchée par le clic de l'utilisateur,
         // fire-and-forget, échec silencieux (il garde la main).
         void deps.applyModel?.(reco.recommended_model);
       },
       onOverride: (model) => {
         deps.memory.noteDerogation(reco.recommended_model, model);
-        deps.client.sendRecoEvent(buildRecoEvent(reco.reco_id, false, model, now));
+        send(buildRecoEvent(reco.reco_id, false, model, now));
         void deps.applyModel?.(model);
       },
     },
@@ -139,12 +148,21 @@ export async function bootstrap(): Promise<void> {
     ? (model: string) => applyModelInPage(model)
     : undefined;
 
+  // Télémétrie : file persistante avec retry. Reprise des événements en
+  // attente au démarrage. Interdite (noop) si kill-switch ou opt-out org.
+  const telemetry = new TelemetryQueue((event) => Promise.resolve(client.deliverRecoEvent(event)));
+  void telemetry.flush(); // reprend les envois en attente d'une session passée
+  const sendEvent = telemetryAllowed(config)
+    ? (event: RecoEvent) => void telemetry.enqueue(event)
+    : () => {};
+
   const baseDeps: FlowDeps = {
     client,
     memory: controller.currentMemory(),
     config,
     messages,
     applyModel,
+    sendEvent,
   };
   observeInputArea(baseDeps, () => controller.currentMemory(), controller.stop);
 }

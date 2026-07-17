@@ -146,6 +146,11 @@ class ApiClientV0 implements RecoClientV0 {
     sendWithRetry(() => postRecoEvent(this.settings, event));
   }
 
+  deliverRecoEvent(event: RecoEvent): Promise<boolean> {
+    // Un seul essai borné : la file de télémétrie gère le retry persistant.
+    return postRecoEvent(this.settings, event, RECOMMEND_TIMEOUT_MS);
+  }
+
   async getConfig(): Promise<ExtensionConfig | null> {
     return getExtensionConfig(this.settings);
   }
