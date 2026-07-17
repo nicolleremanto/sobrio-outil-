@@ -120,18 +120,25 @@ describe('applyModelInPage — succès vérifié', () => {
     expect(clickSpy).not.toHaveBeenCalled();
   });
 
-  it('SÉRIALISATION inter-flux : deux bascules concurrentes ne se chevauchent pas — modèle final déterministe', async () => {
+  it('SÉRIALISATION inter-flux : les corps ne s’entrelacent PAS — clics dans l’ordre de la file', async () => {
     mountFakeModelSelector('Claude Opus 4.8');
-    // Deux bascules lancées EN MÊME TEMPS (saisie rapide) vers des modèles
-    // différents. Sans verrou, elles se disputeraient le menu → état final
-    // indéterministe / menu laissé ouvert. La file garantit : l'une puis
-    // l'autre, le DERNIER demandé gagne.
+    // Journal d'ordre : chaque clic d'item enregistre son libellé (capture).
+    const log: string[] = [];
+    for (const item of document.querySelectorAll('[role="menuitem"]')) {
+      item.addEventListener('click', () => log.push(item.textContent ?? ''), { capture: true });
+    }
+    // Deux bascules lancées EN MÊME TEMPS vers des modèles différents. Sans
+    // verrou, leurs navigations de menu s'entrelaceraient (ordre de clics
+    // indéterministe, menu potentiellement laissé ouvert). La file garantit un
+    // ordre strict : la 1re bascule ENTIÈREMENT avant la 2e.
     const p1 = applyModelInPage('claude-haiku-4-5', FAST);
     const p2 = applyModelInPage('claude-sonnet-5', FAST);
     const [r1, r2] = await Promise.all([p1, p2]);
     expect(r1).toBe(true);
     expect(r2).toBe(true);
-    // Ordre déterministe : la 2e bascule (sonnet) est la dernière appliquée.
+    // Preuve de sérialisation : haiku cliqué AVANT sonnet, sans entrelacement.
+    expect(log).toEqual(['Claude Haiku 4.5', 'Claude Sonnet 5']);
+    // Et modèle final déterministe = dernier demandé.
     expect(document.querySelector('[data-testid="model-selector"]')?.textContent).toBe(
       'Claude Sonnet 5',
     );
@@ -156,6 +163,18 @@ describe('applyModelInPage — abandons silencieux', () => {
   it('modèle absent du menu → false dans le délai imparti', async () => {
     mountFakeModelSelector('Claude Opus 4.8');
     await expect(applyModelInPage('modele-inconnu-9', FAST)).resolves.toBe(false);
+  });
+
+  it('garde de currency : conversation changée en vol → AUCUNE sélection (pas de mutation du mauvais fil)', async () => {
+    mountFakeModelSelector('Claude Opus 4.8');
+    // isCurrent renvoie false : la sélection TERMINALE ne doit pas s'appliquer
+    // (le sélecteur claude.ai est global : sinon on muterait la conversation
+    // d'arrivée après une nav SPA).
+    const ok = await applyModelInPage('claude-sonnet-5', { ...FAST, isCurrent: () => false });
+    expect(ok).toBe(false);
+    expect(document.querySelector('[data-testid="model-selector"]')?.textContent).toBe(
+      'Claude Opus 4.8',
+    );
   });
 });
 
@@ -192,7 +211,7 @@ describe('Flux : OPT-IN strict (amendement règle 2)', () => {
     const flowDeps = deps({ applyModel });
     const reco = await runRecommendationFlow('Quelle heure est-il ?', flowDeps);
     (shadow().querySelector('[data-sobrio-follow]') as HTMLButtonElement).click();
-    expect(applyModel).toHaveBeenCalledWith(reco!.recommended_model);
+    expect(applyModel).toHaveBeenCalledWith(reco!.recommended_model, expect.any(Function));
   });
 
   it('opt-in activé : la dérogation applique le modèle choisi', async () => {
@@ -201,7 +220,7 @@ describe('Flux : OPT-IN strict (amendement règle 2)', () => {
     const select = shadow().querySelector<HTMLSelectElement>('[data-sobrio-override]')!;
     select.value = 'claude-opus-4-8';
     select.dispatchEvent(new Event('change'));
-    expect(applyModel).toHaveBeenCalledWith('claude-opus-4-8');
+    expect(applyModel).toHaveBeenCalledWith('claude-opus-4-8', expect.any(Function));
   });
 
   it("SANS opt-in (défaut) : lecture seule stricte — la page hôte n'est jamais touchée", async () => {

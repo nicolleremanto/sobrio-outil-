@@ -360,3 +360,28 @@ major que le jeton de génération ne couvrait pas :
   `badge_title_one_click` (« applique … à votre clic »). · silence télémétrie de
   « déjà sur le modèle » → **documenté** comme choix assumé (issue neutre).
 - **[minor product, hors périmètre]** budget=None en prod (TODO Lot B).
+
+## Chantier B — round 4 (commit 0268d65)
+
+| agent               | scores                                                                  | blocking | major | verdict    |
+| ------------------- | ----------------------------------------------------------------------- | -------- | ----- | ---------- |
+| robustness-redteam  | dégrad 5 · crash 5 · repli 4 · spa 3 · observers 5                      | 0        | 1     | **YELLOW** |
+| product-conformance | ton 5 · fourchettes 5 · mémoire 5 · démontre 5 · nouv-conv 5 · budget 5 | 0        | 0     | **GREEN**  |
+| qa-auditor          | couv 5 · contrat 4 · erreurs 5 · clarté 4 · régressions 5               | 0        | 0     | **GREEN**  |
+| privacy-sentinel    | —                                                                       | PASS     | —     | **PASS**   |
+
+→ Ronde **YELLOW**. product + qa GREEN ; redteam attrape le dernier major
+subtil : l'ACTION DOM n'était pas gardée par `isCurrent` (la télémétrie l'était).
+
+- **[major redteam]** Pendant la navigation des menus (~2,7 s), une nav SPA
+  pouvait faire atterrir le clic terminal sur la mauvaise conversation (sélecteur
+  claude.ai global) → mutation silencieuse du mauvais fil. → **corrigé** : jeton
+  `isCurrent` threadé jusqu'à `applyModelInPageExclusive`, re-vérifié juste avant
+  le clic terminal (nav en vol → `tryCloseMenu` + false) + test de garde de currency.
+- **[minor redteam]** try/catch `applyAndReport` non testé → **test** (applyModel
+  rejette → pas de crash, selector_broken, repli). · preuve de sérialisation faible
+  → **renforcée** (journal d'ordre des clics : haiku avant sonnet, sans entrelacement).
+- **[minor qa]** en-têtes « v1.0 » périmés (schemas.py, api.ts) → **v1.1/RFC-0003**.
+  · fusion `policy_json.messages` superficielle → TODO(LotB) documenté.
+- **[minor product]** état « déjà sur le modèle » absent de la capture →
+  **ajouté** (10 états). · KPI recos_followed/shown & libellé optimiste → assumés/documentés.

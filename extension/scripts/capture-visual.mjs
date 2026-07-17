@@ -79,6 +79,11 @@ function panelMarkup(state) {
       <button type="button" data-sobrio-cancel>Annuler</button>
       <p class="hint">Bascule automatique — vous gardez la main.</p>
     </div>`);
+  } else if (state.alreadyOnModel) {
+    // Auto mais déjà sur le modèle recommandé : simple accusé, aucune action.
+    parts.push(
+      `<div class="actions"><div class="ack" data-sobrio-already>Déjà sur ${state.model} — rien à faire.</div></div>`,
+    );
   } else if (state.ack) {
     parts.push(`<div class="actions"><div class="ack">Merci, c'est noté.</div></div>`);
   } else {
@@ -203,10 +208,22 @@ const STATES = [
     guide: true,
     others: ['Claude Haiku 4.5', 'Claude Opus 4.8'],
   },
+  {
+    // Chantier B (RFC-0003) : mode auto mais modèle recommandé DÉJÀ sélectionné.
+    key: 'deja-sur-modele',
+    model: 'Claude Sonnet 5',
+    confidence: 0.9,
+    costMin: 0.002,
+    costMax: 0.004,
+    energyMin: 0.4,
+    energyMax: 1.8,
+    alreadyOnModel: true,
+    others: [],
+  },
 ];
 
 // 3) Harnais : deux colonnes (clair / sombre), un vrai Shadow DOM par état.
-// Première cellule = le badge « S » (charte §4 : pastille 22 px), puis les 9
+// Première cellule = le badge « S » (charte §4 : pastille 22 px), puis les 10
 // états du panneau. Le badge est rendu depuis la même PANEL_CSS (source unique).
 const cells = (theme) =>
   [
@@ -270,10 +287,10 @@ execFileSync(
     '--disable-gpu',
     '--hide-scrollbars',
     '--force-device-scale-factor=2',
-    // Fenêtre assez HAUTE pour contenir le badge + les 9 états empilés :
+    // Fenêtre assez HAUTE pour contenir le badge + les 10 états empilés :
     // `--screenshot` clippe au viewport, donc la hauteur doit couvrir toute
     // la colonne.
-    '--window-size=800,4400',
+    '--window-size=800,4900',
     `--screenshot=${out}`,
     `file://${HARNESS}`,
   ],

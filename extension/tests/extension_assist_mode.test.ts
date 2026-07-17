@@ -131,7 +131,7 @@ describe('auto — UI optimiste + acceptation différée (un seul événement ne
     expect(q('[data-sobrio-switched]')?.textContent).toContain('Claude Sonnet 5');
     expect(q('[data-sobrio-cancel]')).toBeTruthy();
     expect(q('[data-sobrio-follow]')).toBeNull();
-    expect(applyModel).toHaveBeenCalledWith('claude-sonnet-5');
+    expect(applyModel).toHaveBeenCalledWith('claude-sonnet-5', expect.any(Function));
     // Rien n'est émis tant que l'utilisateur peut annuler.
     expect(events).toEqual([]);
   });
@@ -176,7 +176,7 @@ describe('auto — UI optimiste + acceptation différée (un seul événement ne
         ts: '2026-07-17T10:00:00.000Z',
       },
     ]);
-    expect(applyModel).toHaveBeenCalledWith('claude-haiku-4-5'); // restauration
+    expect(applyModel).toHaveBeenCalledWith('claude-haiku-4-5', expect.any(Function)); // restauration
     // Aucune acceptation ne peut plus être committée (issue déjà tranchée).
     (shadow().querySelector('[data-sobrio-close]') as HTMLButtonElement)?.click();
     flushPendingAutoAccept();
@@ -218,7 +218,7 @@ describe('auto — UI optimiste + acceptation différée (un seul événement ne
     slow.resolve(true); // la bascule se résout APRÈS l'annulation
     await flowP;
     expect(followedTrue(events)).toHaveLength(0);
-    expect(applyModel).toHaveBeenLastCalledWith('claude-haiku-4-5'); // restauration sérialisée
+    expect(applyModel).toHaveBeenLastCalledWith('claude-haiku-4-5', expect.any(Function)); // restauration sérialisée
   });
 
   it('confiance < seuil → pas de bascule (UI one_click)', async () => {
@@ -256,11 +256,22 @@ describe('auto — UI optimiste + acceptation différée (un seul événement ne
     const { deps, events, health, applyModel } = autoDeps();
     applyModel.mockResolvedValue(false);
     await runRecommendationFlow('Refactore ce module', deps);
-    expect(applyModel).toHaveBeenCalledWith('claude-sonnet-5');
+    expect(applyModel).toHaveBeenCalledWith('claude-sonnet-5', expect.any(Function));
     expect(q('[data-sobrio-switched]')).toBeNull();
     expect(q('[data-sobrio-follow]')).toBeTruthy();
     expect(health).toContain('selector_broken');
     expect(events).toHaveLength(0);
+  });
+
+  it('applyModel qui REJETTE → aucun rejet non géré, selector_broken, repli one_click', async () => {
+    const { deps, events, health, applyModel } = autoDeps();
+    applyModel.mockRejectedValue(new Error('boom')); // ne devrait jamais arriver en prod
+    const reco = await runRecommendationFlow('Refactore ce module', deps);
+    expect(reco).not.toBeNull(); // pas de throw propagé
+    expect(health).toContain('selector_broken');
+    expect(q('[data-sobrio-switched]')).toBeNull(); // repli one_click
+    expect(q('[data-sobrio-follow]')).toBeTruthy();
+    expect(events).toEqual([]);
   });
 
   it('GARDE SPA : conversation changée pendant l’appel réseau → rien affiché, aucune bascule', async () => {

@@ -69,8 +69,10 @@ export interface FlowDeps {
   /**
    * Application du modèle dans la page hôte. Présent en `auto`/`one_click`,
    * ABSENT en `guide` (aucun contact page) — voir `resolveAssistMode`.
+   * `isCurrent` (optionnel) est propagé jusqu'au clic terminal : la sélection
+   * s'abandonne si la conversation a changé pendant la navigation des menus.
    */
-  applyModel?: (model: string) => Promise<boolean>;
+  applyModel?: (model: string, isCurrent?: () => boolean) => Promise<boolean>;
   /**
    * Lecture (seule) du modèle courant de la page — requise par la bascule
    * `auto` pour pouvoir Annuler (restaurer le précédent). Absent ⇒ pas d'auto.
@@ -172,7 +174,7 @@ export async function runRecommendationFlow(text: string, deps: FlowDeps) {
   const applyAndReport = async (model: string): Promise<boolean> => {
     if (!deps.applyModel) return false; // mode guide : aucun contact page
     try {
-      const ok = await deps.applyModel(model);
+      const ok = await deps.applyModel(model, isCurrent);
       if (!ok) deps.client.sendHealthSignal?.('selector_broken');
       return ok;
     } catch {
@@ -340,7 +342,9 @@ export async function bootstrap(): Promise<void> {
   // guide ⇒ aucun contact page (applyModel absent, lecture seule stricte).
   // auto/one_click ⇒ applyModel présent (bascule encadrée, résultat vérifié).
   const applyModel =
-    assistMode === 'guide' ? undefined : (model: string) => applyModelInPage(model);
+    assistMode === 'guide'
+      ? undefined
+      : (model: string, isCurrent?: () => boolean) => applyModelInPage(model, { isCurrent });
   // La lecture du modèle courant n'est utile qu'à la bascule auto (pour Annuler).
   const readCurrentModel = assistMode === 'auto' ? readCurrentModelFromPage : undefined;
   const autoThreshold = config?.auto_confidence_threshold ?? DEFAULT_AUTO_THRESHOLD;

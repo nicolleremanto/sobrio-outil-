@@ -1,4 +1,4 @@
-"""Modèles pydantic v2 FIDÈLES au contrat contracts/openapi.yaml (v1.0, figé).
+"""Modèles pydantic v2 FIDÈLES au contrat contracts/openapi.yaml (v1.1, RFC-0003).
 
 Tout changement ici exige une RFC (docs/rfc/) + entrée dans
 contracts/CHANGELOG.md (règle n°7).

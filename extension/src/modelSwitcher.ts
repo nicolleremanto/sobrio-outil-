@@ -38,6 +38,13 @@ export interface ApplyModelOptions {
   menuTimeoutMs?: number;
   /** Délai de stabilisation avant vérification du résultat (ms). */
   settleMs?: number;
+  /**
+   * Jeton de « currency » : la navigation des menus dure jusqu'à ~2,7 s. Si la
+   * conversation a changé entre-temps, la sélection terminale ne doit PAS
+   * s'appliquer (le sélecteur de claude.ai est global au top-bar : elle
+   * muterait le mauvais fil). Re-vérifié juste avant le clic terminal.
+   */
+  isCurrent?: () => boolean;
 }
 
 /**
@@ -268,6 +275,15 @@ async function applyModelInPageExclusive(
     if (!item) {
       tryCloseMenu();
       debugLog('auto_apply_abandon', { menu_trouve: false });
+      return false;
+    }
+
+    // Garde de currency AVANT la sélection : la conversation a pu changer
+    // pendant la navigation des menus. Ne PAS muter le fil d'arrivée (le
+    // sélecteur claude.ai est global) — abandon propre.
+    if (options.isCurrent && !options.isCurrent()) {
+      tryCloseMenu();
+      debugLog('auto_apply_abandon', { conversation_changee: true });
       return false;
     }
 

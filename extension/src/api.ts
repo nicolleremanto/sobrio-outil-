@@ -1,5 +1,5 @@
 /**
- * Client typé de l'API Sobrio — 3 endpoints du contrat `contracts/openapi.yaml` (v1.0).
+ * Client typé de l'API Sobrio — 3 endpoints du contrat `contracts/openapi.yaml` (v1.1, RFC-0003).
  *
  * Règles encodées ici :
  * - Règle n°1 : `prompt_text` n'est JAMAIS envoyé en v0 (champ omis du corps).
@@ -11,7 +11,7 @@
  *   ne throw jamais vers l'appelant, ne logge jamais de contenu.
  */
 // ---------------------------------------------------------------------------
-// Types fidèles à contracts/openapi.yaml (v1.0) — ne pas modifier sans RFC.
+// Types fidèles à contracts/openapi.yaml (v1.1, RFC-0003) — ne pas modifier sans RFC.
 // ---------------------------------------------------------------------------
 
 export type Lang = 'fr' | 'en' | 'other';
