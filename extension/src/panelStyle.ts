@@ -89,6 +89,11 @@ export const PANEL_CSS = `
 
   /* En-tête : titre + fermeture, aligné sur la grille 8. */
   .header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  /* Écart charte ASSUMÉ : l'en-tête « SOBRIO » est un OVERLINE (eyebrow) —
+     11px/600, majuscules, interlettrage 0.08em, couleur secondaire — et non le
+     « titre 13px/600 » de la charte §4. Le titre 13px de la carte, c'est le nom
+     du modèle (.model). L'eyebrow 11px est une convention premium sobre
+     (surtitre discret), volontairement plus petit que le corps 12px. */
   .title {
     font-weight: 600; font-size: 11px; color: var(--secondary);
     letter-spacing: 0.08em; text-transform: uppercase; margin: 0;
@@ -156,4 +161,12 @@ export const PANEL_CSS = `
   }
   .badge:hover { opacity: 1; transform: scale(1.06); }
   .badge:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* Respect de la préférence système « mouvement réduit » (WCAG 2.3.3) :
+     neutralise l'apparition du panneau et la transition du badge. */
+  @media (prefers-reduced-motion: reduce) {
+    .panel { animation: none; }
+    .badge { transition: none; }
+    .badge:hover { transform: none; }
+  }
 `;

@@ -266,13 +266,14 @@ export function renderPanel(reco: RecoV0, options: PanelOptions): void {
     gaugeLabel.textContent = `${messages['confidence_label'] ?? 'Confiance'} : ${confidencePct} %`;
     panel.appendChild(gaugeLabel);
 
-    // Signal ambigu ⇒ on le dit (règle 7).
+    // Signal ambigu ⇒ on le dit (règle 7). Variable distincte de la `note` de
+    // ton plus haut (évite l'ombrage — une seule source de l'UI, lisible).
     if (reco.confidence < 0.65) {
-      const note = document.createElement('p');
-      note.className = 'note';
-      note.setAttribute('data-sobrio-ambiguous', '');
-      note.textContent = messages['ambiguous_note'] ?? '';
-      panel.appendChild(note);
+      const ambiguousNote = document.createElement('p');
+      ambiguousNote.className = 'note';
+      ambiguousNote.setAttribute('data-sobrio-ambiguous', '');
+      ambiguousNote.textContent = messages['ambiguous_note'] ?? '';
+      panel.appendChild(ambiguousNote);
     }
 
     // Fourchettes coût / énergie (règle 5 : min–max + périmètre).

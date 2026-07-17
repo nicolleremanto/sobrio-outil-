@@ -20,7 +20,7 @@ Fable 5 (10/50), Opus 4.8 (5/25), Sonnet 5 (3/15 · intro 2/10), Haiku 4.5 (1/5)
 | Chantier | Sujet                             | Rondes vertes consécutives | Statut       |
 | -------- | --------------------------------- | -------------------------- | ------------ |
 | C        | Catalogue de modèles à jour       | 2/2 (rondes 1 & 2)         | **CONVERGÉ** |
-| A        | Refonte graphique du panneau      | 0/2                        | en cours     |
+| A        | Refonte graphique du panneau      | 1/2 (ronde 1)              | en cours     |
 | B        | Bascule instantanée + assist_mode | 0/2                        | à venir      |
 
 ---
@@ -105,3 +105,29 @@ Minors optionnels non bloquants (documentés, non traités en C) :
 - **[minor qa]** markup du harnais dupliqué (seule la CSS est source unique) →
   documenter/aligner. · `harness.html` committé + prettier → gitignorer (généré). ·
   branche luminance de `detectHostTheme` non testée.
+
+## Chantier A — round 1 (commit 5aa1b45, capture pleine page régénérée)
+
+| agent               | scores                                                                       | blocking | major | verdict   |
+| ------------------- | ---------------------------------------------------------------------------- | -------- | ----- | --------- |
+| design-critic       | layout 4 · couleur 5 · typo 4 · grille 4 · couverture 4 · parité 5 · a11y 5  | 0        | 0     | **GREEN** |
+| product-conformance | ton 5 · fourchettes 5 · mémoire 5 · démontre 5 · nouv-conv 5 · budget 5      | 0        | 0     | **GREEN** |
+| qa-auditor          | couv 4 · contrat 5 · erreurs 5 · clarté 5 · régressions 5                    | 0        | 0     | **GREEN** |
+| privacy-sentinel    | —                                                                            | PASS     | —     | **PASS**  |
+
+→ Ronde **VERTE (1/2)**. Le MAJOR de la ronde 0 (capture tronquée) est levé :
+les 6 états sont désormais jugés sur pleine page, clair ET sombre. Minors
+(non bloquants) — quatre corrigés avant la ronde 2, le reste documenté :
+
+- **corrigé** `prefers-reduced-motion` absent (qa, WCAG 2.3.3) → media query
+  neutralisant apparition + transition badge, + test.
+- **corrigé** ombrage de variable `note` dans `panel.ts` (product) → renommée
+  `ambiguousNote`.
+- **corrigé** eyebrow « SOBRIO » 11 px hors échelle typo (design) → documenté
+  comme OVERLINE assumé (le titre 13 px de la carte est le nom du modèle).
+- **corrigé** badge 22 px absent de la capture (design) → ajouté clair+sombre
+  au harnais, + garde de test sur l'extraction PANEL_CSS.
+- **documenté (TODO V2)** ordre libellé→barre de la jauge de confiance ;
+  jauges confiance/budget au rendu identique (sémantique) — la charte interdit
+  toute couleur supplémentaire, différenciation par le libellé, RFC si besoin ;
+  script de capture hors suite de tests (smoke-run CI) ; EN_MESSAGES partiel.

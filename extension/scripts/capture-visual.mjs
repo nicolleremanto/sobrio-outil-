@@ -134,11 +134,16 @@ const STATES = [
 ];
 
 // 3) Harnais : deux colonnes (clair / sombre), un vrai Shadow DOM par état.
+// Première cellule = le badge « S » (charte §4 : pastille 22 px), puis les 6
+// états du panneau. Le badge est rendu depuis la même PANEL_CSS (source unique).
 const cells = (theme) =>
-  STATES.map(
-    (s) =>
-      `<div class="cell"><span class="lbl">${s.key}</span><div class="host" data-theme="${theme}" data-state='${JSON.stringify(s).replace(/'/g, '&#39;')}'></div></div>`,
-  ).join('\n');
+  [
+    `<div class="cell"><span class="lbl">badge</span><div class="host" data-kind="badge" data-theme="${theme}"></div></div>`,
+    ...STATES.map(
+      (s) =>
+        `<div class="cell"><span class="lbl">${s.key}</span><div class="host" data-theme="${theme}" data-state='${JSON.stringify(s).replace(/'/g, '&#39;')}'></div></div>`,
+    ),
+  ].join('\n');
 
 const HTML = `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <style>
@@ -165,10 +170,15 @@ const HTML = `<!doctype html><html lang="fr"><head><meta charset="utf-8">
   const LAYOUT = '.panel,.badge{position:static !important;right:auto;bottom:auto;animation:none;margin:0}';
   function markup(s){ ${panelMarkup.toString()}; return panelMarkup(s); }
   for (const host of document.querySelectorAll('.host')) {
-    const s = JSON.parse(host.getAttribute('data-state'));
     host.setAttribute('data-sobrio-theme', host.getAttribute('data-theme'));
     const root = host.attachShadow({ mode: 'open' });
     const style = document.createElement('style'); style.textContent = CSS + LAYOUT; root.appendChild(style);
+    if (host.getAttribute('data-kind') === 'badge') {
+      const badge = document.createElement('button'); badge.className = 'badge'; badge.type = 'button'; badge.textContent = 'S';
+      root.appendChild(badge);
+      continue;
+    }
+    const s = JSON.parse(host.getAttribute('data-state'));
     const panel = document.createElement('div'); panel.className = 'panel'; panel.innerHTML = markup(s); root.appendChild(panel);
   }
   document.title = 'ready';
@@ -188,9 +198,10 @@ execFileSync(
     '--disable-gpu',
     '--hide-scrollbars',
     '--force-device-scale-factor=2',
-    // Fenêtre assez HAUTE pour contenir les 6 états empilés : `--screenshot`
-    // clippe au viewport, donc la hauteur doit couvrir toute la colonne.
-    '--window-size=800,2700',
+    // Fenêtre assez HAUTE pour contenir le badge + les 6 états empilés :
+    // `--screenshot` clippe au viewport, donc la hauteur doit couvrir toute
+    // la colonne.
+    '--window-size=800,2900',
     `--screenshot=${out}`,
     `file://${HARNESS}`,
   ],

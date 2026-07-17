@@ -2,6 +2,9 @@
  * Chantier A — thèmes & charte graphique : détection de thème hôte, tokens
  * charte §4 dans la source unique PANEL_CSS, application du thème au panneau.
  */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { PANEL_CSS } from '../src/panelStyle';
@@ -96,6 +99,27 @@ describe('PANEL_CSS — tokens de la charte §4 (source unique)', () => {
   it('aucun emoji, aucun dégradé (charte : accent unique)', () => {
     expect(PANEL_CSS).not.toContain('gradient');
     expect(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(PANEL_CSS)).toBe(false);
+  });
+  it('respecte prefers-reduced-motion (WCAG 2.3.3)', () => {
+    expect(PANEL_CSS).toContain('prefers-reduced-motion: reduce');
+    // Sous la requête, l'apparition et la transition du badge sont neutralisées.
+    const block = PANEL_CSS.slice(PANEL_CSS.indexOf('prefers-reduced-motion'));
+    expect(block).toContain('.panel { animation: none; }');
+    expect(block).toContain('.badge { transition: none; }');
+  });
+});
+
+describe('capture-visual — extraction PANEL_CSS (garde anti-dérive du harnais)', () => {
+  it('la regex du script de capture extrait une CSS non vide avec les tokens charte', () => {
+    // Reproduit exactement l'extraction de scripts/capture-visual.mjs : si elle
+    // casse (renommage de l'export, backtick), le harnais visuel se viderait.
+    const src = readFileSync(join(process.cwd(), 'src', 'panelStyle.ts'), 'utf-8');
+    const match = /export const PANEL_CSS = `([\s\S]*?)`;/.exec(src);
+    expect(match).not.toBeNull();
+    const css = match![1];
+    expect(css.length).toBeGreaterThan(500);
+    expect(css).toContain('#0E7C66'); // accent clair (token charte présent)
+    expect(css).toContain('.badge'); // le badge est bien capturable
   });
 });
 
