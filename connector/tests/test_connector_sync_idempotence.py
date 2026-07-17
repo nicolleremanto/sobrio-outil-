@@ -63,9 +63,7 @@ def test_sync_records_runs_and_window(clean_db: str, pseudonym_salt: str) -> Non
                 "started_at, finished_at FROM sync_runs ORDER BY id"
             )
         ).all()
-        dates = conn.execute(
-            text("SELECT min(date), max(date) FROM usage_daily")
-        ).one()
+        dates = conn.execute(text("SELECT min(date), max(date) FROM usage_daily")).one()
     engine.dispose()
 
     assert len(runs) == 2

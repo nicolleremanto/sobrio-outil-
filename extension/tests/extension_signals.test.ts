@@ -75,7 +75,8 @@ describe('detectKeywordFlagsV0 — liste fermée', () => {
 describe('normalizeModelLabel — vocabulaire fermé, jamais le libellé brut', () => {
   it('normalise les libellés claude.ai vers les ids du catalogue', () => {
     expect(normalizeModelLabel('Claude Opus 4.8')).toBe('claude-opus-4-8');
-    expect(normalizeModelLabel('Claude Sonnet 4.6')).toBe('claude-sonnet-5');
+    expect(normalizeModelLabel('Claude Sonnet 5')).toBe('claude-sonnet-5');
+    expect(normalizeModelLabel('Claude Fable 5')).toBe('claude-fable-5');
     expect(normalizeModelLabel('claude haiku 4.5 (aperçu)')).toBe('claude-haiku-4-5');
   });
 

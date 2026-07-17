@@ -29,9 +29,14 @@ SOURCE_ANALYTICS = "anthropic_analytics"
 # TODO(LotC) : table de mapping complète (alias datés type claude-sonnet-4-6-20260115,
 # snapshots, modèles legacy) + stratégie pour les modèles inconnus (quarantaine ?).
 MODEL_NAME_MAP: dict[str, str] = {
-    "claude-haiku-4-5": "haiku-4-5",
-    "claude-sonnet-4-6": "sonnet-4-6",
-    "claude-opus-4-8": "opus-4-8",
+    # Noms bruts Anthropic -> ids du catalogue (gamme courante 2026-07.2).
+    "claude-haiku-4-5": "claude-haiku-4-5",
+    "claude-sonnet-5": "claude-sonnet-5",
+    "claude-opus-4-8": "claude-opus-4-8",
+    "claude-fable-5": "claude-fable-5",
+    # Usage historique du Sonnet précédent rattaché au Sonnet courant (les
+    # fixtures synthétiques emploient encore ce nom brut).
+    "claude-sonnet-4-6": "claude-sonnet-5",
 }
 
 

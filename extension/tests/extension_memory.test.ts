@@ -130,4 +130,20 @@ describe('Scénario clé — « démontre-le » dans un fil maths', () => {
     };
     expect(decide(signals).recommended_model).toBe('claude-haiku-4-5');
   });
+
+  it('ISOLE la mémoire : prompt NEUTRE (sans keyword) dans un fil maths → reco ≠ Haiku', () => {
+    // « vas-y » ne déclenche AUCUN drapeau du prompt (ni has_math, ni le flag
+    // 'demonstration'). Seul conversation.seen_math (la mémoire) peut router
+    // hors Haiku — c'est la preuve isolée de l'apport de la mémoire.
+    const neutralPrompt = computePromptSignals('vas-y');
+    expect(neutralPrompt.has_math).toBe(false);
+    expect(neutralPrompt.keyword_flags).not.toContain('demonstration');
+
+    const memory = new ConversationMemory();
+    memory.updateFromPage(MATH_THREAD); // seen_math = true
+    const decision = decide({ prompt: neutralPrompt, conversation: memory.toSignals() });
+    expect(decision.recommended_model).not.toBe('claude-haiku-4-5');
+    expect(decision.recommended_model).toBe('claude-sonnet-5');
+    expect(decision.rule).toBe('mock:reasoning_context');
+  });
 });

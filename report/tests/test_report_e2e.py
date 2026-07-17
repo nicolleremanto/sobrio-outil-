@@ -25,9 +25,9 @@ def test_requetes_sur_base_dediee(base_test_url):
     assert float(total[0]["energy_wh_min"]) <= float(total[0]["energy_wh_max"])
 
     assert {ligne["model"] for ligne in resultats["by_model"]} == {
-        "haiku-4-5",
-        "sonnet-4-6",
-        "opus-4-8",
+        "claude-haiku-4-5",
+        "claude-sonnet-5",
+        "claude-opus-4-8",
     }
     assert len(resultats["by_workspace"]) == 2
 

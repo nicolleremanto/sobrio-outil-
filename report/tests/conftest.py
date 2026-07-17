@@ -62,9 +62,9 @@ def _inserer_seed(conn) -> None:
     lignes_agg = [
         # (dimension, dim_value, tokens, cost_usd, wh_min, wh_max)
         ("total", "*", 12_500_000, 1842.50, 2520.00, 10845.00),
-        ("model", "haiku-4-5", 6_000_000, 320.00, 540.00, 2520.00),
-        ("model", "sonnet-4-6", 4_500_000, 780.50, 1080.00, 4725.00),
-        ("model", "opus-4-8", 2_000_000, 742.00, 900.00, 3600.00),
+        ("model", "claude-haiku-4-5", 6_000_000, 320.00, 540.00, 2520.00),
+        ("model", "claude-sonnet-5", 4_500_000, 780.50, 1080.00, 4725.00),
+        ("model", "claude-opus-4-8", 2_000_000, 742.00, 900.00, 3600.00),
         ("workspace", "ws_produit", 7_500_000, 1105.50, 1520.00, 6500.00),
         ("workspace", "ws_support", 5_000_000, 737.00, 1000.00, 4345.00),
     ]
@@ -84,7 +84,7 @@ def _inserer_seed(conn) -> None:
                 "cout": cost,
                 "whmin": wh_min,
                 "whmax": wh_max,
-                "cat": "2026-07",
+                "cat": "2026-07.2",
             },
         )
 
@@ -101,19 +101,67 @@ def _inserer_seed(conn) -> None:
     )
     evenements = [
         # (ts, recommandé, final, followed, wh_min, wh_max, eur_min, eur_max)
-        (datetime(2026, 6, 3, 9, 15, tzinfo=UTC),
-         "haiku-4-5", "haiku-4-5", True, 0.4, 1.8, 0.002, 0.010),
-        (datetime(2026, 6, 10, 14, 30, tzinfo=UTC),
-         "haiku-4-5", "haiku-4-5", True, 0.5, 2.1, 0.003, 0.012),
-        (datetime(2026, 6, 24, 11, 5, tzinfo=UTC),
-         "sonnet-4-6", "sonnet-4-6", True, 0.7, 2.5, 0.004, 0.020),
-        (datetime(2026, 6, 17, 16, 45, tzinfo=UTC),
-         "haiku-4-5", "opus-4-8", False, None, None, None, None),
-        (datetime(2026, 6, 28, 8, 0, tzinfo=UTC),
-         "sonnet-4-6", None, None, None, None, None, None),
+        (
+            datetime(2026, 6, 3, 9, 15, tzinfo=UTC),
+            "claude-haiku-4-5",
+            "claude-haiku-4-5",
+            True,
+            0.4,
+            1.8,
+            0.002,
+            0.010,
+        ),
+        (
+            datetime(2026, 6, 10, 14, 30, tzinfo=UTC),
+            "claude-haiku-4-5",
+            "claude-haiku-4-5",
+            True,
+            0.5,
+            2.1,
+            0.003,
+            0.012,
+        ),
+        (
+            datetime(2026, 6, 24, 11, 5, tzinfo=UTC),
+            "claude-sonnet-5",
+            "claude-sonnet-5",
+            True,
+            0.7,
+            2.5,
+            0.004,
+            0.020,
+        ),
+        (
+            datetime(2026, 6, 17, 16, 45, tzinfo=UTC),
+            "claude-haiku-4-5",
+            "claude-opus-4-8",
+            False,
+            None,
+            None,
+            None,
+            None,
+        ),
+        (
+            datetime(2026, 6, 28, 8, 0, tzinfo=UTC),
+            "claude-sonnet-5",
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
         # Hors fenêtre (mai) : ne doit PAS compter dans le mois 2026-06.
-        (datetime(2026, 5, 20, 10, 0, tzinfo=UTC),
-         "haiku-4-5", "haiku-4-5", True, 9.0, 90.0, 9.0, 90.0),
+        (
+            datetime(2026, 5, 20, 10, 0, tzinfo=UTC),
+            "claude-haiku-4-5",
+            "claude-haiku-4-5",
+            True,
+            9.0,
+            90.0,
+            9.0,
+            90.0,
+        ),
     ]
     for ts, reco, final, followed, whmin, whmax, eurmin, eurmax in evenements:
         conn.execute(
@@ -168,19 +216,19 @@ def resultats_factices() -> dict:
                 "cost_usd": 1842.50,
                 "energy_wh_min": 2520.00,
                 "energy_wh_max": 10845.00,
-                "catalog_version": "2026-07",
+                "catalog_version": "2026-07.2",
             }
         ],
         "by_model": [
             {
-                "model": "haiku-4-5",
+                "model": "claude-haiku-4-5",
                 "tokens_total": 6_000_000,
                 "cost_usd": 320.00,
                 "energy_wh_min": 540.00,
                 "energy_wh_max": 2520.00,
             },
             {
-                "model": "opus-4-8",
+                "model": "claude-opus-4-8",
                 "tokens_total": 2_000_000,
                 "cost_usd": 742.00,
                 "energy_wh_min": 900.00,
@@ -199,10 +247,6 @@ def resultats_factices() -> dict:
         "reco_adoption": [
             {"n_events": 5, "n_followed": 3, "n_decided": 4, "adoption_rate_pct": 75.0}
         ],
-        "reco_savings": [
-            {"n_followed": 3, "savings_eur_min": 0.009, "savings_eur_max": 0.042}
-        ],
-        "footprint_avoided": [
-            {"n_followed": 3, "avoided_wh_min": 1.6, "avoided_wh_max": 6.4}
-        ],
+        "reco_savings": [{"n_followed": 3, "savings_eur_min": 0.009, "savings_eur_max": 0.042}],
+        "footprint_avoided": [{"n_followed": 3, "avoided_wh_min": 1.6, "avoided_wh_max": 6.4}],
     }

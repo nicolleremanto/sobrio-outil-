@@ -79,7 +79,9 @@ def snapshot_state(engine: sa.Engine) -> tuple:
     """
     with engine.connect() as conn:
         orgs = conn.execute(
-            sa.text("SELECT org_id, name, api_token_hash, policy_json::text FROM orgs ORDER BY org_id")
+            sa.text(
+                "SELECT org_id, name, api_token_hash, policy_json::text FROM orgs ORDER BY org_id"
+            )
         ).fetchall()
         usage_hash = conn.execute(
             sa.text(

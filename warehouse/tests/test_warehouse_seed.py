@@ -18,7 +18,7 @@ FEATURES_KEYS_CONTRAT = {
     "keyword_flags",
 }
 
-MODELES_CATALOGUE = {"haiku-4-5", "sonnet-4-6", "opus-4-8"}
+MODELES_CATALOGUE = {"claude-haiku-4-5", "claude-sonnet-5", "claude-opus-4-8"}
 
 
 def test_seed_deux_fois_etat_identique(seeded):

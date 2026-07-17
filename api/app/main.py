@@ -33,9 +33,9 @@ app = FastAPI(
 # TODO(LotB) : restreindre par org / durcir en prod (Lot F).
 _cors_origins = [
     o.strip()
-    for o in os.environ.get(
-        "SOBRIO_CORS_ORIGINS", "https://claude.ai,http://localhost:3000"
-    ).split(",")
+    for o in os.environ.get("SOBRIO_CORS_ORIGINS", "https://claude.ai,http://localhost:3000").split(
+        ","
+    )
     if o.strip()
 ]
 app.add_middleware(

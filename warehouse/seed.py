@@ -67,17 +67,17 @@ API_KEYS = [
 
 # Volumes de sortie plausibles par modèle (tokens/jour/clé) — ids du CATALOGUE.
 TOKENS_OUT_RANGES = {
-    "haiku-4-5": (20_000, 120_000),
-    "sonnet-4-6": (10_000, 80_000),
-    "opus-4-8": (2_000, 30_000),
+    "claude-haiku-4-5": (20_000, 120_000),
+    "claude-sonnet-5": (10_000, 80_000),
+    "claude-opus-4-8": (2_000, 30_000),
 }
 
 # Routeur v0 (heuristiques explicables) : scénario -> (modèle recommandé,
 # poids de tirage, bornes de confiance, tokens de sortie estimés par appel).
 SCENARIOS = [
-    ("short_simple", "haiku-4-5", 0.5, (0.75, 0.95), (150, 400)),
-    ("code_task", "sonnet-4-6", 0.3, (0.65, 0.90), (300, 1500)),
-    ("complex_task", "opus-4-8", 0.2, (0.60, 0.85), (500, 2500)),
+    ("short_simple", "claude-haiku-4-5", 0.5, (0.75, 0.95), (150, 400)),
+    ("code_task", "claude-sonnet-5", 0.3, (0.65, 0.90), (300, 1500)),
+    ("complex_task", "claude-opus-4-8", 0.2, (0.60, 0.85), (500, 2500)),
 ]
 
 # Politique d'organisation par défaut — cohérente avec ExtensionConfig
@@ -85,7 +85,7 @@ SCENARIOS = [
 POLICY_JSON_DEFAULT = {
     "mode": "equilibre",
     "send_prompt_text": False,
-    "models_visible": ["haiku-4-5", "sonnet-4-6", "opus-4-8"],
+    "models_visible": ["claude-haiku-4-5", "claude-sonnet-5", "claude-opus-4-8"],
 }
 
 _USAGE_INSERT_SQL = sa.text(
@@ -177,9 +177,7 @@ def _usage_rows(
                 # Coût depuis les prix du catalogue (entrée non cachée + sortie).
                 # TODO(LotC) : tarification réelle du cache (lecture/écriture)
                 # côté connecteur Usage & Cost.
-                cost_usd = round(
-                    (tokens_in_uncached * price_in + tokens_out * price_out) / 1e6, 4
-                )
+                cost_usd = round((tokens_in_uncached * price_in + tokens_out * price_out) / 1e6, 4)
                 rows.append(
                     {
                         "org_id": org_id,
@@ -294,7 +292,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Seed déterministe et idempotent de l'entrepôt Sobrio (Lot D)."
     )
-    parser.add_argument("--org", default="demo", help="Identifiant de l'organisation (défaut : demo)")
+    parser.add_argument(
+        "--org", default="demo", help="Identifiant de l'organisation (défaut : demo)"
+    )
     parser.add_argument(
         "--database-url",
         default=None,

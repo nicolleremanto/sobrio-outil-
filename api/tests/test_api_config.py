@@ -5,7 +5,7 @@ from __future__ import annotations
 import sqlalchemy as sa
 from helpers_api import AUTH_HEADERS
 
-_CATALOG_IDS = ["haiku-4-5", "sonnet-4-6", "opus-4-8"]
+_CATALOG_IDS = ["claude-haiku-4-5", "claude-sonnet-5", "claude-opus-4-8"]
 
 
 def test_config_conforms_and_send_prompt_text_false_by_default(client):
@@ -33,9 +33,7 @@ def test_config_conforms_and_send_prompt_text_false_by_default(client):
 
 def test_config_other_org_is_404(client):
     """404 si l'org demandée n'est pas celle du token (pas d'énumération)."""
-    response = client.get(
-        "/v1/extension/config", params={"org": "autre-org"}, headers=AUTH_HEADERS
-    )
+    response = client.get("/v1/extension/config", params={"org": "autre-org"}, headers=AUTH_HEADERS)
     assert response.status_code == 404
 
 
@@ -55,9 +53,7 @@ def test_config_merges_policy_json(client, test_engine):
             )
         )
     try:
-        response = client.get(
-            "/v1/extension/config", params={"org": "demo"}, headers=AUTH_HEADERS
-        )
+        response = client.get("/v1/extension/config", params={"org": "demo"}, headers=AUTH_HEADERS)
         assert response.status_code == 200
         payload = response.json()
         assert payload["mode"] == "eco"  # surchargé par la politique

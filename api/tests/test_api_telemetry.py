@@ -46,7 +46,7 @@ def test_telemetry_override_sets_final_model(client, db):
     reco = _create_reco(client)
     response = client.post(
         "/v1/telemetry/reco_event",
-        json=_telemetry_body(reco["reco_id"], followed=False, overridden_to="opus-4-8"),
+        json=_telemetry_body(reco["reco_id"], followed=False, overridden_to="claude-opus-4-8"),
         headers=AUTH_HEADERS,
     )
     assert response.status_code == 204
@@ -55,7 +55,7 @@ def test_telemetry_override_sets_final_model(client, db):
         {"id": reco["reco_id"]},
     ).one()
     assert row.followed is False
-    assert row.final_model == "opus-4-8"
+    assert row.final_model == "claude-opus-4-8"
 
 
 def test_telemetry_unknown_reco_id_is_404(client):

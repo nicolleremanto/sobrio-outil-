@@ -16,8 +16,10 @@ def aggregated(engine, migrated_db_url, seeded):
     """Lance l'agrégation DEUX fois (idempotence) sur le mois de démo."""
     import aggregate
 
-    assert aggregate.main(["--org", "demo", "--month", MOIS_DEMO,
-                           "--database-url", migrated_db_url]) == 0
+    assert (
+        aggregate.main(["--org", "demo", "--month", MOIS_DEMO, "--database-url", migrated_db_url])
+        == 0
+    )
     with engine.connect() as conn:
         rows_1 = conn.execute(
             sa.text(
@@ -31,8 +33,10 @@ def aggregated(engine, migrated_db_url, seeded):
             ),
             {"m": MOIS_DEMO_DATE},
         ).fetchall()
-    assert aggregate.main(["--org", "demo", "--month", MOIS_DEMO,
-                           "--database-url", migrated_db_url]) == 0
+    assert (
+        aggregate.main(["--org", "demo", "--month", MOIS_DEMO, "--database-url", migrated_db_url])
+        == 0
+    )
     with engine.connect() as conn:
         rows_2 = conn.execute(
             sa.text(
@@ -83,7 +87,7 @@ def test_energie_en_fourchette_stricte(aggregated):
 
 def test_catalog_version_tracee(aggregated):
     rows, _ = aggregated
-    assert {r.catalog_version for r in rows} == {"2026-07"}
+    assert {r.catalog_version for r in rows} == {"2026-07.2"}
 
 
 def test_coherence_total_vs_dimension_model(aggregated):

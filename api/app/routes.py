@@ -17,7 +17,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from .auth import Org, get_current_org
-from .catalog import model_ids
+from .catalog import visible_model_ids
 from .db import get_session
 from .router import HeuristicRouterV0, build_alternatives, build_impact_estimate
 from .schemas import (
@@ -168,7 +168,7 @@ def get_extension_config(
     defaults: dict = {
         "enabled": True,
         "mode": "equilibre",
-        "models_visible": model_ids(),
+        "models_visible": visible_model_ids(),
         "send_prompt_text": False,  # défaut PAR CONTRAT — opt-in explicite.
         "messages": {"fr": _DEFAULT_MESSAGES_FR},
         "min_extension_version": "0.1.0",
@@ -177,8 +177,6 @@ def get_extension_config(
     # les clés du contrat sont retenues (le schéma strict rejetterait le reste).
     # TODO(LotB) : fusion fine (messages par langue, politique par équipe).
     overrides = {
-        key: value
-        for key, value in org.policy_json.items()
-        if key in ExtensionConfig.model_fields
+        key: value for key, value in org.policy_json.items() if key in ExtensionConfig.model_fields
     }
     return ExtensionConfig(**{**defaults, **overrides})

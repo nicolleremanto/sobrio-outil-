@@ -15,7 +15,7 @@ from dataclasses import dataclass
 
 from sobrio_impact import estimate
 
-from .catalog import EUR_PER_USD, model_ids, model_prices
+from .catalog import EUR_PER_USD, model_prices, visible_model_ids
 from .schemas import Alternative, Features, ImpactEstimate
 
 # Flags "lourds" : signaux d'une tâche exigeante (contrat, analyse, code).
@@ -49,17 +49,13 @@ class HeuristicRouterV0(Router):
     def decide(self, features: Features) -> Decision:
         flags = set(features.keyword_flags)
         # (a) court, sans code ni flag lourd -> le modèle le plus léger.
-        if (
-            features.token_est < 300
-            and not features.has_code
-            and not (flags & _HEAVY_FLAGS)
-        ):
-            return Decision("haiku-4-5", "heuristic:short_simple", 0.8)
+        if features.token_est < 300 and not features.has_code and not (flags & _HEAVY_FLAGS):
+            return Decision("claude-haiku-4-5", "heuristic:short_simple", 0.8)
         # (b) présence de code -> modèle intermédiaire.
         if features.has_code or "code" in flags:
-            return Decision("sonnet-4-6", "heuristic:code_task", 0.7)
+            return Decision("claude-sonnet-5", "heuristic:code_task", 0.7)
         # (c) sinon (long, contrat/analyse...) -> modèle le plus capable.
-        return Decision("opus-4-8", "heuristic:complex_task", 0.6)
+        return Decision("claude-opus-4-8", "heuristic:complex_task", 0.6)
 
 
 def estimate_tokens_out(features: Features) -> int:
@@ -86,7 +82,9 @@ def build_alternatives(decision: Decision, features: Features) -> list[Alternati
     tokens_out = estimate_tokens_out(features)
     reco_cost = _cost_eur_per_call(decision.model_id, features.token_est, tokens_out)
     alternatives = []
-    for model_id in model_ids():
+    # Alternatives = modèles VISIBLES (proposables à la dérogation) autres que
+    # le recommandé — Fable 5 (visible: false) n'apparaît pas dans la réponse.
+    for model_id in visible_model_ids():
         if model_id == decision.model_id:
             continue
         delta = _cost_eur_per_call(model_id, features.token_est, tokens_out) - reco_cost

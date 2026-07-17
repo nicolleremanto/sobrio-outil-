@@ -84,14 +84,11 @@ def _ensure_org(conn: Connection, org_id: str, *, fixtures: bool) -> None:
     if exists:
         return
     if not fixtures:
-        raise RuntimeError(
-            f"Organisation inconnue : {org_id!r}. La créer avant de lancer le sync."
-        )
+        raise RuntimeError(f"Organisation inconnue : {org_id!r}. La créer avant de lancer le sync.")
     token = os.environ.get("DEMO_ORG_TOKEN", "demo-token-not-a-secret")
     conn.execute(
         text(
-            "INSERT INTO orgs (org_id, name, api_token_hash) "
-            "VALUES (:org_id, :name, :token_hash)"
+            "INSERT INTO orgs (org_id, name, api_token_hash) VALUES (:org_id, :name, :token_hash)"
         ),
         {
             "org_id": org_id,
@@ -112,8 +109,7 @@ def _fixture_snapshot_ts(usage_buckets: list[dict[str, Any]]) -> datetime:
     if not usage_buckets:
         raise ValueError("Fixtures d'usage vides : impossible de dériver snapshot_ts.")
     return max(
-        datetime.fromisoformat(str(b["ending_at"]).replace("Z", "+00:00"))
-        for b in usage_buckets
+        datetime.fromisoformat(str(b["ending_at"]).replace("Z", "+00:00")) for b in usage_buckets
     )
 
 
@@ -129,9 +125,7 @@ def run_sync(
     Retourne le bilan du run, également enregistré dans `sync_runs`.
     """
     started_at = datetime.now(UTC)
-    client = (
-        FixturesClient(fixtures_dir) if fixtures else AnthropicAdminClient()
-    )
+    client = FixturesClient(fixtures_dir) if fixtures else AnthropicAdminClient()
     engine = create_engine(database_url)
     status, error = "ok", None
     rows: list[dict[str, Any]] = []
@@ -160,9 +154,7 @@ def run_sync(
         # 3. Normalisation (pseudonymisation incluse — règle n°1) puis fenêtrage.
         rows = normalize_usage_buckets(usage_buckets, org_id=org_id, snapshot_ts=snapshot_ts)
         apply_cost_buckets(rows, cost_buckets)
-        rows += normalize_analytics_rows(
-            analytics_items, org_id=org_id, snapshot_ts=snapshot_ts
-        )
+        rows += normalize_analytics_rows(analytics_items, org_id=org_id, snapshot_ts=snapshot_ts)
         rows = [r for r in rows if window_start <= r["date"] <= window_end]
 
         # 4. Ingestion idempotente.

@@ -32,8 +32,14 @@ def _load_catalog(path: str) -> dict:
 
 
 def model_ids() -> list[str]:
-    """Ids des modèles du catalogue, dans l'ordre du fichier."""
+    """Ids des modèles du catalogue, dans l'ordre du fichier (chiffrage/impact)."""
     return [m["id"] for m in _load_catalog(_catalog_path())["models"]]
+
+
+def visible_model_ids() -> list[str]:
+    """Ids proposés à l'utilisateur (dérogation) — exclut `visible: false`
+    (ex. Claude Fable 5, gardé pour le chiffrage mais non exposé par sobriété)."""
+    return [m["id"] for m in _load_catalog(_catalog_path())["models"] if m.get("visible", True)]
 
 
 def model_prices(model_id: str) -> tuple[float, float]:

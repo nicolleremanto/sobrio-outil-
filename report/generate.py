@@ -46,8 +46,18 @@ OUT_DIR = REPORT_DIR / "out"
 DEFAULT_DATABASE_URL = "postgresql+psycopg://sobrio:sobrio_dev_password@localhost:5432/sobrio"
 
 _MOIS_FR = [
-    "janvier", "février", "mars", "avril", "mai", "juin",
-    "juillet", "août", "septembre", "octobre", "novembre", "décembre",
+    "janvier",
+    "février",
+    "mars",
+    "avril",
+    "mai",
+    "juin",
+    "juillet",
+    "août",
+    "septembre",
+    "octobre",
+    "novembre",
+    "décembre",
 ]
 
 # Repère les paramètres nommés SQLAlchemy (":org_id") sans confondre les
@@ -58,6 +68,7 @@ _PARAM_RE = re.compile(r"(?<![:\w]):([a-z_]+)")
 # ---------------------------------------------------------------------------
 # Chargement des requêtes versionnées
 # ---------------------------------------------------------------------------
+
 
 def load_queries() -> dict[str, str]:
     """Charge toutes les requêtes de ``report/queries/`` (nom de fichier -> SQL).
@@ -111,6 +122,7 @@ def run_queries(engine, org_id: str, month: str) -> dict[str, list[dict]]:
 # ---------------------------------------------------------------------------
 # Construction du contexte de rendu
 # ---------------------------------------------------------------------------
+
 
 def _libelle_mois(month: str) -> str:
     debut, _ = _bornes_mois(month)
@@ -217,6 +229,7 @@ def build_context(
 # ---------------------------------------------------------------------------
 # Rendu HTML + PDF
 # ---------------------------------------------------------------------------
+
 
 def _filtre_nombre(valeur, decimales: int = 0) -> str:
     """Format numérique à la française : 12 345,67 (— si absent)."""

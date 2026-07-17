@@ -15,7 +15,7 @@ from sobrio_impact import Range, catalog_version, estimate
 
 
 def test_estimate_retourne_un_range_jamais_un_scalaire():
-    result = estimate("haiku-4-5", 1000)
+    result = estimate("claude-haiku-4-5", 1000)
     assert isinstance(result, Range)
     assert not isinstance(result, (int, float))
 
@@ -42,7 +42,7 @@ def test_range_non_convertible_en_nombre():
     # Un Range n'est PAS un nombre : pas de __float__ ni __int__.
     assert not hasattr(Range, "__float__")
     assert not hasattr(Range, "__int__")
-    result = estimate("sonnet-4-6", 500)
+    result = estimate("claude-sonnet-5", 500)
     with pytest.raises(TypeError):
         float(result)
     with pytest.raises(TypeError):
@@ -51,7 +51,7 @@ def test_range_non_convertible_en_nombre():
 
 def test_estimate_valeurs_du_catalogue():
     # 1000 tokens de sortie = 1 ktok : les bornes du catalogue s'appliquent telles quelles.
-    result = estimate("haiku-4-5", 1000)
+    result = estimate("claude-haiku-4-5", 1000)
     assert result.min == pytest.approx(0.3)
     assert result.max == pytest.approx(1.4)
     assert result.scope == "inference"
@@ -64,4 +64,4 @@ def test_estimate_modele_inconnu_leve_keyerror():
 
 
 def test_catalog_version_correspond_au_contrat():
-    assert catalog_version() == "2026-07"
+    assert catalog_version() == "2026-07.2"

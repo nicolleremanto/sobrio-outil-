@@ -25,4 +25,28 @@ Fable 5 (10/50), Opus 4.8 (5/25), Sonnet 5 (3/15 · intro 2/10), Haiku 4.5 (1/5)
 
 ---
 
-<!-- Les tableaux de rondes sont ajoutés au fil de l'eau ci-dessous. -->
+## Chantier C — round 0 (commit b440607)
+
+| agent               | scores                                                                  | blocking | major | verdict  |
+| ------------------- | ----------------------------------------------------------------------- | -------- | ----- | -------- |
+| qa-auditor          | couv 3 · contrat 2 · erreurs 3 · clarté 4 · régressions 1               | 2        | 1     | **RED**  |
+| privacy-sentinel    | —                                                                       | PASS     | —     | **PASS** |
+| product-conformance | ton 5 · fourchettes 5 · mémoire 5 · démontre 5 · nouv-conv 5 · budget 4 | 0        | 0     | GREEN    |
+
+→ Ronde **RED**. Défauts retenus (à corriger avant ronde 1) :
+
+- **[blocking]** Régression inter-lots : le catalogue partagé a changé d'ids mais
+  les consommateurs Python (api/router, warehouse/seed+aggregate,
+  connector/normalize) n'ont pas suivi → `make test` rouge (11 failed + 11
+  errors). J'avais lancé la seule suite extension.
+- **[blocking]** Assertions Python obsolètes (catalog_version, ids attendus).
+- **[major]** Changement de contrat sans RFC (règle n°7) → créer une RFC.
+- **[minor]** Prix intro Sonnet 5 (2/10, en vigueur jusqu'au 2026-08-31) ignoré
+  par le mock (surestime le coût ~50 %). · **[minor]** `claude-fable-5` exposé
+  dans `models_visible`. · **[minor]** libellé nominal obsolète dans le test
+  signals. · **[minor]** test « démontre-le » n'isole pas la mémoire (le prompt
+  déclenche déjà le flag `demonstration`).
+
+Décision chef d'orchestre : je corrige TOUT (blocking + major + minors) — le
+catalogue étant un contrat partagé, la porte de non-régression §6 couvre bien
+la suite complète `make test`, pas seulement l'extension.

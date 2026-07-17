@@ -35,6 +35,8 @@ models:
   - id: claude-fable-5
     provider: anthropic
     display_name: "Claude Fable 5"
+    visible: false                # non proposé par défaut (sobriété) — présent
+                                  # pour le chiffrage/impact mais hors dérogation
     price_in_usd_mtok: 10.0
     price_out_usd_mtok: 50.0
     impact:

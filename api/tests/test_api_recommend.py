@@ -7,7 +7,7 @@ import uuid
 import sqlalchemy as sa
 from helpers_api import AUTH_HEADERS, make_recommend_body
 
-_CATALOG_IDS = {"haiku-4-5", "sonnet-4-6", "opus-4-8"}
+_CATALOG_IDS = {"claude-haiku-4-5", "claude-sonnet-5", "claude-opus-4-8"}
 
 
 def _assert_conforms_to_contract(payload: dict) -> None:
@@ -51,7 +51,7 @@ def test_recommend_short_simple_returns_haiku(client, db):
     assert response.status_code == 200
     payload = response.json()
     _assert_conforms_to_contract(payload)
-    assert payload["recommended_model"] == "haiku-4-5"
+    assert payload["recommended_model"] == "claude-haiku-4-5"
     assert payload["rule"] == "heuristic:short_simple"
 
     # INSERT réel dans events_reco, final_model/followed NULL à ce stade.
@@ -62,7 +62,7 @@ def test_recommend_short_simple_returns_haiku(client, db):
         ),
         {"id": payload["reco_id"]},
     ).one()
-    assert row.recommended_model == "haiku-4-5"
+    assert row.recommended_model == "claude-haiku-4-5"
     assert row.final_model is None
     assert row.followed is None
     # features_json = uniquement les clés du contrat.
@@ -80,11 +80,19 @@ def test_recommend_varies_with_features(client):
     """La reco varie selon token_est / has_code (démo vivante pour le Lot A)."""
     cases = [
         # (surcharges de features, modèle attendu, règle attendue)
-        ({"token_est": 50}, "haiku-4-5", "heuristic:short_simple"),
-        ({"token_est": 50, "has_code": True}, "sonnet-4-6", "heuristic:code_task"),
-        ({"token_est": 50, "keyword_flags": ["code"]}, "sonnet-4-6", "heuristic:code_task"),
-        ({"token_est": 900, "keyword_flags": ["analyse"]}, "opus-4-8", "heuristic:complex_task"),
-        ({"token_est": 100, "keyword_flags": ["contrat"]}, "opus-4-8", "heuristic:complex_task"),
+        ({"token_est": 50}, "claude-haiku-4-5", "heuristic:short_simple"),
+        ({"token_est": 50, "has_code": True}, "claude-sonnet-5", "heuristic:code_task"),
+        ({"token_est": 50, "keyword_flags": ["code"]}, "claude-sonnet-5", "heuristic:code_task"),
+        (
+            {"token_est": 900, "keyword_flags": ["analyse"]},
+            "claude-opus-4-8",
+            "heuristic:complex_task",
+        ),
+        (
+            {"token_est": 100, "keyword_flags": ["contrat"]},
+            "claude-opus-4-8",
+            "heuristic:complex_task",
+        ),
     ]
     for overrides, expected_model, expected_rule in cases:
         response = client.post(
