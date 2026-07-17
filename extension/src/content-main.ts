@@ -115,6 +115,15 @@ export function flushPendingAutoAccept(): void {
   commit?.();
 }
 
+/**
+ * Génération de flux : un `runRecommendationFlow` qui affiche un panneau
+ * incrémente ce compteur et devient « le plus récent ». Un flux plus ancien,
+ * dont la bascule lente se résout APRÈS qu'un flux plus récent l'a supplanté
+ * (debounce 600 ms < bascule ~2,7 s), le détecte et committe son acceptation
+ * immédiatement plutôt que d'écraser le pending du plus récent (anti-orphelin).
+ */
+let flowGeneration = 0;
+
 /** Télémétrie STRICTE : exactement les 4 champs du contrat, rien d'autre. */
 export function buildRecoEvent(
   recoId: string,
@@ -146,6 +155,10 @@ export async function runRecommendationFlow(text: string, deps: FlowDeps) {
   // basculer sur un fil qui n'est plus actif (anti-fuite inter-conversations).
   const isCurrent = deps.isCurrent ?? (() => true);
   if (!isCurrent()) return null;
+
+  // Ce flux devient le plus récent (supersession des flux concurrents antérieurs).
+  const generation = ++flowGeneration;
+  const isLatest = () => generation === flowGeneration;
 
   deps.memory.noteRecoShown();
   const now = deps.now ?? (() => new Date());
@@ -234,7 +247,10 @@ export async function runRecommendationFlow(text: string, deps: FlowDeps) {
       },
       onCancel: commitReject,
       // Écarter le panneau « basculé » SANS annuler = accepter la bascule auto.
-      onDismiss: switched ? commitAccept : undefined,
+      // On committe le PENDING (posé seulement après une bascule RÉUSSIE) : si
+      // la bascule est encore en vol ou a échoué, rien n'est committé (l'issue
+      // reflète le succès mécanique, pas la seule fermeture).
+      onDismiss: switched ? flushPendingAutoAccept : undefined,
     },
   });
 
@@ -249,16 +265,25 @@ export async function runRecommendationFlow(text: string, deps: FlowDeps) {
   if (autoSwitch) {
     switchInFlight = applyAndReport(reco.recommended_model);
     const ok = await switchInFlight;
-    // Conversation changée pendant la bascule, ou issue déjà committée (Annuler
-    // en vol) : ne rien committer ni re-render ici.
-    if (!isCurrent() || outcomeCommitted) return reco;
+    // Issue déjà tranchée (Annuler en vol), ou conversation quittée pendant la
+    // bascule : on ne committe rien. Le drop d'acceptation sur une nav en cours
+    // de bascule est un choix ASSUMÉ (sens sûr : sous-comptage, jamais un
+    // followed=true sur un fil que l'utilisateur a quitté).
+    if (outcomeCommitted || !isCurrent()) return reco;
     if (ok) {
-      // Succès : l'acceptation reste EN ATTENTE (Annuler encore possible). Elle
-      // sera committée à la fermeture/nav (onDismiss) ou par le flux suivant.
-      pendingAutoAccept = commitAccept;
-    } else if (isPanelPresent()) {
-      // Repli one_click — uniquement si le panneau optimiste est encore monté
-      // (une navigation SPA a pu le retirer ; on ne le ressuscite pas).
+      if (isLatest()) {
+        // Flux le plus récent : l'acceptation reste EN ATTENTE (Annuler encore
+        // possible) — committée à la fermeture/nav (onDismiss) ou au flux suivant.
+        pendingAutoAccept = commitAccept;
+      } else {
+        // Un flux plus récent a supplanté celui-ci (l'utilisateur est déjà passé
+        // à la reco suivante sans annuler) → accepter CETTE bascule maintenant,
+        // sinon son acceptation serait orpheline (écrasée sans être committée).
+        commitAccept();
+      }
+    } else if (isLatest() && isPanelPresent()) {
+      // Repli one_click — uniquement si ce flux est encore le panneau affiché
+      // (ni supplanté par un flux plus récent, ni retiré par une nav SPA).
       renderPanel(reco, renderOptions(false));
     }
   }
@@ -390,8 +415,12 @@ function observeInputArea(
       return; // dégradation silencieuse (voir src/selectors.ts)
     }
     currentInput = input;
-    // Badge ancré sur la barre de saisie (overlay — règle 2).
-    renderBadge(baseDeps.messages, input);
+    // Badge ancré sur la barre de saisie (overlay — règle 2). Titre honnête
+    // selon le mode ; clic = écarter (committe une acceptation auto en attente).
+    renderBadge(baseDeps.messages, input, {
+      assistMode: baseDeps.assistMode,
+      onDismiss: flushPendingAutoAccept,
+    });
     // Écoute PASSIVE de la saisie — on lit, on ne modifie rien (règle 2).
     input.addEventListener('input', () => debouncer.schedule());
   };

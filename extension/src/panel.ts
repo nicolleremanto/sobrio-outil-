@@ -195,7 +195,18 @@ export function repositionBadge(): void {
  * présence de Sobrio, clic = replier le panneau. Overlay positionné sur le
  * rectangle de la zone de saisie : rien n'est inséré dans le DOM fonctionnel.
  */
-export function renderBadge(messages: Messages, anchor: HTMLElement | null = null): void {
+export interface BadgeOptions {
+  /** Mode d'assistance effectif — infléchit le libellé (honnêteté, règle 7). */
+  assistMode?: AssistMode;
+  /** Masquer le panneau via le badge = l'écarter (committe une acceptation). */
+  onDismiss?: () => void;
+}
+
+export function renderBadge(
+  messages: Messages,
+  anchor: HTMLElement | null = null,
+  options: BadgeOptions = {},
+): void {
   badgeAnchor = anchor ?? badgeAnchor;
   if (document.getElementById(BADGE_HOST_ID)) {
     repositionBadge(); // déjà en place : on met simplement à jour l'ancrage
@@ -207,8 +218,18 @@ export function renderBadge(messages: Messages, anchor: HTMLElement | null = nul
   badge.className = 'badge';
   badge.type = 'button';
   badge.textContent = 'S';
-  badge.title = messages['badge_title'] ?? 'Sobrio';
-  badge.addEventListener('click', () => removePanel());
+  // En auto, l'extension AGIT (bascule) : le titre ne peut pas affirmer le
+  // contraire (règle 7). Sinon, libellé lecture-seule par défaut.
+  badge.title =
+    options.assistMode === 'auto'
+      ? (messages['badge_title_auto'] ?? messages['badge_title'] ?? 'Sobrio')
+      : (messages['badge_title'] ?? 'Sobrio');
+  badge.addEventListener('click', () => {
+    // Écarter le panneau via le badge committe une acceptation auto en attente
+    // (sinon orpheline), puis le retire.
+    options.onDismiss?.();
+    removePanel();
+  });
   shadow.appendChild(badge);
   repositionBadge();
 }

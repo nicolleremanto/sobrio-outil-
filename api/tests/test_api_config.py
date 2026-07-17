@@ -90,6 +90,31 @@ def test_config_invalid_policy_falls_back_not_500(client, test_engine):
             conn.execute(sa.text("UPDATE orgs SET policy_json = '{}'::jsonb WHERE org_id = 'demo'"))
 
 
+def test_config_partial_invalid_policy_preserves_guide(client, test_engine):
+    """RFC-0003 : un seuil invalide ne doit PAS écraser assist_mode=guide (kill-switch).
+
+    Assainissement clé par clé : l'override valide (guide) est conservé, seule la
+    valeur fautive (seuil hors 0..1) est écartée.
+    """
+    with test_engine.begin() as conn:
+        conn.execute(
+            sa.text(
+                "UPDATE orgs SET policy_json = "
+                """'{"assist_mode": "guide", "auto_confidence_threshold": 1.5}'::jsonb """
+                "WHERE org_id = 'demo'"
+            )
+        )
+    try:
+        response = client.get("/v1/extension/config", params={"org": "demo"}, headers=AUTH_HEADERS)
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["assist_mode"] == "guide"  # kill-switch PRÉSERVÉ
+        assert payload["auto_confidence_threshold"] == 0.75  # seuil fautif écarté
+    finally:
+        with test_engine.begin() as conn:
+            conn.execute(sa.text("UPDATE orgs SET policy_json = '{}'::jsonb WHERE org_id = 'demo'"))
+
+
 def test_config_assist_mode_guide_kill_switch(client, test_engine):
     """RFC-0003 : l'org peut forcer assist_mode=guide (kill-switch prudence CGU)."""
     with test_engine.begin() as conn:

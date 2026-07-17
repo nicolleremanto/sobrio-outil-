@@ -185,10 +185,16 @@ def get_extension_config(
     overrides = {
         key: value for key, value in org.policy_json.items() if key in ExtensionConfig.model_fields
     }
-    # Robustesse (règle 3) : un policy_json mal formé (ex. seuil hors 0..1) ne
-    # doit JAMAIS produire un 500 — on retombe silencieusement sur les défauts
-    # sûrs plutôt que de casser la config de toute l'extension.
-    try:
-        return ExtensionConfig(**{**defaults, **overrides})
-    except ValidationError:
-        return ExtensionConfig(**defaults)
+    # Robustesse (règle 3) : un policy_json mal formé ne doit JAMAIS produire un
+    # 500. On assainit CLÉ PAR CLÉ — chaque override valide est retenu, seule la
+    # valeur fautive est écartée. Ainsi un assist_mode=guide (kill-switch
+    # prudence CGU) est PRÉSERVÉ même si un auto_confidence_threshold voisin est
+    # hors bornes (sinon tout jeter réactiverait silencieusement la bascule).
+    safe: dict = {}
+    for key, value in overrides.items():
+        try:
+            ExtensionConfig(**{**defaults, **safe, key: value})
+        except ValidationError:
+            continue  # override fautif ignoré, les autres conservés
+        safe[key] = value
+    return ExtensionConfig(**{**defaults, **safe})

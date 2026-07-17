@@ -15,7 +15,7 @@ import {
   type FlowDeps,
 } from '../src/content-main';
 import { FR_MESSAGES } from '../src/messages';
-import { removePanel } from '../src/panel';
+import { removeBadge, removePanel, renderBadge } from '../src/panel';
 import type { RecoClientV0, RecoV0 } from '../src/mockClient';
 import type { ExtensionConfig, RecoEvent } from '../src/api';
 
@@ -83,6 +83,7 @@ beforeEach(() => {
   document.body.innerHTML = '<main></main>';
   flushPendingAutoAccept(); // pas de fuite d'acceptation en attente entre tests
   removePanel();
+  removeBadge();
 });
 
 describe('resolveAssistMode — mode effectif (opt-in local ∧ politique org)', () => {
@@ -271,6 +272,58 @@ describe('auto — UI optimiste + acceptation différée (un seul événement ne
     expect(events).toEqual([]);
   });
 
+  it('CONCURRENCE : F1 (bascule lente) supplanté par F2 → acceptation de F1 committée EXACTEMENT une fois', async () => {
+    const events: RecoEvent[] = [];
+    const mkClient = (reco: RecoV0): RecoClientV0 => ({
+      recommend: async () => reco,
+      sendRecoEvent: (e) => events.push(e),
+      deliverRecoEvent: async () => true,
+      getConfig: async () => null,
+      sendHealthSignal: () => {},
+    });
+    const now = () => new Date('2026-07-17T10:00:00.000Z');
+    const slow = deferred<boolean>();
+    const deps1: FlowDeps = {
+      client: mkClient({ ...BASE_RECO, reco_id: 'reco-1' }),
+      memory: new ConversationMemory(),
+      config: CONFIG,
+      messages: FR_MESSAGES,
+      now,
+      assistMode: 'auto',
+      applyModel: vi.fn().mockReturnValue(slow.promise),
+      readCurrentModel: () => 'claude-haiku-4-5',
+      isCurrent: () => true,
+    };
+    const deps2: FlowDeps = {
+      client: mkClient({ ...BASE_RECO, reco_id: 'reco-2' }),
+      memory: new ConversationMemory(),
+      config: CONFIG,
+      messages: FR_MESSAGES,
+      now,
+      assistMode: 'auto',
+      applyModel: vi.fn().mockResolvedValue(true),
+      readCurrentModel: () => 'claude-haiku-4-5',
+      isCurrent: () => true,
+    };
+
+    const f1 = runRecommendationFlow('Refactore A', deps1);
+    await flush(); // F1 en vol (bascule lente)
+    await runRecommendationFlow('Refactore B', deps2); // F2 supplante F1
+    expect(events).toEqual([]); // rien encore committé (F2 en attente)
+
+    slow.resolve(true);
+    await f1; // F1 résout après avoir été supplanté → committe SON acceptation
+    expect(events).toEqual([
+      { reco_id: 'reco-1', followed: true, overridden_to: null, ts: '2026-07-17T10:00:00.000Z' },
+    ]);
+    expect(deps1.memory.toSignals().recos_followed).toBe(1);
+
+    flushPendingAutoAccept(); // committe F2 (le pending le plus récent)
+    // Chaque reco committée EXACTEMENT une fois (aucune orpheline, aucun double).
+    expect(events.filter((e) => e.reco_id === 'reco-1')).toHaveLength(1);
+    expect(events.filter((e) => e.reco_id === 'reco-2')).toHaveLength(1);
+  });
+
   it('COURSE : nav SPA (removePanel) pendant une bascule échouée → panneau NON ressuscité', async () => {
     const { client } = fakeClient(BASE_RECO);
     const slow = deferred<boolean>();
@@ -323,5 +376,30 @@ describe('guide — aucun contact page', () => {
     // « Suivre » note l'intention (followed:true) mais ne touche jamais la page.
     (shadow().querySelector('[data-sobrio-follow]') as HTMLButtonElement).click();
     expect(events[0]?.followed).toBe(true);
+  });
+});
+
+describe('badge — honnêteté du libellé selon le mode (règle 7)', () => {
+  it('en auto, le titre n’affirme PAS « n’agit jamais » ; le clic committe l’acceptation', () => {
+    const onDismiss = vi.fn();
+    renderBadge(FR_MESSAGES, document.querySelector('main'), {
+      assistMode: 'auto',
+      onDismiss,
+    });
+    const badge = document
+      .getElementById('sobrio-badge-host')!
+      .shadowRoot!.querySelector('.badge') as HTMLButtonElement;
+    expect(badge.title).not.toContain('n’agit jamais');
+    expect(badge.title.toLowerCase()).toContain('automatiquement');
+    badge.click();
+    expect(onDismiss).toHaveBeenCalled();
+  });
+
+  it('hors auto (one_click), le titre lecture-seule « n’agit jamais » reste correct', () => {
+    renderBadge(FR_MESSAGES, document.querySelector('main'), { assistMode: 'one_click' });
+    const badge = document
+      .getElementById('sobrio-badge-host')!
+      .shadowRoot!.querySelector('.badge') as HTMLButtonElement;
+    expect(badge.title).toContain('n’agit jamais');
   });
 });

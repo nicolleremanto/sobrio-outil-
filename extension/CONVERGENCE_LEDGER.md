@@ -17,11 +17,11 @@ Fable 5 (10/50), Opus 4.8 (5/25), Sonnet 5 (3/15 · intro 2/10), Haiku 4.5 (1/5)
 
 ## État des chantiers
 
-| Chantier | Sujet                             | Rondes vertes consécutives  | Statut       |
-| -------- | --------------------------------- | --------------------------- | ------------ |
-| C        | Catalogue de modèles à jour       | 2/2 (rondes 1 & 2)          | **CONVERGÉ** |
-| A        | Refonte graphique du panneau      | 2/2 (rondes 3 & 4)          | **CONVERGÉ** |
-| B        | Bascule instantanée + assist_mode | 0/2 (ronde 1 RED cycle-vie) | en cours     |
+| Chantier | Sujet                             | Rondes vertes consécutives    | Statut       |
+| -------- | --------------------------------- | ----------------------------- | ------------ |
+| C        | Catalogue de modèles à jour       | 2/2 (rondes 1 & 2)            | **CONVERGÉ** |
+| A        | Refonte graphique du panneau      | 2/2 (rondes 3 & 4)            | **CONVERGÉ** |
+| B        | Bascule instantanée + assist_mode | 0/2 (ronde 2 RED concurrence) | en cours     |
 
 ---
 
@@ -303,3 +303,32 @@ trouvé la racine plus profonde (deux blocking convergents). Défauts retenus :
 - **[minor]** FastAPI `main.py` version → 1.1 ; `policy_json` invalide (seuil hors
   0..1) → repli défauts (plus de 500) + test ; libellé « déjà sur {modèle} » quand
   auto et modèle déjà courant ; en-têtes de sources « v1.1 » ; test guide non trivial.
+
+## Chantier B — round 2 (commit 38f7ddc)
+
+| agent               | scores                                                                  | blocking | major | verdict    |
+| ------------------- | ----------------------------------------------------------------------- | -------- | ----- | ---------- |
+| robustness-redteam  | dégrad 4 · crash 5 · repli 5 · spa 3 · observers 5                      | 0        | 1     | **YELLOW** |
+| product-conformance | ton 3 · fourchettes 5 · mémoire 5 · démontre 5 · nouv-conv 5 · budget 5 | 0        | 1     | **YELLOW** |
+| qa-auditor          | couv 3 · contrat 5 · erreurs 3 · clarté 4 · régressions 3               | 1        | 0     | **RED**    |
+| privacy-sentinel    | —                                                                       | PASS     | —     | **PASS**   |
+
+→ Ronde **RED**. Le cycle-vie + l'acceptation différée tiennent ; les juges
+descendent d'un cran : **flux CONCURRENTS de la même conversation** (debounce
+600 ms < bascule lente ~2,7 s). Défauts retenus :
+
+- **[blocking qa + major redteam]** Deux flux auto se chevauchent : `pendingAutoAccept`
+  écrasé sans flush → acceptation ORPHELINE (committée 0 fois) pour la reco
+  supplantée. → **corrigé** jeton de génération `flowGeneration` : un flux plus
+  ancien qui se résout après avoir été supplanté committe SON acceptation
+  (`commitAccept()`) au lieu d'écraser le pending du plus récent + test de
+  concurrence (F1 lent supplanté par F2 → chacune committée exactement une fois).
+- **[major product]** Titre du badge « n'agit jamais à votre place » FAUX en auto
+  (règle 7). → **corrigé** `badge_title_auto` honnête, passé selon le mode effectif.
+- **[minor]** clic badge → `removePanel` sans flush (acceptation orpheline) →
+  **corrigé** (badge `onDismiss` = flush) ; `switched_back` affirmait un fait
+  incertain → **reformulé** en intention ; `policy_json` partiellement invalide
+  écrasait `guide` → **corrigé** assainissement clé par clé + test ; onDismiss
+  pendant bascule en vol → **corrigé** (flush du pending, posé après succès seul).
+- **[minor assumé]** nav SPA pendant la bascule → acceptation non committée
+  (sous-comptage, sens sûr) : documenté comme choix conservateur.
