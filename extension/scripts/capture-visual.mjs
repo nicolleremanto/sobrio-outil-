@@ -56,9 +56,14 @@ function panelMarkup(state) {
   parts.push(
     `<div class="range">Énergie estimée : ${formatRange(state.energyMin, state.energyMax)} Wh · périmètre : inférence</div>`,
   );
-  if (state.budget) {
-    parts.push(`<div class="gauge" data-sobrio-budget><div style="width:42%"></div></div>
-      <div class="gauge-label">Budget Équipe démo : 42 % utilisé</div>`);
+  if (state.budgetPct !== undefined) {
+    // Miroir de renderPanel : barre bornée à 100 %, libellé = valeur réelle,
+    // attribut de dépassement si > 100 % (sincérité budget).
+    const rawPct = Math.round(Math.max(0, state.budgetPct));
+    const barPct = Math.min(100, rawPct);
+    const over = rawPct > 100 ? ` data-sobrio-budget-over="${rawPct}"` : '';
+    parts.push(`<div class="gauge" data-sobrio-budget${over}><div style="width:${barPct}%"></div></div>
+      <div class="gauge-label">Budget Équipe démo : ${rawPct} % utilisé</div>`);
   }
   if (state.banner) {
     parts.push(
@@ -91,7 +96,7 @@ const STATES = [
     costMax: 0.0006,
     energyMin: 0.05,
     energyMax: 0.21,
-    budget: true,
+    budgetPct: 42,
     others: ['Claude Sonnet 5', 'Claude Opus 4.8'],
   },
   {
@@ -102,7 +107,7 @@ const STATES = [
     costMax: 0.0006,
     energyMin: 0.05,
     energyMax: 0.21,
-    budget: true,
+    budgetPct: 42,
     why: true,
     others: ['Claude Sonnet 5', 'Claude Opus 4.8'],
   },
@@ -114,7 +119,17 @@ const STATES = [
     costMax: 0.004,
     energyMin: 0.4,
     energyMax: 1.8,
-    budget: false,
+    others: ['Claude Haiku 4.5', 'Claude Opus 4.8'],
+  },
+  {
+    key: 'budget-depasse',
+    model: 'Claude Sonnet 5',
+    confidence: 0.7,
+    costMin: 0.002,
+    costMax: 0.004,
+    energyMin: 0.4,
+    energyMax: 1.8,
+    budgetPct: 118,
     others: ['Claude Haiku 4.5', 'Claude Opus 4.8'],
   },
   {
@@ -125,7 +140,7 @@ const STATES = [
     costMax: 0.012,
     energyMin: 0.8,
     energyMax: 3.2,
-    budget: true,
+    budgetPct: 42,
     banner: true,
     others: ['Claude Haiku 4.5', 'Claude Sonnet 5'],
   },
@@ -218,10 +233,10 @@ execFileSync(
     '--disable-gpu',
     '--hide-scrollbars',
     '--force-device-scale-factor=2',
-    // Fenêtre assez HAUTE pour contenir le badge + les 6 états empilés :
+    // Fenêtre assez HAUTE pour contenir le badge + les 7 états empilés :
     // `--screenshot` clippe au viewport, donc la hauteur doit couvrir toute
     // la colonne.
-    '--window-size=800,2900',
+    '--window-size=800,3400',
     `--screenshot=${out}`,
     `file://${HARNESS}`,
   ],

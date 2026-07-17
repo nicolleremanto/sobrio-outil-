@@ -25,8 +25,10 @@ export const PANEL_CSS = `
     --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
   }
   /* Sombre : suit la préférence système, sauf thème clair explicite de l'hôte.
-     Écart charte ASSUMÉ : l'ombre est renforcée (0.32 vs 0.08) car une ombre à
-     0.08 est invisible sur fond sombre — le token clair reste 0.08. */
+     Écarts charte ASSUMÉS (le token CLAIR reste la valeur de charte) :
+     - ombre renforcée 0.32 vs 0.08 — une ombre à 0.08 est invisible sur fond sombre ;
+     - piste de jauge --track rgba(255,255,255,.10) vs charte rgba(0,0,0,.08) —
+       une piste noire serait invisible sur fond sombre. */
   @media (prefers-color-scheme: dark) {
     :host(:not([data-sobrio-theme="light"])) {
       --bg: #262521;

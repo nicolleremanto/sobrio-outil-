@@ -308,8 +308,13 @@ export function renderPanel(reco: RecoV0, options: PanelOptions): void {
       budgetGauge.setAttribute('aria-valuemin', '0');
       budgetGauge.setAttribute('aria-valuemax', '100');
       // La barre (donc aria-valuenow) est bornée à 100 ; le dépassement est
-      // porté par le libellé et l'attribut de dépassement ci-dessous.
+      // porté par le libellé, l'attribut de dépassement, et aria-valuetext —
+      // pour que le lecteur d'écran entende la valeur RÉELLE (parité a11y ↔ visuel).
       budgetGauge.setAttribute('aria-valuenow', String(barPct));
+      budgetGauge.setAttribute(
+        'aria-valuetext',
+        `${rawPct} ${messages['budget_used_suffix'] ?? '% utilisé'}`,
+      );
       if (rawPct > 100) budgetGauge.setAttribute('data-sobrio-budget-over', String(rawPct));
       budgetGauge.setAttribute(
         'aria-label',

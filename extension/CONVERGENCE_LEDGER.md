@@ -20,7 +20,7 @@ Fable 5 (10/50), Opus 4.8 (5/25), Sonnet 5 (3/15 · intro 2/10), Haiku 4.5 (1/5)
 | Chantier | Sujet                             | Rondes vertes consécutives | Statut       |
 | -------- | --------------------------------- | -------------------------- | ------------ |
 | C        | Catalogue de modèles à jour       | 2/2 (rondes 1 & 2)         | **CONVERGÉ** |
-| A        | Refonte graphique du panneau      | 1/2 (ronde 3)              | en cours     |
+| A        | Refonte graphique du panneau      | 2/2 (rondes 3 & 4)         | **CONVERGÉ** |
 | B        | Bascule instantanée + assist_mode | 0/2                        | à venir      |
 
 ---
@@ -185,3 +185,42 @@ le reste documenté :
   importé par le harnais ET un test de parité stricte vs `panel.ts`).
 - **corrigé** garde de dérive markup rendue **symétrique** (panel.ts ↔ harnais).
 - **corrigé** `.close` 16 px commenté comme glyphe d'icône (écart typo assumé).
+
+## Chantier A — round 4 (commit 0b27634)
+
+| agent               | scores                                                                      | blocking | major | verdict   |
+| ------------------- | --------------------------------------------------------------------------- | -------- | ----- | --------- |
+| design-critic       | layout 5 · couleur 5 · typo 5 · grille 5 · couverture 4 · parité 5 · a11y 5 | 0        | 0     | **GREEN** |
+| product-conformance | ton 5 · fourchettes 5 · mémoire 5 · démontre 5 · nouv-conv 5 · budget 5     | 0        | 0     | **GREEN** |
+| qa-auditor          | couv 5 · contrat 5 · erreurs 5 · clarté 5 · régressions 5                   | 0        | 0     | **GREEN** |
+| privacy-sentinel    | —                                                                           | PASS     | —     | **PASS**  |
+
+→ Ronde **VERTE (2/2 consécutive)** — **CHANTIER A CONVERGÉ** (rondes 3 & 4).
+Toutes dimensions ≥ 4, zéro blocking/major, privacy PASS aux deux rondes.
+
+Bilan de la boucle A : ronde 0 YELLOW (capture tronquée) → 1 verte → 2 RED
+(blocking lint attrapé par qa) → 3 verte → 4 verte. Le dispositif a attrapé en
+chemin : capture tronquée, blocking lint, faille de sincérité budget, dérive de
+parité `formatRange`.
+
+Minors non bloquants de la ronde 4 traités en **finition post-convergence**
+(commit ronde 5) — chaque changement re-jugé (ronde 5 de clôture) pour ne rien
+livrer de non-jugé, puis résidus triviaux → TODO(V2) :
+
+- **corrigé** état « budget dépassé » (>100 %) absent de la capture (design docke
+  couverture à 4 ; product) → nouvel état `budget-depasse` (118 %) + budget du
+  harnais paramétré → sincérité budget prouvée à l'œil, clair ET sombre.
+- **corrigé** a11y budget en dépassement (qa) : `aria-valuetext` porte la valeur
+  réelle (le lecteur d'écran entend « 118 % », plus seulement 100) + test.
+- **corrigé** garde anti-régression `ambiguous_note` (product) : test verrouillant
+  l'absence de tout nom de modèle en dur.
+- **corrigé** écart `--track` sombre non documenté (design) → commenté (parité
+  avec l'ombre). · garde de dérive markup élargie à 17 classes (qa).
+- **documenté** libellé a11y du harnais (qa) : le harnais reflète FR_MESSAGES
+  (« Fermer le panneau ») ; seule PANEL_CSS est mono-source par ailleurs.
+
+## Chantier A — round 5 (commit **RONDE5**) — validation de la finition post-convergence
+
+| agent        | scores | blocking | major | verdict |
+| ------------ | ------ | -------- | ----- | ------- |
+| _(en cours)_ |        |          |       |         |

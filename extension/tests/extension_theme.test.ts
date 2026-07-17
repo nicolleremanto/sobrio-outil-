@@ -164,10 +164,38 @@ describe('capture-visual — extraction PANEL_CSS (garde anti-dérive du harnais
     // un attribut class="x" (template du harnais).
     const appears = (src: string, cls: string) =>
       src.includes(`'${cls}'`) || new RegExp(`class="${cls}(?=[ "])`).test(src);
-    for (const cls of ['panel', 'badge', 'gauge', 'model', 'banner', 'why', 'actions', 'header']) {
+    // Ensemble élargi des classes rendues (celles apparaissant comme tokens
+    // autonomes des deux côtés ; 'why-text' est composée, gardée via 'note').
+    const CLASSES = [
+      'panel',
+      'badge',
+      'gauge',
+      'gauge-label',
+      'model',
+      'banner',
+      'why',
+      'actions',
+      'header',
+      'title',
+      'close',
+      'mode-note',
+      'range',
+      'note',
+      'ack',
+      'primary',
+      'hint',
+    ];
+    for (const cls of CLASSES) {
       expect(appears(panelSrc, cls)).toBe(true);
       expect(appears(harnessSrc, cls)).toBe(true);
     }
+  });
+});
+
+describe('ton humble — ambiguous_note ne nomme aucun modèle en dur (anti-régression)', () => {
+  it('le message de signal ambigu ne cite ni haiku ni sonnet ni opus ni fable', () => {
+    // Verrouille le correctif de ton (Chantier C→A) : aucun nom de modèle en dur.
+    expect(FR_MESSAGES['ambiguous_note']).not.toMatch(/haiku|sonnet|opus|fable/i);
   });
 });
 
@@ -222,11 +250,13 @@ describe('renderPanel — thème appliqué à l’hôte + fourchettes FR', () =>
     });
     const shadow = document.getElementById('sobrio-reco-host')!.shadowRoot!;
     const budget = shadow.querySelector('[data-sobrio-budget]')!;
-    // Barre + aria bornées à 100 (ne peut pas déborder visuellement)…
+    // Barre + aria-valuenow bornées à 100 (ne peut pas déborder visuellement)…
     expect(budget.getAttribute('aria-valuenow')).toBe('100');
     expect((budget.querySelector('div') as HTMLElement).style.width).toBe('100%');
-    // …mais le dépassement RESTE visible : attribut + libellé à 118, pas 100.
+    // …mais le dépassement RESTE visible : attribut, libellé ET aria-valuetext
+    // à 118 (parité a11y ↔ visuel : le lecteur d'écran entend la valeur réelle).
     expect(budget.getAttribute('data-sobrio-budget-over')).toBe('118');
+    expect(budget.getAttribute('aria-valuetext')).toBe('118 % utilisé');
     expect(shadow.textContent).toContain('118');
     expect(shadow.textContent).not.toContain('100 % utilisé');
   });
