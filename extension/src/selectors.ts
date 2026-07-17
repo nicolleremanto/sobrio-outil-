@@ -163,7 +163,7 @@ export const BUBBLE_SELECTORS: readonly string[] = [
   '[data-testid="user-message"], [data-testid="assistant-message"]',
 ];
 
-/** Étiquette du modèle courant — candidats ordonnés (claude.ai + testpage). */
+/** Étiquette du modèle courant — candidats ordonnés (claude.ai + fixtures). */
 export const MODEL_LABEL_SELECTORS: readonly string[] = [
   '[data-testid="model-selector-dropdown"]',
   '[data-testid="model-selector"]',

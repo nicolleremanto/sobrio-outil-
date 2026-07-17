@@ -17,6 +17,7 @@ est assumé et documenté — il ne sera pas « corrigé » en supprimant l'auto
 ## Boucle par boucle
 
 ### Boucle 2 — Migration du harnais de test
+
 - 🔁 `dev/testpage/` + `dev/serve.mjs` + entrypoint `testpage.content.ts` +
   script `dev:page` : **à supprimer**.
 - ❌ Fixtures DOM headless `test/fixtures/*.html` (nominal, alt1, alt2, broken) :
@@ -25,6 +26,7 @@ est assumé et documenté — il ne sera pas « corrigé » en supprimant l'auto
 - 🔶 `filterEntrypoints` : simplifier une fois testpage retiré.
 
 ### Boucle 3 — Cycle de vie SPA & mémoire par conversation
+
 - 🔶 `conversationMemory.ts` : mémoire mono-instance avec reset sur changement
   de `threadId`. **Manque** : registre multi-conversations (clé = URL), états
   distincts conservés en navigation entre fils, purge, re-scan paresseux à
@@ -33,12 +35,14 @@ est assumé et documenté — il ne sera pas « corrigé » en supprimant l'auto
   qu'aux mutations DOM, pas aux changements d'URL sans rechargement.
 
 ### Boucle 4 — Sélecteurs durcis + diagnostic
+
 - ✅ `selectors.ts` : stratégies ordonnées + repli « plus grand éditable » +
   détecteur de casse `selector_broken`.
 - ❌ Bouton popup « Tester la détection sur cet onglet » (diagnostic sans DevTools).
 - 🔶 Détachement des observers : fait sur `pagehide` ; à couvrir par un test.
 
 ### Boucle 5 — Panneau complet & modes
+
 - ✅ Panneau : reco, confiance, fourchettes, budget, Utiliser/Déroger, Pourquoi,
   bandeau conversation longue, note ambiguë.
 - ❌ Prise en compte du `mode` (eco/equilibre/qualite) sur le ton des messages.
@@ -47,6 +51,7 @@ est assumé et documenté — il ne sera pas « corrigé » en supprimant l'auto
   test « aucun style ne fuit hors shadow DOM ».
 
 ### Boucle 6 — Config distante industrialisée
+
 - 🔶 `createConfigCache` : TTL 5 min. **À porter** à 1 h + rafraîchissement
   silencieux.
 - ✅ Kill-switch `enabled=false`.
@@ -55,6 +60,7 @@ est assumé et documenté — il ne sera pas « corrigé » en supprimant l'auto
 - 🔶 Hors-ligne : dernier état connu conservé ; à couvrir explicitement.
 
 ### Boucle 7 — Télémétrie industrialisée
+
 - 🔶 `sendWithRetry` : retry en mémoire (perdu au rechargement). **À changer** :
   file **persistante** (`chrome.storage`) + retry exponentiel + reprise.
 - ✅ Schéma strict `RecoEvent` (test de forme).
@@ -63,12 +69,14 @@ est assumé et documenté — il ne sera pas « corrigé » en supprimant l'auto
 - 🔶 Pas d'envoi si kill-switch : à garantir et tester.
 
 ### Boucle 8 — Performance & robustesse
+
 - ❌ Script de garde de taille (< 2 Mo, échec du build sinon).
 - ❌ Greps automatisés : `console.log` de contenu, permissions en trop, réseau
   hors des 3 endpoints.
 - ✅ Debounce/throttle en place.
 
 ### Boucle 9 — Packaging & livraison
+
 - 🔶 Version : `0.1.0` → **`1.0.0`**.
 - ❌ `CHANGELOG.md`.
 - 🔶 README : refonte finale (dev + politique entreprise DSI, diagnostic, limites).
@@ -94,6 +102,6 @@ extension/
 
 ## Suivi (coché au fil des boucles)
 
-- [ ] B2 migration harnais · [ ] B3 SPA & mémoire · [ ] B4 sélecteurs & diagnostic
+- [x] B2 migration harnais · [ ] B3 SPA & mémoire · [ ] B4 sélecteurs & diagnostic
 - [ ] B5 panneau & modes · [ ] B6 config distante · [ ] B7 télémétrie
 - [ ] B8 perf & robustesse · [ ] B9 packaging

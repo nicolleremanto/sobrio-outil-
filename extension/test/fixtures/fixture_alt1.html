@@ -1,0 +1,20 @@
+<!--
+  Fixture ALTERNATIVE 1 — structure plausible différente : zone de saisie sans
+  classe ProseMirror (contenteditable + role=textbox seul), bulles par
+  data-testid, sélecteur de modèle sans data-testid (résolu par heuristique de
+  libellé). Éprouve les stratégies de repli. Données inventées.
+-->
+<body data-fixture="alt1" data-sim-path="/chat/conv-alt1-777">
+  <nav>
+    <button type="button" aria-haspopup="menu">Claude Sonnet 4.6</button>
+  </nav>
+  <section aria-label="conversation">
+    <article data-testid="user-message">Corrige ce script Python s'il te plaît.</article>
+    <article data-testid="assistant-message">
+      ```python\ndef inverse(x):\n return x[::-1]\n```
+    </article>
+  </section>
+  <footer>
+    <div contenteditable="true" role="textbox" aria-label="Message"></div>
+  </footer>
+</body>

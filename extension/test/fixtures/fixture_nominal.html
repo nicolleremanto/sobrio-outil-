@@ -1,0 +1,39 @@
+<!--
+  Fixture DOM headless NOMINALE — instantané synthétique d'une structure type
+  claude.ai (ProseMirror, bulles data-message-author-role, sélecteur de modèle
+  à deux niveaux, URL de conversation simulée). Utilisée par vitest/happy-dom.
+  Aucun script : seul le <body> est injecté dans les tests. Données inventées.
+-->
+<body data-fixture="nominal" data-sim-path="/chat/conv-nominal-001">
+  <header>
+    <button type="button" data-testid="model-selector-dropdown" aria-haspopup="menu">
+      Claude Opus 4.8
+    </button>
+    <div role="menu" hidden>
+      <button type="button" role="menuitem">Claude Opus 4.8</button>
+      <button type="button" role="menuitem" aria-haspopup="menu">Plus de modèles ›</button>
+    </div>
+  </header>
+  <main data-thread-id="conv-nominal-001">
+    <div id="messages">
+      <div data-message-author-role="user">Peux-tu m'aider sur un exercice d'analyse ?</div>
+      <div data-message-author-role="assistant">
+        Bien sûr, donnez-moi l'énoncé et je vous accompagne pas à pas.
+      </div>
+      <div data-message-author-role="user">
+        Soit f(x) = x² + 3x. Calcule la dérivée et l'intégrale sur [0,1].
+      </div>
+      <div data-message-author-role="assistant">
+        f'(x) = 2x + 3, donc par le théorème fondamental l'intégrale vaut 11/6. La preuve suit.
+      </div>
+    </div>
+  </main>
+  <div class="composer">
+    <div
+      class="ProseMirror"
+      contenteditable="true"
+      role="textbox"
+      aria-label="Écrivez votre message"
+    ></div>
+  </div>
+</body>
