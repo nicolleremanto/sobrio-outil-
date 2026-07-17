@@ -69,6 +69,27 @@ def test_config_merges_policy_json(client, test_engine):
             conn.execute(sa.text("UPDATE orgs SET policy_json = '{}'::jsonb WHERE org_id = 'demo'"))
 
 
+def test_config_invalid_policy_falls_back_not_500(client, test_engine):
+    """RFC-0003 : un policy_json mal formé (seuil hors 0..1) → défauts sûrs, pas 500."""
+    with test_engine.begin() as conn:
+        conn.execute(
+            sa.text(
+                "UPDATE orgs SET policy_json = "
+                """'{"auto_confidence_threshold": 1.5}'::jsonb """
+                "WHERE org_id = 'demo'"
+            )
+        )
+    try:
+        response = client.get("/v1/extension/config", params={"org": "demo"}, headers=AUTH_HEADERS)
+        assert response.status_code == 200  # jamais 500 (règle 3)
+        payload = response.json()
+        assert payload["auto_confidence_threshold"] == 0.75  # repli sur le défaut sûr
+        assert payload["assist_mode"] == "one_click"
+    finally:
+        with test_engine.begin() as conn:
+            conn.execute(sa.text("UPDATE orgs SET policy_json = '{}'::jsonb WHERE org_id = 'demo'"))
+
+
 def test_config_assist_mode_guide_kill_switch(client, test_engine):
     """RFC-0003 : l'org peut forcer assist_mode=guide (kill-switch prudence CGU)."""
     with test_engine.begin() as conn:

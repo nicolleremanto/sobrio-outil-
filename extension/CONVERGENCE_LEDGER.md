@@ -17,11 +17,11 @@ Fable 5 (10/50), Opus 4.8 (5/25), Sonnet 5 (3/15 · intro 2/10), Haiku 4.5 (1/5)
 
 ## État des chantiers
 
-| Chantier | Sujet                             | Rondes vertes consécutives | Statut       |
-| -------- | --------------------------------- | -------------------------- | ------------ |
-| C        | Catalogue de modèles à jour       | 2/2 (rondes 1 & 2)         | **CONVERGÉ** |
-| A        | Refonte graphique du panneau      | 2/2 (rondes 3 & 4)         | **CONVERGÉ** |
-| B        | Bascule instantanée + assist_mode | 0/2 (ronde 0 RED course)   | en cours     |
+| Chantier | Sujet                             | Rondes vertes consécutives  | Statut       |
+| -------- | --------------------------------- | --------------------------- | ------------ |
+| C        | Catalogue de modèles à jour       | 2/2 (rondes 1 & 2)          | **CONVERGÉ** |
+| A        | Refonte graphique du panneau      | 2/2 (rondes 3 & 4)          | **CONVERGÉ** |
+| B        | Bascule instantanée + assist_mode | 0/2 (ronde 1 RED cycle-vie) | en cours     |
 
 ---
 
@@ -273,3 +273,33 @@ jamais pendant la bascule en vol). Défauts retenus :
   → **corrigé** « J'utiliserai {modèle} » (`use_model_guide`).
 - **[minor qa]** `schemas.py` seuil sans borne 0..1 → **corrigé** `Field(ge=0, le=1)`.
   · `openapi.info.version` resté « 1.0 » → **corrigé** « 1.1 ».
+
+## Chantier B — round 1 (commit a7896a1)
+
+| agent               | scores                                                                  | blocking | major | verdict   |
+| ------------------- | ----------------------------------------------------------------------- | -------- | ----- | --------- |
+| robustness-redteam  | dégrad 3 · crash 4 · repli 3 · spa 2 · observers 5                      | 1        | 1     | **RED**   |
+| product-conformance | ton 5 · fourchettes 5 · mémoire 4 · démontre 5 · nouv-conv 5 · budget 5 | 1        | 0     | **RED**   |
+| qa-auditor          | couv 5 · contrat 4 · erreurs 4 · clarté 5 · régressions 5               | 0        | 0     | **GREEN** |
+| privacy-sentinel    | —                                                                       | PASS     | —     | **PASS**  |
+
+→ Ronde **RED**. Mon patch ronde 0 n'avait traité qu'une facette : les juges ont
+trouvé la racine plus profonde (deux blocking convergents). Défauts retenus :
+
+- **[blocking redteam + product]** Cycle de vie conversation : le flux en vol
+  rendait le panneau + basculait APRÈS l'`await recommend()` sans re-valider le
+  fil actif → nav SPA pendant le fetch = panneau ressuscité + **bascule auto sur
+  le mauvais fil** + followed:true. → **corrigé** jeton `isCurrent` (clé de
+  conversation figée au lancement, re-vérifiée avant render, avant applyModel et
+  avant tout commit) + test de garde SPA.
+- **[blocking product]** Timing télémétrie : `followed:true` émis dès le succès
+  → une bascule réussie PUIS Annuler émettait DEUX événements contradictoires
+  (parcours conçu, pas une course rare) + `recos_followed` corrompu. → **corrigé**
+  ACCEPTATION DIFFÉRÉE : `followed:true` n'est émis qu'à l'acceptation (écarter le
+  panneau sans annuler : fermeture/Échap/nav/flux suivant) ; `onCancel` est le
+  SEUL émetteur en cas d'annulation → exactement un événement net. Registre
+  `pendingAutoAccept` + garde `outcomeCommitted`. Tests réécrits (les anciens
+  entérinaient le double-événement).
+- **[minor]** FastAPI `main.py` version → 1.1 ; `policy_json` invalide (seuil hors
+  0..1) → repli défauts (plus de 500) + test ; libellé « déjà sur {modèle} » quand
+  auto et modèle déjà courant ; en-têtes de sources « v1.1 » ; test guide non trivial.

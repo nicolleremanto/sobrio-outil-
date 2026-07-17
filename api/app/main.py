@@ -20,7 +20,7 @@ setup_logging()
 
 app = FastAPI(
     title="Sobrio API",
-    version="1.0",
+    version="1.1",  # RFC-0003 : ExtensionConfig += assist_mode (aligné sur openapi.yaml)
     description=(
         "API Sobrio Phase 1 : recommandation de modèle, télémétrie, "
         "configuration de l'extension. Contrat : contracts/openapi.yaml."

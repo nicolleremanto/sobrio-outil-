@@ -50,6 +50,7 @@ export const FR_MESSAGES: Messages = {
   auto_switch_hint: 'Bascule automatique — vous gardez la main.',
   cancel_auto: 'Annuler',
   switched_back: 'Modèle précédent restauré.',
+  already_on_model: 'Déjà sur {model} — rien à faire.',
   // Mode guide : l'extension n'agit pas sur la page, elle indique quoi faire.
   guide_hint: 'À sélectionner dans le menu de modèle de Claude.',
 

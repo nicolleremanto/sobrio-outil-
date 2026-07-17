@@ -81,6 +81,12 @@ export interface FlowDeps {
   /** Seuil de bascule auto. Absent ⇒ DEFAULT_AUTO_THRESHOLD. */
   autoThreshold?: number;
   /**
+   * Vrai si la conversation d'origine du flux est TOUJOURS active. Empêche
+   * d'afficher ou de basculer sur un fil dont l'utilisateur est déjà parti
+   * (navigation SPA pendant l'appel réseau). Absent ⇒ toujours courant.
+   */
+  isCurrent?: () => boolean;
+  /**
    * Émission d'un événement de télémétrie. Par défaut : `client.sendRecoEvent`
    * (capture mock). En production, la file persistante (bootstrap) est
    * branchée ici, et vaut noop si la télémétrie est interdite (kill-switch /
@@ -92,6 +98,21 @@ export interface FlowDeps {
 /** Construit le bloc `signals` complet : prompt + mémoire de conversation. */
 export function buildSignals(text: string, memory: ConversationMemory): Signals {
   return { prompt: computePromptSignals(text), conversation: memory.toSignals() };
+}
+
+/**
+ * Acceptation d'une bascule auto EN ATTENTE de confirmation. Committée (une
+ * seule fois) quand l'utilisateur écarte le panneau sans annuler, change de
+ * conversation, ou déclenche un flux suivant. Module-level : au plus une
+ * bascule auto en attente à la fois (le panneau de reco est unique).
+ */
+let pendingAutoAccept: (() => void) | null = null;
+
+/** Committe l'acceptation auto en attente, s'il y en a une (idempotent). */
+export function flushPendingAutoAccept(): void {
+  const commit = pendingAutoAccept;
+  pendingAutoAccept = null;
+  commit?.();
 }
 
 /** Télémétrie STRICTE : exactement les 4 champs du contrat, rien d'autre. */
@@ -112,6 +133,7 @@ export async function runRecommendationFlow(text: string, deps: FlowDeps) {
   if (deps.config && !deps.config.enabled) return null; // kill-switch : inerte
 
   if (text.trim().length === 0) {
+    flushPendingAutoAccept(); // panneau retiré = l'auto précédent est accepté
     removePanel();
     return null;
   }
@@ -119,6 +141,11 @@ export async function runRecommendationFlow(text: string, deps: FlowDeps) {
   const signals = buildSignals(text, deps.memory);
   const reco = await withTimeout(deps.client.recommend(signals), RECOMMEND_TIMEOUT_MS);
   if (!reco) return null; // échec/timeout ⇒ NE RIEN AFFICHER (règle 3)
+
+  // La conversation a pu changer PENDANT l'appel réseau : ne rien afficher ni
+  // basculer sur un fil qui n'est plus actif (anti-fuite inter-conversations).
+  const isCurrent = deps.isCurrent ?? (() => true);
+  if (!isCurrent()) return null;
 
   deps.memory.noteRecoShown();
   const now = deps.now ?? (() => new Date());
@@ -152,14 +179,39 @@ export async function runRecommendationFlow(text: string, deps: FlowDeps) {
     if (previousModel === null) deps.client.sendHealthSignal?.('selector_broken');
     autoSwitch = previousModel !== null && previousModel !== reco.recommended_model;
   }
+  // Auto mais DÉJÀ sur le modèle recommandé : rien à basculer — on l'indique
+  // plutôt que d'afficher « Utiliser {modèle} » pour un modèle déjà sélectionné.
+  const autoAlreadyCurrent =
+    assistMode === 'auto' && previousModel !== null && previousModel === reco.recommended_model;
 
-  // La bascule auto est une opération asynchrone ANNULABLE. `cancelled` est
-  // partagé entre le clic Annuler et la fin de la bascule de fond ;
-  // `switchInFlight` permet de SÉRIALISER la restauration APRÈS la bascule —
-  // jamais deux `applyModelInPage` concurrents sur le menu (modèle final
-  // déterministe), et jamais de followed=true émis après une annulation.
-  let cancelled = false;
+  // ACCEPTATION DIFFÉRÉE (garantie : UN SEUL événement net par reco). En auto,
+  // la bascule est faite immédiatement mais l'issue reste EN ATTENTE tant
+  // qu'Annuler est offert. On committe :
+  //   - REJET (followed=false, overridden_to=précédent) au clic Annuler ;
+  //   - ACCEPTATION (followed=true) quand l'utilisateur écarte le panneau sans
+  //     annuler (fermeture, Échap, changement de conversation, flux suivant).
+  // `outcomeCommitted` garantit l'exclusivité ; `switchInFlight` sérialise la
+  // restauration APRÈS la bascule (jamais deux sélections concurrentes → modèle
+  // final déterministe).
+  let outcomeCommitted = false;
   let switchInFlight: Promise<boolean> | null = null;
+
+  const commitAccept = () => {
+    if (outcomeCommitted) return;
+    outcomeCommitted = true;
+    if (pendingAutoAccept === commitAccept) pendingAutoAccept = null;
+    deps.memory.noteFollowed();
+    send(buildRecoEvent(reco.reco_id, true, null, now));
+  };
+  const commitReject = () => {
+    if (outcomeCommitted || previousModel === null) return;
+    outcomeCommitted = true;
+    if (pendingAutoAccept === commitAccept) pendingAutoAccept = null;
+    deps.memory.noteDerogation(reco.recommended_model, previousModel);
+    send(buildRecoEvent(reco.reco_id, false, previousModel, now));
+    const restore = () => applyAndReport(previousModel!);
+    void (switchInFlight ? switchInFlight.then(restore, restore) : restore());
+  };
 
   const renderOptions = (switched: boolean) => ({
     modelsVisible: deps.config?.models_visible ?? [],
@@ -167,6 +219,7 @@ export async function runRecommendationFlow(text: string, deps: FlowDeps) {
     mode: deps.config?.mode,
     assistMode,
     autoSwitched: switched,
+    alreadyOnModel: autoAlreadyCurrent,
     callbacks: {
       onFollow: () => {
         deps.memory.noteFollowed();
@@ -179,19 +232,15 @@ export async function runRecommendationFlow(text: string, deps: FlowDeps) {
         send(buildRecoEvent(reco.reco_id, false, model, now));
         void applyAndReport(model);
       },
-      onCancel: () => {
-        // Annuler la bascule auto : un seul événement net (followed=false,
-        // overridden_to=précédent). La restauration attend la fin de la bascule
-        // en vol (sérialisation) pour ne pas se disputer le menu de modèle.
-        if (previousModel === null || cancelled) return;
-        cancelled = true;
-        deps.memory.noteDerogation(reco.recommended_model, previousModel);
-        send(buildRecoEvent(reco.reco_id, false, previousModel, now));
-        const restore = () => applyAndReport(previousModel!);
-        void (switchInFlight ? switchInFlight.then(restore, restore) : restore());
-      },
+      onCancel: commitReject,
+      // Écarter le panneau « basculé » SANS annuler = accepter la bascule auto.
+      onDismiss: switched ? commitAccept : undefined,
     },
   });
+
+  // Un nouveau panneau remplace le précédent : committe l'acceptation d'une
+  // bascule auto antérieure encore en attente (l'utilisateur est passé à autre).
+  flushPendingAutoAccept();
 
   // UI OPTIMISTE : en auto, on montre immédiatement l'état « basculé » (< 300 ms
   // perçu) ; la bascule réelle suit et corrige l'UI si elle échoue.
@@ -200,16 +249,16 @@ export async function runRecommendationFlow(text: string, deps: FlowDeps) {
   if (autoSwitch) {
     switchInFlight = applyAndReport(reco.recommended_model);
     const ok = await switchInFlight;
-    // Annulé PENDANT la bascule : ne PAS émettre followed=true — la restauration
-    // et sa télémétrie sont portées par onCancel (un seul événement net).
-    if (cancelled) return reco;
+    // Conversation changée pendant la bascule, ou issue déjà committée (Annuler
+    // en vol) : ne rien committer ni re-render ici.
+    if (!isCurrent() || outcomeCommitted) return reco;
     if (ok) {
-      // Bascule réussie et non annulée = suivi (followed=true).
-      deps.memory.noteFollowed();
-      send(buildRecoEvent(reco.reco_id, true, null, now));
+      // Succès : l'acceptation reste EN ATTENTE (Annuler encore possible). Elle
+      // sera committée à la fermeture/nav (onDismiss) ou par le flux suivant.
+      pendingAutoAccept = commitAccept;
     } else if (isPanelPresent()) {
-      // Repli one_click — UNIQUEMENT si le panneau optimiste est encore monté :
-      // une navigation SPA a pu le retirer entre-temps, on ne le ressuscite pas.
+      // Repli one_click — uniquement si le panneau optimiste est encore monté
+      // (une navigation SPA a pu le retirer ; on ne le ressuscite pas).
       renderPanel(reco, renderOptions(false));
     }
   }
@@ -242,7 +291,12 @@ export async function bootstrap(): Promise<void> {
   // sa propre mémoire, restituée en revenant dessus, reconstruite à l'arrivée
   // au milieu d'un fil existant. Changement de conversation ⇒ panneau retiré.
   const controller = createConversationController({
-    onConversationChange: () => removePanel(),
+    onConversationChange: () => {
+      // Quitter un fil = accepter une éventuelle bascule auto en attente, puis
+      // retirer le panneau obsolète (anti-fuite inter-conversations).
+      flushPendingAutoAccept();
+      removePanel();
+    },
   });
 
   // Mode d'assistance EFFECTIF (RFC-0003) : opt-in local ∧ politique org.
@@ -274,7 +328,12 @@ export async function bootstrap(): Promise<void> {
     autoThreshold,
     sendEvent,
   };
-  observeInputArea(baseDeps, () => controller.currentMemory(), controller.stop);
+  observeInputArea(
+    baseDeps,
+    () => controller.currentMemory(),
+    controller.stop,
+    () => controller.currentKey(),
+  );
 }
 
 /** Fenêtre du throttle d'observation DOM (garde-fou perf, boucle 5). */
@@ -291,6 +350,7 @@ function observeInputArea(
   baseDeps: FlowDeps,
   getMemory: () => ConversationMemory = () => baseDeps.memory,
   onStop?: () => void,
+  currentKey: () => string = () => '',
 ): void {
   let currentInput: HTMLElement | null = null;
 
@@ -305,7 +365,11 @@ function observeInputArea(
       currentInput instanceof HTMLTextAreaElement
         ? currentInput.value
         : (currentInput.textContent ?? '');
-    void runRecommendationFlow(text, { ...baseDeps, memory });
+    // Fige la conversation d'origine : le flux ne s'affichera/basculera QUE si
+    // ce fil est encore actif à l'arrivée de la reco (anti-fuite SPA).
+    const flowKey = currentKey();
+    const isCurrent = () => currentKey() === flowKey;
+    void runRecommendationFlow(text, { ...baseDeps, memory, isCurrent });
   };
 
   const debouncer = createDebouncer(onPause);
@@ -348,6 +412,7 @@ function observeInputArea(
       window.removeEventListener('resize', throttledReposition);
       document.removeEventListener('scroll', throttledReposition, { capture: true });
       onStop?.(); // détache le contrôleur SPA (aucune fuite)
+      flushPendingAutoAccept(); // committe une acceptation auto en attente
       removePanel();
       removeBadge();
     },

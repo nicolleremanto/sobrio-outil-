@@ -38,6 +38,11 @@ export interface PanelCallbacks {
    * modèle précédent et télémètre followed=false, overridden_to=précédent.
    */
   onCancel?: () => void;
+  /**
+   * Mode `auto` : le panneau « basculé » est ÉCARTÉ sans annuler (fermeture,
+   * Échap) — l'utilisateur accepte la bascule (followed=true différé).
+   */
+  onDismiss?: () => void;
 }
 
 export interface PanelOptions {
@@ -54,6 +59,11 @@ export interface PanelOptions {
    * s'ouvre en état « basculé » avec Annuler, au lieu du bouton « Utiliser ».
    */
   autoSwitched?: boolean;
+  /**
+   * Mode `auto` : le modèle recommandé est DÉJÀ sélectionné — rien à basculer.
+   * On l'indique au lieu d'un bouton d'action inutile.
+   */
+  alreadyOnModel?: boolean;
 }
 
 const STYLE = PANEL_CSS;
@@ -242,13 +252,19 @@ export function renderPanel(reco: RecoV0, options: PanelOptions): void {
     closeButton.setAttribute('data-sobrio-close', '');
     closeButton.setAttribute('aria-label', messages['close_label'] ?? 'Fermer');
     closeButton.textContent = '×';
-    closeButton.addEventListener('click', () => removePanel());
+    // Écarter le panneau (croix / Échap) notifie l'acceptation d'une bascule
+    // auto en attente (onDismiss), puis le retire — sans piéger le focus.
+    const dismiss = () => {
+      callbacks.onDismiss?.();
+      removePanel();
+    };
+    closeButton.addEventListener('click', dismiss);
     header.appendChild(closeButton);
     panel.appendChild(header);
 
     // Échap ferme le panneau (accessibilité clavier), sans piéger le focus.
     panel.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') removePanel();
+      if (event.key === 'Escape') dismiss();
     });
 
     // Note de ton selon le mode d'organisation (eco/equilibre/qualite).
@@ -419,6 +435,15 @@ export function renderPanel(reco: RecoV0, options: PanelOptions): void {
       autoHint.className = 'hint';
       autoHint.textContent = messages['auto_switch_hint'] ?? '';
       actions.appendChild(autoHint);
+    } else if (options.alreadyOnModel) {
+      // Auto, mais déjà sur le modèle recommandé : simple accusé, aucune action.
+      const already = document.createElement('div');
+      already.className = 'ack';
+      already.setAttribute('data-sobrio-already', '');
+      already.textContent = formatMessage(messages['already_on_model'] ?? 'Déjà sur {model}.', {
+        model: modelDisplayName(reco.recommended_model),
+      });
+      actions.appendChild(already);
     } else {
       const followButton = document.createElement('button');
       followButton.className = 'primary';

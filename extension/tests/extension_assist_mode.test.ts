@@ -1,13 +1,15 @@
 /**
  * Chantier B — bascule de modèle encadrée (assist_mode : auto / one_click /
- * guide). Résolution du mode effectif, UI optimiste + Annuler, repli silencieux
- * `guide`, télémétrie cohérente. Aucun texte ne quitte le poste (règle 1).
+ * guide). Résolution du mode effectif, UI optimiste, ACCEPTATION DIFFÉRÉE (un
+ * seul événement net par reco), Annuler, garde de conversation (anti-fuite SPA),
+ * repli silencieux `guide`. Aucun texte ne quitte le poste (règle 1).
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ConversationMemory } from '../src/conversationMemory';
 import {
   DEFAULT_AUTO_THRESHOLD,
+  flushPendingAutoAccept,
   resolveAssistMode,
   runRecommendationFlow,
   type FlowDeps,
@@ -58,6 +60,13 @@ const CONFIG: ExtensionConfig = {
 function shadow(): ShadowRoot {
   return document.getElementById('sobrio-reco-host')!.shadowRoot!;
 }
+function q(sel: string): Element | null {
+  const host = document.getElementById('sobrio-reco-host');
+  return host ? host.shadowRoot!.querySelector(sel) : null;
+}
+function followedTrue(events: RecoEvent[]) {
+  return events.filter((e) => e.followed === true);
+}
 
 /** Promesse résoluble à la demande — pour simuler une bascule LENTE (course). */
 function deferred<T>() {
@@ -65,7 +74,6 @@ function deferred<T>() {
   const promise = new Promise<T>((r) => (resolve = r));
   return { promise, resolve };
 }
-
 /** Draine la file des microtâches (le flux atteint son `await` de bascule). */
 function flush(): Promise<void> {
   return new Promise((r) => setTimeout(r, 0));
@@ -73,6 +81,7 @@ function flush(): Promise<void> {
 
 beforeEach(() => {
   document.body.innerHTML = '<main></main>';
+  flushPendingAutoAccept(); // pas de fuite d'acceptation en attente entre tests
   removePanel();
 });
 
@@ -93,7 +102,7 @@ describe('resolveAssistMode — mode effectif (opt-in local ∧ politique org)',
   });
 });
 
-describe('auto — bascule optimiste, confiance ≥ seuil', () => {
+describe('auto — UI optimiste + acceptation différée (un seul événement net)', () => {
   function autoDeps(over: Partial<FlowDeps> = {}) {
     const { client, events, health } = fakeClient(BASE_RECO);
     const applyModel = vi.fn().mockResolvedValue(true);
@@ -108,99 +117,76 @@ describe('auto — bascule optimiste, confiance ≥ seuil', () => {
       autoThreshold: DEFAULT_AUTO_THRESHOLD,
       applyModel,
       readCurrentModel,
+      isCurrent: () => true,
       ...over,
     };
     return { deps, events, health, applyModel, readCurrentModel };
   }
 
-  it('panneau en état « basculé » + Annuler ; applyModel(reco) ; followed=true', async () => {
+  it('bascule immédiate + panneau « basculé » + Annuler ; issue EN ATTENTE (aucun événement)', async () => {
     const { deps, events, applyModel } = autoDeps();
     await runRecommendationFlow('Refactore ce module', deps);
 
-    // UI : état basculé (pas de bouton « Utiliser »), confirmation + Annuler.
-    expect(shadow().querySelector('[data-sobrio-switched]')?.textContent).toContain(
-      'Claude Sonnet 5',
-    );
-    expect(shadow().querySelector('[data-sobrio-cancel]')).toBeTruthy();
-    expect(shadow().querySelector('[data-sobrio-follow]')).toBeNull();
-
-    // Bascule réelle vers la reco + télémétrie followed=true.
+    expect(q('[data-sobrio-switched]')?.textContent).toContain('Claude Sonnet 5');
+    expect(q('[data-sobrio-cancel]')).toBeTruthy();
+    expect(q('[data-sobrio-follow]')).toBeNull();
     expect(applyModel).toHaveBeenCalledWith('claude-sonnet-5');
+    // Rien n'est émis tant que l'utilisateur peut annuler.
+    expect(events).toEqual([]);
+  });
+
+  it('acceptation committée à la fermeture (écarter sans annuler) = followed:true, UNE fois', async () => {
+    const { deps, events } = autoDeps();
+    await runRecommendationFlow('Refactore ce module', deps);
+    (shadow().querySelector('[data-sobrio-close]') as HTMLButtonElement).click();
     expect(events).toEqual([
       { reco_id: 'mock-1', followed: true, overridden_to: null, ts: '2026-07-17T10:00:00.000Z' },
     ]);
+    flushPendingAutoAccept(); // idempotent : pas de double-comptage
+    expect(events).toHaveLength(1);
+    expect(deps.memory.toSignals().recos_followed).toBe(1);
   });
 
-  it('Annuler restaure le modèle précédent + télémétrie followed=false/overridden_to', async () => {
+  it('acceptation committée par le flux suivant (flushPendingAutoAccept)', async () => {
+    const { deps, events } = autoDeps();
+    await runRecommendationFlow('Refactore ce module', deps);
+    expect(events).toEqual([]); // en attente
+    flushPendingAutoAccept();
+    expect(events).toEqual([
+      { reco_id: 'mock-1', followed: true, overridden_to: null, ts: '2026-07-17T10:00:00.000Z' },
+    ]);
+    flushPendingAutoAccept();
+    expect(events).toHaveLength(1);
+  });
+
+  it('Annuler après succès = UN SEUL événement net (followed:false), JAMAIS followed:true', async () => {
     const { deps, events, applyModel } = autoDeps();
     await runRecommendationFlow('Refactore ce module', deps);
     applyModel.mockClear();
 
     (shadow().querySelector('[data-sobrio-cancel]') as HTMLButtonElement).click();
-    await Promise.resolve();
+    await flush();
 
+    expect(events).toEqual([
+      {
+        reco_id: 'mock-1',
+        followed: false,
+        overridden_to: 'claude-haiku-4-5',
+        ts: '2026-07-17T10:00:00.000Z',
+      },
+    ]);
     expect(applyModel).toHaveBeenCalledWith('claude-haiku-4-5'); // restauration
-    expect(events[1]).toEqual({
-      reco_id: 'mock-1',
-      followed: false,
-      overridden_to: 'claude-haiku-4-5',
-      ts: '2026-07-17T10:00:00.000Z',
-    });
+    // Aucune acceptation ne peut plus être committée (issue déjà tranchée).
+    (shadow().querySelector('[data-sobrio-close]') as HTMLButtonElement)?.click();
+    flushPendingAutoAccept();
+    expect(followedTrue(events)).toHaveLength(0);
+    expect(events).toHaveLength(1);
+    expect(deps.memory.toSignals().recos_followed).toBe(0); // pas gonflé
   });
 
-  it('confiance < seuil → pas de bascule auto (UI one_click)', async () => {
-    const { deps, applyModel } = autoDeps();
-    await runRecommendationFlow('x', {
-      ...deps,
-      client: fakeClient({ ...BASE_RECO, confidence: 0.5 }).client,
-    });
-    expect(shadow().querySelector('[data-sobrio-switched]')).toBeNull();
-    expect(shadow().querySelector('[data-sobrio-follow]')).toBeTruthy();
-    expect(applyModel).not.toHaveBeenCalled();
-  });
-
-  it('modèle courant illisible (null) → pas de bascule auto (on ne saurait pas Annuler)', async () => {
-    const { deps, applyModel, readCurrentModel } = autoDeps();
-    readCurrentModel.mockReturnValue(null);
-    await runRecommendationFlow('Refactore ce module', deps);
-    expect(shadow().querySelector('[data-sobrio-switched]')).toBeNull();
-    expect(shadow().querySelector('[data-sobrio-follow]')).toBeTruthy();
-    expect(applyModel).not.toHaveBeenCalled();
-  });
-
-  it('déjà sur le modèle recommandé → pas de bascule', async () => {
-    const { deps, applyModel, readCurrentModel } = autoDeps();
-    readCurrentModel.mockReturnValue('claude-sonnet-5'); // == reco
-    await runRecommendationFlow('Refactore ce module', deps);
-    expect(shadow().querySelector('[data-sobrio-switched]')).toBeNull();
-    expect(applyModel).not.toHaveBeenCalled();
-  });
-
-  it('modèle courant illisible en auto → signal selector_broken émis', async () => {
-    const { deps, health, readCurrentModel } = autoDeps();
-    readCurrentModel.mockReturnValue(null);
-    await runRecommendationFlow('Refactore ce module', deps);
-    expect(health).toContain('selector_broken');
-  });
-
-  it('échec des sélecteurs → repli silencieux one_click + signal selector_broken, pas de followed=true', async () => {
-    const { deps, events, health, applyModel } = autoDeps();
-    applyModel.mockResolvedValue(false); // la bascule échoue
-    await runRecommendationFlow('Refactore ce module', deps);
-
-    expect(applyModel).toHaveBeenCalledWith('claude-sonnet-5');
-    // UI revenue à one_click (l'utilisateur garde la main).
-    expect(shadow().querySelector('[data-sobrio-switched]')).toBeNull();
-    expect(shadow().querySelector('[data-sobrio-follow]')).toBeTruthy();
-    // Signal de santé émis, aucune télémétrie de suivi mensongère.
-    expect(health).toContain('selector_broken');
-    expect(events).toHaveLength(0);
-  });
-
-  it('COURSE : Annuler PENDANT une bascule lente → un seul événement (followed=false), pas de followed=true tardif', async () => {
+  it('COURSE : Annuler PENDANT une bascule lente → followed:false unique, pas de followed:true tardif', async () => {
     const { client, events } = fakeClient(BASE_RECO);
     const slow = deferred<boolean>();
-    // 1er appel (bascule vers la reco) = LENT ; 2e (restauration) = immédiat.
     const applyModel = vi.fn().mockReturnValueOnce(slow.promise).mockResolvedValue(true);
     const readCurrentModel = vi.fn().mockReturnValue('claude-haiku-4-5');
     const deps: FlowDeps = {
@@ -212,12 +198,12 @@ describe('auto — bascule optimiste, confiance ≥ seuil', () => {
       assistMode: 'auto',
       applyModel,
       readCurrentModel,
+      isCurrent: () => true,
     };
 
-    const flow = runRecommendationFlow('Refactore ce module', deps);
-    await flush(); // le panneau optimiste « basculé » est affiché, bascule en vol
+    const flowP = runRecommendationFlow('Refactore ce module', deps);
+    await flush(); // panneau « basculé » affiché, bascule en vol
 
-    // L'utilisateur annule AVANT la fin de la bascule.
     (shadow().querySelector('[data-sobrio-cancel]') as HTMLButtonElement).click();
     expect(events).toEqual([
       {
@@ -228,16 +214,64 @@ describe('auto — bascule optimiste, confiance ≥ seuil', () => {
       },
     ]);
 
-    slow.resolve(true); // la bascule de fond se résout APRÈS l'annulation
-    await flow;
-
-    // Aucun followed=true mensonger n'a été ajouté après l'annulation.
-    expect(events.filter((e) => e.followed === true)).toHaveLength(0);
-    // La restauration a bien eu lieu (sérialisée après la bascule).
-    expect(applyModel).toHaveBeenLastCalledWith('claude-haiku-4-5');
+    slow.resolve(true); // la bascule se résout APRÈS l'annulation
+    await flowP;
+    expect(followedTrue(events)).toHaveLength(0);
+    expect(applyModel).toHaveBeenLastCalledWith('claude-haiku-4-5'); // restauration sérialisée
   });
 
-  it('COURSE : navigation SPA (removePanel) pendant une bascule échouée → panneau NON ressuscité', async () => {
+  it('confiance < seuil → pas de bascule (UI one_click)', async () => {
+    const { deps, applyModel } = autoDeps();
+    await runRecommendationFlow('x', {
+      ...deps,
+      client: fakeClient({ ...BASE_RECO, confidence: 0.5 }).client,
+    });
+    expect(q('[data-sobrio-switched]')).toBeNull();
+    expect(q('[data-sobrio-follow]')).toBeTruthy();
+    expect(applyModel).not.toHaveBeenCalled();
+  });
+
+  it('modèle courant illisible (null) → pas de bascule + signal selector_broken', async () => {
+    const { deps, applyModel, health, readCurrentModel } = autoDeps();
+    readCurrentModel.mockReturnValue(null);
+    await runRecommendationFlow('Refactore ce module', deps);
+    expect(q('[data-sobrio-switched]')).toBeNull();
+    expect(q('[data-sobrio-follow]')).toBeTruthy();
+    expect(applyModel).not.toHaveBeenCalled();
+    expect(health).toContain('selector_broken');
+  });
+
+  it('déjà sur le modèle recommandé → accusé « Déjà sur … », pas de bascule ni d’événement', async () => {
+    const { deps, applyModel, events, readCurrentModel } = autoDeps();
+    readCurrentModel.mockReturnValue('claude-sonnet-5'); // == reco
+    await runRecommendationFlow('Refactore ce module', deps);
+    expect(q('[data-sobrio-already]')?.textContent).toContain('Claude Sonnet 5');
+    expect(q('[data-sobrio-follow]')).toBeNull();
+    expect(applyModel).not.toHaveBeenCalled();
+    expect(events).toEqual([]);
+  });
+
+  it('échec des sélecteurs → repli one_click + selector_broken, aucun événement', async () => {
+    const { deps, events, health, applyModel } = autoDeps();
+    applyModel.mockResolvedValue(false);
+    await runRecommendationFlow('Refactore ce module', deps);
+    expect(applyModel).toHaveBeenCalledWith('claude-sonnet-5');
+    expect(q('[data-sobrio-switched]')).toBeNull();
+    expect(q('[data-sobrio-follow]')).toBeTruthy();
+    expect(health).toContain('selector_broken');
+    expect(events).toHaveLength(0);
+  });
+
+  it('GARDE SPA : conversation changée pendant l’appel réseau → rien affiché, aucune bascule', async () => {
+    const { deps, applyModel, events } = autoDeps({ isCurrent: () => false });
+    const reco = await runRecommendationFlow('Refactore ce module', deps);
+    expect(reco).toBeNull();
+    expect(document.getElementById('sobrio-reco-host')).toBeNull();
+    expect(applyModel).not.toHaveBeenCalled();
+    expect(events).toEqual([]);
+  });
+
+  it('COURSE : nav SPA (removePanel) pendant une bascule échouée → panneau NON ressuscité', async () => {
     const { client } = fakeClient(BASE_RECO);
     const slow = deferred<boolean>();
     const applyModel = vi.fn().mockReturnValue(slow.promise);
@@ -251,26 +285,23 @@ describe('auto — bascule optimiste, confiance ≥ seuil', () => {
       assistMode: 'auto',
       applyModel,
       readCurrentModel,
+      isCurrent: () => true,
     };
 
-    const flow = runRecommendationFlow('Refactore ce module', deps);
+    const flowP = runRecommendationFlow('Refactore ce module', deps);
     await flush();
-    expect(document.getElementById('sobrio-reco-host')).not.toBeNull(); // panneau optimiste
+    expect(document.getElementById('sobrio-reco-host')).not.toBeNull();
 
-    // Changement de conversation (SPA) : le panneau est retiré…
-    removePanel();
-    slow.resolve(false); // …puis la bascule échoue
-    await flow;
-
-    // Le panneau NE réapparaît PAS (pas de fuite de la conversation précédente).
+    removePanel(); // nav SPA
+    slow.resolve(false); // la bascule échoue
+    await flowP;
     expect(document.getElementById('sobrio-reco-host')).toBeNull();
   });
 });
 
 describe('guide — aucun contact page', () => {
-  it('applyModel absent : « Utiliser » note l’intention SANS toucher la page + hint guide', async () => {
+  it('bouton à libellé NON-actif + hint de sélection ; « suivre » note l’intention sans agir', async () => {
     const { client, events } = fakeClient(BASE_RECO);
-    const applyModel = vi.fn().mockResolvedValue(true);
     const deps: FlowDeps = {
       client,
       memory: new ConversationMemory(),
@@ -278,15 +309,19 @@ describe('guide — aucun contact page', () => {
       messages: FR_MESSAGES,
       now: () => new Date('2026-07-17T10:00:00.000Z'),
       assistMode: 'guide',
-      applyModel: undefined, // guide ⇒ jamais de contact page (bootstrap le retire)
-      ...{ readCurrentModel: undefined },
+      applyModel: undefined, // guide ⇒ aucun contact page (bootstrap le retire)
+      readCurrentModel: undefined,
+      isCurrent: () => true,
     };
     await runRecommendationFlow('Refactore ce module', deps);
 
-    // Hint « à sélectionner à la main » ; pas de bascule.
-    expect(shadow().querySelector('[data-sobrio-guide-hint]')).toBeTruthy();
+    // Libellé d'intention (pas « Utiliser »), hint de sélection manuelle.
+    expect(q('[data-sobrio-guide-hint]')).toBeTruthy();
+    expect(q('[data-sobrio-follow]')?.textContent).toContain('J’utiliserai');
+    expect(q('[data-sobrio-switched]')).toBeNull();
+
+    // « Suivre » note l'intention (followed:true) mais ne touche jamais la page.
     (shadow().querySelector('[data-sobrio-follow]') as HTMLButtonElement).click();
-    expect(applyModel).not.toHaveBeenCalled(); // aucune action page
-    expect(events[0]?.followed).toBe(true); // intention notée quand même
+    expect(events[0]?.followed).toBe(true);
   });
 });

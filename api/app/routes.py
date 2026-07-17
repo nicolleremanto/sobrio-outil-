@@ -1,7 +1,8 @@
-"""Les trois routes du contrat contracts/openapi.yaml (v1.0, figé).
+"""Les trois routes du contrat contracts/openapi.yaml (v1.1).
 
-Toute évolution passe par une RFC (docs/rfc/) + contracts/CHANGELOG.md
-(règle n°7).
+v1.1 (RFC-0003) : ExtensionConfig porte assist_mode + auto_confidence_threshold
+(optionnels, compat ascendante). Toute évolution passe par une RFC (docs/rfc/) +
+contracts/CHANGELOG.md (règle n°7).
 """
 
 from __future__ import annotations
@@ -13,6 +14,7 @@ from typing import Annotated
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from pydantic import ValidationError
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -183,4 +185,10 @@ def get_extension_config(
     overrides = {
         key: value for key, value in org.policy_json.items() if key in ExtensionConfig.model_fields
     }
-    return ExtensionConfig(**{**defaults, **overrides})
+    # Robustesse (règle 3) : un policy_json mal formé (ex. seuil hors 0..1) ne
+    # doit JAMAIS produire un 500 — on retombe silencieusement sur les défauts
+    # sûrs plutôt que de casser la config de toute l'extension.
+    try:
+        return ExtensionConfig(**{**defaults, **overrides})
+    except ValidationError:
+        return ExtensionConfig(**defaults)
