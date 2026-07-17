@@ -20,7 +20,7 @@ Fable 5 (10/50), Opus 4.8 (5/25), Sonnet 5 (3/15 · intro 2/10), Haiku 4.5 (1/5)
 | Chantier | Sujet                             | Rondes vertes consécutives | Statut       |
 | -------- | --------------------------------- | -------------------------- | ------------ |
 | C        | Catalogue de modèles à jour       | 2/2 (rondes 1 & 2)         | **CONVERGÉ** |
-| A        | Refonte graphique du panneau      | 1/2 (ronde 1)              | en cours     |
+| A        | Refonte graphique du panneau      | 0/2 (ronde 2 RED lint)     | en cours     |
 | B        | Bascule instantanée + assist_mode | 0/2                        | à venir      |
 
 ---
@@ -108,12 +108,12 @@ Minors optionnels non bloquants (documentés, non traités en C) :
 
 ## Chantier A — round 1 (commit 5aa1b45, capture pleine page régénérée)
 
-| agent               | scores                                                                       | blocking | major | verdict   |
-| ------------------- | ---------------------------------------------------------------------------- | -------- | ----- | --------- |
-| design-critic       | layout 4 · couleur 5 · typo 4 · grille 4 · couverture 4 · parité 5 · a11y 5  | 0        | 0     | **GREEN** |
-| product-conformance | ton 5 · fourchettes 5 · mémoire 5 · démontre 5 · nouv-conv 5 · budget 5      | 0        | 0     | **GREEN** |
-| qa-auditor          | couv 4 · contrat 5 · erreurs 5 · clarté 5 · régressions 5                    | 0        | 0     | **GREEN** |
-| privacy-sentinel    | —                                                                            | PASS     | —     | **PASS**  |
+| agent               | scores                                                                      | blocking | major | verdict   |
+| ------------------- | --------------------------------------------------------------------------- | -------- | ----- | --------- |
+| design-critic       | layout 4 · couleur 5 · typo 4 · grille 4 · couverture 4 · parité 5 · a11y 5 | 0        | 0     | **GREEN** |
+| product-conformance | ton 5 · fourchettes 5 · mémoire 5 · démontre 5 · nouv-conv 5 · budget 5     | 0        | 0     | **GREEN** |
+| qa-auditor          | couv 4 · contrat 5 · erreurs 5 · clarté 5 · régressions 5                   | 0        | 0     | **GREEN** |
+| privacy-sentinel    | —                                                                           | PASS     | —     | **PASS**  |
 
 → Ronde **VERTE (1/2)**. Le MAJOR de la ronde 0 (capture tronquée) est levé :
 les 6 états sont désormais jugés sur pleine page, clair ET sombre. Minors
@@ -131,3 +131,33 @@ les 6 états sont désormais jugés sur pleine page, clair ET sombre. Minors
   jauges confiance/budget au rendu identique (sémantique) — la charte interdit
   toute couleur supplémentaire, différenciation par le libellé, RFC si besoin ;
   script de capture hors suite de tests (smoke-run CI) ; EN_MESSAGES partiel.
+
+## Chantier A — round 2 (commit 700addd)
+
+| agent               | scores                                                                        | blocking | major | verdict  |
+| ------------------- | ----------------------------------------------------------------------------- | -------- | ----- | -------- |
+| design-critic       | layout 5 · couleur 5 · typo 5 · grille 4,5 · couverture 5 · parité 5 · a11y 5 | 0        | 0     | GREEN    |
+| product-conformance | ton 5 · fourchettes 5 · mémoire 5 · démontre 5 · nouv-conv 5 · budget 5       | 0        | 0     | GREEN    |
+| qa-auditor          | couv 4 · contrat 4 · erreurs 5 · clarté 5 · régressions 2                     | 1        | 0     | **RED**  |
+| privacy-sentinel    | —                                                                             | PASS     | —     | **PASS** |
+
+→ Ronde **RED** — le streak retombe (ronde 1 verte, ronde 2 rouge). Le juge qa a
+attrapé un blocking RÉEL que mon étape « prouver » avait manqué : j'ai lancé
+`pnpm lint` AVANT d'éditer `CONVERGENCE_LEDGER.md`, puis j'ai commité le journal
+(tableau à accents + `·`) sans re-linter → `prettier --check .` échoue →
+`pnpm lint` RED. Design et produit GREEN, privacy PASS. Défauts retenus :
+
+- **[blocking qa]** `pnpm lint` RED : `CONVERGENCE_LEDGER.md` non conforme
+  prettier (largeurs de colonnes faussées par les caractères accentués/`·`). →
+  `prettier --write`, re-vérifier `pnpm lint` vert, discipliner l'ordre
+  prouver→commit (linter APRÈS toute édition, journal compris).
+- **[minor design]** `.model small` (« recommandé ») rendu à ~10,8 px hors échelle
+  typo → **corrigé** `font-size: 12px`. · marge jauge 4 px (demi-pas) →
+  **documentée** comme appariement assumé. · ombre sombre 0,32 / jauge budget même
+  vert → écarts déjà assumés, aucune action.
+- **[minor produit]** valeurs du harnais non alignées sur la logique de décimales
+  de `formatRange` (« 0,05–0,21 » vs réel « 0,050–0,210 ») → **corrigé** : STATES
+  en nombres bruts + `formatRange` mirroir, `formatRange` exporté + testé.
+- **[minor qa]** assertion reduced-motion couplée au formatage exact → **corrigée**
+  en regex tolérante. · miroir markup non gardé → **ajout** d'une garde (classes
+  clés présentes dans `panel.ts`).

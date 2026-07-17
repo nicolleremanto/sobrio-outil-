@@ -30,6 +30,13 @@ const PANEL_CSS = cssMatch[1];
 // démonstration (libellés alignés sur src/messages.ts). Le harnais généré
 // (test/visual/harness.html) est un artefact non versionné (cf. .gitignore).
 function panelMarkup(state) {
+  // MIROIR de src/panel.ts formatRange : mêmes décimales (virgule FR + tiret
+  // demi-cadratin sans espaces), pour que le harnais reflète le rendu réel.
+  const formatRange = (min, max) => {
+    const digits = max < 0.01 ? 4 : max < 1 ? 3 : 1;
+    const fr = (n) => n.toFixed(digits).replace('.', ',');
+    return `${fr(min)}–${fr(max)}`;
+  };
   const parts = [];
   parts.push(`<div class="header"><div class="title">Sobrio</div>
     <button class="close" type="button" aria-label="Fermer le panneau">×</button></div>`);
@@ -46,9 +53,11 @@ function panelMarkup(state) {
       `<p class="note">Signal ambigu — si cette conversation demande un raisonnement complexe, préférez un modèle plus capable.</p>`,
     );
   }
-  parts.push(`<div class="range">Coût estimé : ${state.cost} € / appel</div>`);
   parts.push(
-    `<div class="range">Énergie estimée : ${state.energy} Wh · périmètre : inférence</div>`,
+    `<div class="range">Coût estimé : ${formatRange(state.costMin, state.costMax)} € / appel</div>`,
+  );
+  parts.push(
+    `<div class="range">Énergie estimée : ${formatRange(state.energyMin, state.energyMax)} Wh · périmètre : inférence</div>`,
   );
   if (state.budget) {
     parts.push(`<div class="gauge" data-sobrio-budget><div style="width:42%"></div></div>
@@ -74,13 +83,17 @@ function panelMarkup(state) {
   return parts.join('\n');
 }
 
+// Nombres BRUTS (min–max) ; le format (décimales/virgule/tiret) est produit par
+// formatRange dans panelMarkup, comme dans le vrai panneau (aucune dérive).
 const STATES = [
   {
     key: 'reco-simple',
     model: 'Claude Haiku 4.5',
     confidence: 0.8,
-    cost: '0,0004–0,0006',
-    energy: '0,05–0,21',
+    costMin: 0.0004,
+    costMax: 0.0006,
+    energyMin: 0.05,
+    energyMax: 0.21,
     budget: true,
     others: ['Claude Sonnet 5', 'Claude Opus 4.8'],
   },
@@ -88,8 +101,10 @@ const STATES = [
     key: 'derogation',
     model: 'Claude Haiku 4.5',
     confidence: 0.8,
-    cost: '0,0004–0,0006',
-    energy: '0,05–0,21',
+    costMin: 0.0004,
+    costMax: 0.0006,
+    energyMin: 0.05,
+    energyMax: 0.21,
     budget: true,
     why: true,
     others: ['Claude Sonnet 5', 'Claude Opus 4.8'],
@@ -98,8 +113,10 @@ const STATES = [
     key: 'budget-absent',
     model: 'Claude Sonnet 5',
     confidence: 0.7,
-    cost: '0,002–0,004',
-    energy: '0,4–1,8',
+    costMin: 0.002,
+    costMax: 0.004,
+    energyMin: 0.4,
+    energyMax: 1.8,
     budget: false,
     others: ['Claude Haiku 4.5', 'Claude Opus 4.8'],
   },
@@ -107,8 +124,10 @@ const STATES = [
     key: 'suggestion',
     model: 'Claude Opus 4.8',
     confidence: 0.65,
-    cost: '0,006–0,012',
-    energy: '0,8–3,2',
+    costMin: 0.006,
+    costMax: 0.012,
+    energyMin: 0.8,
+    energyMax: 3.2,
     budget: true,
     banner: true,
     others: ['Claude Haiku 4.5', 'Claude Sonnet 5'],
@@ -117,8 +136,10 @@ const STATES = [
     key: 'ambigu',
     model: 'Claude Sonnet 5',
     confidence: 0.55,
-    cost: '0,002–0,004',
-    energy: '0,4–1,8',
+    costMin: 0.002,
+    costMax: 0.004,
+    energyMin: 0.4,
+    energyMax: 1.8,
     mode: true,
     others: ['Claude Haiku 4.5', 'Claude Opus 4.8'],
   },
@@ -126,8 +147,10 @@ const STATES = [
     key: 'basculee',
     model: 'Claude Sonnet 5',
     confidence: 0.75,
-    cost: '0,002–0,004',
-    energy: '0,4–1,8',
+    costMin: 0.002,
+    costMax: 0.004,
+    energyMin: 0.4,
+    energyMax: 1.8,
     ack: true,
     others: [],
   },

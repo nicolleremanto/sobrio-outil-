@@ -108,9 +108,14 @@ export const PANEL_CSS = `
   .mode-note { color: var(--secondary); font-size: 12px; margin: 8px 0 0; }
 
   .model { font-size: 13px; font-weight: 600; margin: 8px 0 0; color: var(--text); }
-  .model small { font-weight: 400; color: var(--secondary); }
+  /* « recommandé » : corps 12 px explicite (sinon le <small> tomberait à
+     ~10,8 px, hors de l'échelle typo 11/12/13 de la charte §4). */
+  .model small { font-weight: 400; font-size: 12px; color: var(--secondary); }
 
-  /* Jauges : 4 px arrondies, piste neutre, remplissage accent. */
+  /* Jauges : 4 px arrondies, piste neutre, remplissage accent.
+     Écart grille ASSUMÉ : marge basse 4 px (demi-pas) — appariement de
+     proximité jauge↔légende (la légende colle à sa barre, 8 px vers le bloc
+     suivant). Seule valeur hors 8/16 px, couplée à la hauteur imposée 4 px. */
   .gauge { height: 4px; border-radius: 2px; background: var(--track); overflow: hidden; margin: 8px 0 4px; }
   .gauge > div { height: 100%; border-radius: 2px; background: var(--accent); }
   .gauge-label { color: var(--secondary); font-size: 12px; }

@@ -182,7 +182,7 @@ export function renderBadge(messages: Messages, anchor: HTMLElement | null = nul
  * Fourchette min–max (règle 5 : jamais de valeur unique). Format charte §4 :
  * décimale virgule (FR) et tiret demi-cadratin SANS espaces — « 0,004–0,006 ».
  */
-function formatRange(min: number, max: number): string {
+export function formatRange(min: number, max: number): string {
   const digits = max < 0.01 ? 4 : max < 1 ? 3 : 1;
   const fr = (n: number) => n.toFixed(digits).replace('.', ',');
   return `${fr(min)}–${fr(max)}`;

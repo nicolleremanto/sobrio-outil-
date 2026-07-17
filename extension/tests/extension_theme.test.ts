@@ -8,7 +8,7 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { PANEL_CSS } from '../src/panelStyle';
-import { detectHostTheme, removePanel, renderPanel } from '../src/panel';
+import { detectHostTheme, formatRange, removePanel, renderPanel } from '../src/panel';
 import { FR_MESSAGES } from '../src/messages';
 import type { RecoV0 } from '../src/mockClient';
 
@@ -102,10 +102,21 @@ describe('PANEL_CSS — tokens de la charte §4 (source unique)', () => {
   });
   it('respecte prefers-reduced-motion (WCAG 2.3.3)', () => {
     expect(PANEL_CSS).toContain('prefers-reduced-motion: reduce');
-    // Sous la requête, l'apparition et la transition du badge sont neutralisées.
+    // Assertions TOLÉRANTES au reformatage (espaces/sauts de ligne) : on
+    // vérifie le sens (animation/transition neutralisées), pas la mise en page.
     const block = PANEL_CSS.slice(PANEL_CSS.indexOf('prefers-reduced-motion'));
-    expect(block).toContain('.panel { animation: none; }');
-    expect(block).toContain('.badge { transition: none; }');
+    expect(/\.panel\s*\{[^}]*animation:\s*none/.test(block)).toBe(true);
+    expect(/\.badge\s*\{[^}]*transition:\s*none/.test(block)).toBe(true);
+  });
+});
+
+describe('formatRange — décimales charte §4 (source du rendu ET du harnais)', () => {
+  it('4 déc. si max<0,01 · 3 si <1 · 1 sinon — virgule + tiret demi-cadratin', () => {
+    expect(formatRange(0.0004, 0.0006)).toBe('0,0004–0,0006');
+    expect(formatRange(0.002, 0.004)).toBe('0,0020–0,0040');
+    expect(formatRange(0.05, 0.21)).toBe('0,050–0,210');
+    expect(formatRange(0.4, 1.8)).toBe('0,4–1,8');
+    expect(formatRange(0.8, 3.2)).toBe('0,8–3,2');
   });
 });
 
@@ -120,6 +131,16 @@ describe('capture-visual — extraction PANEL_CSS (garde anti-dérive du harnais
     expect(css.length).toBeGreaterThan(500);
     expect(css).toContain('#0E7C66'); // accent clair (token charte présent)
     expect(css).toContain('.badge'); // le badge est bien capturable
+  });
+
+  it('garde de dérive : les classes clés du harnais existent dans panel.ts', () => {
+    // panelMarkup (capture-visual.mjs) est un miroir manuel de renderPanel ;
+    // seule PANEL_CSS est mono-source. Cette garde détecte un renommage de
+    // classe côté panel.ts qui désynchroniserait silencieusement la capture.
+    const panelSrc = readFileSync(join(process.cwd(), 'src', 'panel.ts'), 'utf-8');
+    for (const cls of ['panel', 'badge', 'gauge', 'model', 'banner', 'why', 'actions', 'header']) {
+      expect(panelSrc).toContain(`'${cls}'`);
+    }
   });
 });
 
