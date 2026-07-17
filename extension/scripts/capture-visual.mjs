@@ -169,7 +169,7 @@ const STATES = [
 ];
 
 // 3) Harnais : deux colonnes (clair / sombre), un vrai Shadow DOM par état.
-// Première cellule = le badge « S » (charte §4 : pastille 22 px), puis les 6
+// Première cellule = le badge « S » (charte §4 : pastille 22 px), puis les 7
 // états du panneau. Le badge est rendu depuis la même PANEL_CSS (source unique).
 const cells = (theme) =>
   [

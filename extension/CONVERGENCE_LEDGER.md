@@ -219,8 +219,27 @@ livrer de non-jugé, puis résidus triviaux → TODO(V2) :
 - **documenté** libellé a11y du harnais (qa) : le harnais reflète FR_MESSAGES
   (« Fermer le panneau ») ; seule PANEL_CSS est mono-source par ailleurs.
 
-## Chantier A — round 5 (commit **RONDE5**) — validation de la finition post-convergence
+## Chantier A — round 5 (commit 61072e4) — validation de la finition post-convergence
 
-| agent        | scores | blocking | major | verdict |
-| ------------ | ------ | -------- | ----- | ------- |
-| _(en cours)_ |        |          |       |         |
+| agent               | scores                                                                      | blocking | major | verdict   |
+| ------------------- | --------------------------------------------------------------------------- | -------- | ----- | --------- |
+| design-critic       | layout 5 · couleur 5 · typo 5 · grille 5 · couverture 5 · parité 5 · a11y 5 | 0        | 0     | **GREEN** |
+| product-conformance | ton 5 · fourchettes 5 · mémoire 5 · démontre 5 · nouv-conv 5 · budget 5     | 0        | 0     | **GREEN** |
+| qa-auditor          | couv 5 · contrat 5 · erreurs 5 · clarté 4 · régressions 5                   | 0        | 0     | **GREEN** |
+| privacy-sentinel    | —                                                                           | PASS     | —     | **PASS**  |
+
+→ Ronde **VERTE** — 3ᵉ verte consécutive (rondes 3-4-5). La finition
+post-convergence est validée : `couverture_etats` remonte à 5 (état budget
+dépassé désormais visible), a11y budget confirmée. **CHANTIER A définitivement
+clos.** Deux minors triviaux :
+
+- **corrigé** commentaire périmé « 6 états » → « 7 états » (product + qa, la
+  seule cause du clarté 4 de qa) dans `capture-visual.mjs`.
+- **TODO(V2)** (design, optionnel) : `data-sobrio-budget-over` est émis mais
+  aucune règle CSS ne le consomme — le dépassement se lit dans le chiffre, pas
+  visuellement. Le juge confirme que c'est **conforme** (décision assumée « jauge
+  budget même accent ») ; piste V2 : indice DANS l'accent (libellé 600 ou liseré
+  interne) sans introduire de 2ᵉ couleur.
+
+**Bilan Chantier A : 0 YELLOW → 1 verte → 2 RED → 3 verte → 4 verte (convergé)
+→ 5 verte (finition validée).** Aucun FAIL privacy sur toute la boucle.
