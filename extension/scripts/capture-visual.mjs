@@ -11,6 +11,8 @@ import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { formatRange } from './lib/format.mjs';
+
 const ROOT = process.cwd();
 const OUT_DIR = join(ROOT, 'test', 'visual', 'out');
 const HARNESS = join(ROOT, 'test', 'visual', 'harness.html');
@@ -30,13 +32,8 @@ const PANEL_CSS = cssMatch[1];
 // démonstration (libellés alignés sur src/messages.ts). Le harnais généré
 // (test/visual/harness.html) est un artefact non versionné (cf. .gitignore).
 function panelMarkup(state) {
-  // MIROIR de src/panel.ts formatRange : mêmes décimales (virgule FR + tiret
-  // demi-cadratin sans espaces), pour que le harnais reflète le rendu réel.
-  const formatRange = (min, max) => {
-    const digits = max < 0.01 ? 4 : max < 1 ? 3 : 1;
-    const fr = (n) => n.toFixed(digits).replace('.', ',');
-    return `${fr(min)}–${fr(max)}`;
-  };
+  // formatRange provient du module scripts/lib/format.mjs (mono-source testée
+  // vs panel.ts) ; il est injecté dans le script du harnais ci-dessous.
   const parts = [];
   parts.push(`<div class="header"><div class="title">Sobrio</div>
     <button class="close" type="button" aria-label="Fermer le panneau">×</button></div>`);
@@ -191,7 +188,7 @@ const HTML = `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <script>
   const CSS = ${JSON.stringify(PANEL_CSS)};
   const LAYOUT = '.panel,.badge{position:static !important;right:auto;bottom:auto;animation:none;margin:0}';
-  function markup(s){ ${panelMarkup.toString()}; return panelMarkup(s); }
+  function markup(s){ ${formatRange.toString()}; ${panelMarkup.toString()}; return panelMarkup(s); }
   for (const host of document.querySelectorAll('.host')) {
     host.setAttribute('data-sobrio-theme', host.getAttribute('data-theme'));
     const root = host.attachShadow({ mode: 'open' });

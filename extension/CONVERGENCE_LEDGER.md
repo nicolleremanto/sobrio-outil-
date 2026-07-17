@@ -20,7 +20,7 @@ Fable 5 (10/50), Opus 4.8 (5/25), Sonnet 5 (3/15 · intro 2/10), Haiku 4.5 (1/5)
 | Chantier | Sujet                             | Rondes vertes consécutives | Statut       |
 | -------- | --------------------------------- | -------------------------- | ------------ |
 | C        | Catalogue de modèles à jour       | 2/2 (rondes 1 & 2)         | **CONVERGÉ** |
-| A        | Refonte graphique du panneau      | 0/2 (ronde 2 RED lint)     | en cours     |
+| A        | Refonte graphique du panneau      | 1/2 (ronde 3)              | en cours     |
 | B        | Bascule instantanée + assist_mode | 0/2                        | à venir      |
 
 ---
@@ -161,3 +161,27 @@ attrapé un blocking RÉEL que mon étape « prouver » avait manqué : j'ai lan
 - **[minor qa]** assertion reduced-motion couplée au formatage exact → **corrigée**
   en regex tolérante. · miroir markup non gardé → **ajout** d'une garde (classes
   clés présentes dans `panel.ts`).
+
+## Chantier A — round 3 (commit 02cbc7e)
+
+| agent               | scores                                                                      | blocking | major | verdict   |
+| ------------------- | --------------------------------------------------------------------------- | -------- | ----- | --------- |
+| design-critic       | layout 5 · couleur 5 · typo 5 · grille 5 · couverture 5 · parité 5 · a11y 5 | 0        | 0     | **GREEN** |
+| product-conformance | ton 5 · fourchettes 5 · mémoire 5 · démontre 5 · nouv-conv 5 · budget 5     | 0        | 0     | **GREEN** |
+| qa-auditor          | couv 5 · contrat 4 · erreurs 5 · clarté 5 · régressions 5                   | 0        | 0     | **GREEN** |
+| privacy-sentinel    | —                                                                           | PASS     | —     | **PASS**  |
+
+→ Ronde **VERTE (1/2)** — nouveau streak. Le blocking lint de la ronde 2 est
+levé (`pnpm lint` vert, confirmé par qa). design : **5 partout, zéro minor**.
+Deux minors substantiels (relevés par product ET qa) corrigés avant la ronde 4,
+le reste documenté :
+
+- **corrigé** sincérité budget (product) : `pct_used` était borné à 100 pour la
+  barre ET le libellé → un dépassement (> 100 %) afficherait « 100 % utilisé ».
+  Désormais la barre borne à 100 % mais le libellé montre la valeur réelle
+  (« 118 % »), + attribut `data-sobrio-budget-over`, + test.
+- **corrigé** parité `formatRange` (product + qa) : la copie du harnais n'était
+  liée par aucun test → extraction dans `scripts/lib/format.mjs` (module pur
+  importé par le harnais ET un test de parité stricte vs `panel.ts`).
+- **corrigé** garde de dérive markup rendue **symétrique** (panel.ts ↔ harnais).
+- **corrigé** `.close` 16 px commenté comme glyphe d'icône (écart typo assumé).

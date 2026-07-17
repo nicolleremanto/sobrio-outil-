@@ -296,26 +296,34 @@ export function renderPanel(reco: RecoV0, options: PanelOptions): void {
     // Jauge budget — uniquement si fournie (accessible : progressbar 0–100,
     // par parité avec la jauge de confiance).
     if (reco.budget) {
-      const budgetPct = Math.round(Math.min(100, Math.max(0, reco.budget.pct_used)));
+      // Sincérité budget : la BARRE est bornée à 100 % (elle ne peut pas
+      // déborder visuellement), mais le LIBELLÉ affiche la valeur RÉELLE — un
+      // dépassement (> 100 %) doit rester visible, jamais masqué en « 100 % ».
+      const rawPct = Math.round(Math.max(0, reco.budget.pct_used));
+      const barPct = Math.min(100, rawPct);
       const budgetGauge = document.createElement('div');
       budgetGauge.className = 'gauge';
       budgetGauge.setAttribute('data-sobrio-budget', '');
       budgetGauge.setAttribute('role', 'progressbar');
       budgetGauge.setAttribute('aria-valuemin', '0');
       budgetGauge.setAttribute('aria-valuemax', '100');
-      budgetGauge.setAttribute('aria-valuenow', String(budgetPct));
+      // La barre (donc aria-valuenow) est bornée à 100 ; le dépassement est
+      // porté par le libellé et l'attribut de dépassement ci-dessous.
+      budgetGauge.setAttribute('aria-valuenow', String(barPct));
+      if (rawPct > 100) budgetGauge.setAttribute('data-sobrio-budget-over', String(rawPct));
       budgetGauge.setAttribute(
         'aria-label',
         `${messages['budget_label'] ?? 'Budget'} ${reco.budget.team_label}`,
       );
       const budgetFill = document.createElement('div');
-      budgetFill.style.width = `${budgetPct}%`;
+      budgetFill.style.width = `${barPct}%`;
       budgetGauge.appendChild(budgetFill);
       panel.appendChild(budgetGauge);
       const budgetLabel = document.createElement('div');
       budgetLabel.className = 'gauge-label';
-      // Libellé borné (réutilise budgetPct) : texte et barre coïncident toujours.
-      budgetLabel.textContent = `${messages['budget_label'] ?? 'Budget'} ${reco.budget.team_label} : ${budgetPct} ${messages['budget_used_suffix'] ?? '% utilisé'}`;
+      // Libellé : valeur RÉELLE (rawPct) — un budget dépassé s'affiche « 118 % »,
+      // jamais tronqué à 100 % (sincérité, cohérent avec les fourchettes).
+      budgetLabel.textContent = `${messages['budget_label'] ?? 'Budget'} ${reco.budget.team_label} : ${rawPct} ${messages['budget_used_suffix'] ?? '% utilisé'}`;
       panel.appendChild(budgetLabel);
     }
 

@@ -98,6 +98,9 @@ export const PANEL_CSS = `
     font-weight: 600; font-size: 11px; color: var(--secondary);
     letter-spacing: 0.08em; text-transform: uppercase; margin: 0;
   }
+  /* .close : le 16 px est la taille du GLYPHE d'icône « × » (bouton de
+     fermeture), pas de la typographie de corps — hors échelle 11/12/13 par
+     nature, comme tout picto. Écart documenté (cohérence avec .model small). */
   .close {
     background: none; border: none; padding: 0; width: auto; height: 16px;
     color: var(--secondary); cursor: pointer; font-size: 16px; line-height: 1;

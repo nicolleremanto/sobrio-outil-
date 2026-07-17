@@ -9,6 +9,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { PANEL_CSS } from '../src/panelStyle';
 import { detectHostTheme, formatRange, removePanel, renderPanel } from '../src/panel';
+import { formatRange as harnessFormatRange } from '../scripts/lib/format.mjs';
 import { FR_MESSAGES } from '../src/messages';
 import type { RecoV0 } from '../src/mockClient';
 
@@ -118,6 +119,26 @@ describe('formatRange — décimales charte §4 (source du rendu ET du harnais)'
     expect(formatRange(0.4, 1.8)).toBe('0,4–1,8');
     expect(formatRange(0.8, 3.2)).toBe('0,8–3,2');
   });
+
+  it('parité STRICTE panel.ts ↔ harnais de capture (anti-dérive des seuils)', () => {
+    // Le harnais (scripts/lib/format.mjs) et panel.ts DOIVENT coïncider : toute
+    // dérive des seuils de décimales fait échouer la CI (minor product+qa r3).
+    const bounds: [number, number][] = [
+      [0.0004, 0.0006],
+      [0.002, 0.004],
+      [0.05, 0.21],
+      [0.4, 1.8],
+      [0.8, 3.2],
+      [0.006, 0.012],
+      [0, 0.009],
+      [0.5, 0.99],
+      [1, 250],
+      [0.0099, 0.01],
+    ];
+    for (const [a, b] of bounds) {
+      expect(harnessFormatRange(a, b)).toBe(formatRange(a, b));
+    }
+  });
 });
 
 describe('capture-visual — extraction PANEL_CSS (garde anti-dérive du harnais)', () => {
@@ -133,13 +154,19 @@ describe('capture-visual — extraction PANEL_CSS (garde anti-dérive du harnais
     expect(css).toContain('.badge'); // le badge est bien capturable
   });
 
-  it('garde de dérive : les classes clés du harnais existent dans panel.ts', () => {
+  it('garde de dérive SYMÉTRIQUE : les classes clés existent dans panel.ts ET le harnais', () => {
     // panelMarkup (capture-visual.mjs) est un miroir manuel de renderPanel ;
-    // seule PANEL_CSS est mono-source. Cette garde détecte un renommage de
-    // classe côté panel.ts qui désynchroniserait silencieusement la capture.
+    // seule PANEL_CSS est mono-source. Garde bilatérale : un renommage de classe
+    // d'un côté OU de l'autre désynchroniserait silencieusement la capture.
     const panelSrc = readFileSync(join(process.cwd(), 'src', 'panel.ts'), 'utf-8');
+    const harnessSrc = readFileSync(join(process.cwd(), 'scripts', 'capture-visual.mjs'), 'utf-8');
+    // Une classe « apparaît » via un littéral 'x' (createElement + className) ou
+    // un attribut class="x" (template du harnais).
+    const appears = (src: string, cls: string) =>
+      src.includes(`'${cls}'`) || new RegExp(`class="${cls}(?=[ "])`).test(src);
     for (const cls of ['panel', 'badge', 'gauge', 'model', 'banner', 'why', 'actions', 'header']) {
-      expect(panelSrc).toContain(`'${cls}'`);
+      expect(appears(panelSrc, cls)).toBe(true);
+      expect(appears(harnessSrc, cls)).toBe(true);
     }
   });
 });
@@ -183,5 +210,24 @@ describe('renderPanel — thème appliqué à l’hôte + fourchettes FR', () =>
     expect(budget.getAttribute('role')).toBe('progressbar');
     expect(budget.getAttribute('aria-valuenow')).toBe('42');
     expect(budget.getAttribute('aria-label')).toContain('Budget');
+  });
+
+  it('budget en dépassement : barre bornée à 100 %, libellé montre le réel (sincérité)', () => {
+    document.body.innerHTML = '<main></main>';
+    const over: RecoV0 = { ...RECO, budget: { team_label: 'Équipe démo', pct_used: 118 } };
+    renderPanel(over, {
+      modelsVisible: [],
+      messages: FR_MESSAGES,
+      callbacks: { onFollow() {}, onOverride() {} },
+    });
+    const shadow = document.getElementById('sobrio-reco-host')!.shadowRoot!;
+    const budget = shadow.querySelector('[data-sobrio-budget]')!;
+    // Barre + aria bornées à 100 (ne peut pas déborder visuellement)…
+    expect(budget.getAttribute('aria-valuenow')).toBe('100');
+    expect((budget.querySelector('div') as HTMLElement).style.width).toBe('100%');
+    // …mais le dépassement RESTE visible : attribut + libellé à 118, pas 100.
+    expect(budget.getAttribute('data-sobrio-budget-over')).toBe('118');
+    expect(shadow.textContent).toContain('118');
+    expect(shadow.textContent).not.toContain('100 % utilisé');
   });
 });
