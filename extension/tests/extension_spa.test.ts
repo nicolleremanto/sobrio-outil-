@@ -135,6 +135,38 @@ describe('createConversationController — intégration', () => {
     controller.stop();
   });
 
+  it('filet périodique : poll() rattrape une nav qui contourne History ; stop() le nettoie', () => {
+    vi.useFakeTimers();
+    try {
+      let path = '/chat/a';
+      const target = new EventTarget() as unknown as Window;
+      const changes: string[] = [];
+      const controller = createConversationController({
+        getPath: () => path,
+        target,
+        onConversationChange: (key) => changes.push(key),
+        pollIntervalMs: 2000,
+      });
+
+      // Navigation SANS évènement History (routeur SPA exotique) : pas détectée
+      // par les écouteurs — c'est le rôle du filet périodique de la rattraper.
+      path = '/chat/b';
+      expect(changes).toEqual([]);
+
+      vi.advanceTimersByTime(2000); // un tick du filet
+      expect(changes).toEqual(['chat:b']);
+      expect(controller.currentKey()).toBe('chat:b');
+
+      // stop() clôt l'intervalle : plus aucun tick (aucune fuite de timer).
+      controller.stop();
+      path = '/chat/c';
+      vi.advanceTimersByTime(6000);
+      expect(changes).toEqual(['chat:b']); // aucune nouvelle détection
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('re-scan mid-fil : la mémoire se reconstruit depuis les bulles visibles', () => {
     const path = loadFixture('nominal');
     const controller = createConversationController({ getPath: () => path });

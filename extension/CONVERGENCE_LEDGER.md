@@ -17,11 +17,11 @@ Fable 5 (10/50), Opus 4.8 (5/25), Sonnet 5 (3/15 · intro 2/10), Haiku 4.5 (1/5)
 
 ## État des chantiers
 
-| Chantier | Sujet                             | Rondes vertes consécutives       | Statut       |
-| -------- | --------------------------------- | -------------------------------- | ------------ |
-| C        | Catalogue de modèles à jour       | 2/2 (rondes 1 & 2)               | **CONVERGÉ** |
-| A        | Refonte graphique du panneau      | 2/2 (rondes 3 & 4)               | **CONVERGÉ** |
-| B        | Bascule instantanée + assist_mode | 0/2 (ronde 5 YELLOW faux signal) | en cours     |
+| Chantier | Sujet                             | Rondes vertes consécutives | Statut       |
+| -------- | --------------------------------- | -------------------------- | ------------ |
+| C        | Catalogue de modèles à jour       | 2/2 (rondes 1 & 2)         | **CONVERGÉ** |
+| A        | Refonte graphique du panneau      | 2/2 (rondes 3 & 4)         | **CONVERGÉ** |
+| B        | Bascule instantanée + assist_mode | 1/2 (ronde 6 verte)        | en cours     |
 
 ---
 
@@ -411,3 +411,24 @@ propre correction ronde 4 avait introduit :
 - **[minor product]** CLAUDE.md règle 2 disait « uniquement au clic » (contredit
   par auto) → **amendement RFC-0003** ajouté. · `recos_shown` sur « déjà sur le
   modèle » & harnais de capture ré-implémenté → documentés (résidus V2).
+
+## Chantier B — round 6 (commit 5275897)
+
+| agent               | scores                                                                  | blocking | major | verdict   |
+| ------------------- | ----------------------------------------------------------------------- | -------- | ----- | --------- |
+| robustness-redteam  | dégrad 5 · crash 5 · repli 5 · spa 5 · observers 4                      | 0        | 0     | **GREEN** |
+| product-conformance | ton 5 · fourchettes 5 · mémoire 5 · démontre 5 · nouv-conv 5 · budget 5 | 0        | 0     | **GREEN** |
+| qa-auditor          | couv 4 · contrat 5 · erreurs 5 · clarté 4 · régressions 5               | 0        | 0     | **GREEN** |
+| privacy-sentinel    | —                                                                       | PASS     | —     | **PASS**  |
+
+→ Ronde **VERTE (1/2)** — 1re du streak. Le faux `selector_broken` est levé, le
+poll est câblé. Minors triviaux corrigés avant la ronde 7 :
+
+- **corrigé** filet périodique (poll) non testé (redteam + qa) → **test fake-timers**
+  (poll rattrape une nav bypass-History ; stop() nettoie l'intervalle).
+- **corrigé** CLAUDE.md règle 2 « uniquement au clic » contredisait l'amendement
+  auto → « au clic (mode one_click) » + renvoi RFC-0003.
+- **corrigé** en-tête `main.py` « figée en v1.0 » (oubli du balayage r4) → v1.1.
+- **assumé (documenté)** vraie casse de sélecteurs coïncidant avec une nav
+  sortante = abandon silencieux (sous-comptage, sens sûr) ; harnais de capture ;
+  recos_shown « déjà sur le modèle » ; budget=None prod (Lot B).

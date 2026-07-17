@@ -1,7 +1,7 @@
 """Point d'entrée de l'API Sobrio (Lot B — squelette).
 
 L'API stub est le MOCK OFFICIEL du Lot A : réponses conformes à
-contracts/openapi.yaml (source de vérité, figée en v1.0 — règle n°7).
+contracts/openapi.yaml (source de vérité, v1.1 / RFC-0003 — règle n°7).
 
 Aucun log du corps des requêtes n'est activé, nulle part (règle n°1).
 """

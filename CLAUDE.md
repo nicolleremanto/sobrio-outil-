@@ -24,8 +24,9 @@ module d'impact en fourchettes (`sobrio_impact`, Lot D), ops (Lot F).
    dans le bundle. *Amendements du 2026-07-16 (décisions fondateur, voir
    `docs/decisions.md`)* : l'application automatique du modèle choisi est **activée
    par défaut** (désactivable dans le popup — décochée, retour à la lecture seule
-   stricte), déclenchée uniquement par un clic de l'utilisateur dans le panneau
-   Sobrio, implémentée dans le SEUL module `extension/src/modelSwitcher.ts`
+   stricte), déclenchée au clic de l'utilisateur dans le panneau Sobrio (mode
+   `one_click` ; voir l'amendement RFC-0003 ci-dessous pour le mode `auto` sans
+   clic), implémentée dans le SEUL module `extension/src/modelSwitcher.ts`
    (résultat vérifié, échec ⇒ abandon silencieux). Gating par politique org
    (`allow_auto_apply`) proposé dans la RFC-0001. *Amendement du 2026-07-17
    (RFC-0003)* : le mode `assist_mode: auto` bascule le modèle **sans clic** (si
