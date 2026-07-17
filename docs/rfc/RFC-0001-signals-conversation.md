@@ -51,6 +51,9 @@ routeur réel bénéficie du contexte, le contrat doit évoluer.
    permet à l'organisation d'interdire l'application automatique du modèle même si
    l'utilisateur l'a activée localement (amendement règle n°2 du 2026-07-16, voir
    `docs/decisions.md`). Tant que ce champ n'existe pas, l'opt-in est purement local.
+5. `ExtensionConfig` : nouveau champ `telemetry_enabled: bool` (défaut **true**) —
+   opt-out de télémétrie piloté par l'organisation. L'extension le lit déjà
+   défensivement (`telemetryAllowed`) ; absent ⇒ autorisé.
 
 ## Version proposée
 
