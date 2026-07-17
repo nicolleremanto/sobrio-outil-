@@ -11,13 +11,13 @@
 import type { ExtensionConfig, RecoEvent } from './api';
 import {
   createClient,
-  createConfigCache,
   createDebouncer,
   createThrottle,
   withTimeout,
   RECOMMEND_TIMEOUT_MS,
   type RecoClientV0,
 } from './client';
+import { isVersionSupported, localVersion, resolveConfig } from './remoteConfig';
 import { ConversationMemory } from './conversationMemory';
 import { createConversationController } from './conversationController';
 import { debugLog } from './debugLog';
@@ -109,12 +109,20 @@ export async function runRecommendationFlow(text: string, deps: FlowDeps) {
 export async function bootstrap(): Promise<void> {
   const settings = await loadStoredSettings();
   const client = createClient(settings);
-  const configCache = createConfigCache(client);
 
-  // Config au démarrage (cachée). Kill-switch : on ne s'arrête que sur un
-  // enabled=false EXPLICITE — un échec réseau ne désactive pas l'extension.
-  const config = await configCache.get();
+  // Config au démarrage : cache persistant TTL 1 h, rafraîchissement
+  // silencieux, dernier état connu conservé hors-ligne (voir remoteConfig.ts).
+  const { config } = await resolveConfig(client);
+
+  // Kill-switch : on ne s'arrête que sur un enabled=false EXPLICITE — un échec
+  // réseau ne désactive pas l'extension (le dernier état connu prévaut).
   if (config && !config.enabled) return;
+
+  // Version obsolète : l'extension s'auto-désactive (le popup guide la mise à
+  // jour) — aucune gêne dans la page (règle 3).
+  if (config && !isVersionSupported(localVersion(), config.min_extension_version)) {
+    return;
+  }
 
   const messages = mergeMessages(config?.messages?.fr as Record<string, unknown> | undefined);
 

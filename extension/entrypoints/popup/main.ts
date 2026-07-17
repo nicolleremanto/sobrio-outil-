@@ -10,6 +10,7 @@ import { browser } from 'wxt/browser';
 
 import { getExtensionConfig } from '../../src/api';
 import { initDebugLog, saveDebugLogEnabled } from '../../src/debugLog';
+import { isVersionSupported, localVersion } from '../../src/remoteConfig';
 import { DIAGNOSE_MESSAGE, formatDiagnosis, type DiagnoseResponse } from '../../src/diagnostics';
 import { loadStoredSettings, saveStoredSettings, type BackendMode } from '../../src/settings';
 
@@ -45,6 +46,15 @@ async function refreshStatus(): Promise<void> {
   if (!config) {
     statusText.textContent =
       'API injoignable — la recommandation est simplement désactivée (jamais bloquant).';
+    return;
+  }
+
+  // Version obsolète : message de mise à jour prioritaire.
+  if (!isVersionSupported(localVersion(), config.min_extension_version)) {
+    statusText.textContent =
+      `Mise à jour requise : votre version ${localVersion()} est inférieure au minimum ` +
+      `${config.min_extension_version} exigé par votre organisation. L’extension est désactivée ` +
+      `jusqu’à la mise à jour.`;
     return;
   }
 
