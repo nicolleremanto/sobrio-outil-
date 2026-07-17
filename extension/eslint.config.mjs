@@ -18,9 +18,9 @@ export default tseslint.config(
     },
   },
   {
-    // Outillage de développement (serveur de la page d'entraînement, scripts
-    // node) : hors bundle de l'extension — globals Node et console autorisés.
-    files: ['dev/**/*.mjs'],
+    // Outillage de développement et scripts de garde (node) : hors bundle de
+    // l'extension — globals Node et console autorisés.
+    files: ['dev/**/*.mjs', 'scripts/**/*.mjs'],
     languageOptions: {
       globals: {
         console: 'readonly',

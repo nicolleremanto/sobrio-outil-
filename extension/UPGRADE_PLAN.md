@@ -104,4 +104,4 @@ extension/
 
 - [x] B2 migration harnais · [x] B3 SPA & mémoire · [x] B4 sélecteurs & diagnostic
 - [x] B5 panneau & modes · [x] B6 config distante · [x] B7 télémétrie
-- [ ] B8 perf & robustesse · [ ] B9 packaging
+- [x] B8 perf & robustesse · [ ] B9 packaging

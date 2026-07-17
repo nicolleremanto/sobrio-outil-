@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "wxt",
-    "build": "wxt build",
+    "build": "wxt build && node scripts/check-bundle-size.mjs && node scripts/check-hygiene.mjs",
     "zip": "wxt zip",
     "test": "vitest run",
     "lint": "eslint . && prettier --check .",
