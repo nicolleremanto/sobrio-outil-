@@ -19,6 +19,7 @@ import {
   type RecoClientV0,
 } from './client';
 import { ConversationMemory } from './conversationMemory';
+import { createConversationController } from './conversationController';
 import { debugLog } from './debugLog';
 import { mergeMessages, type Messages } from './messages';
 import { applyModelInPage } from './modelSwitcher';
@@ -115,7 +116,13 @@ export async function bootstrap(): Promise<void> {
   if (config && !config.enabled) return;
 
   const messages = mergeMessages(config?.messages?.fr as Record<string, unknown> | undefined);
-  const memory = new ConversationMemory();
+
+  // Registre multi-conversations + détection de navigation SPA : chaque fil a
+  // sa propre mémoire, restituée en revenant dessus, reconstruite à l'arrivée
+  // au milieu d'un fil existant. Changement de conversation ⇒ panneau retiré.
+  const controller = createConversationController({
+    onConversationChange: () => removePanel(),
+  });
 
   // Application automatique du modèle : OPT-IN STRICT (popup), sinon absent
   // ⇒ lecture seule (amendement règle 2 du 2026-07-16, docs/decisions.md).
@@ -123,7 +130,14 @@ export async function bootstrap(): Promise<void> {
     ? (model: string) => applyModelInPage(model)
     : undefined;
 
-  observeInputArea({ client, memory, config, messages, applyModel });
+  const baseDeps: FlowDeps = {
+    client,
+    memory: controller.currentMemory(),
+    config,
+    messages,
+    applyModel,
+  };
+  observeInputArea(baseDeps, () => controller.currentMemory(), controller.stop);
 }
 
 /** Fenêtre du throttle d'observation DOM (garde-fou perf, boucle 5). */
@@ -136,18 +150,25 @@ const OBSERVER_THROTTLE_MS = 300;
  * Après SELECTOR_BROKEN_THRESHOLD échecs consécutifs : flag local + UN signal
  * de santé léger (`selector_broken`, sans autre donnée) — puis silence.
  */
-function observeInputArea(deps: FlowDeps): void {
+function observeInputArea(
+  baseDeps: FlowDeps,
+  getMemory: () => ConversationMemory = () => baseDeps.memory,
+  onStop?: () => void,
+): void {
   let currentInput: HTMLElement | null = null;
 
   const onPause = () => {
     if (!currentInput?.isConnected) return;
-    // Mise à jour de la mémoire depuis la page (texte réduit localement).
-    deps.memory.updateFromPage(collectPageView());
+    // Mémoire de la conversation ACTIVE (le fil a pu changer sans rechargement).
+    const memory = getMemory();
+    // Mise à jour de la mémoire depuis la page (texte réduit localement) :
+    // reconstruit aussi la mémoire à l'arrivée au milieu d'un fil existant.
+    memory.updateFromPage(collectPageView());
     const text =
       currentInput instanceof HTMLTextAreaElement
         ? currentInput.value
         : (currentInput.textContent ?? '');
-    void runRecommendationFlow(text, deps);
+    void runRecommendationFlow(text, { ...baseDeps, memory });
   };
 
   const debouncer = createDebouncer(onPause);
@@ -161,7 +182,7 @@ function observeInputArea(deps: FlowDeps): void {
     if (noteInputResolution(Boolean(input))) {
       // Seuil franchi À L'INSTANT : un seul log debug, un seul signal.
       debugLog('selector_broken', { failures: SELECTOR_BROKEN_THRESHOLD });
-      deps.client.sendHealthSignal?.('selector_broken');
+      baseDeps.client.sendHealthSignal?.('selector_broken');
     }
     if (!input) {
       removeBadge();
@@ -169,7 +190,7 @@ function observeInputArea(deps: FlowDeps): void {
     }
     currentInput = input;
     // Badge ancré sur la barre de saisie (overlay — règle 2).
-    renderBadge(deps.messages, input);
+    renderBadge(baseDeps.messages, input);
     // Écoute PASSIVE de la saisie — on lit, on ne modifie rien (règle 2).
     input.addEventListener('input', () => debouncer.schedule());
   };
@@ -189,6 +210,7 @@ function observeInputArea(deps: FlowDeps): void {
       debouncer.cancel();
       window.removeEventListener('resize', throttledReposition);
       document.removeEventListener('scroll', throttledReposition, { capture: true });
+      onStop?.(); // détache le contrôleur SPA (aucune fuite)
       removePanel();
       removeBadge();
     },
