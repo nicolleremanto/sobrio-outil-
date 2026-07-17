@@ -48,7 +48,7 @@ export interface RecoClientV0 {
  * Le mock est local : pas de dépendance au fichier de contrat au runtime.
  */
 const MOCK_CATALOG: Readonly<
-  Record<string, { inUsd: number; outUsd: number; whMin: number; whMax: number }>
+  Record<string, { inUsd: number; outUsd: number; whMin: number; whMax: number; visible?: boolean }>
 > = {
   'claude-haiku-4-5': { inUsd: 1.0, outUsd: 5.0, whMin: 0.3, whMax: 1.4 },
   // Sonnet 5 : tarif DURABLE (standard) retenu volontairement, pas le prix
@@ -56,7 +56,9 @@ const MOCK_CATALOG: Readonly<
   // coût doit refléter le coût en régime permanent (décision, docs/decisions.md).
   'claude-sonnet-5': { inUsd: 3.0, outUsd: 15.0, whMin: 0.8, whMax: 3.5 },
   'claude-opus-4-8': { inUsd: 5.0, outUsd: 25.0, whMin: 1.5, whMax: 6.0 },
-  'claude-fable-5': { inUsd: 10.0, outUsd: 50.0, whMin: 2.5, whMax: 9.0 },
+  // visible: false — gardé pour le chiffrage/impact, non proposé à la
+  // dérogation (sobriété), aligné sur `visible: false` du catalogue/API.
+  'claude-fable-5': { inUsd: 10.0, outUsd: 50.0, whMin: 2.5, whMax: 9.0, visible: false },
 };
 
 /** Taux fixe — même convention que le monorepo. TODO(V1) : source datée. */
@@ -164,9 +166,12 @@ export class MockClient implements RecoClientV0 {
     return {
       enabled: this.options.enabled,
       mode: 'equilibre',
-      // Fable 5 exclu de la dérogation (sobriété) : gardé pour le chiffrage
-      // mais non proposé — cohérent avec `visible: false` du catalogue.
-      models_visible: Object.keys(MOCK_CATALOG).filter((id) => id !== 'claude-fable-5'),
+      // Modèles proposables (dérogation) : ceux dont `visible !== false` —
+      // sémantique alignée sur le champ `visible` du catalogue/API (Fable 5
+      // exclu par sobriété, gardé pour le chiffrage).
+      models_visible: Object.entries(MOCK_CATALOG)
+        .filter(([, entry]) => entry.visible !== false)
+        .map(([id]) => id),
       send_prompt_text: false,
       messages: { fr: {} },
       min_extension_version: '0.1.0',

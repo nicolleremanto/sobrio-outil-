@@ -50,3 +50,19 @@ Fable 5 (10/50), Opus 4.8 (5/25), Sonnet 5 (3/15 · intro 2/10), Haiku 4.5 (1/5)
 Décision chef d'orchestre : je corrige TOUT (blocking + major + minors) — le
 catalogue étant un contrat partagé, la porte de non-régression §6 couvre bien
 la suite complète `make test`, pas seulement l'extension.
+
+## Chantier C — round 1 (commit 7839e77)
+
+| agent               | scores                                                                  | blocking | major | verdict   |
+| ------------------- | ----------------------------------------------------------------------- | -------- | ----- | --------- |
+| qa-auditor          | couv 4 · contrat 5 · erreurs 5 · clarté 5 · régressions 5               | 0        | 0     | **GREEN** |
+| privacy-sentinel    | —                                                                       | PASS     | —     | **PASS**  |
+| product-conformance | ton 5 · fourchettes 5 · mémoire 5 · démontre 5 · nouv-conv 5 · budget 5 | 0        | 0     | **GREEN** |
+
+→ Ronde **VERTE (1/2)**. `make test` complet re-vérifié vert par les juges.
+Minors (non bloquants) retenus pour polissage avant la ronde 2 :
+
+- Filtre Fable du mock non couvert par un test → ajouter une assertion.
+- Sémantique `visible` du mock en dur (`!== 'claude-fable-5'`) → aligner sur un
+  champ `visible` comme le catalogue/API.
+- (produit) EN_MESSAGES partiel → `TODO(V2)`, hors périmètre Chantier C.

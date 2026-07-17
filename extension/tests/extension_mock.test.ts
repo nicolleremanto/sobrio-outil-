@@ -110,3 +110,15 @@ describe('MockClient — règles vivantes', () => {
     expect(first.reco_id).not.toBe(second.reco_id);
   });
 });
+
+describe('MockClient — config : visibilité des modèles', () => {
+  it('models_visible exclut Fable 5 (sobriété), aligné sur le catalogue/API', async () => {
+    const config = await new MockClient({ latencyMs: 0 }).getConfig();
+    expect(config?.models_visible).toEqual([
+      'claude-haiku-4-5',
+      'claude-sonnet-5',
+      'claude-opus-4-8',
+    ]);
+    expect(config?.models_visible).not.toContain('claude-fable-5');
+  });
+});
