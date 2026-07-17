@@ -151,6 +151,77 @@ export function resolvePanelAnchor(root: ParentNode = document): HTMLElement | n
 }
 
 // ---------------------------------------------------------------------------
+// Diagnostic de détection (boucle 4) — quelle stratégie a résolu la zone de
+// saisie, pour l'outil « Tester la détection » du popup (sans DevTools).
+// ---------------------------------------------------------------------------
+
+export interface DetectionDiagnosis {
+  /** Zone de saisie trouvée ? */
+  found: boolean;
+  /** Stratégie qui a fonctionné (sélecteur exact, repli, ou 'aucune'). */
+  strategy: string;
+  /** Balise de la zone résolue (ex. 'div.ProseMirror', 'textarea'). */
+  inputTag: string | null;
+  /** Étiquette de modèle détectée ? */
+  modelDetected: boolean;
+  /** Nombre de bulles lues (métadonnées uniquement, jamais le texte). */
+  bubbleCount: number;
+}
+
+/** Description compacte d'un élément (balise + classe principale). */
+function describeElement(element: HTMLElement): string {
+  const tag = element.tagName.toLowerCase();
+  const cls = element.classList.item(0);
+  return cls ? `${tag}.${cls}` : tag;
+}
+
+/**
+ * Diagnostique la détection sur le document courant : renvoie la stratégie
+ * gagnante et quelques compteurs — AUCUN contenu textuel (règle 1).
+ */
+export function diagnoseDetection(root: ParentNode = document): DetectionDiagnosis {
+  let strategy = 'aucune';
+  let input: HTMLElement | null = null;
+
+  for (const selector of INPUT_SELECTORS) {
+    const found = resolveFirst([selector], root);
+    if (found) {
+      input = found;
+      strategy = `sélecteur: ${selector}`;
+      break;
+    }
+  }
+  if (!input) {
+    const fallback = fallbackLargestEditable(root);
+    if (fallback) {
+      input = fallback;
+      strategy = 'repli: plus grand éditable visible';
+    }
+  }
+
+  let bubbleCount = 0;
+  try {
+    for (const selector of BUBBLE_SELECTORS) {
+      const found = root.querySelectorAll(selector);
+      if (found.length > 0) {
+        bubbleCount = found.length;
+        break;
+      }
+    }
+  } catch {
+    // Dégradation silencieuse.
+  }
+
+  return {
+    found: input !== null,
+    strategy,
+    inputTag: input ? describeElement(input) : null,
+    modelDetected: resolveModelButton(root) !== null,
+    bubbleCount,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Vue de page (boucle 1) — lecture LOCALE des bulles, de l'étiquette de
 // modèle et de l'identifiant de fil, pour la mémoire de conversation.
 // Le texte lu ici est immédiatement réduit en signaux (conversationMemory) —

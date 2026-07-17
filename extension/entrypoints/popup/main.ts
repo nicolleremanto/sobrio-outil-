@@ -10,6 +10,7 @@ import { browser } from 'wxt/browser';
 
 import { getExtensionConfig } from '../../src/api';
 import { initDebugLog, saveDebugLogEnabled } from '../../src/debugLog';
+import { DIAGNOSE_MESSAGE, formatDiagnosis, type DiagnoseResponse } from '../../src/diagnostics';
 import { loadStoredSettings, saveStoredSettings, type BackendMode } from '../../src/settings';
 
 /** Timeout plus généreux que le content script : le popup n'est pas bloquant. */
@@ -100,6 +101,37 @@ async function initForm(): Promise<void> {
   });
 }
 
+/**
+ * « Tester la détection » : demande au content script de l'onglet actif
+ * d'exécuter le diagnostic (le popup n'a pas accès au DOM de la page).
+ * Message-only : aucun contenu ne transite (règle 1).
+ */
+function initDiagnostic(): void {
+  const button = element<HTMLButtonElement>('diagnose-btn');
+  const result = element<HTMLParagraphElement>('diagnose-result');
+  button.addEventListener('click', () => {
+    void (async () => {
+      result.textContent = 'Test en cours…';
+      try {
+        const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+        if (tab?.id === undefined) {
+          result.textContent = 'Aucun onglet actif.';
+          return;
+        }
+        const response = (await browser.tabs.sendMessage(tab.id, {
+          type: DIAGNOSE_MESSAGE,
+        })) as DiagnoseResponse | undefined;
+        result.textContent = response?.ok
+          ? formatDiagnosis(response.diagnosis)
+          : "Sobrio n'est pas actif sur cet onglet (ouvrez une page claude.ai).";
+      } catch {
+        result.textContent =
+          "Sobrio n'est pas actif sur cet onglet (ouvrez une page claude.ai, puis rechargez).";
+      }
+    })();
+  });
+}
+
 function showVersion(): void {
   try {
     const { version } = browser.runtime.getManifest();
@@ -112,6 +144,7 @@ function showVersion(): void {
 void (async () => {
   await initDebugLog();
   await initForm();
+  initDiagnostic();
   showVersion();
   await refreshStatus();
 })();
