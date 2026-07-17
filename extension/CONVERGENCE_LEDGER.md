@@ -17,11 +17,11 @@ Fable 5 (10/50), Opus 4.8 (5/25), Sonnet 5 (3/15 · intro 2/10), Haiku 4.5 (1/5)
 
 ## État des chantiers
 
-| Chantier | Sujet                             | Rondes vertes consécutives | Statut   |
-| -------- | --------------------------------- | -------------------------- | -------- |
-| C        | Catalogue de modèles à jour       | 0/2                        | en cours |
-| A        | Refonte graphique du panneau      | 0/2                        | à venir  |
-| B        | Bascule instantanée + assist_mode | 0/2                        | à venir  |
+| Chantier | Sujet                             | Rondes vertes consécutives | Statut       |
+| -------- | --------------------------------- | -------------------------- | ------------ |
+| C        | Catalogue de modèles à jour       | 2/2 (rondes 1 & 2)         | **CONVERGÉ** |
+| A        | Refonte graphique du panneau      | 0/2                        | en cours     |
+| B        | Bascule instantanée + assist_mode | 0/2                        | à venir      |
 
 ---
 
@@ -66,3 +66,19 @@ Minors (non bloquants) retenus pour polissage avant la ronde 2 :
 - Sémantique `visible` du mock en dur (`!== 'claude-fable-5'`) → aligner sur un
   champ `visible` comme le catalogue/API.
 - (produit) EN_MESSAGES partiel → `TODO(V2)`, hors périmètre Chantier C.
+
+## Chantier C — round 2 (commit 90d1175)
+
+| agent | scores | blocking | major | verdict |
+|-------|--------|----------|-------|---------|
+| qa-auditor | couv 5 · contrat 5 · erreurs 5 · clarté 5 · régressions 5 | 0 | 0 | **GREEN** |
+| privacy-sentinel | — | PASS | — | **PASS** |
+| product-conformance | ton 5 · fourchettes 5 · mémoire 5 · démontre 5 · nouv-conv 5 · budget 5 | 0 | 0 | **GREEN** |
+
+→ Ronde **VERTE (2/2 consécutive)** — **CHANTIER C CONVERGÉ.**
+Minors optionnels non bloquants (documentés, non traités en C) :
+- garde-fou anti-dérive `MOCK_CATALOG` ↔ `contracts/model_catalog.yaml` (le mock
+  duplique volontairement le catalogue — choix documenté) ;
+- `warehouse/seed.py` `models_visible` en dur (données de démo) ;
+- `ambiguous_note` nomme « Sonnet » en dur → **reporté au Chantier A** (refonte
+  du panneau, qui touche `messages.ts`/`panel.ts`).
