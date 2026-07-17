@@ -122,16 +122,18 @@ describe('MockClient — config : visibilité des modèles', () => {
     expect(config?.models_visible).not.toContain('claude-fable-5');
   });
 
-  it('assist_mode : défaut one_click / seuil 0,75, surchargeables (RFC-0003)', async () => {
+  it('assist_mode : le mock démontre auto par défaut / seuil 0,75, surchargeable (RFC-0003)', async () => {
+    // Défaut DÉMO du mock = auto (vitrine la bascule instantanée). Le défaut
+    // prudent du CONTRAT reste one_click (couvert par les tests API).
     const def = await new MockClient({ latencyMs: 0 }).getConfig();
-    expect(def?.assist_mode).toBe('one_click');
+    expect(def?.assist_mode).toBe('auto');
     expect(def?.auto_confidence_threshold).toBe(0.75);
-    const auto = await new MockClient({
+    const oneClick = await new MockClient({
       latencyMs: 0,
-      assistMode: 'auto',
+      assistMode: 'one_click',
       autoConfidenceThreshold: 0.8,
     }).getConfig();
-    expect(auto?.assist_mode).toBe('auto');
-    expect(auto?.auto_confidence_threshold).toBe(0.8);
+    expect(oneClick?.assist_mode).toBe('one_click');
+    expect(oneClick?.auto_confidence_threshold).toBe(0.8);
   });
 });

@@ -121,7 +121,10 @@ export class MockClient implements RecoClientV0 {
       failure: options.failure ?? 'none',
       budget: options.budget ?? { team_label: 'Équipe démo', pct_used: 42 },
       enabled: options.enabled ?? true,
-      assistMode: options.assistMode ?? 'one_click',
+      // Démo : le MOCK local vitrine le mode `auto` (bascule instantanée +
+      // Annuler). Le défaut prudent du CONTRAT reste `one_click` (openapi /
+      // schemas.py / routes.py) — seul le mock démontre la feature phare.
+      assistMode: options.assistMode ?? 'auto',
       autoConfidenceThreshold: options.autoConfidenceThreshold ?? 0.75,
     };
   }
