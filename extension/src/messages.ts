@@ -24,8 +24,9 @@ export const FR_MESSAGES: Messages = {
   recommended_suffix: 'recommandé',
   probably_enough: 'suffit probablement pour cette demande.',
   confidence_label: 'Confiance',
+  // Ne nomme aucun modèle en dur : reste cohérent quelle que soit la reco.
   ambiguous_note:
-    'Signal ambigu — si cette conversation demande un raisonnement complexe, restez sur Sonnet.',
+    'Signal ambigu — si cette conversation demande un raisonnement complexe, préférez un modèle plus capable.',
   cost_label: 'Coût estimé',
   cost_unit: '€ / appel',
   energy_label: 'Énergie estimée',

@@ -4,3 +4,7 @@ node_modules/
 .wxt/
 stats.html
 stats-*.json
+
+# Captures visuelles intermédiaires (les finales versionnées iront dans test/visual/out/final/)
+test/visual/out/
+!test/visual/out/final/

@@ -69,14 +69,15 @@ Minors (non bloquants) retenus pour polissage avant la ronde 2 :
 
 ## Chantier C — round 2 (commit 90d1175)
 
-| agent | scores | blocking | major | verdict |
-|-------|--------|----------|-------|---------|
-| qa-auditor | couv 5 · contrat 5 · erreurs 5 · clarté 5 · régressions 5 | 0 | 0 | **GREEN** |
-| privacy-sentinel | — | PASS | — | **PASS** |
-| product-conformance | ton 5 · fourchettes 5 · mémoire 5 · démontre 5 · nouv-conv 5 · budget 5 | 0 | 0 | **GREEN** |
+| agent               | scores                                                                  | blocking | major | verdict   |
+| ------------------- | ----------------------------------------------------------------------- | -------- | ----- | --------- |
+| qa-auditor          | couv 5 · contrat 5 · erreurs 5 · clarté 5 · régressions 5               | 0        | 0     | **GREEN** |
+| privacy-sentinel    | —                                                                       | PASS     | —     | **PASS**  |
+| product-conformance | ton 5 · fourchettes 5 · mémoire 5 · démontre 5 · nouv-conv 5 · budget 5 | 0        | 0     | **GREEN** |
 
 → Ronde **VERTE (2/2 consécutive)** — **CHANTIER C CONVERGÉ.**
 Minors optionnels non bloquants (documentés, non traités en C) :
+
 - garde-fou anti-dérive `MOCK_CATALOG` ↔ `contracts/model_catalog.yaml` (le mock
   duplique volontairement le catalogue — choix documenté) ;
 - `warehouse/seed.py` `models_visible` en dur (données de démo) ;

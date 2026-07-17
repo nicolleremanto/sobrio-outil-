@@ -20,6 +20,7 @@ import {
   type ExtensionMode,
   type Messages,
 } from './messages';
+import { PANEL_CSS } from './panelStyle';
 import { resolvePanelAnchor } from './selectors';
 
 const PANEL_HOST_ID = 'sobrio-reco-host';
@@ -42,71 +43,38 @@ export interface PanelOptions {
   mode?: ExtensionMode;
 }
 
-const STYLE = `
-  :host { all: initial; }
-  * { box-sizing: border-box; }
-  .panel {
-    position: fixed;
-    right: 16px;
-    bottom: 96px;
-    z-index: 2147483646;
-    width: 300px;
-    padding: 14px;
-    border: 1px solid #d5d0c8;
-    border-radius: 12px;
-    background: #faf8f5;
-    color: #2b2a27;
-    font: 13px/1.5 system-ui, sans-serif;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+const STYLE = PANEL_CSS;
+
+/**
+ * Détecte le thème de la page hôte (claude.ai) : classe/attribut de thème, puis
+ * repli sur la luminance du fond. Retourne `null` si indéterminable — auquel
+ * cas `prefers-color-scheme` gouverne (charte §4). Ne throw jamais.
+ */
+export function detectHostTheme(): 'dark' | 'light' | null {
+  try {
+    const root = document.documentElement;
+    const cls = ` ${root.className} `;
+    const attr = (
+      root.getAttribute('data-theme') ??
+      root.getAttribute('data-mode') ??
+      ''
+    ).toLowerCase();
+    if (/\s(dark|theme-dark)\s/.test(cls) || attr === 'dark') return 'dark';
+    if (/\s(light|theme-light)\s/.test(cls) || attr === 'light') return 'light';
+    const bg = getComputedStyle(document.body).backgroundColor;
+    const m = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/.exec(bg);
+    if (m) {
+      const alpha = m[4] === undefined ? 1 : Number(m[4]);
+      if (alpha > 0) {
+        const lum = 0.2126 * Number(m[1]) + 0.7152 * Number(m[2]) + 0.0722 * Number(m[3]);
+        return lum < 128 ? 'dark' : 'light';
+      }
+    }
+  } catch {
+    // Dégradation silencieuse.
   }
-  .header { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-  .title { font-weight: 600; color: #6b675f; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
-  .close { background: none; border: none; padding: 0; width: auto; color: #6b675f; cursor: pointer; font-size: 16px; line-height: 1; }
-  .close:hover, .close:focus-visible { color: #2b2a27; }
-  .mode-note { color: #6b675f; font-size: 11px; margin: 2px 0 6px; }
-  button:focus-visible, select:focus-visible, .why:focus-visible {
-    outline: 2px solid #4a6d51; outline-offset: 1px;
-  }
-  .model { font-size: 16px; font-weight: 700; margin: 4px 0 2px; }
-  .model small { font-weight: 400; color: #6b675f; }
-  .gauge { height: 6px; border-radius: 3px; background: #e6e1d7; overflow: hidden; margin: 4px 0 2px; }
-  .gauge > div { height: 100%; border-radius: 3px; background: #4a6d51; }
-  .gauge-label { color: #6b675f; font-size: 12px; }
-  .range { margin: 3px 0; }
-  .note { color: #6b675f; font-style: italic; margin: 6px 0 0; font-size: 12px; }
-  .banner {
-    margin-top: 8px; padding: 7px 9px; border-radius: 8px;
-    background: #f0ead9; color: #5d5638; font-size: 12px;
-  }
-  .actions { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
-  button, select {
-    font: inherit; padding: 6px 10px; border-radius: 8px;
-    border: 1px solid #b8b2a7; background: #fff; cursor: pointer; width: 100%;
-  }
-  button.primary { background: #2b2a27; color: #faf8f5; border-color: #2b2a27; }
-  .hint { color: #8a847a; font-size: 11px; margin: 0; }
-  .why { background: none; border: none; padding: 0; color: #4a6d51; cursor: pointer; width: auto; font-size: 12px; text-decoration: underline; }
-  .why-text { display: none; }
-  .why-text.visible { display: block; }
-  .ack { font-style: italic; color: #4a6d51; margin-top: 8px; }
-  .badge {
-    position: fixed; right: 16px; bottom: 48px; z-index: 2147483646;
-    width: 26px; height: 26px; border-radius: 50%;
-    background: #faf8f5; color: #2b2a27;
-    border: 1px solid rgba(43, 42, 39, 0.28); cursor: pointer;
-    font: 600 12px/24px system-ui, sans-serif; text-align: center;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
-    opacity: 0.88;
-    transition: opacity 0.15s ease, transform 0.15s ease, background 0.15s ease, color 0.15s ease;
-    padding: 0;
-  }
-  .badge:hover {
-    opacity: 1;
-    transform: scale(1.08);
-    background: #2b2a27;
-    color: #faf8f5;
-  }
-`;
+  return null;
+}
 
 /** Crée (ou remplace) un hôte + shadow root. Retourne null si pas d'ancre. */
 function mountHost(hostId: string): ShadowRoot | null {
@@ -116,6 +84,9 @@ function mountHost(hostId: string): ShadowRoot | null {
     if (!anchor) return null; // dégradation silencieuse
     const host = document.createElement('div');
     host.id = hostId;
+    // Thème détecté de la page hôte (prioritaire sur prefers-color-scheme).
+    const theme = detectHostTheme();
+    if (theme) host.setAttribute('data-sobrio-theme', theme);
     const shadow = host.attachShadow({ mode: 'open' });
     const style = document.createElement('style');
     style.textContent = STYLE;
@@ -147,7 +118,7 @@ export function removeBadge(): void {
 }
 
 /** Taille du badge (px) — utilisée par le calcul d'ancrage. */
-const BADGE_SIZE = 26;
+const BADGE_SIZE = 22;
 
 /** Marge intérieure entre le badge et le bord droit de la zone de saisie. */
 const BADGE_INSET = 10;
@@ -207,10 +178,14 @@ export function renderBadge(messages: Messages, anchor: HTMLElement | null = nul
   repositionBadge();
 }
 
-/** Fourchette min–max (règle 5 : jamais de valeur unique). */
+/**
+ * Fourchette min–max (règle 5 : jamais de valeur unique). Format charte §4 :
+ * décimale virgule (FR) et tiret demi-cadratin SANS espaces — « 0,004–0,006 ».
+ */
 function formatRange(min: number, max: number): string {
   const digits = max < 0.01 ? 4 : max < 1 ? 3 : 1;
-  return `${min.toFixed(digits)} – ${max.toFixed(digits)}`;
+  const fr = (n: number) => n.toFixed(digits).replace('.', ',');
+  return `${fr(min)}–${fr(max)}`;
 }
 
 /**

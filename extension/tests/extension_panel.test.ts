@@ -60,7 +60,7 @@ describe('renderPanel — reco simple', () => {
     );
     expect(root.querySelector('[data-sobrio-confidence="0.8"]')).toBeTruthy();
     const text = root.querySelector('[data-sobrio-panel]')!.textContent!;
-    expect(text).toContain('0.0004 – 0.0006');
+    expect(text).toContain('0,0004–0,0006');
     expect(text).toContain('€ / appel');
     expect(text).toContain('Wh');
     expect(text).toContain('périmètre'); // règle 5 : fourchette + périmètre
@@ -146,9 +146,9 @@ describe('renderPanel — états particuliers', () => {
     const badge = document
       .getElementById('sobrio-badge-host')!
       .shadowRoot!.querySelector<HTMLElement>('.badge')!;
-    // top = 500 + (52 − 26)/2 = 513 ; left = 800 − 26 − 10 = 764.
-    expect(badge.style.top).toBe('513px');
-    expect(badge.style.left).toBe('764px');
+    // top = 500 + (52 − 22)/2 = 515 ; left = 800 − 22 − 10 = 768.
+    expect(badge.style.top).toBe('515px');
+    expect(badge.style.left).toBe('768px');
   });
 
   it('badge sans ancre mesurable : repli sur le coin bas-droit', () => {
