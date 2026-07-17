@@ -148,7 +148,7 @@ describe('capture-visual — extraction PANEL_CSS (garde anti-dérive du harnais
     const src = readFileSync(join(process.cwd(), 'src', 'panelStyle.ts'), 'utf-8');
     const match = /export const PANEL_CSS = `([\s\S]*?)`;/.exec(src);
     expect(match).not.toBeNull();
-    const css = match![1];
+    const css = match?.[1] ?? '';
     expect(css.length).toBeGreaterThan(500);
     expect(css).toContain('#0E7C66'); // accent clair (token charte présent)
     expect(css).toContain('.badge'); // le badge est bien capturable

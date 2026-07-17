@@ -5,7 +5,9 @@ node_modules/
 stats.html
 stats-*.json
 
-# Captures visuelles intermédiaires (les finales versionnées iront dans test/visual/out/final/)
-test/visual/out/
+# Captures visuelles intermédiaires (les finales versionnées vont dans final/).
+# On ignore le CONTENU de out/ (out/*) — pas le répertoire — pour pouvoir
+# ré-inclure le sous-dossier final/ (git ne ré-inclut pas sous un dir exclu).
+test/visual/out/*
 !test/visual/out/final/
 test/visual/harness.html

@@ -21,7 +21,7 @@ Fable 5 (10/50), Opus 4.8 (5/25), Sonnet 5 (3/15 · intro 2/10), Haiku 4.5 (1/5)
 | -------- | --------------------------------- | -------------------------- | ------------ |
 | C        | Catalogue de modèles à jour       | 2/2 (rondes 1 & 2)         | **CONVERGÉ** |
 | A        | Refonte graphique du panneau      | 2/2 (rondes 3 & 4)         | **CONVERGÉ** |
-| B        | Bascule instantanée + assist_mode | 1/2 (ronde 6 verte)        | en cours     |
+| B        | Bascule instantanée + assist_mode | 2/2 (rondes 6 & 7)         | **CONVERGÉ** |
 
 ---
 
@@ -432,3 +432,29 @@ poll est câblé. Minors triviaux corrigés avant la ronde 7 :
 - **assumé (documenté)** vraie casse de sélecteurs coïncidant avec une nav
   sortante = abandon silencieux (sous-comptage, sens sûr) ; harnais de capture ;
   recos_shown « déjà sur le modèle » ; budget=None prod (Lot B).
+
+## Chantier B — round 7 (commit 3c15ad9)
+
+| agent               | scores                                                                  | blocking | major | verdict   |
+| ------------------- | ----------------------------------------------------------------------- | -------- | ----- | --------- |
+| robustness-redteam  | dégrad 5 · crash 5 · repli 5 · spa 5 · observers 5                      | 0        | 0     | **GREEN** |
+| product-conformance | ton 5 · fourchettes 5 · mémoire 5 · démontre 5 · nouv-conv 5 · budget 5 | 0        | 0     | **GREEN** |
+| qa-auditor          | couv 5 · contrat 5 · erreurs 5 · clarté 4 · régressions 5               | 0        | 0     | **GREEN** |
+| privacy-sentinel    | —                                                                       | PASS     | —     | **PASS**  |
+
+→ Ronde **VERTE (2/2 consécutive)** — **CHANTIER B CONVERGÉ** (rondes 6 & 7).
+redteam **5 partout**. Minors finaux traités en §8 (finition post-convergence) :
+
+- **corrigé** CLAUDE.md intro + carte des lots « n'automatise JAMAIS » (résidu de
+  prose non balayé) → aligné sur RFC-0003 (product).
+- **corrigé** `tsc --noEmit` : déclaration `scripts/lib/format.d.mts` + `css`
+  possiblement undefined dans le test → typecheck propre (redteam).
+- **documenté TODO(V2)** : `createThrottle.cancel()` (timer terminal bénin au
+  pagehide) ; extraction de la machine à états d'acceptation différée hors de
+  `runRecommendationFlow` (lisibilité) — comportement inchangé, invariants testés.
+
+**Bilan Chantier B : 0 RED → 1 RED → 2 RED → 3 YELLOW → 4 YELLOW → 5 YELLOW → 6
+VERTE → 7 VERTE (convergé).** À chaque ronde, un défaut plus fin, tous réels :
+course Annuler, cycle-vie conversation, timing télémétrie, flux concurrents,
+sérialisation DOM, action DOM non gardée, faux `selector_broken`. Aucun FAIL
+privacy sur les 8 rondes.

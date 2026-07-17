@@ -6,7 +6,9 @@ Sobrio aide les entreprises européennes à maîtriser le coût et l'empreinte e
 de leur IA générative. Phase 1 :
 
 1. **Extension navigateur** (Lot A) : recommande sur claude.ai le modèle adapté à chaque
-   prompt — elle **affiche et conseille, n'automatise JAMAIS**.
+   prompt. Elle **affiche et conseille** ; l'application du modèle est **encadrée,
+   vérifiée et annulable** (RFC-0003 : modes `auto`/`one_click`/`guide`), opt-out par
+   défaut vers la lecture seule stricte — jamais d'action page hors la sélection du modèle.
 2. **Connecteur de facturation** (Lot C) : **LECTURE SEULE** sur l'API d'administration
    Anthropic (Usage & Cost, Analytics).
 3. **Rapport mensuel PDF** (Lot E) : deux volets — économique + environnemental/RSE,
@@ -101,7 +103,7 @@ dans `docs/rfc/` (gabarit : `docs/rfc/TEMPLATE.md`) **et** un incrément de vers
 
 | Lot | Dossier | Périmètre |
 |-----|---------|-----------|
-| A | `extension/` | Extension navigateur (recommandation affichée, jamais automatisée) |
+| A | `extension/` | Extension navigateur : recommandation affichée ; bascule de modèle encadrée/annulable (RFC-0003), opt-out lecture seule |
 | B | `api/` | API FastAPI : `/v1/recommend`, `/v1/telemetry/reco_event`, `/v1/extension/config` |
 | C | `connector/` | Connecteur Anthropic Admin, lecture seule, fenêtre J-30, `snapshot_ts` |
 | D | `warehouse/` | Entrepôt Postgres (métadonnées uniquement) + module `sobrio_impact` |

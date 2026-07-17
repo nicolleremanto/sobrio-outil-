@@ -18,7 +18,7 @@ import { defineConfig } from 'wxt';
 export default defineConfig({
   manifest: {
     name: 'Sobrio',
-    version: '1.2.0',
+    version: '1.3.0',
     description:
       "Recommande le modèle Claude adapté à chaque prompt — n'agit que si vous l'y autorisez.",
     permissions: ['storage'],
