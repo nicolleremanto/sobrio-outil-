@@ -121,4 +121,17 @@ describe('MockClient — config : visibilité des modèles', () => {
     ]);
     expect(config?.models_visible).not.toContain('claude-fable-5');
   });
+
+  it('assist_mode : défaut one_click / seuil 0,75, surchargeables (RFC-0003)', async () => {
+    const def = await new MockClient({ latencyMs: 0 }).getConfig();
+    expect(def?.assist_mode).toBe('one_click');
+    expect(def?.auto_confidence_threshold).toBe(0.75);
+    const auto = await new MockClient({
+      latencyMs: 0,
+      assistMode: 'auto',
+      autoConfidenceThreshold: 0.8,
+    }).getConfig();
+    expect(auto?.assist_mode).toBe('auto');
+    expect(auto?.auto_confidence_threshold).toBe(0.8);
+  });
 });

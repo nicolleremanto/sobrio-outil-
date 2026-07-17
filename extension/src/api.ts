@@ -79,10 +79,22 @@ export interface RecoEvent {
 
 export type ExtensionMode = 'eco' | 'equilibre' | 'qualite';
 
+/**
+ * Niveau d'assistance à la bascule de modèle (RFC-0003) :
+ * - `auto`      : bascule immédiate si confiance ≥ seuil, + confirmation & Annuler ;
+ * - `one_click` : bascule au clic « Utiliser {modèle} » (défaut) ;
+ * - `guide`     : AUCUN contact page (repli / kill-switch prudence CGU).
+ */
+export type AssistMode = 'auto' | 'one_click' | 'guide';
+
 export interface ExtensionConfig {
   enabled: boolean; // kill-switch à distance
   mode: ExtensionMode;
   models_visible: string[];
+  /** OPTIONNEL (RFC-0003). Absent ⇒ 'one_click' (compat ascendante). */
+  assist_mode?: AssistMode;
+  /** OPTIONNEL (RFC-0003). Seuil de bascule auto. Absent ⇒ 0.75. */
+  auto_confidence_threshold?: number;
   send_prompt_text: boolean;
   messages: { fr: Record<string, unknown> };
   min_extension_version: string;

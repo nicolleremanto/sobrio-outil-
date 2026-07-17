@@ -8,7 +8,7 @@
  *
  * Règle 5 : tout coût/énergie est un min–max — jamais de valeur unique.
  */
-import type { Budget, ExtensionConfig, ImpactEstimate, RecoEvent } from './api';
+import type { AssistMode, Budget, ExtensionConfig, ImpactEstimate, RecoEvent } from './api';
 import { decide } from './mockRules';
 import type { Signals } from './signals';
 
@@ -97,6 +97,10 @@ export interface MockClientOptions {
   budget?: Budget | 'absent';
   /** Kill-switch de la config mock. */
   enabled?: boolean;
+  /** Mode d'assistance renvoyé par getConfig (RFC-0003). Défaut 'one_click'. */
+  assistMode?: AssistMode;
+  /** Seuil de bascule auto renvoyé par getConfig. Défaut 0.75. */
+  autoConfidenceThreshold?: number;
 }
 
 /** Compteur local pour des reco_id lisibles et uniques en démo. */
@@ -117,6 +121,8 @@ export class MockClient implements RecoClientV0 {
       failure: options.failure ?? 'none',
       budget: options.budget ?? { team_label: 'Équipe démo', pct_used: 42 },
       enabled: options.enabled ?? true,
+      assistMode: options.assistMode ?? 'one_click',
+      autoConfidenceThreshold: options.autoConfidenceThreshold ?? 0.75,
     };
   }
 
@@ -172,6 +178,8 @@ export class MockClient implements RecoClientV0 {
       models_visible: Object.entries(MOCK_CATALOG)
         .filter(([, entry]) => entry.visible !== false)
         .map(([id]) => id),
+      assist_mode: this.options.assistMode,
+      auto_confidence_threshold: this.options.autoConfidenceThreshold,
       send_prompt_text: false,
       messages: { fr: {} },
       min_extension_version: '0.1.0',

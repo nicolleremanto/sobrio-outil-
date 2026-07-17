@@ -43,6 +43,14 @@ export const FR_MESSAGES: Messages = {
   long_conversation_banner:
     'Conversation longue — repartir d’une nouvelle conversation coûtera probablement moins.',
 
+  // Bascule de modèle (RFC-0003 / Chantier B). {model} = libellé du modèle.
+  auto_switched: 'Basculé sur {model}',
+  auto_switch_hint: 'Bascule automatique — vous gardez la main.',
+  cancel_auto: 'Annuler',
+  switched_back: 'Modèle précédent restauré.',
+  // Mode guide : l'extension n'agit pas sur la page, elle indique quoi faire.
+  guide_hint: 'À sélectionner dans le menu de modèle de Claude.',
+
   // Ton par mode d'organisation (config.mode).
   'mode:eco': 'Priorité à la sobriété : on privilégie le modèle le plus léger qui suffit.',
   'mode:equilibre': 'Équilibre coût / qualité : le modèle proposé vise le juste nécessaire.',

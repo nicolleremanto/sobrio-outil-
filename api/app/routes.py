@@ -169,6 +169,10 @@ def get_extension_config(
         "enabled": True,
         "mode": "equilibre",
         "models_visible": visible_model_ids(),
+        # RFC-0003 : défauts sûrs (one_click, seuil 0,75) — surchargables par
+        # policy_json (ex. assist_mode=guide comme kill-switch prudence CGU).
+        "assist_mode": "one_click",
+        "auto_confidence_threshold": 0.75,
         "send_prompt_text": False,  # défaut PAR CONTRAT — opt-in explicite.
         "messages": {"fr": _DEFAULT_MESSAGES_FR},
         "min_extension_version": "0.1.0",

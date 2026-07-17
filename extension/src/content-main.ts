@@ -8,7 +8,7 @@
  * bloquant — échec/timeout ⇒ rien ne s'affiche, aucun toast, aucun crash.
  * RÈGLE 4 : aucun secret dans le bundle — réglages via storage (popup).
  */
-import type { ExtensionConfig, RecoEvent } from './api';
+import type { AssistMode, ExtensionConfig, RecoEvent } from './api';
 import {
   createClient,
   createDebouncer,
@@ -22,7 +22,7 @@ import { ConversationMemory } from './conversationMemory';
 import { createConversationController } from './conversationController';
 import { debugLog } from './debugLog';
 import { mergeMessages, type Messages } from './messages';
-import { applyModelInPage } from './modelSwitcher';
+import { applyModelInPage, readCurrentModel as readCurrentModelFromPage } from './modelSwitcher';
 import { removeBadge, removePanel, renderBadge, renderPanel, repositionBadge } from './panel';
 import {
   collectPageView,
@@ -34,6 +34,23 @@ import { loadStoredSettings } from './settings';
 import { computePromptSignals, type Signals } from './signals';
 import { TelemetryQueue, telemetryAllowed } from './telemetryQueue';
 
+/** Seuil de confiance par défaut de la bascule `auto` (RFC-0003). */
+export const DEFAULT_AUTO_THRESHOLD = 0.75;
+
+/**
+ * Mode d'assistance EFFECTIF (RFC-0003) : intersection du consentement local et
+ * de la politique org. L'opt-out local strict (`autoApplyModel=false`, règle 2)
+ * force `guide` (aucun contact page) ; sinon la config org décide, `one_click`
+ * par défaut. La config peut forcer `guide` (kill-switch prudence CGU).
+ */
+export function resolveAssistMode(
+  config: ExtensionConfig | null,
+  autoApplyEnabled: boolean,
+): AssistMode {
+  if (!autoApplyEnabled) return 'guide';
+  return config?.assist_mode ?? 'one_click';
+}
+
 /** Dépendances injectables — tests et démo utilisent les mêmes chemins. */
 export interface FlowDeps {
   client: RecoClientV0;
@@ -43,11 +60,19 @@ export interface FlowDeps {
   /** Horloge injectable (horodatage ISO des événements). */
   now?: () => Date;
   /**
-   * Application automatique du modèle dans la page hôte — présent UNIQUEMENT
-   * si l'utilisateur a activé l'opt-in (amendement règle 2, 2026-07-16).
-   * Absent ⇒ lecture seule stricte (comportement par défaut).
+   * Application du modèle dans la page hôte. Présent en `auto`/`one_click`,
+   * ABSENT en `guide` (aucun contact page) — voir `resolveAssistMode`.
    */
   applyModel?: (model: string) => Promise<boolean>;
+  /**
+   * Lecture (seule) du modèle courant de la page — requise par la bascule
+   * `auto` pour pouvoir Annuler (restaurer le précédent). Absent ⇒ pas d'auto.
+   */
+  readCurrentModel?: () => string | null;
+  /** Mode d'assistance effectif (RFC-0003). Absent ⇒ 'one_click'. */
+  assistMode?: AssistMode;
+  /** Seuil de bascule auto. Absent ⇒ DEFAULT_AUTO_THRESHOLD. */
+  autoThreshold?: number;
   /**
    * Émission d'un événement de télémétrie. Par défaut : `client.sendRecoEvent`
    * (capture mock). En production, la file persistante (bootstrap) est
@@ -92,25 +117,77 @@ export async function runRecommendationFlow(text: string, deps: FlowDeps) {
   const now = deps.now ?? (() => new Date());
   const send = deps.sendEvent ?? ((event: RecoEvent) => deps.client.sendRecoEvent(event));
 
-  renderPanel(reco, {
+  const assistMode = deps.assistMode ?? 'one_click';
+  const threshold = deps.autoThreshold ?? DEFAULT_AUTO_THRESHOLD;
+
+  // Applique le modèle et, en cas d'échec des sélecteurs, émet UN signal de
+  // santé (`selector_broken`) — repli silencieux, jamais bloquant (règle 3).
+  const applyAndReport = async (model: string): Promise<boolean> => {
+    if (!deps.applyModel) return false; // mode guide : aucun contact page
+    const ok = await deps.applyModel(model);
+    if (!ok) deps.client.sendHealthSignal?.('selector_broken');
+    return ok;
+  };
+
+  // Décision de bascule AUTO : mode auto + confiance ≥ seuil + modèle courant
+  // LISIBLE (pour pouvoir Annuler) + il diffère de la reco. Sinon → one_click.
+  let previousModel: string | null = null;
+  let autoSwitch = false;
+  if (
+    assistMode === 'auto' &&
+    deps.applyModel &&
+    deps.readCurrentModel &&
+    reco.confidence >= threshold
+  ) {
+    previousModel = deps.readCurrentModel();
+    autoSwitch = previousModel !== null && previousModel !== reco.recommended_model;
+  }
+
+  const renderOptions = (switched: boolean) => ({
     modelsVisible: deps.config?.models_visible ?? [],
     messages: deps.messages,
     mode: deps.config?.mode,
+    assistMode,
+    autoSwitched: switched,
     callbacks: {
       onFollow: () => {
         deps.memory.noteFollowed();
         send(buildRecoEvent(reco.reco_id, true, null, now));
-        // Opt-in uniquement : action déclenchée par le clic de l'utilisateur,
-        // fire-and-forget, échec silencieux (il garde la main).
-        void deps.applyModel?.(reco.recommended_model);
+        // Action déclenchée par le clic de l'utilisateur ; échec silencieux.
+        void applyAndReport(reco.recommended_model);
       },
-      onOverride: (model) => {
+      onOverride: (model: string) => {
         deps.memory.noteDerogation(reco.recommended_model, model);
         send(buildRecoEvent(reco.reco_id, false, model, now));
-        void deps.applyModel?.(model);
+        void applyAndReport(model);
+      },
+      onCancel: () => {
+        // Annuler la bascule auto : restaure le modèle précédent + télémétrie
+        // cohérente (followed=false, overridden_to=précédent).
+        if (previousModel === null) return;
+        deps.memory.noteDerogation(reco.recommended_model, previousModel);
+        send(buildRecoEvent(reco.reco_id, false, previousModel, now));
+        void applyAndReport(previousModel);
       },
     },
   });
+
+  // UI OPTIMISTE : en auto, on montre immédiatement l'état « basculé » (< 300 ms
+  // perçu) ; la bascule réelle suit et corrige l'UI si elle échoue.
+  renderPanel(reco, renderOptions(autoSwitch));
+
+  if (autoSwitch) {
+    const ok = await applyAndReport(reco.recommended_model);
+    if (ok) {
+      // Bascule réussie = suivi (followed=true).
+      deps.memory.noteFollowed();
+      send(buildRecoEvent(reco.reco_id, true, null, now));
+    } else {
+      // Repli silencieux : retour à l'UI one_click (l'utilisateur garde la main).
+      renderPanel(reco, renderOptions(false));
+    }
+  }
+
   return reco;
 }
 
@@ -142,11 +219,15 @@ export async function bootstrap(): Promise<void> {
     onConversationChange: () => removePanel(),
   });
 
-  // Application automatique du modèle : OPT-IN STRICT (popup), sinon absent
-  // ⇒ lecture seule (amendement règle 2 du 2026-07-16, docs/decisions.md).
-  const applyModel = settings.autoApplyModel
-    ? (model: string) => applyModelInPage(model)
-    : undefined;
+  // Mode d'assistance EFFECTIF (RFC-0003) : opt-in local ∧ politique org.
+  const assistMode = resolveAssistMode(config, settings.autoApplyModel);
+  // guide ⇒ aucun contact page (applyModel absent, lecture seule stricte).
+  // auto/one_click ⇒ applyModel présent (bascule encadrée, résultat vérifié).
+  const applyModel =
+    assistMode === 'guide' ? undefined : (model: string) => applyModelInPage(model);
+  // La lecture du modèle courant n'est utile qu'à la bascule auto (pour Annuler).
+  const readCurrentModel = assistMode === 'auto' ? readCurrentModelFromPage : undefined;
+  const autoThreshold = config?.auto_confidence_threshold ?? DEFAULT_AUTO_THRESHOLD;
 
   // Télémétrie : file persistante avec retry. Reprise des événements en
   // attente au démarrage. Interdite (noop) si kill-switch ou opt-out org.
@@ -162,6 +243,9 @@ export async function bootstrap(): Promise<void> {
     config,
     messages,
     applyModel,
+    readCurrentModel,
+    assistMode,
+    autoThreshold,
     sendEvent,
   };
   observeInputArea(baseDeps, () => controller.currentMemory(), controller.stop);

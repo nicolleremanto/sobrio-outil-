@@ -123,6 +123,10 @@ class ExtensionConfig(BaseModel):
     enabled: bool
     mode: Literal["eco", "equilibre", "qualite"]
     models_visible: list[str]
+    # RFC-0003 : niveau d'assistance à la bascule (optionnels, compat ascendante).
+    # guide = aucun contact page (repli / kill-switch prudence CGU).
+    assist_mode: Literal["auto", "one_click", "guide"] = "one_click"
+    auto_confidence_threshold: float = 0.75
     # false PAR CONTRAT : l'envoi du texte est un opt-in explicite de l'org.
     send_prompt_text: bool = False
     messages: Messages

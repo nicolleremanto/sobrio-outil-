@@ -12,11 +12,13 @@ def test_config_conforms_and_send_prompt_text_false_by_default(client):
     response = client.get("/v1/extension/config", params={"org": "demo"}, headers=AUTH_HEADERS)
     assert response.status_code == 200
     payload = response.json()
-    # Forme exacte du contrat ExtensionConfig.
+    # Forme exacte du contrat ExtensionConfig (RFC-0003 : + assist_mode + seuil).
     assert set(payload.keys()) == {
         "enabled",
         "mode",
         "models_visible",
+        "assist_mode",
+        "auto_confidence_threshold",
         "send_prompt_text",
         "messages",
         "min_extension_version",
@@ -24,6 +26,9 @@ def test_config_conforms_and_send_prompt_text_false_by_default(client):
     assert payload["enabled"] is True
     assert payload["mode"] == "equilibre"
     assert payload["models_visible"] == _CATALOG_IDS
+    # RFC-0003 : défauts sûrs (compat ascendante) — one_click, seuil 0,75.
+    assert payload["assist_mode"] == "one_click"
+    assert payload["auto_confidence_threshold"] == 0.75
     # false PAR CONTRAT : l'envoi du texte est un opt-in explicite de l'org.
     assert payload["send_prompt_text"] is False
     assert "fr" in payload["messages"]
@@ -59,6 +64,27 @@ def test_config_merges_policy_json(client, test_engine):
         assert payload["mode"] == "eco"  # surchargé par la politique
         assert payload["enabled"] is True  # défaut conservé
         assert "cle_hors_contrat" not in payload  # clé hors contrat filtrée
+    finally:
+        with test_engine.begin() as conn:
+            conn.execute(sa.text("UPDATE orgs SET policy_json = '{}'::jsonb WHERE org_id = 'demo'"))
+
+
+def test_config_assist_mode_guide_kill_switch(client, test_engine):
+    """RFC-0003 : l'org peut forcer assist_mode=guide (kill-switch prudence CGU)."""
+    with test_engine.begin() as conn:
+        conn.execute(
+            sa.text(
+                "UPDATE orgs SET policy_json = "
+                """'{"assist_mode": "guide", "auto_confidence_threshold": 0.9}'::jsonb """
+                "WHERE org_id = 'demo'"
+            )
+        )
+    try:
+        response = client.get("/v1/extension/config", params={"org": "demo"}, headers=AUTH_HEADERS)
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["assist_mode"] == "guide"  # kill-switch appliqué
+        assert payload["auto_confidence_threshold"] == 0.9
     finally:
         with test_engine.begin() as conn:
             conn.execute(sa.text("UPDATE orgs SET policy_json = '{}'::jsonb WHERE org_id = 'demo'"))

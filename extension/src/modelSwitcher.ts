@@ -40,6 +40,23 @@ export interface ApplyModelOptions {
   settleMs?: number;
 }
 
+/**
+ * Lit l'id (catalogue) du modèle ACTUELLEMENT sélectionné dans la page hôte,
+ * SANS rien modifier (lecture seule stricte). Retourne `null` si le sélecteur
+ * est introuvable ou son étiquette non reconnue — auquel cas la bascule `auto`
+ * ne peut pas garantir de restauration (« Annuler ») et retombe sur `one_click`.
+ * Ne throw jamais.
+ */
+export function readCurrentModel(): string | null {
+  try {
+    const selector = resolveModelButton();
+    if (!selector) return null;
+    return normalizeModelLabel(selector.textContent);
+  } catch {
+    return null; // dégradation silencieuse
+  }
+}
+
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }

@@ -11,6 +11,7 @@
  * Règle 5 : tout coût/énergie affiché est un min–max avec périmètre.
  * Règle 7 : ton humble — les textes viennent de src/messages.ts.
  */
+import type { AssistMode } from './api';
 import type { RecoV0 } from './mockClient';
 import {
   formatMessage,
@@ -32,6 +33,11 @@ export interface PanelCallbacks {
   onFollow: () => void;
   /** L'utilisateur déroge et indique le modèle choisi (followed=false). */
   onOverride: (model: string) => void;
+  /**
+   * Mode `auto` : l'utilisateur annule la bascule automatique. Restaure le
+   * modèle précédent et télémètre followed=false, overridden_to=précédent.
+   */
+  onCancel?: () => void;
 }
 
 export interface PanelOptions {
@@ -41,6 +47,13 @@ export interface PanelOptions {
   callbacks: PanelCallbacks;
   /** Mode d'organisation (config.mode) — infléchit le ton affiché. */
   mode?: ExtensionMode;
+  /** Mode d'assistance effectif (RFC-0003) — infléchit la zone d'actions. */
+  assistMode?: AssistMode;
+  /**
+   * Mode `auto` : la bascule a déjà été DÉCLENCHÉE (UI optimiste) → le panneau
+   * s'ouvre en état « basculé » avec Annuler, au lieu du bouton « Utiliser ».
+   */
+  autoSwitched?: boolean;
 }
 
 const STYLE = PANEL_CSS;
@@ -368,45 +381,78 @@ export function renderPanel(reco: RecoV0, options: PanelOptions): void {
       actions.appendChild(ack);
     };
 
-    const followButton = document.createElement('button');
-    followButton.className = 'primary';
-    followButton.type = 'button';
-    followButton.setAttribute('data-sobrio-follow', '');
-    followButton.textContent = formatMessage(messages['use_model'] ?? 'Utiliser {model}', {
-      model: modelDisplayName(reco.recommended_model),
-    });
-    followButton.addEventListener('click', () => {
-      callbacks.onFollow();
-      acknowledge(messages['followed_ack'] ?? '');
-    });
-    actions.appendChild(followButton);
-
-    const followHint = document.createElement('p');
-    followHint.className = 'hint';
-    followHint.textContent = messages['use_model_hint'] ?? '';
-    actions.appendChild(followHint);
-
-    const others = options.modelsVisible.filter((id) => id !== reco.recommended_model);
-    if (others.length > 0) {
-      const select = document.createElement('select');
-      select.setAttribute('data-sobrio-override', '');
-      select.setAttribute('aria-label', messages['choose_other'] ?? 'Choisir un autre modèle');
-      const placeholder = document.createElement('option');
-      placeholder.value = '';
-      placeholder.textContent = messages['choose_other'] ?? 'Choisir un autre modèle…';
-      select.appendChild(placeholder);
-      for (const id of others) {
-        const option = document.createElement('option');
-        option.value = id;
-        option.textContent = modelDisplayName(id);
-        select.appendChild(option);
-      }
-      select.addEventListener('change', () => {
-        if (!select.value) return;
-        callbacks.onOverride(select.value);
-        acknowledge(messages['overridden_ack'] ?? '');
+    if (options.autoSwitched) {
+      // Mode `auto` : la bascule a déjà été déclenchée (UI optimiste). On
+      // confirme discrètement et on propose Annuler (restaure le précédent).
+      const switched = document.createElement('div');
+      switched.className = 'ack';
+      switched.setAttribute('data-sobrio-switched', '');
+      switched.textContent = formatMessage(messages['auto_switched'] ?? 'Basculé sur {model}', {
+        model: modelDisplayName(reco.recommended_model),
       });
-      actions.appendChild(select);
+      actions.appendChild(switched);
+
+      const cancelButton = document.createElement('button');
+      cancelButton.type = 'button';
+      cancelButton.setAttribute('data-sobrio-cancel', '');
+      cancelButton.textContent = messages['cancel_auto'] ?? 'Annuler';
+      cancelButton.addEventListener('click', () => {
+        cancelButton.disabled = true; // pas de double-clic pendant la restauration
+        callbacks.onCancel?.();
+        acknowledge(messages['switched_back'] ?? '');
+      });
+      actions.appendChild(cancelButton);
+
+      const autoHint = document.createElement('p');
+      autoHint.className = 'hint';
+      autoHint.textContent = messages['auto_switch_hint'] ?? '';
+      actions.appendChild(autoHint);
+    } else {
+      const followButton = document.createElement('button');
+      followButton.className = 'primary';
+      followButton.type = 'button';
+      followButton.setAttribute('data-sobrio-follow', '');
+      followButton.textContent = formatMessage(messages['use_model'] ?? 'Utiliser {model}', {
+        model: modelDisplayName(reco.recommended_model),
+      });
+      followButton.addEventListener('click', () => {
+        callbacks.onFollow();
+        acknowledge(messages['followed_ack'] ?? '');
+      });
+      actions.appendChild(followButton);
+
+      const followHint = document.createElement('p');
+      followHint.className = 'hint';
+      // Mode `guide` : on n'agit pas sur la page — on indique quoi faire.
+      followHint.textContent =
+        options.assistMode === 'guide'
+          ? (messages['guide_hint'] ?? '')
+          : (messages['use_model_hint'] ?? '');
+      if (options.assistMode === 'guide') followHint.setAttribute('data-sobrio-guide-hint', '');
+      actions.appendChild(followHint);
+
+      const others = options.modelsVisible.filter((id) => id !== reco.recommended_model);
+      if (others.length > 0) {
+        const select = document.createElement('select');
+        select.setAttribute('data-sobrio-override', '');
+        select.setAttribute('aria-label', messages['choose_other'] ?? 'Choisir un autre modèle');
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = messages['choose_other'] ?? 'Choisir un autre modèle…';
+        select.appendChild(placeholder);
+        for (const id of others) {
+          const option = document.createElement('option');
+          option.value = id;
+          option.textContent = modelDisplayName(id);
+          select.appendChild(option);
+        }
+        select.addEventListener('change', () => {
+          if (!select.value) return;
+          callbacks.onOverride(select.value);
+          acknowledge(messages['overridden_ack'] ?? '');
+        });
+        actions.appendChild(select);
+      }
     }
 
     panel.appendChild(actions);

@@ -3,6 +3,16 @@
 Les fichiers de `contracts/` sont la **source de vérité** des interfaces entre lots.
 Toute modification exige une **RFC** (`docs/rfc/`) et une incrémentation de version ici.
 
+## openapi v1.1 (2026-07-17) — assist_mode (RFC-0003)
+
+- `openapi.yaml` : `ExtensionConfig` gagne deux propriétés **optionnelles**
+  (compat ascendante, hors `required`) — `assist_mode`
+  (`auto` | `one_click` | `guide`, défaut `one_click`) et
+  `auto_confidence_threshold` (0..1, défaut 0.75). Pilotage org de la bascule de
+  modèle + kill-switch de prudence CGU (`guide` = aucun contact page). Voir
+  `docs/rfc/RFC-0003-assist-mode.md`. Une config sans ces champs conserve le
+  comportement actuel (`one_click`, seuil 0,75).
+
 ## catalogue 2026-07.2 (2026-07-17) — gamme de modèles à jour
 
 - `model_catalog.yaml` : gamme alignée sur la documentation officielle Anthropic

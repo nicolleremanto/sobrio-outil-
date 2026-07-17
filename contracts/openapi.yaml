@@ -275,6 +275,23 @@ components:
           type: array
           items:
             type: string
+        assist_mode:
+          type: string
+          enum: [auto, one_click, guide]
+          default: one_click
+          description: >
+            OPTIONNEL (RFC-0003). Niveau d'assistance à la bascule de modèle.
+            guide = aucun contact page (repli / kill-switch prudence CGU). Le
+            mode effectif est borné par l'opt-in local (règle 2) et retombe sur
+            guide si les sélecteurs échouent. Absent ⇒ one_click.
+        auto_confidence_threshold:
+          type: number
+          minimum: 0
+          maximum: 1
+          default: 0.75
+          description: >
+            OPTIONNEL (RFC-0003). Seuil de confiance au-dessus duquel
+            assist_mode=auto bascule immédiatement. Sous le seuil, one_click.
         send_prompt_text:
           type: boolean
           default: false
