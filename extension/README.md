@@ -1,145 +1,116 @@
-# Extension Sobrio — V0 (Lot A)
+# Extension Sobrio — 1.0.0
 
-Extension navigateur (Chrome/Edge, Manifest V3, [WXT](https://wxt.dev) + TypeScript) qui
-recommande sur **claude.ai** le modèle adapté à chaque prompt — coût et énergie **en
-fourchettes**, budget d'équipe, suivi des recommandations. Elle **affiche et conseille —
-et n'agit que si vous l'y autorisez** (application automatique du modèle en opt-in
-strict, désactivée par défaut).
+Extension navigateur (Chrome/Edge, Manifest V3, [WXT](https://wxt.dev) +
+TypeScript) qui recommande sur **claude.ai** le modèle Claude adapté à chaque
+prompt — coût et énergie **en fourchettes**, budget d'équipe, suivi des
+recommandations. Elle **conseille — et n'agit que si vous l'y autorisez**
+(application automatique du modèle activée par défaut, désactivable au popup).
 
-La recommandation ne se fonde pas sur le seul dernier prompt : l'extension entretient une
-**mémoire de signaux de la conversation** (`src/conversationMemory.ts`) — nombre de
-messages, taille de contexte estimée, code/maths/raisonnement vus au fil des tours,
-modèle courant, historique recos/dérogations — **jamais le texte**. Un « démontre-le »
-court dans un fil mathématique ne part pas naïvement sur Haiku.
+La recommandation ne se fonde pas sur le seul dernier prompt : l'extension
+entretient une **mémoire de signaux par conversation** (`conversationMemory` +
+`conversationRegistry`) — nombre de messages, contexte estimé,
+code/maths/raisonnement vus au fil des tours, modèle courant, historique
+recos/dérogations — **jamais le texte**. Un « démontre-le » court dans un fil
+mathématique ne part pas naïvement sur le modèle le plus léger.
 
-## Les règles non négociables (encodées dans le code et les tests)
+## Règles non négociables (encodées dans le code ET les tests)
 
-1. **Aucun texte ne quitte le poste** — seuls des nombres et des drapeaux de listes
-   fermées sont transmis (`tests/extension_zerotext.test.ts` l'atteste).
-2. **Lecture seule PAR DÉFAUT** vis-à-vis de claude.ai — badge/panneau à nous (Shadow
-   DOM), aucun clic simulé, aucune pré-sélection, aucun DOM fonctionnel modifié.
-   _Amendements (2026-07-16, `docs/decisions.md`)_ : l'application automatique du
-   modèle est **activée par défaut** — Sobrio change le modèle dans le sélecteur de
-   claude.ai, uniquement au clic « Utiliser… » de l'utilisateur, via le seul module
-   `src/modelSwitcher.ts` (résultat vérifié, abandon silencieux au moindre doute).
-   Décocher la case du popup rétablit la lecture seule stricte.
-3. **Jamais bloquante** — timeout 400 ms, échec ⇒ silence total (aucun toast, rien).
-4. **Aucun secret dans le bundle** — URL d'API + jeton vivent dans le storage (popup).
-5. **Fourchettes obligatoires** — tout coût/énergie affiché est un min–max + périmètre.
-6. **Permissions minimales** — `storage` + `https://claude.ai/*` uniquement (le zip de
-   prod ne matche jamais la page d'entraînement).
-7. **Ton humble** — « recommandé », « suffit probablement » ; signal ambigu ⇒ on le dit.
+| #   | Règle                                                                                            | Preuve automatisée                                                                                                             |
+| --- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | Aucun texte ne quitte le poste                                                                   | `extension_zerotext.test.ts`, `extension_hygiene.test.ts` (réseau confiné, aucun console de contenu), schéma télémétrie strict |
+| 2   | Lecture seule **par défaut** de claude.ai ; auto-apply en opt-in (activé par défaut, décochable) | `extension_modelswitcher.test.ts` (sans opt-in : aucune action)                                                                |
+| 3   | Jamais bloquante (timeout 400 ms → silence)                                                      | `extension_client.test.ts`, `extension_panel.test.ts`                                                                          |
+| 4   | Aucun secret dans le bundle                                                                      | `extension_hygiene.test.ts` (aucune URL en dur), storage-only                                                                  |
+| 5   | Fourchettes obligatoires (coût/énergie)                                                          | `extension_mock.test.ts`, `extension_ui.test.ts`                                                                               |
+| 6   | Permissions minimales (`storage` + claude.ai)                                                    | `scripts/check-hygiene.mjs` (garde de build)                                                                                   |
+| 7   | Ton humble                                                                                       | `extension_ui.test.ts` (note « signal ambigu », modes)                                                                         |
 
 ## Installation
 
-```bash
-pnpm install        # pnpm ≥ 10 (postinstall : wxt prepare)
-```
-
-**Dev (rechargement à chaud)** : `pnpm dev` — ouvre un Chrome dédié, extension chargée,
-qui matche claude.ai **et** la page d'entraînement locale.
-
-**V0 installable** : `pnpm zip` → `.output/sobrioextension-0.1.0-chrome.zip`. Dézipper,
-puis `chrome://extensions` → mode développeur → « Charger l'extension non empaquetée »
-→ pointer le dossier dézippé (ou directement `.output/chrome-mv3` après `pnpm build`).
-
-## Modes de backend (commutables dans le popup)
-
-| Mode               | Effet                                                                                                                                                                                                                                                                        |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mock` (défaut V0) | `src/mockClient.ts` répond localement, conforme au contrat — tout se démontre **sans serveur**. Latence simulée, mode panne pour la recette.                                                                                                                                 |
-| `api`              | API Sobrio réelle (`make dev` du monorepo, `http://localhost:8000`, org `demo`). Les signaux sont mappés vers les `features` v1.0 du contrat figé — le bloc `conversation` reste local tant que la RFC v1.1 n'est pas adoptée (`docs/rfc/RFC-0001-signals-conversation.md`). |
-
-## Démo humaine V0 — page d'entraînement (boucle 3)
-
-Aucune dépendance à claude.ai : tout se joue en local, en mode **mock** (défaut).
+### Développement
 
 ```bash
-pnpm dev:page   # terminal 1 — sert le faux chat sur http://localhost:8788
-pnpm dev        # terminal 2 — Chrome dédié avec l'extension (matche aussi le faux chat)
+pnpm install     # pnpm ≥ 10 (postinstall : wxt prepare)
+pnpm dev         # Chrome dédié, extension chargée, auto-rechargement claude.ai
 ```
 
-Scénario complet à dérouler sur `http://localhost:8788` :
+`pnpm dev` ouvre un navigateur avec l'extension : **rechargez l'onglet
+claude.ai** pour voir chaque changement.
 
-1. **Reco simple** — taper « Quelle heure est-il à Tokyo ? », attendre ~600 ms :
-   le panneau propose **Claude Haiku 4.5** (règle `mock:short_simple`), avec
-   jauge de confiance, fourchettes coût/énergie (min–max) et jauge budget.
-2. **Mémoire de conversation (LE scénario)** — cliquer « + bulle maths », puis
-   taper « démontre-le » : la reco passe à **Claude Sonnet 4.6**
-   (`mock:reasoning_context`) alors que le prompt est court — la mémoire du fil
-   a parlé. « Pourquoi ? » explique la règle en langage clair.
-3. **Dérogation** — dans le panneau, « Choisir un autre modèle… » → Opus :
-   accusé discret, événement `followed=false, overridden_to=opus-4-8` capturé
-   par le mock (visible dans les tests ; en mode api : `events_reco`).
-4. **Suivi** — « Utiliser Claude Sonnet 4.6 » : note l'intention (aucune action
-   sur la page — règle 2) et télémètre `followed=true`.
-5. **Fil long** — cliquer « + fil long (20 bulles) », retaper un mot : bandeau
-   discret « Conversation longue — repartir de zéro coûtera probablement moins ».
-6. **Nouvelle conversation** — cliquer « Nouvelle conversation » : la mémoire se
-   réinitialise, « démontre-le » seul repart sur un signal ambigu (ton humble).
-7. **Jamais bloquant** — popup → mode `api` avec une URL invalide → plus AUCUN
-   panneau, aucune erreur visible, la saisie reste fluide.
+### Extension installable (recette / production)
 
-Variantes de robustesse : `/variant-b.html` (markup alternatif, résolution par
-heuristique de repli) et `/variant-broken.html` (extension totalement inerte).
+```bash
+pnpm build       # → .output/chrome-mv3 (gardes taille + hygiène incluses)
+pnpm zip         # → .output/sobrioextension-1.0.0-chrome.zip
+```
 
-## Recette manuelle sur claude.ai RÉEL (checklist V0)
+`chrome://extensions` → « Mode développeur » → « Charger l'extension non
+empaquetée » → dossier `.output/chrome-mv3` (ou dézipper l'artefact).
 
-- [ ] Badge « S » discret visible près de la zone de saisie après chargement.
-- [ ] Panneau à la pause de saisie (~600 ms) : modèle recommandé + confiance +
-      fourchettes ; **aucune** valeur unique affichée.
-- [ ] Scénario mémoire : conversation contenant des maths, puis « démontre-le » →
-      la reco n'est pas Haiku.
-- [ ] Dérogation : « Choisir un autre modèle… » → accusé, événement
-      `followed=false, overridden_to=…` (mode api : visible dans `events_reco`).
-- [ ] Kill-switch : `enabled=false` dans la config org → extension invisible.
-- [ ] API coupée (arrêter `make dev`) : silence total, zéro erreur console visible,
-      saisie jamais ralentie.
-- [ ] **Aucune interaction avec l'interface du site par défaut** : pas de clic, pas de
-      pré-sélection de modèle, DOM fonctionnel intact (inspecter : seuls
-      `#sobrio-badge-host` et `#sobrio-reco-host` sont ajoutés).
-- [ ] **Auto-apply (opt-in)** : cocher « Appliquer automatiquement… » dans le popup,
-      cliquer « Utiliser [modèle] » → le sélecteur de claude.ai change réellement de
-      modèle ; décocher → plus aucune action sur la page. En cas de menu introuvable :
-      abandon silencieux (le modèle ne bouge pas, aucune erreur visible).
-- [ ] Bundle : `pnpm build` puis vérifier `.output/chrome-mv3` — aucun secret,
-      permissions `storage` + `https://claude.ai/*` uniquement.
+### Déploiement d'entreprise (pour la DSI)
+
+Chrome/Edge permettent de forcer l'installation via politique d'entreprise
+(`ExtensionInstallForcelist`) une fois l'extension publiée sur le Chrome Web
+Store ou hébergée en interne. L'extension ne demande que la permission
+`storage` et l'accès à `https://claude.ai/*` — aucune donnée de conversation
+n'est lue ni transmise (règle 1). La configuration (URL API, jeton
+d'organisation, mode) se fait par le popup ou, à terme, par politique gérée
+(`managed storage` — `TODO(V2)`).
+
+## Modes de backend (popup)
+
+| Mode            | Effet                                                                                                                                                                                         |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mock` (défaut) | Réponses locales conformes au contrat — tout se démontre **sans serveur**.                                                                                                                    |
+| `api`           | API Sobrio réelle (`make dev` du monorepo). Les signaux sont mappés vers les `features` v1.0 du contrat figé ; le bloc `conversation` reste local tant que la **RFC-0001** n'est pas adoptée. |
+
+## Diagnostic de détection
+
+Popup → **« Tester la détection sur cet onglet »** : indique quelle stratégie a
+résolu la zone de saisie (ou signale l'inertie). Outil de première ligne quand
+claude.ai fait évoluer son interface — sans ouvrir les DevTools.
+
+## Architecture
+
+| Module                                                                      | Rôle                                                          |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `signals.ts` / `features.ts`                                                | Signaux du prompt (mesures + drapeaux fermés, `has_math`).    |
+| `conversationMemory.ts`                                                     | Mémoire d'un fil (compteurs/drapeaux, jamais le texte).       |
+| `conversationRegistry.ts` / `spaLifecycle.ts` / `conversationController.ts` | Multi-conversations, détection SPA, mémoire active.           |
+| `mockRules.ts` / `mockClient.ts` / `client.ts`                              | Décision mock, clients mock/api, timeout/debounce.            |
+| `remoteConfig.ts`                                                           | Config distante (cache persistant TTL 1 h, versions).         |
+| `telemetryQueue.ts`                                                         | File de télémétrie persistante + retry + schéma strict.       |
+| `panel.ts` / `messages.ts`                                                  | Badge + panneau (shadow DOM), i18n, modes, a11y.              |
+| `selectors.ts` / `diagnostics.ts`                                           | Détection durcie + diagnostic.                                |
+| `modelSwitcher.ts`                                                          | Auto-apply (sous-menus, vérification, abandon silencieux).    |
+| `content-main.ts`                                                           | Orchestration (SPA, télémétrie, cleanup pagehide).            |
+| `test/fixtures/`                                                            | Instantanés DOM headless (remplacent la page d'entraînement). |
 
 ## Commandes
 
 ```bash
-pnpm dev        # dev Chrome dédié (matche claude.ai + page d'entraînement)
-pnpm dev:page   # sert la page d'entraînement sur :8788
-pnpm build      # build production (claude.ai uniquement)
-pnpm build:dev  # build avec l'entrypoint page d'entraînement
-pnpm zip        # artefact installable .output/sobrioextension-0.1.0-chrome.zip
-pnpm test       # vitest (119 tests)
-pnpm lint       # eslint + prettier --check
-pnpm format     # prettier --write
-node dev/make-icons.mjs  # régénère les icônes placeholder
+pnpm dev         # dev auto-rechargement claude.ai
+pnpm build       # build prod + gardes taille/hygiène (échec si dépassement)
+pnpm zip         # artefact installable 1.0.0
+pnpm test        # vitest (173 tests)
+pnpm lint        # eslint + prettier --check
+pnpm check:size  # garde de taille seule (après build)
+pnpm check:hygiene  # garde permissions/manifest seule (après build)
 ```
 
-## Architecture
+## Recette humaine
 
-| Module                                | Rôle                                                                                                                                           |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/signals.ts`                      | Bloc `signals` du contrat : mesures + drapeaux (listes fermées), `has_math`, normalisation du modèle courant vers le vocabulaire du catalogue. |
-| `src/conversationMemory.ts`           | Mémoire par fil (session uniquement) : compteurs, drapeaux vus, historique recos/dérogations ; reset sur nouveau fil.                          |
-| `src/mockRules.ts`                    | Règles de décision pures du mock (4 règles vivantes).                                                                                          |
-| `src/mockClient.ts` / `src/client.ts` | Clients mock/api derrière une interface commune ; timeout 400 ms, debounce 600 ms, retry télémétrie ≤ 3, cache config + kill-switch.           |
-| `src/panel.ts` / `src/messages.ts`    | Badge + panneau (Shadow DOM) ; textes FR centralisés, surchargeables par `config.messages.fr`, ton humble.                                     |
-| `src/selectors.ts`                    | Sélecteurs ordonnés + repli « plus grand éditable visible » + détecteur de casse (`selector_broken`).                                          |
-| `src/content-main.ts`                 | Orchestration (observer throttlé, nettoyage pagehide), injectable pour les tests.                                                              |
-| `entrypoints/`                        | `content.ts` (prod, claude.ai), `testpage.content.ts` (dev uniquement, filtré du zip), `popup/`.                                               |
-| `dev/`                                | Page d'entraînement + variantes robustesse + serveur statique + générateur d'icônes — hors bundle.                                             |
+Voir **`RECETTE_5MIN.md`** : la checklist de 5 minutes sur claude.ai réel
+(badge, panneau, scénario « démontre-le », dérogation, auto-apply, kill-switch,
+API coupée, navigation SPA).
 
-## Limites connues de la V0 (TODO(V1))
+## Limites connues (`TODO(V2)`)
 
 - `token_est` ≈ chars/4 (pas de tokenizer réel) ; langue/maths/code heuristiques.
-- Le mode `api` n'envoie que les `features` v1.0 : la mémoire de conversation
-  n'influence que le mock tant que la **RFC v1.1** n'est pas adoptée côté serveur
-  (`signals`, `suggest_new_conversation`, `demonstration`, signal `selector_broken`).
-- Sélecteurs claude.ai plausibles mais à valider en fumée manuelle (recette ci-dessus).
-- `seen_reasoning` : heuristique grossière (maths, réponses longues, marqueurs).
-- Pas de cache/rafraîchissement périodique du kill-switch au-delà du TTL de 5 min.
-- i18n EN, Firefox/Safari : hors périmètre V0.
+- Mode `api` : la mémoire de conversation n'influence le routeur qu'après
+  adoption de la **RFC-0001** (`signals`, `suggest_new_conversation`,
+  `demonstration`, `selector_broken`, `allow_auto_apply`, `telemetry_enabled`).
+- Sélecteurs claude.ai plausibles mais à confirmer en recette (outil de
+  diagnostic fourni).
+- i18n EN partielle (repli FR) ; Firefox/Safari hors périmètre.
+- Config par `managed storage` d'entreprise non encore branchée.

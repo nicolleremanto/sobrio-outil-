@@ -104,4 +104,7 @@ extension/
 
 - [x] B2 migration harnais · [x] B3 SPA & mémoire · [x] B4 sélecteurs & diagnostic
 - [x] B5 panneau & modes · [x] B6 config distante · [x] B7 télémétrie
-- [x] B8 perf & robustesse · [ ] B9 packaging
+- [x] B8 perf & robustesse · [x] B9 packaging
+
+**SOLDÉ le 2026-07-17** — 9 boucles livrées, 173 tests verts, bundle 66 Ko,
+zip 1.0.0 produit. Voir `CHANGELOG.md` et `RECETTE_5MIN.md`.
