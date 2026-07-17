@@ -39,12 +39,12 @@ describe('Télémétrie — schéma STRICT du contrat', () => {
     const event = buildRecoEvent(
       'mock-000002',
       false,
-      'opus-4-8',
+      'claude-opus-4-8',
       () => new Date('2026-07-16T12:34:56.789Z'),
     );
     expect(event.ts).toBe('2026-07-16T12:34:56.789Z');
     expect(event.followed).toBe(false);
-    expect(event.overridden_to).toBe('opus-4-8');
+    expect(event.overridden_to).toBe('claude-opus-4-8');
   });
 
   it("aucun champ texte libre : le JSON de l'événement ne contient que le contrat", () => {

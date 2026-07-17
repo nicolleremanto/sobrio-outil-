@@ -35,7 +35,7 @@ import {
 const CONFIG: ExtensionConfig = {
   enabled: true,
   mode: 'equilibre',
-  models_visible: ['haiku-4-5', 'sonnet-4-6', 'opus-4-8'],
+  models_visible: ['claude-haiku-4-5', 'claude-sonnet-5', 'claude-opus-4-8'],
   send_prompt_text: false,
   messages: { fr: {} },
   min_extension_version: '1.0.0',

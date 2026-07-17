@@ -1,6 +1,10 @@
-version: "2026-07"
+version: "2026-07.2"
+# Gamme alignée sur la documentation officielle Anthropic (vérifiée en ligne le
+# 2026-07-17 : platform.claude.com/docs/.../models/overview + référence claude-api).
+# `id` = identifiant d'API Anthropic. Prix en USD/Mtok (tarifs publics).
+# Règle : toute valeur d'impact est un couple min/max. Un seul nombre = PR refusée.
 models:
-  - id: haiku-4-5
+  - id: claude-haiku-4-5
     provider: anthropic
     display_name: "Claude Haiku 4.5"
     price_in_usd_mtok: 1.0
@@ -9,16 +13,32 @@ models:
       wh_per_ktok_out: {min: 0.3, max: 1.4}
       scope: "inference"
       source: "EcoLogits + littérature publique — à recalibrer (TODO Lot D)"
-  - id: sonnet-4-6
+  - id: claude-sonnet-5
     provider: anthropic
-    display_name: "Claude Sonnet 4.6"
-    price_in_usd_mtok: 3.0
-    price_out_usd_mtok: 15.0
-    impact: {wh_per_ktok_out: {min: 0.8, max: 3.5}, scope: "inference", source: "idem"}
-  - id: opus-4-8
+    display_name: "Claude Sonnet 5"
+    price_in_usd_mtok: 3.0        # tarif standard ; intro 2.0 jusqu'au 2026-08-31
+    price_out_usd_mtok: 15.0      # tarif standard ; intro 10.0 jusqu'au 2026-08-31
+    intro_price_in_usd_mtok: 2.0
+    intro_price_out_usd_mtok: 10.0
+    intro_until: "2026-08-31"
+    impact:
+      wh_per_ktok_out: {min: 0.8, max: 3.5}
+      scope: "inference"
+      extrapolated: true          # nouveau modèle — TODO(recalibration Lot D)
+      source: "extrapolé (gamme Sonnet) — à recalibrer (TODO Lot D)"
+  - id: claude-opus-4-8
     provider: anthropic
     display_name: "Claude Opus 4.8"
     price_in_usd_mtok: 5.0
     price_out_usd_mtok: 25.0
     impact: {wh_per_ktok_out: {min: 1.5, max: 6.0}, scope: "inference", source: "idem"}
-# Règle : toute valeur d'impact est un couple min/max. Un seul nombre = PR refusée.
+  - id: claude-fable-5
+    provider: anthropic
+    display_name: "Claude Fable 5"
+    price_in_usd_mtok: 10.0
+    price_out_usd_mtok: 50.0
+    impact:
+      wh_per_ktok_out: {min: 2.5, max: 9.0}
+      scope: "inference"
+      extrapolated: true          # nouveau modèle, le plus capable — TODO(recalibration Lot D)
+      source: "extrapolé (au-delà d'Opus) — à recalibrer (TODO Lot D)"

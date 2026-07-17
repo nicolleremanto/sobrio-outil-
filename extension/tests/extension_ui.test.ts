@@ -9,7 +9,7 @@ import { removePanel, renderPanel } from '../src/panel';
 
 const RECO: RecoV0 = {
   reco_id: 'mock-1',
-  recommended_model: 'haiku-4-5',
+  recommended_model: 'claude-haiku-4-5',
   confidence: 0.8,
   rule: 'mock:short_simple',
   impact_estimate: {
@@ -24,7 +24,7 @@ const RECO: RecoV0 = {
 
 function render(over: Partial<Parameters<typeof renderPanel>[1]> = {}) {
   renderPanel(RECO, {
-    modelsVisible: ['haiku-4-5', 'sonnet-4-6', 'opus-4-8'],
+    modelsVisible: ['claude-haiku-4-5', 'claude-sonnet-5', 'claude-opus-4-8'],
     messages: FR_MESSAGES,
     callbacks: { onFollow: vi.fn(), onOverride: vi.fn() },
     ...over,

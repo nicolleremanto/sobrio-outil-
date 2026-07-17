@@ -121,28 +121,40 @@ export function detectKeywordFlagsV0(text: string): KeywordFlagV0[] {
 // Modèle courant — normalisation vers le vocabulaire FERMÉ du catalogue.
 // ---------------------------------------------------------------------------
 
-/** Ids du catalogue (contracts/model_catalog.yaml), du moins au plus cher. */
-export const KNOWN_MODELS = ['haiku-4-5', 'sonnet-4-6', 'opus-4-8'] as const;
+/**
+ * Ids du catalogue (contracts/model_catalog.yaml), identifiants d'API
+ * Anthropic, du moins au plus cher. Gamme vérifiée en ligne le 2026-07-17.
+ */
+export const KNOWN_MODELS = [
+  'claude-haiku-4-5',
+  'claude-sonnet-5',
+  'claude-opus-4-8',
+  'claude-fable-5',
+] as const;
 
 /**
- * Étiquette de la page (« Claude Opus 4.8 ») → id du catalogue (« opus-4-8 »)
- * ou null si inconnu. On n'émet JAMAIS le libellé brut (texte de la page) :
- * seule une valeur du vocabulaire fermé peut sortir (règle 1, par
- * construction).
+ * Famille (mot-clé du libellé claude.ai) → id du catalogue. Une seule version
+ * courante par famille : la correspondance par famille est donc robuste aux
+ * libellés à un ou deux chiffres (« Sonnet 5 » comme « Opus 4.8 »).
+ */
+const FAMILY_TO_ID: Readonly<Record<string, (typeof KNOWN_MODELS)[number]>> = {
+  haiku: 'claude-haiku-4-5',
+  sonnet: 'claude-sonnet-5',
+  opus: 'claude-opus-4-8',
+  fable: 'claude-fable-5',
+};
+
+/**
+ * Étiquette de la page (« Claude Opus 4.8 ») → id du catalogue
+ * (« claude-opus-4-8 ») ou null si inconnu. On n'émet JAMAIS le libellé brut
+ * (texte de la page) : seule une valeur du vocabulaire fermé peut sortir
+ * (règle 1, par construction).
  */
 export function normalizeModelLabel(label: string | null): string | null {
   if (!label) return null;
   const normalized = normalize(label);
-  for (const id of KNOWN_MODELS) {
-    const family = id.split('-')[0] ?? id; // haiku | sonnet | opus
-    if (normalized.includes(family)) {
-      const version = /(\d+)[.\s-](\d+)/.exec(normalized);
-      if (version) {
-        const candidate = `${family}-${version[1] ?? ''}-${version[2] ?? ''}`;
-        return (KNOWN_MODELS as readonly string[]).includes(candidate) ? candidate : id;
-      }
-      return id;
-    }
+  for (const family of Object.keys(FAMILY_TO_ID)) {
+    if (normalized.includes(family)) return FAMILY_TO_ID[family]!;
   }
   return null;
 }

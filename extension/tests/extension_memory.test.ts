@@ -47,7 +47,7 @@ describe('ConversationMemory — agrégation', () => {
   it('normalise le modèle courant (jamais le libellé brut)', () => {
     const memory = new ConversationMemory();
     memory.updateFromPage(MATH_THREAD);
-    expect(memory.toSignals().current_model).toBe('opus-4-8');
+    expect(memory.toSignals().current_model).toBe('claude-opus-4-8');
   });
 
   it('un fil banal ne lève aucun drapeau', () => {
@@ -98,8 +98,8 @@ describe('ConversationMemory — cycle de vie', () => {
   it('derogations_up ne compte que les dérogations vers plus cher', () => {
     const memory = new ConversationMemory();
     memory.updateFromPage(MATH_THREAD);
-    memory.noteDerogation('haiku-4-5', 'opus-4-8'); // vers le haut
-    memory.noteDerogation('opus-4-8', 'haiku-4-5'); // vers le bas — ignorée
+    memory.noteDerogation('claude-haiku-4-5', 'claude-opus-4-8'); // vers le haut
+    memory.noteDerogation('claude-opus-4-8', 'claude-haiku-4-5'); // vers le bas — ignorée
     expect(memory.toSignals().derogations_up).toBe(1);
   });
 });
@@ -114,8 +114,8 @@ describe('Scénario clé — « démontre-le » dans un fil maths', () => {
       conversation: memory.toSignals(),
     };
     const decision = decide(signals);
-    expect(decision.recommended_model).not.toBe('haiku-4-5');
-    expect(decision.recommended_model).toBe('sonnet-4-6');
+    expect(decision.recommended_model).not.toBe('claude-haiku-4-5');
+    expect(decision.recommended_model).toBe('claude-sonnet-5');
     expect(decision.rule).toBe('mock:reasoning_context');
   });
 
@@ -128,6 +128,6 @@ describe('Scénario clé — « démontre-le » dans un fil maths', () => {
       prompt: computePromptSignals('vas-y'),
       conversation: memory.toSignals(),
     };
-    expect(decide(signals).recommended_model).toBe('haiku-4-5');
+    expect(decide(signals).recommended_model).toBe('claude-haiku-4-5');
   });
 });

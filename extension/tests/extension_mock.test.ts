@@ -14,7 +14,7 @@ const QUIET_CONVERSATION: ConversationSignals = {
   seen_code: false,
   seen_math: false,
   seen_reasoning: false,
-  current_model: 'opus-4-8',
+  current_model: 'claude-opus-4-8',
   recos_shown: 0,
   recos_followed: 0,
   derogations_up: 0,
@@ -74,15 +74,15 @@ describe('MockClient — forme du contrat V0', () => {
 describe('MockClient — règles vivantes', () => {
   it('court + simple + fil léger → haiku', async () => {
     const response = await reco(signalsFor('Quelle heure est-il à Tokyo ?'));
-    expect(response.recommended_model).toBe('haiku-4-5');
+    expect(response.recommended_model).toBe('claude-haiku-4-5');
     expect(response.rule).toBe('mock:short_simple');
   });
 
   it('code (prompt ou fil) → sonnet', async () => {
     const fromPrompt = await reco(signalsFor('Corrige : ```js\nlet a = 1;\n```'));
-    expect(fromPrompt.recommended_model).toBe('sonnet-4-6');
+    expect(fromPrompt.recommended_model).toBe('claude-sonnet-5');
     const fromThread = await reco(signalsFor('et maintenant ?', { seen_code: true }));
-    expect(fromThread.recommended_model).toBe('sonnet-4-6');
+    expect(fromThread.recommended_model).toBe('claude-sonnet-5');
   });
 
   it('contexte long → suggest_new_conversation=true', async () => {

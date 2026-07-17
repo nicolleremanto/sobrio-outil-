@@ -11,7 +11,7 @@ import { renderBadge, renderPanel, removeBadge, removePanel } from '../src/panel
 
 const BASE_RECO: RecoV0 = {
   reco_id: 'mock-000042',
-  recommended_model: 'haiku-4-5',
+  recommended_model: 'claude-haiku-4-5',
   confidence: 0.8,
   rule: 'mock:short_simple',
   impact_estimate: {
@@ -37,7 +37,7 @@ function render(
   renderPanel(
     { ...BASE_RECO, ...reco },
     {
-      modelsVisible: ['haiku-4-5', 'sonnet-4-6', 'opus-4-8'],
+      modelsVisible: ['claude-haiku-4-5', 'claude-sonnet-5', 'claude-opus-4-8'],
       messages: FR_MESSAGES,
       callbacks,
     },
@@ -55,7 +55,7 @@ describe('renderPanel — reco simple', () => {
   it('affiche le modèle recommandé, la jauge de confiance et les fourchettes', () => {
     render();
     const root = panelRoot();
-    expect(root.querySelector('[data-sobrio-model="haiku-4-5"]')?.textContent).toContain(
+    expect(root.querySelector('[data-sobrio-model="claude-haiku-4-5"]')?.textContent).toContain(
       'Claude Haiku 4.5',
     );
     expect(root.querySelector('[data-sobrio-confidence="0.8"]')).toBeTruthy();
@@ -96,10 +96,10 @@ describe('renderPanel — dérogation et suivi', () => {
     const callbacks = render();
     const select = panelRoot().querySelector<HTMLSelectElement>('[data-sobrio-override]')!;
     const values = [...select.options].map((option) => option.value).filter(Boolean);
-    expect(values).toEqual(['sonnet-4-6', 'opus-4-8']);
-    select.value = 'opus-4-8';
+    expect(values).toEqual(['claude-sonnet-5', 'claude-opus-4-8']);
+    select.value = 'claude-opus-4-8';
     select.dispatchEvent(new Event('change'));
-    expect(callbacks.onOverride).toHaveBeenCalledWith('opus-4-8');
+    expect(callbacks.onOverride).toHaveBeenCalledWith('claude-opus-4-8');
   });
 });
 
@@ -169,7 +169,7 @@ describe('runRecommendationFlow — silence et kill-switch', () => {
       config: {
         enabled: true,
         mode: 'equilibre',
-        models_visible: ['haiku-4-5', 'sonnet-4-6', 'opus-4-8'],
+        models_visible: ['claude-haiku-4-5', 'claude-sonnet-5', 'claude-opus-4-8'],
         send_prompt_text: false,
         messages: { fr: {} },
         min_extension_version: '0.1.0',
@@ -208,7 +208,7 @@ describe('runRecommendationFlow — silence et kill-switch', () => {
   it('flux nominal : la reco est affichée et notée dans la mémoire', async () => {
     const memory = new ConversationMemory();
     const result = await runRecommendationFlow('Quelle heure est-il ?', deps({ memory }));
-    expect(result?.recommended_model).toBe('haiku-4-5');
+    expect(result?.recommended_model).toBe('claude-haiku-4-5');
     expect(document.getElementById('sobrio-reco-host')).toBeTruthy();
     expect(memory.toSignals().recos_shown).toBe(1);
   });

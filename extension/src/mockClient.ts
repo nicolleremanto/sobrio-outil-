@@ -50,9 +50,10 @@ export interface RecoClientV0 {
 const MOCK_CATALOG: Readonly<
   Record<string, { inUsd: number; outUsd: number; whMin: number; whMax: number }>
 > = {
-  'haiku-4-5': { inUsd: 1.0, outUsd: 5.0, whMin: 0.3, whMax: 1.4 },
-  'sonnet-4-6': { inUsd: 3.0, outUsd: 15.0, whMin: 0.8, whMax: 3.5 },
-  'opus-4-8': { inUsd: 5.0, outUsd: 25.0, whMin: 1.5, whMax: 6.0 },
+  'claude-haiku-4-5': { inUsd: 1.0, outUsd: 5.0, whMin: 0.3, whMax: 1.4 },
+  'claude-sonnet-5': { inUsd: 3.0, outUsd: 15.0, whMin: 0.8, whMax: 3.5 },
+  'claude-opus-4-8': { inUsd: 5.0, outUsd: 25.0, whMin: 1.5, whMax: 6.0 },
+  'claude-fable-5': { inUsd: 10.0, outUsd: 50.0, whMin: 2.5, whMax: 9.0 },
 };
 
 /** Taux fixe — même convention que le monorepo. TODO(V1) : source datée. */
@@ -65,7 +66,7 @@ function estimateTokensOut(tokensIn: number): number {
 
 /** Fourchettes coût/énergie pour un modèle donné (règle 5 : min–max). */
 export function mockImpactEstimate(model: string, tokensIn: number): ImpactEstimate {
-  const entry = MOCK_CATALOG[model] ?? MOCK_CATALOG['sonnet-4-6']!;
+  const entry = MOCK_CATALOG[model] ?? MOCK_CATALOG['claude-sonnet-5']!;
   const tokensOut = estimateTokensOut(tokensIn);
   const costPointEur =
     ((tokensIn * entry.inUsd + tokensOut * entry.outUsd) / 1_000_000) * EUR_PER_USD;

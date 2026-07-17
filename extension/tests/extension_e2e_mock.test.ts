@@ -17,7 +17,7 @@ function makeDeps(): FlowDeps & { client: MockClient } {
     config: {
       enabled: true,
       mode: 'equilibre',
-      models_visible: ['haiku-4-5', 'sonnet-4-6', 'opus-4-8'],
+      models_visible: ['claude-haiku-4-5', 'claude-sonnet-5', 'claude-opus-4-8'],
       send_prompt_text: false,
       messages: { fr: {} },
       min_extension_version: '0.1.0',
@@ -57,15 +57,15 @@ describe('Parcours mock de bout en bout', () => {
   it('saisie → reco → dérogation → événement followed=false + overridden_to', async () => {
     const deps = makeDeps();
     const reco = await runRecommendationFlow('Quelle heure est-il à Tokyo ?', deps);
-    expect(reco!.recommended_model).toBe('haiku-4-5');
+    expect(reco!.recommended_model).toBe('claude-haiku-4-5');
 
     const select = shadow().querySelector<HTMLSelectElement>('[data-sobrio-override]')!;
-    select.value = 'opus-4-8';
+    select.value = 'claude-opus-4-8';
     select.dispatchEvent(new Event('change'));
 
     const event = deps.client.sentEvents[0]!;
     expect(event.followed).toBe(false);
-    expect(event.overridden_to).toBe('opus-4-8');
+    expect(event.overridden_to).toBe('claude-opus-4-8');
     // Dérogation vers plus cher : le signal derogations_up s'incrémente.
     expect(deps.memory.toSignals().derogations_up).toBe(1);
   });

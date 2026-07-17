@@ -22,7 +22,7 @@ function mountFakeModelSelector(initial = 'Claude Opus 4.8', itemsRespond = true
   const menu = document.createElement('div');
   menu.setAttribute('role', 'menu');
   menu.hidden = true;
-  for (const label of ['Claude Haiku 4.5', 'Claude Sonnet 4.6', 'Claude Opus 4.8']) {
+  for (const label of ['Claude Haiku 4.5', 'Claude Sonnet 5', 'Claude Opus 4.8']) {
     const item = document.createElement('button');
     item.setAttribute('role', 'menuitem');
     item.textContent = label;
@@ -75,7 +75,7 @@ function mountNestedModelSelector(initial = 'Fable 5 Max'): void {
     if (submenu) return;
     submenu = document.createElement('div');
     submenu.setAttribute('role', 'menu');
-    for (const label of ['Claude Haiku 4.5', 'Claude Sonnet 4.6', 'Claude Opus 4.8']) {
+    for (const label of ['Claude Haiku 4.5', 'Claude Sonnet 5', 'Claude Opus 4.8']) {
       const item = document.createElement('button');
       item.setAttribute('role', 'menuitem');
       item.textContent = label;
@@ -98,25 +98,25 @@ const FAST = { menuTimeoutMs: 200, settleMs: 0 };
 describe('applyModelInPage — succès vérifié', () => {
   it('ouvre le menu, clique le bon item et vérifie le résultat', async () => {
     mountFakeModelSelector('Claude Opus 4.8');
-    await expect(applyModelInPage('sonnet-4-6', FAST)).resolves.toBe(true);
+    await expect(applyModelInPage('claude-sonnet-5', FAST)).resolves.toBe(true);
     expect(document.querySelector('[data-testid="model-selector"]')?.textContent).toBe(
-      'Claude Sonnet 4.6',
+      'Claude Sonnet 5',
     );
   });
 
   it('menu à DEUX niveaux (claude.ai réel) : ouvre « Plus de modèles » et sélectionne', async () => {
     mountNestedModelSelector('Fable 5 Max');
-    await expect(applyModelInPage('sonnet-4-6', FAST)).resolves.toBe(true);
+    await expect(applyModelInPage('claude-sonnet-5', FAST)).resolves.toBe(true);
     expect(document.querySelector('[data-testid="model-selector-dropdown"]')?.textContent).toBe(
-      'Claude Sonnet 4.6',
+      'Claude Sonnet 5',
     );
   });
 
   it('modèle déjà sélectionné : true sans aucun clic', async () => {
-    mountFakeModelSelector('Claude Sonnet 4.6');
+    mountFakeModelSelector('Claude Sonnet 5');
     const button = document.querySelector<HTMLElement>('[data-testid="model-selector"]')!;
     const clickSpy = vi.spyOn(button, 'click');
-    await expect(applyModelInPage('sonnet-4-6', FAST)).resolves.toBe(true);
+    await expect(applyModelInPage('claude-sonnet-5', FAST)).resolves.toBe(true);
     expect(clickSpy).not.toHaveBeenCalled();
   });
 });
@@ -124,12 +124,12 @@ describe('applyModelInPage — succès vérifié', () => {
 describe('applyModelInPage — abandons silencieux', () => {
   it('aucun sélecteur de modèle dans la page → false, sans throw', async () => {
     document.body.innerHTML = '<main></main>';
-    await expect(applyModelInPage('sonnet-4-6', FAST)).resolves.toBe(false);
+    await expect(applyModelInPage('claude-sonnet-5', FAST)).resolves.toBe(false);
   });
 
   it('le clic ne change pas le modèle (menu inerte) → false après vérification', async () => {
     mountFakeModelSelector('Claude Opus 4.8', false); // items sans effet
-    await expect(applyModelInPage('sonnet-4-6', FAST)).resolves.toBe(false);
+    await expect(applyModelInPage('claude-sonnet-5', FAST)).resolves.toBe(false);
     // Le libellé n'a pas bougé : l'utilisateur garde la main.
     expect(document.querySelector('[data-testid="model-selector"]')?.textContent).toBe(
       'Claude Opus 4.8',
@@ -152,7 +152,7 @@ describe('Flux : OPT-IN strict (amendement règle 2)', () => {
       config: {
         enabled: true,
         mode: 'equilibre',
-        models_visible: ['haiku-4-5', 'sonnet-4-6', 'opus-4-8'],
+        models_visible: ['claude-haiku-4-5', 'claude-sonnet-5', 'claude-opus-4-8'],
         send_prompt_text: false,
         messages: { fr: {} },
         min_extension_version: '0.1.0',
@@ -182,9 +182,9 @@ describe('Flux : OPT-IN strict (amendement règle 2)', () => {
     const applyModel = vi.fn().mockResolvedValue(true);
     await runRecommendationFlow('Quelle heure est-il ?', deps({ applyModel }));
     const select = shadow().querySelector<HTMLSelectElement>('[data-sobrio-override]')!;
-    select.value = 'opus-4-8';
+    select.value = 'claude-opus-4-8';
     select.dispatchEvent(new Event('change'));
-    expect(applyModel).toHaveBeenCalledWith('opus-4-8');
+    expect(applyModel).toHaveBeenCalledWith('claude-opus-4-8');
   });
 
   it("SANS opt-in (défaut) : lecture seule stricte — la page hôte n'est jamais touchée", async () => {

@@ -84,11 +84,15 @@ export const EN_MESSAGES: Messages = {
 
 const LOCALES: Readonly<Record<Locale, Messages>> = { fr: FR_MESSAGES, en: EN_MESSAGES };
 
-/** Noms d'affichage des modèles (ids du catalogue → libellés lisibles). */
+/**
+ * Noms d'affichage des modèles (ids d'API → libellés IDENTIQUES au sélecteur
+ * de modèle de claude.ai). Gamme vérifiée en ligne le 2026-07-17.
+ */
 export const MODEL_DISPLAY_NAMES: Readonly<Record<string, string>> = {
-  'haiku-4-5': 'Claude Haiku 4.5',
-  'sonnet-4-6': 'Claude Sonnet 4.6',
-  'opus-4-8': 'Claude Opus 4.8',
+  'claude-haiku-4-5': 'Claude Haiku 4.5',
+  'claude-sonnet-5': 'Claude Sonnet 5',
+  'claude-opus-4-8': 'Claude Opus 4.8',
+  'claude-fable-5': 'Claude Fable 5',
 };
 
 /** Libellé lisible d'un id de modèle (l'id brut sinon). */

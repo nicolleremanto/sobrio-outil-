@@ -2,6 +2,21 @@
 
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/).
 
+## 1.2.0 — 2026-07-17
+
+Finition orchestrée multi-agents (convergence chantier par chantier).
+
+### Chantier C — catalogue de modèles à jour
+
+- Gamme alignée sur la documentation officielle Anthropic (vérifiée en ligne) :
+  **Claude Haiku 4.5**, **Claude Sonnet 5**, **Claude Opus 4.8**, **Claude Fable 5**.
+- Ids internes = identifiants d'API (`claude-haiku-4-5`, `claude-sonnet-5`,
+  `claude-opus-4-8`, `claude-fable-5`) ; libellés UI identiques au sélecteur
+  claude.ai. `mockClient`, `messages`, `signals`, `mockRules` et les tests
+  alignés. Plus aucune référence à la gamme obsolète.
+- `normalizeModelLabel` réécrit en correspondance par famille (robuste aux
+  libellés à un seul chiffre, « Sonnet 5 »/« Fable 5 »).
+
 ## 1.0.0 — 2026-07-17
 
 Première version complète (productisation de la V0, 9 boucles).
