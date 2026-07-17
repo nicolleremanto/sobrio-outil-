@@ -34,6 +34,8 @@ export const FR_MESSAGES: Messages = {
   budget_label: 'Budget',
   budget_used_suffix: '% utilisé',
   use_model: 'Utiliser {model}',
+  // Mode guide : l'extension n'agit pas — libellé d'intention, non d'action.
+  use_model_guide: 'J’utiliserai {model}',
   use_model_hint: 'Note votre intention.',
   choose_other: 'Choisir un autre modèle…',
   why_link: 'Pourquoi ?',

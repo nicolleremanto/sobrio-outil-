@@ -59,6 +59,18 @@ function shadow(): ShadowRoot {
   return document.getElementById('sobrio-reco-host')!.shadowRoot!;
 }
 
+/** Promesse résoluble à la demande — pour simuler une bascule LENTE (course). */
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((r) => (resolve = r));
+  return { promise, resolve };
+}
+
+/** Draine la file des microtâches (le flux atteint son `await` de bascule). */
+function flush(): Promise<void> {
+  return new Promise((r) => setTimeout(r, 0));
+}
+
 beforeEach(() => {
   document.body.innerHTML = '<main></main>';
   removePanel();
@@ -164,6 +176,13 @@ describe('auto — bascule optimiste, confiance ≥ seuil', () => {
     expect(applyModel).not.toHaveBeenCalled();
   });
 
+  it('modèle courant illisible en auto → signal selector_broken émis', async () => {
+    const { deps, health, readCurrentModel } = autoDeps();
+    readCurrentModel.mockReturnValue(null);
+    await runRecommendationFlow('Refactore ce module', deps);
+    expect(health).toContain('selector_broken');
+  });
+
   it('échec des sélecteurs → repli silencieux one_click + signal selector_broken, pas de followed=true', async () => {
     const { deps, events, health, applyModel } = autoDeps();
     applyModel.mockResolvedValue(false); // la bascule échoue
@@ -176,6 +195,75 @@ describe('auto — bascule optimiste, confiance ≥ seuil', () => {
     // Signal de santé émis, aucune télémétrie de suivi mensongère.
     expect(health).toContain('selector_broken');
     expect(events).toHaveLength(0);
+  });
+
+  it('COURSE : Annuler PENDANT une bascule lente → un seul événement (followed=false), pas de followed=true tardif', async () => {
+    const { client, events } = fakeClient(BASE_RECO);
+    const slow = deferred<boolean>();
+    // 1er appel (bascule vers la reco) = LENT ; 2e (restauration) = immédiat.
+    const applyModel = vi.fn().mockReturnValueOnce(slow.promise).mockResolvedValue(true);
+    const readCurrentModel = vi.fn().mockReturnValue('claude-haiku-4-5');
+    const deps: FlowDeps = {
+      client,
+      memory: new ConversationMemory(),
+      config: CONFIG,
+      messages: FR_MESSAGES,
+      now: () => new Date('2026-07-17T10:00:00.000Z'),
+      assistMode: 'auto',
+      applyModel,
+      readCurrentModel,
+    };
+
+    const flow = runRecommendationFlow('Refactore ce module', deps);
+    await flush(); // le panneau optimiste « basculé » est affiché, bascule en vol
+
+    // L'utilisateur annule AVANT la fin de la bascule.
+    (shadow().querySelector('[data-sobrio-cancel]') as HTMLButtonElement).click();
+    expect(events).toEqual([
+      {
+        reco_id: 'mock-1',
+        followed: false,
+        overridden_to: 'claude-haiku-4-5',
+        ts: '2026-07-17T10:00:00.000Z',
+      },
+    ]);
+
+    slow.resolve(true); // la bascule de fond se résout APRÈS l'annulation
+    await flow;
+
+    // Aucun followed=true mensonger n'a été ajouté après l'annulation.
+    expect(events.filter((e) => e.followed === true)).toHaveLength(0);
+    // La restauration a bien eu lieu (sérialisée après la bascule).
+    expect(applyModel).toHaveBeenLastCalledWith('claude-haiku-4-5');
+  });
+
+  it('COURSE : navigation SPA (removePanel) pendant une bascule échouée → panneau NON ressuscité', async () => {
+    const { client } = fakeClient(BASE_RECO);
+    const slow = deferred<boolean>();
+    const applyModel = vi.fn().mockReturnValue(slow.promise);
+    const readCurrentModel = vi.fn().mockReturnValue('claude-haiku-4-5');
+    const deps: FlowDeps = {
+      client,
+      memory: new ConversationMemory(),
+      config: CONFIG,
+      messages: FR_MESSAGES,
+      now: () => new Date('2026-07-17T10:00:00.000Z'),
+      assistMode: 'auto',
+      applyModel,
+      readCurrentModel,
+    };
+
+    const flow = runRecommendationFlow('Refactore ce module', deps);
+    await flush();
+    expect(document.getElementById('sobrio-reco-host')).not.toBeNull(); // panneau optimiste
+
+    // Changement de conversation (SPA) : le panneau est retiré…
+    removePanel();
+    slow.resolve(false); // …puis la bascule échoue
+    await flow;
+
+    // Le panneau NE réapparaît PAS (pas de fuite de la conversation précédente).
+    expect(document.getElementById('sobrio-reco-host')).toBeNull();
   });
 });
 

@@ -120,6 +120,18 @@ export function removePanel(): void {
   }
 }
 
+/**
+ * Vrai si le panneau de recommandation est actuellement monté. Sert à ne PAS
+ * ressusciter un panneau qu'une navigation SPA vient de retirer (anti-fuite).
+ */
+export function isPanelPresent(): boolean {
+  try {
+    return document.getElementById(PANEL_HOST_ID) !== null;
+  } catch {
+    return false;
+  }
+}
+
 /** Retire le badge (sans jamais throw). */
 export function removeBadge(): void {
   try {
@@ -412,7 +424,13 @@ export function renderPanel(reco: RecoV0, options: PanelOptions): void {
       followButton.className = 'primary';
       followButton.type = 'button';
       followButton.setAttribute('data-sobrio-follow', '');
-      followButton.textContent = formatMessage(messages['use_model'] ?? 'Utiliser {model}', {
+      // En guide, le bouton ne bascule PAS la page : libellé non-actif (intention),
+      // pas « Utiliser » qui suggérerait une action que guide n'effectue jamais.
+      const useLabel =
+        options.assistMode === 'guide'
+          ? (messages['use_model_guide'] ?? 'J’utiliserai {model}')
+          : (messages['use_model'] ?? 'Utiliser {model}');
+      followButton.textContent = formatMessage(useLabel, {
         model: modelDisplayName(reco.recommended_model),
       });
       followButton.addEventListener('click', () => {

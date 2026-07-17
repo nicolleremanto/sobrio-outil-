@@ -21,7 +21,7 @@ Fable 5 (10/50), Opus 4.8 (5/25), Sonnet 5 (3/15 · intro 2/10), Haiku 4.5 (1/5)
 | -------- | --------------------------------- | -------------------------- | ------------ |
 | C        | Catalogue de modèles à jour       | 2/2 (rondes 1 & 2)         | **CONVERGÉ** |
 | A        | Refonte graphique du panneau      | 2/2 (rondes 3 & 4)         | **CONVERGÉ** |
-| B        | Bascule instantanée + assist_mode | 0/2                        | à venir      |
+| B        | Bascule instantanée + assist_mode | 0/2 (ronde 0 RED course)   | en cours     |
 
 ---
 
@@ -243,3 +243,33 @@ clos.** Deux minors triviaux :
 
 **Bilan Chantier A : 0 YELLOW → 1 verte → 2 RED → 3 verte → 4 verte (convergé)
 → 5 verte (finition validée).** Aucun FAIL privacy sur toute la boucle.
+
+## Chantier B — round 0 (commit 857f5c5)
+
+| agent               | scores                                                                  | blocking | major | verdict    |
+| ------------------- | ----------------------------------------------------------------------- | -------- | ----- | ---------- |
+| robustness-redteam  | dégrad 2 · crash 4 · repli 2 · spa 2 · observers 4                      | 2        | 0     | **RED**    |
+| product-conformance | ton 5 · fourchettes 5 · mémoire 5 · démontre 5 · nouv-conv 5 · budget 5 | 0        | 1     | **YELLOW** |
+| qa-auditor          | couv 4 · contrat 4 · erreurs 4 · clarté 5 · régressions 5               | 0        | 1     | **YELLOW** |
+| privacy-sentinel    | —                                                                       | PASS     | —     | **PASS**   |
+
+→ Ronde **RED**. Le redteam a attrapé une VRAIE faille de concurrence que mes
+tests masquaient (ils cliquaient Annuler APRÈS un `applyModel` mock instantané,
+jamais pendant la bascule en vol). Défauts retenus :
+
+- **[blocking redteam + major product/qa]** Course « Annuler pendant la
+  bascule » : la bascule de fond résolvait `followed:true` INCONDITIONNELLEMENT,
+  même après un clic Annuler → télémétrie mensongère ; + deux `applyModelInPage`
+  concurrents se disputaient le menu → modèle final non déterministe. → **corrigé**
+  jeton `cancelled` partagé (skip `followed:true` si annulé) + restauration
+  SÉRIALISÉE après la bascule en vol (`switchInFlight.then(restore)`) → un seul
+  événement net, modèle déterministe. + 2 tests de course (applyModel LENT).
+- **[blocking redteam]** Fuite de panneau : sur échec de bascule, re-render APRÈS
+  `removePanel()` (nav SPA) → panneau obsolète réapparaît. → **corrigé** garde
+  `isPanelPresent()` avant le re-render + test SPA.
+- **[minor redteam]** `readCurrentModel()` null n'émettait pas `selector_broken`
+  → **corrigé** + test.
+- **[minor product]** libellé guide « Utiliser {modèle} » trompeur (aucune action)
+  → **corrigé** « J'utiliserai {modèle} » (`use_model_guide`).
+- **[minor qa]** `schemas.py` seuil sans borne 0..1 → **corrigé** `Field(ge=0, le=1)`.
+  · `openapi.info.version` resté « 1.0 » → **corrigé** « 1.1 ».

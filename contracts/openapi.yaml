@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Sobrio API — Phase 1
-  version: "1.0"
+  version: "1.1"
   description: |
     Contrat d'interface de l'API Sobrio : recommandation de modèle, télémétrie,
     configuration de l'extension. Source de vérité pour les Lots A (extension)

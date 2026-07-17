@@ -86,8 +86,10 @@ function panelMarkup(state) {
     const guideHint = state.guide
       ? 'À sélectionner dans le menu de modèle de Claude.'
       : 'Note votre intention.';
+    // En guide, le bouton porte un libellé d'intention (aucune action page).
+    const primaryLabel = state.guide ? `J'utiliserai ${state.model}` : `Utiliser ${state.model}`;
     parts.push(`<div class="actions">
-      <button class="primary" type="button">Utiliser ${state.model}</button>
+      <button class="primary" type="button">${primaryLabel}</button>
       <p class="hint">${guideHint}</p>
       <select aria-label="Choisir un autre modèle">${state.others.length ? `<option>Choisir un autre modèle…</option>${opts}` : ''}</select>
     </div>`);

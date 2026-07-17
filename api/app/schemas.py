@@ -126,7 +126,7 @@ class ExtensionConfig(BaseModel):
     # RFC-0003 : niveau d'assistance à la bascule (optionnels, compat ascendante).
     # guide = aucun contact page (repli / kill-switch prudence CGU).
     assist_mode: Literal["auto", "one_click", "guide"] = "one_click"
-    auto_confidence_threshold: float = 0.75
+    auto_confidence_threshold: float = Field(default=0.75, ge=0, le=1)
     # false PAR CONTRAT : l'envoi du texte est un opt-in explicite de l'org.
     send_prompt_text: bool = False
     messages: Messages

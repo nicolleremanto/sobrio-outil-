@@ -23,7 +23,14 @@ import { createConversationController } from './conversationController';
 import { debugLog } from './debugLog';
 import { mergeMessages, type Messages } from './messages';
 import { applyModelInPage, readCurrentModel as readCurrentModelFromPage } from './modelSwitcher';
-import { removeBadge, removePanel, renderBadge, renderPanel, repositionBadge } from './panel';
+import {
+  isPanelPresent,
+  removeBadge,
+  removePanel,
+  renderBadge,
+  renderPanel,
+  repositionBadge,
+} from './panel';
 import {
   collectPageView,
   noteInputResolution,
@@ -140,8 +147,19 @@ export async function runRecommendationFlow(text: string, deps: FlowDeps) {
     reco.confidence >= threshold
   ) {
     previousModel = deps.readCurrentModel();
+    // Modèle courant illisible = sélecteur cassé → signal de santé + repli
+    // one_click (on ne saurait pas restaurer, donc pas de bascule auto).
+    if (previousModel === null) deps.client.sendHealthSignal?.('selector_broken');
     autoSwitch = previousModel !== null && previousModel !== reco.recommended_model;
   }
+
+  // La bascule auto est une opération asynchrone ANNULABLE. `cancelled` est
+  // partagé entre le clic Annuler et la fin de la bascule de fond ;
+  // `switchInFlight` permet de SÉRIALISER la restauration APRÈS la bascule —
+  // jamais deux `applyModelInPage` concurrents sur le menu (modèle final
+  // déterministe), et jamais de followed=true émis après une annulation.
+  let cancelled = false;
+  let switchInFlight: Promise<boolean> | null = null;
 
   const renderOptions = (switched: boolean) => ({
     modelsVisible: deps.config?.models_visible ?? [],
@@ -162,12 +180,15 @@ export async function runRecommendationFlow(text: string, deps: FlowDeps) {
         void applyAndReport(model);
       },
       onCancel: () => {
-        // Annuler la bascule auto : restaure le modèle précédent + télémétrie
-        // cohérente (followed=false, overridden_to=précédent).
-        if (previousModel === null) return;
+        // Annuler la bascule auto : un seul événement net (followed=false,
+        // overridden_to=précédent). La restauration attend la fin de la bascule
+        // en vol (sérialisation) pour ne pas se disputer le menu de modèle.
+        if (previousModel === null || cancelled) return;
+        cancelled = true;
         deps.memory.noteDerogation(reco.recommended_model, previousModel);
         send(buildRecoEvent(reco.reco_id, false, previousModel, now));
-        void applyAndReport(previousModel);
+        const restore = () => applyAndReport(previousModel!);
+        void (switchInFlight ? switchInFlight.then(restore, restore) : restore());
       },
     },
   });
@@ -177,13 +198,18 @@ export async function runRecommendationFlow(text: string, deps: FlowDeps) {
   renderPanel(reco, renderOptions(autoSwitch));
 
   if (autoSwitch) {
-    const ok = await applyAndReport(reco.recommended_model);
+    switchInFlight = applyAndReport(reco.recommended_model);
+    const ok = await switchInFlight;
+    // Annulé PENDANT la bascule : ne PAS émettre followed=true — la restauration
+    // et sa télémétrie sont portées par onCancel (un seul événement net).
+    if (cancelled) return reco;
     if (ok) {
-      // Bascule réussie = suivi (followed=true).
+      // Bascule réussie et non annulée = suivi (followed=true).
       deps.memory.noteFollowed();
       send(buildRecoEvent(reco.reco_id, true, null, now));
-    } else {
-      // Repli silencieux : retour à l'UI one_click (l'utilisateur garde la main).
+    } else if (isPanelPresent()) {
+      // Repli one_click — UNIQUEMENT si le panneau optimiste est encore monté :
+      // une navigation SPA a pu le retirer entre-temps, on ne le ressuscite pas.
       renderPanel(reco, renderOptions(false));
     }
   }
