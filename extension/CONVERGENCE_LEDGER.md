@@ -17,11 +17,11 @@ Fable 5 (10/50), Opus 4.8 (5/25), Sonnet 5 (3/15 · intro 2/10), Haiku 4.5 (1/5)
 
 ## État des chantiers
 
-| Chantier | Sujet                             | Rondes vertes consécutives | Statut       |
-| -------- | --------------------------------- | -------------------------- | ------------ |
-| C        | Catalogue de modèles à jour       | 2/2 (rondes 1 & 2)         | **CONVERGÉ** |
-| A        | Refonte graphique du panneau      | 2/2 (rondes 3 & 4)         | **CONVERGÉ** |
-| B        | Bascule instantanée + assist_mode | 0/2 (ronde 3 YELLOW DOM)   | en cours     |
+| Chantier | Sujet                             | Rondes vertes consécutives      | Statut       |
+| -------- | --------------------------------- | ------------------------------- | ------------ |
+| C        | Catalogue de modèles à jour       | 2/2 (rondes 1 & 2)              | **CONVERGÉ** |
+| A        | Refonte graphique du panneau      | 2/2 (rondes 3 & 4)              | **CONVERGÉ** |
+| B        | Bascule instantanée + assist_mode | 0/2 (ronde 4 YELLOW action DOM) | en cours     |
 
 ---
 
