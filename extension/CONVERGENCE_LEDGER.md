@@ -83,3 +83,25 @@ Minors optionnels non bloquants (documentés, non traités en C) :
 - `warehouse/seed.py` `models_visible` en dur (données de démo) ;
 - `ambiguous_note` nomme « Sonnet » en dur → **reporté au Chantier A** (refonte
   du panneau, qui touche `messages.ts`/`panel.ts`).
+
+## Chantier A — round 0 (commit d3d9a53)
+
+| agent               | scores                                                                      | blocking | major | verdict    |
+| ------------------- | --------------------------------------------------------------------------- | -------- | ----- | ---------- |
+| design-critic       | layout 5 · couleur 5 · typo 4 · grille 4 · couverture 2 · parité 4 · a11y 5 | 0        | 1     | **YELLOW** |
+| product-conformance | ton 5 · fourchettes 5 · mémoire 5 · démontre 5 · nouv-conv 5 · budget 4     | 0        | 0     | **GREEN**  |
+| qa-auditor          | couv 4 · contrat 5 · erreurs 5 · clarté 4 · régressions 5                   | 0        | 0     | **GREEN**  |
+| privacy-sentinel    | —                                                                           | PASS     | —     | **PASS**   |
+
+→ Ronde **YELLOW**. À corriger avant ronde 1 :
+
+- **[MAJOR design]** Capture TRONQUÉE : 4 états sur 6 visibles (`--headless --screenshot`
+  clippe au viewport). Les états `ambigu` et `basculee` jamais vus. → capturer la
+  PLEINE page (fenêtre plus haute), régénérer, re-soumettre.
+- **[minor design]** `.why` sans margin-top (rupture grille 8). · ombre sombre `.32`
+  vs charte `.08` → documenter l'écart. · `mode-note`/`hint` en 11 px → 12 px.
+- **[minor produit]** jauge budget sans `role=progressbar`/aria-valuenow. · %
+  confiance/budget non bornés dans le libellé.
+- **[minor qa]** markup du harnais dupliqué (seule la CSS est source unique) →
+  documenter/aligner. · `harness.html` committé + prettier → gitignorer (généré). ·
+  branche luminance de `detectHostTheme` non testée.

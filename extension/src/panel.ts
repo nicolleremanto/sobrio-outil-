@@ -262,9 +262,8 @@ export function renderPanel(reco: RecoV0, options: PanelOptions): void {
     panel.appendChild(gauge);
     const gaugeLabel = document.createElement('div');
     gaugeLabel.className = 'gauge-label';
-    gaugeLabel.textContent = `${messages['confidence_label'] ?? 'Confiance'} : ${Math.round(
-      reco.confidence * 100,
-    )} %`;
+    // Libellé borné (réutilise confidencePct) : texte et barre coïncident toujours.
+    gaugeLabel.textContent = `${messages['confidence_label'] ?? 'Confiance'} : ${confidencePct} %`;
     panel.appendChild(gaugeLabel);
 
     // Signal ambigu ⇒ on le dit (règle 7).
@@ -293,20 +292,29 @@ export function renderPanel(reco: RecoV0, options: PanelOptions): void {
     )} ${messages['energy_unit'] ?? 'Wh'}`;
     panel.appendChild(energy);
 
-    // Jauge budget — uniquement si fournie.
+    // Jauge budget — uniquement si fournie (accessible : progressbar 0–100,
+    // par parité avec la jauge de confiance).
     if (reco.budget) {
+      const budgetPct = Math.round(Math.min(100, Math.max(0, reco.budget.pct_used)));
       const budgetGauge = document.createElement('div');
       budgetGauge.className = 'gauge';
       budgetGauge.setAttribute('data-sobrio-budget', '');
+      budgetGauge.setAttribute('role', 'progressbar');
+      budgetGauge.setAttribute('aria-valuemin', '0');
+      budgetGauge.setAttribute('aria-valuemax', '100');
+      budgetGauge.setAttribute('aria-valuenow', String(budgetPct));
+      budgetGauge.setAttribute(
+        'aria-label',
+        `${messages['budget_label'] ?? 'Budget'} ${reco.budget.team_label}`,
+      );
       const budgetFill = document.createElement('div');
-      budgetFill.style.width = `${Math.round(Math.min(100, Math.max(0, reco.budget.pct_used)))}%`;
+      budgetFill.style.width = `${budgetPct}%`;
       budgetGauge.appendChild(budgetFill);
       panel.appendChild(budgetGauge);
       const budgetLabel = document.createElement('div');
       budgetLabel.className = 'gauge-label';
-      budgetLabel.textContent = `${messages['budget_label'] ?? 'Budget'} ${reco.budget.team_label} : ${Math.round(
-        reco.budget.pct_used,
-      )} ${messages['budget_used_suffix'] ?? '% utilisé'}`;
+      // Libellé borné (réutilise budgetPct) : texte et barre coïncident toujours.
+      budgetLabel.textContent = `${messages['budget_label'] ?? 'Budget'} ${reco.budget.team_label} : ${budgetPct} ${messages['budget_used_suffix'] ?? '% utilisé'}`;
       panel.appendChild(budgetLabel);
     }
 

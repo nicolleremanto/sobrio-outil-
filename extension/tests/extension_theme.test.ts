@@ -2,7 +2,7 @@
  * Chantier A — thèmes & charte graphique : détection de thème hôte, tokens
  * charte §4 dans la source unique PANEL_CSS, application du thème au panneau.
  */
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { PANEL_CSS } from '../src/panelStyle';
 import { detectHostTheme, removePanel, renderPanel } from '../src/panel';
@@ -40,6 +40,27 @@ describe('detectHostTheme — thème de la page hôte', () => {
     document.documentElement.className = '';
     document.documentElement.setAttribute('data-theme', 'dark');
     expect(detectHostTheme()).toBe('dark');
+  });
+
+  it('attribut data-mode (variante de thème)', () => {
+    document.documentElement.setAttribute('data-mode', 'dark');
+    expect(detectHostTheme()).toBe('dark');
+    document.documentElement.setAttribute('data-mode', 'light');
+    expect(detectHostTheme()).toBe('light');
+    document.documentElement.removeAttribute('data-mode');
+  });
+
+  it('repli par LUMINANCE du fond opaque (sombre vs clair)', () => {
+    document.documentElement.className = '';
+    const spy = vi.spyOn(window, 'getComputedStyle');
+    spy.mockReturnValue({ backgroundColor: 'rgb(20, 20, 20)' } as CSSStyleDeclaration);
+    expect(detectHostTheme()).toBe('dark');
+    spy.mockReturnValue({ backgroundColor: 'rgb(255, 255, 255)' } as CSSStyleDeclaration);
+    expect(detectHostTheme()).toBe('light');
+    // Fond transparent (alpha 0) : indéterminable → null.
+    spy.mockReturnValue({ backgroundColor: 'rgba(0, 0, 0, 0)' } as CSSStyleDeclaration);
+    expect(detectHostTheme()).toBeNull();
+    spy.mockRestore();
   });
 
   it('fond transparent / indéterminable → null (prefers-color-scheme gouverne)', () => {
@@ -102,5 +123,20 @@ describe('renderPanel — thème appliqué à l’hôte + fourchettes FR', () =>
     const text = document.getElementById('sobrio-reco-host')!.shadowRoot!.textContent!;
     expect(text).toContain('0,0004–0,0006');
     expect(text).not.toContain('0.0004'); // plus de point décimal
+  });
+
+  it('jauge budget accessible : role=progressbar + aria-valuenow (parité confiance)', () => {
+    document.body.innerHTML = '<main></main>';
+    renderPanel(RECO, {
+      modelsVisible: [],
+      messages: FR_MESSAGES,
+      callbacks: { onFollow() {}, onOverride() {} },
+    });
+    const budget = document
+      .getElementById('sobrio-reco-host')!
+      .shadowRoot!.querySelector('[data-sobrio-budget]')!;
+    expect(budget.getAttribute('role')).toBe('progressbar');
+    expect(budget.getAttribute('aria-valuenow')).toBe('42');
+    expect(budget.getAttribute('aria-label')).toContain('Budget');
   });
 });

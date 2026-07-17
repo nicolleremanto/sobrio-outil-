@@ -25,7 +25,10 @@ if (!cssMatch) {
 }
 const PANEL_CSS = cssMatch[1];
 
-// 2) Markup d'un panneau (miroir de src/panel.ts renderPanel).
+// 2) Markup d'un panneau — MIROIR de src/panel.ts renderPanel. Seule la CSS
+// (PANEL_CSS) est garantie sans dérive ; ce markup est un instantané visuel de
+// démonstration (libellés alignés sur src/messages.ts). Le harnais généré
+// (test/visual/harness.html) est un artefact non versionné (cf. .gitignore).
 function panelMarkup(state) {
   const parts = [];
   parts.push(`<div class="header"><div class="title">Sobrio</div>
@@ -185,7 +188,9 @@ execFileSync(
     '--disable-gpu',
     '--hide-scrollbars',
     '--force-device-scale-factor=2',
-    '--window-size=780,1400',
+    // Fenêtre assez HAUTE pour contenir les 6 états empilés : `--screenshot`
+    // clippe au viewport, donc la hauteur doit couvrir toute la colonne.
+    '--window-size=800,2700',
     `--screenshot=${out}`,
     `file://${HARNESS}`,
   ],

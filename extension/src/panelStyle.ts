@@ -24,7 +24,9 @@ export const PANEL_CSS = `
     --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
     --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
   }
-  /* Sombre : suit la préférence système, sauf thème clair explicite de l'hôte. */
+  /* Sombre : suit la préférence système, sauf thème clair explicite de l'hôte.
+     Écart charte ASSUMÉ : l'ombre est renforcée (0.32 vs 0.08) car une ombre à
+     0.08 est invisible sur fond sombre — le token clair reste 0.08. */
   @media (prefers-color-scheme: dark) {
     :host(:not([data-sobrio-theme="light"])) {
       --bg: #262521;
@@ -98,7 +100,7 @@ export const PANEL_CSS = `
   }
   .close:hover { color: var(--text); }
 
-  .mode-note { color: var(--secondary); font-size: 11px; margin: 8px 0 0; }
+  .mode-note { color: var(--secondary); font-size: 12px; margin: 8px 0 0; }
 
   .model { font-size: 13px; font-weight: 600; margin: 8px 0 0; color: var(--text); }
   .model small { font-weight: 400; color: var(--secondary); }
@@ -127,10 +129,10 @@ export const PANEL_CSS = `
     background: var(--accent); color: var(--accent-contrast); border-color: var(--accent);
     font-weight: 600;
   }
-  .hint { color: var(--secondary); font-size: 11px; margin: 0; }
+  .hint { color: var(--secondary); font-size: 12px; margin: 0; }
 
   .why {
-    background: none; border: none; padding: 0; width: auto; height: auto;
+    background: none; border: none; padding: 0; margin: 8px 0 0; width: auto; height: auto;
     color: var(--accent); cursor: pointer; font-size: 12px; text-decoration: underline;
   }
   .why-text { display: none; }
