@@ -72,13 +72,23 @@ function panelMarkup(state) {
   }
   parts.push(`<button class="why" type="button">Pourquoi ?</button>
     <p class="note why-text${state.why ? ' visible' : ''}">Votre demande semble courte et simple : un modèle léger suffit probablement.</p>`);
-  if (state.ack) {
+  if (state.autoSwitched) {
+    // Mode auto (RFC-0003) : confirmation discrète + Annuler (miroir de panel.ts).
+    parts.push(`<div class="actions">
+      <div class="ack" data-sobrio-switched>Basculé sur ${state.model}</div>
+      <button type="button" data-sobrio-cancel>Annuler</button>
+      <p class="hint">Bascule automatique — vous gardez la main.</p>
+    </div>`);
+  } else if (state.ack) {
     parts.push(`<div class="actions"><div class="ack">Merci, c'est noté.</div></div>`);
   } else {
     const opts = state.others.map((m) => `<option>${m}</option>`).join('');
+    const guideHint = state.guide
+      ? 'À sélectionner dans le menu de modèle de Claude.'
+      : 'Note votre intention.';
     parts.push(`<div class="actions">
       <button class="primary" type="button">Utiliser ${state.model}</button>
-      <p class="hint">Note votre intention.</p>
+      <p class="hint">${guideHint}</p>
       <select aria-label="Choisir un autre modèle">${state.others.length ? `<option>Choisir un autre modèle…</option>${opts}` : ''}</select>
     </div>`);
   }
@@ -166,10 +176,35 @@ const STATES = [
     ack: true,
     others: [],
   },
+  {
+    // Chantier B (RFC-0003) : mode auto, panneau en état « basculé » + Annuler.
+    key: 'bascule-auto',
+    model: 'Claude Sonnet 5',
+    confidence: 0.9,
+    costMin: 0.002,
+    costMax: 0.004,
+    energyMin: 0.4,
+    energyMax: 1.8,
+    budgetPct: 42,
+    autoSwitched: true,
+    others: [],
+  },
+  {
+    // Chantier B (RFC-0003) : mode guide — aucun contact page, hint de sélection.
+    key: 'guide',
+    model: 'Claude Sonnet 5',
+    confidence: 0.7,
+    costMin: 0.002,
+    costMax: 0.004,
+    energyMin: 0.4,
+    energyMax: 1.8,
+    guide: true,
+    others: ['Claude Haiku 4.5', 'Claude Opus 4.8'],
+  },
 ];
 
 // 3) Harnais : deux colonnes (clair / sombre), un vrai Shadow DOM par état.
-// Première cellule = le badge « S » (charte §4 : pastille 22 px), puis les 7
+// Première cellule = le badge « S » (charte §4 : pastille 22 px), puis les 9
 // états du panneau. Le badge est rendu depuis la même PANEL_CSS (source unique).
 const cells = (theme) =>
   [
@@ -233,10 +268,10 @@ execFileSync(
     '--disable-gpu',
     '--hide-scrollbars',
     '--force-device-scale-factor=2',
-    // Fenêtre assez HAUTE pour contenir le badge + les 7 états empilés :
+    // Fenêtre assez HAUTE pour contenir le badge + les 9 états empilés :
     // `--screenshot` clippe au viewport, donc la hauteur doit couvrir toute
     // la colonne.
-    '--window-size=800,3400',
+    '--window-size=800,4400',
     `--screenshot=${out}`,
     `file://${HARNESS}`,
   ],
