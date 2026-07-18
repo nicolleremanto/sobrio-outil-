@@ -99,8 +99,12 @@ tout se branche derrière ; rien ne change côté extension ni côté contrat `/
   effectif 0.1435) ; si une baseline non-heuristique à bande vide devient
   possible, envisager un plafond absolu d'écart (analogue au 0.10 d'ECE).
   Les bornes référence+tolérance sont arrondies à 10 décimales : ≤ inclusif
-  garanti à la limite exacte (l'addition flottante brute ne l'était pas
-  pour ~4,9 % des références à 4 décimales — qa r3).
+  garanti à la limite exacte (l'addition flottante brute ne l'était pas —
+  4,93 % des références à 4 décimales pour tol 0.02, 2,68 % pour tol 0.01 ;
+  qa r3/r4). Chacun des 5 sites d'arrondi est tué par mutation testing
+  (retirer un round() fait échouer un cas dédié, garde-fou anti-cas-inutile
+  inclus — le volet ECE initial utilisait 0.07+0.01, bit-exact en IEEE-754,
+  et ne testait rien : attrapé par qa en r4).
 
 ## §7 — Budgets (miroir du ledger)
 

@@ -550,3 +550,47 @@ ledger. Le mnémonique de flags (vocabulaire système, R1) a été examiné et
 
 Preuves : 153 tests router+api verts (+3), make test complet vert (203 py +
 218 ext), ruff check+format verts, rapport régénéré (métriques inchangées).
+
+## R3 — round 4 (commit 406a470, panel 5 juges — purge privacy + bornes)
+
+| agent          | modèle | scores (dims)                                        | blocking | major | verdict |
+|----------------|--------|------------------------------------------------------|----------|-------|---------|
+| eval-scientist | opus   | validité5 robustesse5 contrainte-r2:5 seuils5 repro5 | 0        | 0     | GREEN   |
+| ml-architect   | opus   | pertinence5 fuites5 calibration5 ext-r5:4 expl5      | 0        | 0     | GREEN   |
+| qa-auditor     | sonnet | couverture3 contrat5 erreurs5 clarté3 régressions5   | 0        | 1     | YELLOW  |
+| privacy-sentinel | sonnet | —                                                  | PASS     | —     | PASS    |
+| cost-guard     | haiku  | —                                                    | PASS     | —     | PASS    |
+
+→ **Ronde JAUNE (major qa) — streak reste 0/2.** La purge privacy est
+CONFIRMÉE (grep exhaustif : 56 lignes à guillemets classées une à une, 100 %
+vocabulaire système/littéraux de code ; les 3 formulations purgées : 0
+occurrence dans tout le repo ; golden figé intact). Mais qa a prouvé PAR
+MUTATION TESTING que ma correction r3 des bornes flottantes était
+partiellement mensongère : le volet ECE du test utilisait 0.07+0.01 —
+BIT-EXACT en IEEE-754 (le commentaire « != en flottant » était FAUX) — et 4
+des 5 sites round(.,10) ne étaient tués par AUCUN test. Le code de prod
+était correct (balayage Decimal exhaustif indépendant de qa : 0 cas
+non-inclusif, 0 régression masquée), mais la suite ne le protégeait pas.
+
+**Corrections ronde 4 :**
+- **[major qa]** Test paramétré : un cas PAR site (ece-baseline,
+  ece-previous, sous-baseline, sous-previous — le site bande était déjà
+  couvert), chaque référence choisie authentiquement non-exacte vers le bas
+  (0.06/0.09 pour tol 0.01 ; 0.12/0.15 pour tol 0.02) + GARDE-FOU en tête de
+  test : le cas s'auto-invalide si le couple (référence, tolérance) est
+  bit-exact (le défaut du test r3 ne peut plus se reproduire). PROUVÉ par
+  mutation : les 5 mutations (retrait individuel de chaque round) sont
+  TUÉES ; suite restaurée verte.
+- **[minor qa — doc]** « ~4,9 % » précisé par tolérance : 4,93 % (tol 0.02),
+  2,68 % (tol 0.01).
+- **[minor eval — ledger]** Précision : « métriques inchangées » dans les
+  entrées précédentes se lit « métriques SUBSTANTIELLES inchangées »
+  (exactitudes, ECE, sous-dim, bande, sha) — les latences p50/p95 sont des
+  mesures d'horloge non déterministes par nature (documenté dans le
+  harnais), toujours ~300x sous le budget.
+- **[minor qa — écarté]** Le mnémonique de flags ligne 88 : classé
+  vocabulaire système par privacy-sentinel (examens r3 ET r4 concordants).
+
+Preuves : 131 tests router verts (+1 net : 4 cas paramétrés remplacent le
+volet ECE mensonger), mutation 5/5 tuées, api/tests verts, make test complet
+vert, ruff check+format verts.
