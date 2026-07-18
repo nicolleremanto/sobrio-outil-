@@ -94,6 +94,13 @@ tout se branche derrière ; rien ne change côté extension ni côté contrat `/
   seules les références à bande MESURÉE (n > 0) bornent le min — l'écart 0.0
   d'une bande vide est une convention (« rien à dégrader »), pas une mesure,
   et rejetait à tort un candidat mieux calibré que l'heuristique.
+  TODO(R5) : le critère bande reste RELATIF (sans plafond absolu) — ancré
+  aujourd'hui par la bande heuristique toujours mesurée (n=66, plafond
+  effectif 0.1435) ; si une baseline non-heuristique à bande vide devient
+  possible, envisager un plafond absolu d'écart (analogue au 0.10 d'ECE).
+  Les bornes référence+tolérance sont arrondies à 10 décimales : ≤ inclusif
+  garanti à la limite exacte (l'addition flottante brute ne l'était pas
+  pour ~4,9 % des références à 4 décimales — qa r3).
 
 ## §7 — Budgets (miroir du ledger)
 

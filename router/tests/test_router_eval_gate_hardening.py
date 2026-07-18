@@ -403,3 +403,46 @@ def test_per_confidence_block_never_loses_cells_on_collision():
     assert block["0.75"]["taux_justesse"] == round(2 / 3, 4)
     assert block["0.75"]["confiance_moyenne"] == round((0.7501 + 0.7523 + 0.7549) / 3, 4)
     assert block["0.10"] == {"n": 1, "taux_justesse": 1.0, "confiance_moyenne": 0.1, "ecart": 0.9}
+
+
+# ---------------------------------------------------------------------------
+# Minors ronde 3 (qa) : bornes flottantes inclusives, miroir bande, -0.00.
+# ---------------------------------------------------------------------------
+
+
+def test_gate_bound_inclusive_even_when_float_addition_rounds_down():
+    """qa r3, prouvé par scan : 0.18 + 0.02 = 0.19999999999999998 en flottant —
+    un candidat EXACTEMENT à 0.20 était rejeté malgré la borne documentée <=
+    inclusive (~4,9 % des références à 4 décimales). Bornes arrondies à 10
+    décimales : la limite exacte passe désormais pour TOUTE référence."""
+    band = {"seuil": 0.75, "n": 40, "taux_justesse": 0.60, "confiance_moyenne": 0.78}
+    candidate = _report(exactitude_ponderee=0.95, calibration_bande_auto={**band, "ecart": 0.20})
+    baseline = _report(calibration_bande_auto={**band, "ecart": 0.18})
+    result = evaluate_gate(candidate, baseline)
+    assert not any(r.startswith("FAIL bande-auto") for r in result.reasons)
+
+    ece_candidate = _report(exactitude_ponderee=0.95, ece=0.08)  # == borne exacte
+    ece_result = evaluate_gate(ece_candidate, _report(ece=0.07))  # 0.07+0.01 != 0.08 en flottant
+    assert not any(r.startswith("FAIL calibration-régression") for r in ece_result.reasons)
+
+
+def test_gate_auto_band_mirror_direction_both_measured():
+    """Trou de couverture qa r3 : previous PIRE que baseline, les deux bandes
+    MESURÉES → la baseline (plus stricte) reste la référence liante."""
+    band = {"seuil": 0.75, "n": 40, "taux_justesse": 0.60, "confiance_moyenne": 0.78}
+    candidate = _report(exactitude_ponderee=0.95, calibration_bande_auto={**band, "ecart": 0.15})
+    baseline = _report(calibration_bande_auto={**band, "ecart": 0.10})  # borne liante : 0.12
+    previous = _report(exactitude_ponderee=0.90, calibration_bande_auto={**band, "ecart": 0.30})
+    result = evaluate_gate(candidate, baseline, previous)
+    assert result.passed is False
+    assert any(r.startswith("FAIL bande-auto") for r in result.reasons)
+
+
+def test_per_confidence_block_normalizes_negative_zero_label():
+    """qa r3 : une confiance qui arrondit à -0.0 produisait une clé « -0.00 »
+    distincte de « 0.00 » (défensif : SafeRouter clampe déjà [0, 1] en amont)."""
+    from harness import _calibration_by_confidence
+
+    block = _calibration_by_confidence([-0.001, 0.001], [True, False])
+    assert set(block) == {"0.00"}
+    assert block["0.00"]["n"] == 2

@@ -241,11 +241,15 @@ Preuves : 90 tests router+api verts, make test complet vert, ruff vert.
 → Ronde **RED** (FAIL sentinel). Les juges ont attrapé — entre autres — DEUX
 fautes de L'ORCHESTRATEUR lui-même. Tout corrigé :
 
-- **[FAIL privacy + major data]** 11 notes citaient entre guillemets des
-  formulations utilisateur quasi-littérales (« relis ce texte », « rédige
-  cette clause », « montre les étapes ») = amorces de prompt. DEUX de ces
-  citations venaient de MA correction du minor flags de la double-revue. →
-  **corrigé** : notes réécrites en description INDIRECTE, zéro citation.
+- **[FAIL privacy + major data]** 11 notes du golden contenaient des
+  formulations à l'impératif de type amorce de prompt (au lieu d'une
+  description indirecte de la tâche) — repérables par leurs ids dans
+  l'historique git du golden, non reproduites ici. DEUX venaient de MA
+  correction du minor flags de la double-revue. → **corrigé** : notes
+  réécrites en description INDIRECTE, zéro formulation directe. (Purge r3 :
+  cette entrée du ledger elle-même en citait trois en exemple —
+  auto-qualifiées d'amorces — violation attrapée par privacy-sentinel en
+  ronde 3 de R3 ; réécrite en ids/description seulement.)
 - **[major eval — INTÉGRITÉ]** La trace de revue de gold-0173..75 (mon ajout
   post-arbitrage) affirmait agree/agree alors que la double-revue n'a JAMAIS
   vu ce gabarit : provenance FABRIQUÉE par le défaut du dataclass. →
@@ -505,3 +509,44 @@ Preuves : 150 tests router+api verts (+5), make test complet vert (200 py +
 par-confiance avec confiance_moyenne ; métriques du gate inchangées).
 Note infra : le Postgres de dev s'était arrêté (conteneur disparu) — relancé
 via docker compose, sans lien avec le code jugé.
+
+## R3 — round 3 (commit 3fc732b, panel 5 juges — correctifs r2 re-éprouvés)
+
+| agent          | modèle | scores (dims)                                        | blocking | major | verdict |
+|----------------|--------|------------------------------------------------------|----------|-------|---------|
+| eval-scientist | opus   | validité5 robustesse5 contrainte-r2:5 seuils5 repro5 | 0        | 0     | GREEN   |
+| ml-architect   | opus   | pertinence5 fuites5 calibration5 ext-r5:4 expl5      | 0        | 0     | GREEN   |
+| qa-auditor     | sonnet | couverture4 contrat5 erreurs5 clarté4 régressions5   | 0        | 0     | GREEN   |
+| privacy-sentinel | sonnet | —                                                  | **FAIL** | —     | **FAIL** |
+| cost-guard     | haiku  | —                                                    | PASS     | —     | PASS    |
+
+→ **Ronde ÉCHOUÉE (FAIL sentinel, non-waivable) — streak reste 0/2.** Les
+correctifs M1/M2 de la ronde 2 sont CONFIRMÉS par exécution (matrice complète
+des références rejouée ; balayage 2 000 001 points : 101 clés, 0 collision,
+sum(n) exact sur N=5000 continu). Mais privacy-sentinel a trouvé une
+violation RÉELLE hors diff : la section R2-r0 de CE LEDGER citait entre
+guillemets trois formulations utilisateur quasi-littérales (auto-qualifiées
+d'amorces de prompt) au lieu de référencer des ids — l'angle mort des rondes
+précédentes était une vérification bornée au dataset, jamais à la prose du
+ledger. Le mnémonique de flags (vocabulaire système, R1) a été examiné et
+ÉCARTÉ à juste titre.
+
+**Corrections ronde 3 :**
+- **[FAIL privacy]** Passage du ledger réécrit : description indirecte + ids
+  seulement, avec trace de la purge. Balayage complémentaire router/ + docs/ :
+  aucune autre occurrence de cette classe.
+- **[minor qa — bornes flottantes]** L'addition brute référence + tolérance
+  rendait ~4,9 % des références à 4 décimales NON inclusives à la limite
+  exacte (0.18 + 0.02 = 0.19999999999999998 < 0.20 mesuré) — contredisait la
+  borne documentée ≤ inclusive. → les trois bornes (ece, sous-dim, bande)
+  arrondies à 10 décimales + 2 cas de test à la limite exacte.
+- **[minor qa — couverture]** Direction miroir du min() pour la BANDE (les
+  deux références mesurées, previous pire) désormais testée. Clé « -0.00 »
+  normalisée (défensif — SafeRouter clampe déjà en amont) + test.
+- **[considération R5 consignée — eval + ml]** Le critère bande reste
+  RELATIF sans plafond absolu : acceptable tant que la baseline est
+  l'heuristique (bande toujours mesurée n=66, plafond ancré 0.1435) ;
+  à réexaminer en R5 si une bande candidate NOUVELLE apparaît (TODO(R5)).
+
+Preuves : 153 tests router+api verts (+3), make test complet vert (203 py +
+218 ext), ruff check+format verts, rapport régénéré (métriques inchangées).

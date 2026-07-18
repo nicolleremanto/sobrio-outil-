@@ -227,7 +227,8 @@ def _calibration_by_confidence(confidences: list[float], corrects: list[bool]) -
     """
     groups: dict[float, list[int]] = {}
     for i, confidence in enumerate(confidences):
-        groups.setdefault(round(confidence, 2), []).append(i)
+        # + 0.0 : normalise un éventuel -0.0 (clé « -0.00 » trompeuse, qa r3).
+        groups.setdefault(round(confidence, 2) + 0.0, []).append(i)
     cells: dict[str, dict] = {}
     for conf_label, indices in sorted(groups.items()):
         taux = sum(1 for i in indices if corrects[i]) / len(indices)

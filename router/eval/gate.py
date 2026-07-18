@@ -214,9 +214,12 @@ def evaluate_gate(
         reasons.append(f"FAIL calibration : ece candidat {candidate_ece:.4f} > {ece_max:.4f}")
 
     baseline_ece = heuristic_baseline["ece"]
-    ece_bound = baseline_ece + _ECE_REGRESSION_TOL
+    # round(., 10) : l'addition flottante brute rend ~4,9 % des références à
+    # 4 décimales NON inclusives à la limite exacte (ex. 0.18 + 0.02 =
+    # 0.19999999999999998 < 0.20 mesuré) — borne documentée <= inclusive (qa r3).
+    ece_bound = round(baseline_ece + _ECE_REGRESSION_TOL, 10)
     if previous is not None:
-        ece_bound = min(ece_bound, previous["ece"] + _ECE_REGRESSION_TOL)
+        ece_bound = min(ece_bound, round(previous["ece"] + _ECE_REGRESSION_TOL, 10))
     if candidate_ece <= ece_bound:
         reasons.append(
             f"PASS calibration-régression : ece candidat {candidate_ece:.4f} <= "
@@ -245,10 +248,11 @@ def evaluate_gate(
     # Référence = min(baseline, previous) — tranché r1 (ml) : une fois un
     # artefact ML promu, le candidat ne peut pas régresser vers le plancher
     # heuristique large. Même patron que l'ECE.
-    sous_bound = baseline_sous + _SOUS_DIM_REGRESSION_TOL
+    sous_bound = round(baseline_sous + _SOUS_DIM_REGRESSION_TOL, 10)
     if previous is not None:
         sous_bound = min(
-            sous_bound, previous["sous_dimensionnement"]["taux"] + _SOUS_DIM_REGRESSION_TOL
+            sous_bound,
+            round(previous["sous_dimensionnement"]["taux"] + _SOUS_DIM_REGRESSION_TOL, 10),
         )
     if candidate_sous <= sous_bound:
         reasons.append(
@@ -284,7 +288,7 @@ def evaluate_gate(
                 "previous vides) — rien contre quoi régresser"
             )
         else:
-            bande_bound = min(measured) + _BANDE_AUTO_REGRESSION_TOL
+            bande_bound = round(min(measured) + _BANDE_AUTO_REGRESSION_TOL, 10)
             if candidate_bande["ecart"] <= bande_bound:
                 reasons.append(
                     f"PASS bande-auto : écart candidat {candidate_bande['ecart']:.4f} <= "
