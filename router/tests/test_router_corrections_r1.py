@@ -104,10 +104,11 @@ def test_safe_router_rejects_negative_infinity():
 
 
 def test_safe_router_rejects_bool_confidence():
-    """True est un int en Python : type étranger malgré isinstance -> repli."""
-    rogue = _StubRouter(Decision(model="claude-sonnet-5", confidence=True, rule="ml:v05"))
-    decision = SafeRouter(primary=rogue).decide(make_signals(token_est=50))
-    assert decision.rule == "fallback:heuristic"
+    """True/False sont des int en Python : type étranger -> repli (symétrique)."""
+    for flag in (True, False):
+        rogue = _StubRouter(Decision(model="claude-sonnet-5", confidence=flag, rule="ml:v05"))
+        decision = SafeRouter(primary=rogue).decide(make_signals(token_est=50))
+        assert decision.rule == "fallback:heuristic", flag
 
 
 # ---------------------------------------------------------------------------

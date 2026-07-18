@@ -133,3 +133,27 @@ corrigés :
 
 Preuves après correction : 86 tests router+api verts (+8), make test complet
 vert, ruff/lint verts, bench p95 0,0115 ms.
+
+## R1 — round 2 (commit 05446ec)
+
+| agent            | scores                                                              | blocking | major | verdict   |
+| ---------------- | ------------------------------------------------------------------- | -------- | ----- | --------- |
+| qa-auditor       | couv 4 · contrat 5 · erreurs 5 · clarté 4 · régressions 5           | 0        | 0     | **GREEN** |
+| ml-architect     | règles 4,5 · seuils 5 · interface 4,5 · repli-ml 4,5 · explic 4,5   | 0        | 0     | **GREEN** |
+| privacy-sentinel | — (protocole SECRET_LEAK re-reproduit : repr/str/f-string/traceback) | PASS     | —     | **PASS**  |
+| cost-guard       | — (12 preuves, zéro dépense)                                        | PASS     | —     | **PASS**  |
+
+→ Ronde **VERTE (1/2)** — 1re du streak. Minors polis avant la ronde 3 :
+
+- **corrigé** test end-to-end API du primaire corrompu (qa) : monkeypatch d'un
+  primaire SAIN à la construction renvoyant Decision corrompue (rule=None,
+  conf=inf, modèle fable) → 200 + fallback:heuristic — le chemin complet
+  bridge→SafeRouter→pydantic est verrouillé (le juge l'avait reproduit 6/6).
+- **corrigé** symétrie bool : confidence=False testée (comme True) → repli.
+- **corrigé** commentaire obsolète (référence test_router_catalog.py).
+- **RÉSIDU DOCUMENTÉ (privacy, à surveiller en R6)** : `dataclasses.asdict/
+  astuple/vars()` exposent `prompt_text` (repr=False ne protège que
+  repr/str/f-string). AUCUN code de production n'appelle ces fonctions sur
+  les signaux (grep vérifié par le sentinel) et le champ vaut toujours None
+  en v0. EXIGENCE R6 : le panel étage 2 devra vérifier qu'aucun chemin
+  n'introduit asdict/astuple/pickle sur PromptSignals/Signals.

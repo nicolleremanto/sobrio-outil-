@@ -34,9 +34,10 @@ _LIGHT_TRANSFORM_FLAGS = frozenset({"resume", "traduction"})
 
 # Ids VISIBLES du catalogue — les SEULES étiquettes que ce routeur peut
 # produire (claude-fable-5 est visible:false, RFC-0002 : jamais recommandé).
-# Un test (`test_router_catalog.py`) recoupe cette constante avec
-# contracts/model_catalog.yaml, la source de vérité. `SafeRouter` s'en sert
-# aussi pour VALIDER la sortie de tout routeur primaire (invariant §5.2).
+# Le test `test_visible_models_matches_catalog` (test_router_corrections_r0.py)
+# recoupe cette constante avec contracts/model_catalog.yaml, la source de
+# vérité. `SafeRouter` s'en sert aussi pour VALIDER la sortie de tout routeur
+# primaire (invariant §5.2).
 VISIBLE_MODELS = frozenset({"claude-haiku-4-5", "claude-sonnet-5", "claude-opus-4-8"})
 
 
