@@ -36,8 +36,8 @@ RAM < 1 Go · artefacts : étage 1 < 20 Mo, étage 2 < 500 Mo · dépense API : 
 
 | Chantier | Sujet                                              | Rondes vertes | Statut  |
 | -------- | -------------------------------------------------- | ------------- | ------- |
-| R1       | Socle du routeur & v0 heuristique branchée         | 0/2           | en cours |
-| R2       | Golden set (juge de paix)                          | 0/2           | à venir |
+| R1       | Socle du routeur & v0 heuristique branchée         | 2/2 (r2 & r3) | **CONVERGÉ** |
+| R2       | Golden set (juge de paix)                          | 0/2           | en cours |
 | R3       | Protocole d'évaluation & harnais + gate            | 0/2           | à venir |
 | R4       | Corpus de démarrage à froid                        | 0/2           | à venir |
 | R5       | Pipeline d'entraînement & classifieur v0.5         | 0/2           | à venir |
@@ -157,3 +157,26 @@ vert, ruff/lint verts, bench p95 0,0115 ms.
   les signaux (grep vérifié par le sentinel) et le champ vaut toujours None
   en v0. EXIGENCE R6 : le panel étage 2 devra vérifier qu'aucun chemin
   n'introduit asdict/astuple/pickle sur PromptSignals/Signals.
+
+## R1 — round 3 (commit b5afd27)
+
+| agent            | scores                                                            | blocking | major | verdict   |
+| ---------------- | ----------------------------------------------------------------- | -------- | ----- | --------- |
+| qa-auditor       | couv 5 · contrat 5 · erreurs 5 · clarté 5 · régressions 5         | 0        | 0     | **GREEN** |
+| ml-architect     | règles 4,5 · seuils 5 · interface 4,5 · repli-ml 4,5 · explic 4,5 | 0        | 0     | **GREEN** |
+| privacy-sentinel | — (16 preuves, protocole complet re-déroulé, sentinelle fraîche)  | PASS     | —     | **PASS**  |
+| cost-guard       | — (18 preuves, zéro dépense)                                      | PASS     | —     | **PASS**  |
+
+→ Ronde **VERTE (2/2 consécutive)** — **CHANTIER R1 CONVERGÉ** (rondes 2 & 3).
+Zéro minor résiduel aux deux juges notés. Note d'orchestration : l'agent
+cost-guard de la ronde 3 a d'abord échoué sur une erreur TECHNIQUE transitoire
+(classifieur) — panel repris (resume, 3 verdicts servis du cache), verdict
+cost-guard AUTHENTIQUE obtenu au second passage ; aucun verdict n'a été
+fabriqué.
+
+**Bilan R1 : r0 YELLOW (2 majors ml) → r1 RED (FAIL privacy repr + 2 majors)
+→ r2 VERTE → r3 VERTE.** Le dispositif a attrapé : validation absente de la
+sortie du primaire (500 pydantic), échec au chargement contournant SafeRouter,
+transformations légères longues → Opus, bande morte 800, fuite repr() du champ
+réservé prompt_text, rule=None → 500, ±inf/bool maquillés en confiance saine,
+couture à 4000. Aucune dépense (0,00 $) sur tout le chantier.
