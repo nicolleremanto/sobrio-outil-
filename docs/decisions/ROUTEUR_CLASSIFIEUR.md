@@ -76,7 +76,9 @@ tout se branche derrière ; rien ne change côté extension ni côté contrat `/
   `reasoning_context` long (confiance 0.75 pile) n'est correcte qu'à
   **51,5 %** (n=33) ; la BANDE ≥ 0.75 dans son ensemble est à 65,15 %
   (confiance moyenne 0.775, écart 0.1235 — `short_simple`@0.80 est bien
-  calibrée à 78,8 %). Le harnais mesure `calibration_bande_auto.ecart` (+
+  calibrée à 78,8 %). NB : tout chiffre de bande v0.5 (ex. 0,0093) est un
+  estimateur OPTIMISTE — cf. « Intégrité de l'évaluation » ci-dessous. Le
+  harnais mesure `calibration_bande_auto.ecart` (+
   un diagnostic informatif PAR valeur de confiance) et le gate exige la
   non-régression (`+ 0.02`, vs baseline ET previous). La recalibration de
   fond de la tranche 0.75 est un objectif R5.

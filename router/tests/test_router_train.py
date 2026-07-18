@@ -220,9 +220,24 @@ def test_metadata_complet(artefact_v05: Path):
 
 
 def test_fit_isotonic_refuses_degenerate_calibrator():
-    """Minor qa R5 r0 : un calibrateur à < 2 points est refusé AU TRAIN
-    (diagnostic au bon moment), plus seulement au chargement."""
+    """Minor qa R5 r0 + major eval r1 : un calibrateur à < 2 points est refusé
+    AU TRAIN via RefusError (la ValueError initiale échappait au try/except de
+    main() → traceback brut, contrat CLI violé — corrigé)."""
     import pytest as _pytest
 
-    with _pytest.raises(ValueError, match="dégénéré"):
+    with _pytest.raises(train_v05.RefusError, match="dégénéré"):
         train_v05.fit_isotonic([0.8, 0.8, 0.8], [True, True, False])
+
+
+def test_main_converts_degenerate_calibrator_to_clean_refusal(monkeypatch, capsys, tmp_path):
+    """Le chemin main() RÉEL attrape la garde dégénérée : REFUS propre exit 2,
+    pas de traceback (le handler existant couvre désormais cette garde)."""
+
+    def _degenerate(*args, **kwargs):
+        raise train_v05.RefusError("calibrateur isotonique dégénéré (test)")
+
+    monkeypatch.setattr(train_v05, "fit_isotonic", _degenerate)
+    code = train_v05.main(["--out-dir", str(tmp_path)])
+    assert code == 2
+    err = capsys.readouterr().err
+    assert "REFUS" in err and "dégénéré" in err

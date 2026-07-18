@@ -1068,3 +1068,45 @@ dans la spec (impureté méthodologique, pas dissimulation).
 Preuves : 317 router+api verts (+6), sha model.txt STABLE (43a61267… — les
 gardes ne touchent pas l'entraînement), gate PASS rejoué, make test complet
 vert, ruff verts.
+
+## R5 — round 1 (commit 01dfb57, panel 6 juges Fable)
+
+| agent            | modèle | scores (dims)                                        | blocking | major | verdict |
+|------------------|--------|------------------------------------------------------|----------|-------|---------|
+| ml-architect (P) | fable  | spec5 features5 calibration5 fuites-ml5 extens4      | 0        | 0     | GREEN   |
+| eval-scientist   | fable  | éval5 gate4 plafond5 honnêteté5 repro5               | 0        | 1     | YELLOW  |
+| data-quality     | fable  | étanchéité5 déséquilibre5 intégrité5 robustesse4 tr4 | 0        | 0     | GREEN   |
+| qa-auditor       | fable  | couverture5 contrat5 erreurs4 clarté5 régressions5   | 0        | 0     | GREEN   |
+| privacy-sentinel | fable  | —                                                    | PASS     | —     | PASS    |
+| cost-guard       | fable  | —                                                    | PASS     | —     | PASS    |
+
+→ **Ronde JAUNE (major eval) — streak reste 0/2.** La consignation
+d'intégrité r0 est jugée complète et honnête (honnêteté 5). Mais MA garde
+« calibrateur dégénéré » de r0 levait ValueError alors que main() n'attrape
+que RefusError → traceback brut exit 1 sur le chemin CLI réel, en
+contradiction avec le contrat du module, la garde JUMELLE 30 lignes plus
+haut, et le précédent R4-r3 — prouvé par exécution par 3 juges (eval major,
+ml/dq/qa minors convergents). Encore la leçon : le polish non jugé est du
+code nouveau.
+
+**Corrections ronde 1 :**
+- **[major eval]** RefusError levée (alignée sur la garde jumelle) ; test
+  ajusté + NOUVEAU test du chemin main() réel (monkeypatch → exit 2,
+  « REFUS », zéro traceback).
+- **[minors eval/ml]** Les 2 refus de bornes CLI impriment « VERDICT :
+  FAIL » (contrat de sortie aligné sur le chemin voisin) · --budget-ms
+  plafonné à 1000 ms (1e9 neutralisait le critère de latence — symétrique du
+  plafond de bande) · chemin d'ACCEPTATION couvert (30 ms / 0.10 → VERDICT
+  PASS, sur stderr — contrat CLI) · « de peu » quantifié dans la doc
+  (≤ 0,005 OU ≤ 1 erreur-type de la borne héritée) · renvoi « estimateur
+  OPTIMISTE » ajouté dans la section seuils (le 0,0093 pointe vers
+  Intégrité).
+- **[minor dq — consigné]** L'impact du bruit 3 % sur la val n'est pas
+  chiffré dans les artefacts R5 (le bruit borne l'exactitude atteignable
+  ~97 % ; TODO(V1) avec la recalibration télémétrie).
+- **[note de méthode]** Un replace silencieux (patch non appliqué après
+  reformatage ruff) a failli me faire committer une borne fantôme — attrapé
+  par MON test rouge avant commit : les tests d'abord, toujours.
+
+Preuves : 319 router+api verts (+2), sha model.txt STABLE (43a61267…), gate
+PASS rejoué, make test complet vert (218 ext), ruff verts.

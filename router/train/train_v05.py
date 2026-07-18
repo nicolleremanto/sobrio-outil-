@@ -243,7 +243,10 @@ def fit_isotonic(conf_val: list[float], correct_val: list[bool]) -> tuple[list[f
         # Refus AU TRAIN (minor qa R5 r0) : un calibrateur à < 2 points est
         # inutilisable (interpolation impossible) — le chargeur le refusait
         # déjà, mais échouer ICI donne le diagnostic au bon moment.
-        raise ValueError(
+        # RefusError (major eval r1) : la ValueError initiale échappait au
+        # try/except de main() → traceback brut exit 1, en contradiction avec
+        # le contrat CLI du module et la garde JUMELLE 30 lignes plus haut.
+        raise RefusError(
             f"calibrateur isotonique dégénéré ({len(xs)} point de contrôle) — "
             "val trop petite ou confiances constantes, entraînement refusé"
         )

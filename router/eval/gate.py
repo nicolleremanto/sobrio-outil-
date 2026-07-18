@@ -388,14 +388,17 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    # Bornes des paramètres opérateur (minor eval R5 r0) : un --bande-ecart-max
-    # à 1.0 neutraliserait le critère 7-bis, un budget non fini le critère de
-    # latence — fail-closed, comme le reste de la CLI.
-    if not (math.isfinite(args.budget_ms) and args.budget_ms > 0):
+    # Bornes des paramètres opérateur (minors eval R5 r0/r1) : un
+    # --bande-ecart-max à 1.0 neutraliserait le critère 7-bis, un budget non
+    # fini OU énorme (1e9) le critère de latence — fail-closed, comme le reste
+    # de la CLI. Plafond 1000 ms : couvre étage 1 (5), étage 2 R6 (30) et
+    # /v1/recommend (150) avec marge.
+    if not (math.isfinite(args.budget_ms) and 0 < args.budget_ms <= 1000.0):
         print(
-            f"FAIL : --budget-ms doit être un nombre fini > 0 (reçu {args.budget_ms})",
+            f"FAIL : --budget-ms doit être dans ]0, 1000] ms (reçu {args.budget_ms})",
             file=sys.stderr,
         )
+        print("VERDICT : FAIL", file=sys.stderr)
         return 2
     if not (math.isfinite(args.bande_ecart_max) and 0 < args.bande_ecart_max <= 0.5):
         print(
@@ -403,6 +406,7 @@ def main(argv: list[str] | None = None) -> int:
             "au-delà, le plafond absolu du critère 7-bis serait neutralisé",
             file=sys.stderr,
         )
+        print("VERDICT : FAIL", file=sys.stderr)
         return 2
 
     # Chargement FAIL-CLOSED : un fichier introuvable/illisible produit un

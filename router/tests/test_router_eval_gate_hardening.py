@@ -655,3 +655,40 @@ def test_gate_cli_rejects_out_of_range_operator_params(tmp_path, flag, value):
     )
     assert proc.returncode == 2
     assert "FAIL" in proc.stderr and "Traceback" not in proc.stderr
+
+
+def test_gate_cli_rejects_huge_budget_and_accepts_valid_bounds(tmp_path):
+    """Minors r1 : --budget-ms plafonné à 1000 (1e9 neutralisait le critère de
+    latence) ; chemin d'ACCEPTATION des bornes valides couvert (30 ms / 0.10)."""
+    import json
+
+    candidate_path = tmp_path / "candidate.json"
+    baseline_path = tmp_path / "baseline.json"
+    candidate_path.write_text(
+        json.dumps(_report(exactitude_ponderee=0.95, golden_sha=golden_sha256()))
+    )
+    baseline_path.write_text(json.dumps(_report(golden_sha=golden_sha256())))
+    gate_py = str(Path(__file__).resolve().parents[1] / "eval" / "gate.py")
+    base_cmd = [
+        sys.executable,
+        gate_py,
+        "--candidate",
+        str(candidate_path),
+        "--baseline",
+        str(baseline_path),
+    ]
+
+    huge = subprocess.run(
+        base_cmd + ["--budget-ms", "1e9"], capture_output=True, text=True, timeout=30
+    )
+    assert huge.returncode == 2
+    assert "VERDICT : FAIL" in huge.stderr and "Traceback" not in huge.stderr
+
+    valid = subprocess.run(
+        base_cmd + ["--budget-ms", "30", "--bande-ecart-max", "0.10"],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert valid.returncode == 0
+    assert "VERDICT : PASS" in valid.stderr  # le verdict sort sur stderr (contrat CLI)
