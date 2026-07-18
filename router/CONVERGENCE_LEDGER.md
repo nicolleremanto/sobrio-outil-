@@ -886,3 +886,32 @@ contrat documenté de main() (« message propre + exit 2 »).
 
 Preuves : 237 router + 26 api verts (+1 e2e), corpus INCHANGÉ (sha be96b691,
 8/48/0), make test complet vert, ruff verts.
+
+## R4 — round 4 (commit 3a6831b, panel 5 juges)
+
+| agent            | modèle | scores (dims)                                       | blocking | major | verdict |
+|------------------|--------|-----------------------------------------------------|----------|-------|---------|
+| data-quality (P) | sonnet | réalisme5 équilibre5 cohérence5 étiquettes5 robust5 | 0        | 0     | GREEN   |
+| eval-scientist   | opus   | anti-fuite5 seed5 principes5 repro5 intégrité5      | 0        | 0     | GREEN   |
+| qa-auditor       | sonnet | couverture5 contrat5 erreurs4 clarté5 régressions5  | 0        | 0     | GREEN   |
+| privacy-sentinel | sonnet | —                                                   | PASS     | —     | PASS    |
+| cost-guard       | haiku  | —                                                   | PASS     | —     | PASS    |
+
+→ **Ronde VERTE (1/2).** L'attaque r3 rejouée par qa ET privacy (sandbox +
+vrai CLI) : REFUS propre exit 2, zéro traceback, message construit
+uniquement de préfixes sha (ne peut véhiculer aucun contenu). Golden figé
+re-vérifié par recalcul d'octets. Minors tous classés « aucune action » par
+les juges (assert -O et OSError d'écriture : pré-existants hors diff, flux
+documenté non affecté ; charset hex du sha : gold-plating — les deux chemins
+refusent fail-closed). Consignés ici, aucun code touché avant la ronde de
+convergence (leçon r2 : le polish non jugé est du code nouveau).
+
+## Décision d'orchestration (datée) — politique de modèles
+
+- **2026-07-18 (directive fondateur, prioritaire sur le méta-principe
+  « modèle le moins puissant qui suffit »)** : TOUS les sous-agents (juges,
+  sentinelles, builders) passent sous **Fable** (héritage du modèle de
+  session) pour préserver les quotas opus/sonnet/haiku. Le panel R4 ronde 4,
+  déjà en vol au moment de la directive, a terminé sous l'ancienne
+  politique ; effectif à partir du panel R4 ronde 5. La colonne « modèle »
+  des tableaux suivants vaut « fable » pour tous.
