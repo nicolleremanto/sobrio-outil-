@@ -28,6 +28,8 @@ out/
 router/artifacts/*
 !router/artifacts/bench/
 !router/artifacts/bench/*
+!router/artifacts/eval/
+!router/artifacts/eval/*
 # Exception : captures visuelles FINALES versionnées de l'extension (le
 # répertoire out/ générique les attraperait sinon). L'extension/.gitignore
 # ignore le reste de out/ et ne garde que final/.

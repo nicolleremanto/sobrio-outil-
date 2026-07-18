@@ -15,7 +15,10 @@ PYTEST  := .venv/bin/pytest
 RUFF    := .venv/bin/ruff
 ALEMBIC := .venv/bin/alembic
 
-.PHONY: dev test lint demo report sync-fixtures migrate seed router-bench
+.PHONY: dev test lint demo report sync-fixtures migrate seed router-bench router-eval
+
+# Routeur évalué par `router-eval` (registre : heuristic ; extensible R5 : ml_v05).
+ROUTER ?= heuristic
 
 ## dev : environnement complet (Postgres + Adminer + API --reload) + migrations + seed
 dev:
@@ -35,6 +38,10 @@ seed:
 ## router-bench : preuve budget étage 1 (p95 < 5 ms CPU) ; écrit router/artifacts/bench/latest.json
 router-bench:
 	$(PY) router/bench.py
+
+## router-eval : évalue ROUTER (défaut heuristic) sur le golden set figé ; écrit router/artifacts/eval/<ROUTER>-latest.json
+router-eval:
+	$(PY) router/eval/harness.py --router $(ROUTER)
 
 ## test : tests Python (tous les lots) puis tests de l'extension
 test:
