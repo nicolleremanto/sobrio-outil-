@@ -63,8 +63,9 @@ tout se branche derrière ; rien ne change côté extension ni côté contrat `/
   pour la baseline courante (0.0934 + 0.01 = 0.1034 > 0.10), le plafond
   ABSOLU est le critère liant ; la non-régression devient liante dès qu'une
   référence mieux calibrée (< 0.09) est promue (effet cliquet voulu).
-- **Sous-dimensionnement non-régressif** : `taux(candidat) ≤ taux(baseline)
-  + 0.02` — LE coût produit ne se dégrade pas même si l'agrégat monte.
+- **Sous-dimensionnement non-régressif** : `taux(candidat) ≤ min(baseline,
+  previous) + 0.02` — LE coût produit ne se dégrade pas même si l'agrégat
+  monte, ni vs l'heuristique ni vs l'artefact promu (aligné r2).
 - **Bande d'auto-bascule (confiance ≥ 0.75, RFC-0003)** : l'ECE global à bins
   égaux peut masquer une sur-confiance précisément là où le produit agit SANS
   clic. Découverte r0, chiffres PRÉCIS (revue ml r1) : la RÈGLE
@@ -84,12 +85,15 @@ tout se branche derrière ; rien ne change côté extension ni côté contrat `/
 - **Tolérances** (0.01 ECE, 0.02 taux) : marges d'estimation sur n=181 points
   (n effectif ≈ 55 gabarits) — cf. limites_statistiques du coverage_report.
   Arithmétique (revue r1) : SE ≈ √(p(1−p)/n_eff) ≈ 0.054 pour p≈0.2 à
-  n_eff=55 ; tol 0.02 ≈ 0.35 SE — bande de non-régression CONSERVATRICE
+  n_eff=55 ; tol 0.02 ≈ 0.37 SE — bande de non-régression CONSERVATRICE
   (penche vers le blocage), choix assumé.
 - **Références de non-régression** (tranché r1, avant R5) : sous-dim, bande
   auto ET ECE sont gardés vs baseline ET previous (le min des deux + tol) —
   un candidat ne peut jamais régresser vers le plancher heuristique une fois
-  un artefact ML promu.
+  un artefact ML promu. Précision (défaut prouvé r2) : pour la bande auto,
+  seules les références à bande MESURÉE (n > 0) bornent le min — l'écart 0.0
+  d'une bande vide est une convention (« rien à dégrader »), pas une mesure,
+  et rejetait à tort un candidat mieux calibré que l'heuristique.
 
 ## §7 — Budgets (miroir du ledger)
 

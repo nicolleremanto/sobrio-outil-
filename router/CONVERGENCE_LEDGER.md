@@ -457,3 +457,51 @@ EXACT à 4 décimales (n=66, justesse 0.6515, confiance 0.775, écart 0.1235).
 Preuves : 145 tests router+api verts (+3), make test complet vert (195 py +
 218 ext), ruff check+format verts, rapport heuristique régénéré (métriques
 inchangées).
+
+## R3 — round 2 (commit 9d92656, panel 5 juges — code du polish r1 sous scrutin)
+
+| agent          | modèle | scores (dims)                                        | blocking | major | verdict |
+|----------------|--------|------------------------------------------------------|----------|-------|---------|
+| eval-scientist | opus   | validité4 robustesse2 contrainte-r2:5 seuils4 repro5 | 0        | 1     | YELLOW  |
+| ml-architect   | opus   | pertinence4 fuites5 calibration4 ext-r5:3 expl5      | 0        | 2     | YELLOW  |
+| qa-auditor     | sonnet | couverture3 contrat3 erreurs2 clarté3 régressions5   | 0        | 1     | YELLOW  |
+| privacy-sentinel | sonnet | —                                                  | PASS     | —     | PASS    |
+| cost-guard     | haiku  | —                                                    | PASS     | —     | PASS    |
+
+→ **Ronde JAUNE — streak remise à ZÉRO (0/2).** Le code NOUVEAU introduit par
+le polish de la ronde 1 contenait deux vrais défauts, prouvés par exécution
+par 3 juges indépendants convergents. La discipline « le code jamais jugé se
+fait attaquer » a fonctionné exactement comme prévu.
+
+**Majors ronde 2 → corrigés :**
+- **[eval + ml — gate]** Le min(baseline, previous) de la bande auto
+  consommait l'écart 0.0 CONVENTIONNEL d'une bande VIDE (n=0) chez previous
+  comme référence quasi-parfaite : un candidat à bande réelle écart 0.05
+  (MIEUX calibré que l'heuristique 0.1235) était rejeté. Atteignable en vrai :
+  un artefact R5 recalibré (rétrécissement des confiances) peut plafonner
+  sous 0.75 → bande vide → promu → devient previous. → corrigé : seules les
+  références à bande MESURÉE (n > 0) bornent le min ; baseline et previous
+  vides → PASS explicite « rien contre quoi régresser ». +2 tests.
+- **[ml + qa — harnais]** _calibration_by_confidence groupait à round(conf,4)
+  mais émettait des clés f"{conf:.2f}" : deux confiances distinctes à 4
+  décimales mais égales à 2 (ex. 0.7501/0.7523) s'écrasaient silencieusement
+  (dernier écrit gagne) — perte de cellules, invariant sum(n)==N rompu,
+  précisément dans le scénario R5 « confiances continues » que le bloc doit
+  servir. Le test existant (heuristique = 6 confiances discrètes) donnait une
+  fausse assurance. → corrigé : groupement À LA granularité de la clé (2
+  décimales), taux calculé une fois, cellule enrichie de la confiance
+  MOYENNE réelle (l'écart est mesuré contre elle, pas contre le libellé
+  arrondi). +1 test de collision.
+
+**Minors ronde 2 → corrigés :** direction miroir du min() testée (previous
+PIRE que baseline → baseline reste liante) · limite exacte candidat == borne
+→ PASS (≤ inclusif) testée · doc : 0.02/0.054 = 0,37 SE (pas 0,35) · puce
+sous-dim alignée sur min(baseline, previous) · attribution 51,5 % corrigée
+aussi dans la docstring du gate (règle vs bande) · double calcul du taux
+supprimé (lisibilité).
+
+Preuves : 150 tests router+api verts (+5), make test complet vert (200 py +
+218 ext), ruff check+format verts, rapport heuristique régénéré (cellules
+par-confiance avec confiance_moyenne ; métriques du gate inchangées).
+Note infra : le Postgres de dev s'était arrêté (conteneur disparu) — relancé
+via docker compose, sans lien avec le code jugé.

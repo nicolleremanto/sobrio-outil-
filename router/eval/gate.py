@@ -152,13 +152,16 @@ def evaluate_gate(
     6. sous-dimensionnement NON-RÉGRESSIF : `taux(candidate) <=
        min(baseline, previous) + 0.02` — LE coût produit ne doit pas se
        dégrader, ni vs l'heuristique ni vs l'artefact promu (r0 + r1) ;
-    7. bande d'auto-bascule : `ecart(candidate) <= min(baseline, previous)
-       + 0.02` —
+    7. bande d'auto-bascule : `ecart(candidate) <= min(références MESURÉES)
+       + 0.02` — seules les références à bande non vide (n > 0) bornent le
+       min : un écart 0.0 de bande vide est une convention, pas une mesure
+       (défaut prouvé ronde 2) —
        les décisions à confiance >= 0.75 déclenchent la bascule SANS clic
        (RFC-0003) ; l'ECE global peut masquer une sur-confiance dans cette
-       bande précise (découverte r0 : l'heuristique y est à 51,5 % de
-       justesse) — critère RELATIF pour ne jamais laisser un candidat
-       aggraver la fiabilité de l'auto-bascule ;
+       bande précise (découverte r0, chiffres r1 : la RÈGLE reasoning long à
+       0.75 est à 51,5 % de justesse ; la bande entière à 65,15 %) — critère
+       RELATIF pour ne jamais laisser un candidat aggraver la fiabilité de
+       l'auto-bascule ;
     8. golden_sha : candidat == baseline, ET, si `expected_golden_sha` est
        fourni (la CLI l'injecte TOUJOURS depuis `GOLDEN_SHA256` committé),
        égalité au hash CANONIQUE du set figé.
@@ -267,24 +270,33 @@ def evaluate_gate(
             "d'auto-bascule (rien à dégrader)"
         )
     else:
-        bande_bound = baseline_bande["ecart"] + _BANDE_AUTO_REGRESSION_TOL
+        # Seules les références dont la bande est MESURÉE (n > 0) bornent le
+        # min() : une bande vide porte un écart CONVENTIONNEL 0.0 (« rien à
+        # dégrader »), pas une mesure — l'utiliser comme référence rejetait un
+        # candidat mieux calibré que l'heuristique (défaut prouvé ronde 2).
+        references = [baseline_bande]
         if previous is not None:
-            bande_bound = min(
-                bande_bound,
-                previous["calibration_bande_auto"]["ecart"] + _BANDE_AUTO_REGRESSION_TOL,
-            )
-        if candidate_bande["ecart"] <= bande_bound:
+            references.append(previous["calibration_bande_auto"])
+        measured = [ref["ecart"] for ref in references if ref["n"] > 0]
+        if not measured:
             reasons.append(
-                f"PASS bande-auto : écart candidat {candidate_bande['ecart']:.4f} <= "
-                f"baseline + tolérance {bande_bound:.4f}"
+                "PASS bande-auto : aucune référence à bande mesurée (baseline et "
+                "previous vides) — rien contre quoi régresser"
             )
         else:
-            passed = False
-            reasons.append(
-                f"FAIL bande-auto : écart candidat {candidate_bande['ecart']:.4f} > "
-                f"baseline + tolérance {bande_bound:.4f} (l'auto-bascule deviendrait "
-                "moins fiable — RFC-0003)"
-            )
+            bande_bound = min(measured) + _BANDE_AUTO_REGRESSION_TOL
+            if candidate_bande["ecart"] <= bande_bound:
+                reasons.append(
+                    f"PASS bande-auto : écart candidat {candidate_bande['ecart']:.4f} <= "
+                    f"référence mesurée + tolérance {bande_bound:.4f}"
+                )
+            else:
+                passed = False
+                reasons.append(
+                    f"FAIL bande-auto : écart candidat {candidate_bande['ecart']:.4f} > "
+                    f"référence mesurée + tolérance {bande_bound:.4f} (l'auto-bascule "
+                    "deviendrait moins fiable — RFC-0003)"
+                )
 
     candidate_sha = candidate["golden_sha"]
     baseline_sha = heuristic_baseline["golden_sha"]

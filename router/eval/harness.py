@@ -218,18 +218,27 @@ def _calibration_by_confidence(confidences: list[float], corrects: list[bool]) -
     Permet à la recalibration R5 de viser la tranche précise (ex. 0.75) plutôt
     que l'agrégat de bande, qui peut moyenner une tranche mal calibrée avec une
     tranche saine. Le gate ne lit PAS ce bloc (agrégats/relatif seulement).
+
+    Le groupement se fait à LA MÊME granularité que la clé de sortie (2
+    décimales) : grouper plus fin puis ré-étiqueter à 2 décimales écrasait
+    silencieusement les cellules en collision (ronde 2 — confiances continues
+    R5). L'écart de chaque cellule est mesuré contre la confiance MOYENNE
+    réelle de la cellule, pas contre le libellé arrondi.
     """
     groups: dict[float, list[int]] = {}
     for i, confidence in enumerate(confidences):
-        groups.setdefault(round(confidence, 4), []).append(i)
-    return {
-        f"{conf:.2f}": {
+        groups.setdefault(round(confidence, 2), []).append(i)
+    cells: dict[str, dict] = {}
+    for conf_label, indices in sorted(groups.items()):
+        taux = sum(1 for i in indices if corrects[i]) / len(indices)
+        conf_moyenne = sum(confidences[i] for i in indices) / len(indices)
+        cells[f"{conf_label:.2f}"] = {
             "n": len(indices),
-            "taux_justesse": round(sum(1 for i in indices if corrects[i]) / len(indices), 4),
-            "ecart": round(abs(sum(1 for i in indices if corrects[i]) / len(indices) - conf), 4),
+            "taux_justesse": round(taux, 4),
+            "confiance_moyenne": round(conf_moyenne, 4),
+            "ecart": round(abs(taux - conf_moyenne), 4),
         }
-        for conf, indices in sorted(groups.items())
-    }
+    return cells
 
 
 def evaluate_router(router: Router, entries: list[GoldenEntry]) -> dict:

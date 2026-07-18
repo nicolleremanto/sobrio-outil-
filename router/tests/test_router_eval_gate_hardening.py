@@ -307,3 +307,99 @@ def test_harness_reports_per_confidence_calibration_informative():
         assert cell["ecart"] >= 0.0
     # La tranche découverte en r0 est visible individuellement (règle à 0.75).
     assert "0.75" in block
+
+
+# ---------------------------------------------------------------------------
+# Bornes des références min(baseline, previous) — défauts/trous prouvés ronde 2.
+# ---------------------------------------------------------------------------
+
+
+def test_gate_previous_empty_band_never_serves_as_reference():
+    """MAJOR ronde 2 (eval + ml) : l'écart 0.0 CONVENTIONNEL d'une bande vide
+    chez previous servait de référence via min() et rejetait un candidat MIEUX
+    calibré que la baseline. Une bande n=0 ne borne plus jamais le min."""
+    band = {"seuil": 0.75, "confiance_moyenne": 0.78}
+    candidate = _report(
+        exactitude_ponderee=0.95,
+        calibration_bande_auto={**band, "n": 40, "taux_justesse": 0.73, "ecart": 0.05},
+    )
+    baseline = _report(
+        calibration_bande_auto={**band, "n": 66, "taux_justesse": 0.65, "ecart": 0.1235}
+    )
+    previous = _report(
+        exactitude_ponderee=0.90,
+        calibration_bande_auto={
+            **band,
+            "n": 0,
+            "taux_justesse": None,
+            "confiance_moyenne": None,
+            "ecart": 0.0,
+        },
+    )
+    result = evaluate_gate(candidate, baseline, previous)
+    assert result.passed is True
+    assert any(r.startswith("PASS bande-auto") for r in result.reasons)
+
+
+def test_gate_all_references_empty_band_passes_with_explicit_reason():
+    empty = {"seuil": 0.75, "n": 0, "taux_justesse": None, "confiance_moyenne": None, "ecart": 0.0}
+    full = {"seuil": 0.75, "n": 40, "taux_justesse": 0.7, "confiance_moyenne": 0.78, "ecart": 0.08}
+    candidate = _report(exactitude_ponderee=0.95, calibration_bande_auto=full)
+    baseline = _report(calibration_bande_auto=dict(empty))
+    previous = _report(exactitude_ponderee=0.90, calibration_bande_auto=dict(empty))
+    result = evaluate_gate(candidate, baseline, previous)
+    assert result.passed is True
+    assert any("aucune référence à bande mesurée" in r for r in result.reasons)
+
+
+def test_gate_previous_worse_than_baseline_keeps_baseline_binding():
+    """Direction miroir du min() (trou de couverture r2) : previous PIRE que la
+    baseline → la baseline reste la référence liante, dans les deux sens."""
+    candidate_sous = {"n": 27, "taux": 0.15}
+    baseline = _report(sous_dimensionnement={"n": 18, "taux": 0.10})  # borne liante : 0.12
+    previous = _report(
+        exactitude_ponderee=0.70, sous_dimensionnement={"n": 45, "taux": 0.25}
+    )  # borne large : 0.27
+
+    failing = evaluate_gate(
+        _report(exactitude_ponderee=0.95, sous_dimensionnement=candidate_sous),
+        baseline,
+        previous,
+    )
+    assert failing.passed is False
+    assert any(r.startswith("FAIL sous-dimensionnement") for r in failing.reasons)
+
+    passing = evaluate_gate(
+        _report(exactitude_ponderee=0.95, sous_dimensionnement={"n": 20, "taux": 0.11}),
+        baseline,
+        previous,
+    )
+    assert not any(r.startswith("FAIL sous-dimensionnement") for r in passing.reasons)
+
+
+def test_gate_bound_is_inclusive_at_exact_limit():
+    """candidat == borne exacte → PASS (<= inclusif), pas un FAIL d'arrondi."""
+    candidate = _report(exactitude_ponderee=0.95, sous_dimensionnement={"n": 22, "taux": 0.12})
+    baseline = _report(sous_dimensionnement={"n": 18, "taux": 0.10})  # borne : 0.10 + 0.02
+    result = evaluate_gate(candidate, baseline)
+    assert not any(r.startswith("FAIL sous-dimensionnement") for r in result.reasons)
+
+
+# ---------------------------------------------------------------------------
+# Collision de cellules du bloc par-confiance — major ronde 2 (ml + qa).
+# ---------------------------------------------------------------------------
+
+
+def test_per_confidence_block_never_loses_cells_on_collision():
+    """Grouper à round(,4) puis clef .2f écrasait silencieusement les cellules
+    en collision (0.7501/0.7523/0.7549 → une seule cellule n=1). Le groupement
+    se fait désormais à la granularité de la clé : n cumulés, sum(n) == total,
+    écart mesuré contre la confiance MOYENNE réelle de la cellule."""
+    from harness import _calibration_by_confidence
+
+    block = _calibration_by_confidence([0.7501, 0.7523, 0.7549, 0.10], [True, False, True, True])
+    assert sum(cell["n"] for cell in block.values()) == 4
+    assert block["0.75"]["n"] == 3
+    assert block["0.75"]["taux_justesse"] == round(2 / 3, 4)
+    assert block["0.75"]["confiance_moyenne"] == round((0.7501 + 0.7523 + 0.7549) / 3, 4)
+    assert block["0.10"] == {"n": 1, "taux_justesse": 1.0, "confiance_moyenne": 0.1, "ecart": 0.9}
