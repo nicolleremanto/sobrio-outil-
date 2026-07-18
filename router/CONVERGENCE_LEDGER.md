@@ -37,8 +37,8 @@ RAM < 1 Go · artefacts : étage 1 < 20 Mo, étage 2 < 500 Mo · dépense API : 
 | Chantier | Sujet                                              | Rondes vertes | Statut  |
 | -------- | -------------------------------------------------- | ------------- | ------- |
 | R1       | Socle du routeur & v0 heuristique branchée         | 2/2 (r2 & r3) | **CONVERGÉ** |
-| R2       | Golden set (juge de paix)                          | 0/2           | en cours |
-| R3       | Protocole d'évaluation & harnais + gate            | 0/2           | à venir |
+| R2       | Golden set (juge de paix)                          | 2/2 (r2 & r3) | **CONVERGÉ** |
+| R3       | Protocole d'évaluation & harnais + gate            | 0/2           | en cours |
 | R4       | Corpus de démarrage à froid                        | 0/2           | à venir |
 | R5       | Pipeline d'entraînement & classifieur v0.5         | 0/2           | à venir |
 | R6       | Étage 2 embeddings (construit, ÉTEINT par défaut)  | 0/2           | à venir |
@@ -336,3 +336,32 @@ profondeur (jamais volume-seul).
 Minors polis avant ronde 3 : reviews ml mises à jour d'après son verdict RÉEL
 (« valide panel ronde 2 ») + re-figeage sha 6120df28… · commentaires d'en-tête
 rafraîchis (qa) · vigilance borne multi_tours 31/32 commentée (eval).
+
+## R2 — round 3 (commit 9a493b5)
+
+| agent                | scores                                                                | blocking | major | verdict   |
+| -------------------- | --------------------------------------------------------------------- | -------- | ----- | --------- |
+| eval-scientist       | étiquettes 4,5 · représent. 4 · double-revue 4,5 · figeage 5 · gate 4,5 | 0      | 0     | **GREEN** |
+| ml-architect         | plausib. 4,5 · cohérence 5 · ancrage 5 · symétrie 5 · exploit. 4,5    | 0        | 0     | **GREEN** |
+| qa-auditor           | 5 · 5 · 5 · 5 · 5 (zéro minor)                                        | 0        | 0     | **GREEN** |
+| data-quality-auditor | 5 · 5 · 5 · 5 · 5 (zéro minor)                                        | 0        | 0     | **GREEN** |
+| privacy-sentinel     | — (12 preuves : reproductibilité byte-à-byte re-vérifiée, scans)      | PASS     | —     | **PASS**  |
+| cost-guard           | — (mandat coût strict, zéro motif payant)                             | PASS     | —     | **PASS**  |
+
+→ Ronde **VERTE (2/2 consécutive)** — **CHANTIER R2 CONVERGÉ** (rondes 2 & 3).
+Minors résiduels : `make test` transitoirement perturbé par un reset Postgres
+pendant le run concurrent des juges → REJOUÉ PROPRE par l'orchestrateur
+(141 py + 218 ext verts) ; formulation cosmétique de 2 chaînes review
+(optionnel, non retenu).
+
+**Bilan R2 : construction → double-revue indépendante → arbitrage → r0 RED
+(FAIL citations + provenance fabriquée par l'orchestrateur + arithmétique) →
+r1 échouée (FAIL cost hors mandat, règle appliquée à la lettre) → r2 VERTE →
+r3 VERTE.** Le dispositif a attrapé : 11 notes citant des formulations
+utilisateur (dont 2 issues d'une correction de l'orchestrateur), une trace de
+revue FABRIQUÉE par défaut de champ, recos_shown arithmétiquement impossible,
+un rapport de couverture écrit à la main non gardé, des cellules opus
+fragiles. Livré : golden.jsonl 181 entrées FIGÉ (sha 6120df28…), double-revue
+COMPLÈTE (eval r1 + ml r2, verdicts au ledger), anti-fuite prouvée active,
+limites statistiques versionnées, contrainte de gate transmise à R3 (opus en
+AGRÉGÉ/relatif seulement). Dépense totale : 0,00 $.
