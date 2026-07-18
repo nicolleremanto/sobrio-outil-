@@ -1,0 +1,22 @@
+{
+  "n": 175,
+  "by_category": {
+    "code": 24,
+    "extraction": 20,
+    "juridique_contrat": 20,
+    "maths_raisonnement": 24,
+    "multi_tours": 28,
+    "redaction_simple": 20,
+    "resume": 19,
+    "traduction": 20
+  },
+  "by_label": {
+    "claude-haiku-4-5": 66,
+    "claude-opus-4-8": 24,
+    "claude-sonnet-5": 85
+  },
+  "fr_share": 0.7429,
+  "heuristic_agreement": 0.6914,
+  "seed": 2026,
+  "n_gabarits": 53
+}

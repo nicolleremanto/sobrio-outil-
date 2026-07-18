@@ -180,3 +180,50 @@ sortie du primaire (500 pydantic), échec au chargement contournant SafeRouter,
 transformations légères longues → Opus, bande morte 800, fuite repr() du champ
 réservé prompt_text, rule=None → 500, ±inf/bool maquillés en confiance saine,
 couture à 4000. Aucune dépense (0,00 $) sur tout le chantier.
+
+---
+
+## R2 — construction + double-revue + arbitrage (ronde 0)
+
+**Génération** (builder-core/sonnet) : `generate_golden.py`, 52 gabarits → 172
+entrées, 8 catégories équilibrées (19-25), 73,8 % FR, signaux cohérents par
+construction, étiquetage AU FOND (jamais via l'heuristique), reproductible à
+l'octet (seed 2026). Diagnostic anti-mimétisme : accord heuristique 72,1 %
+(bande saine 70-90, loin du seuil 95 = mimétisme).
+
+**Double-revue INDÉPENDANTE** (parallèle, sans se voir) :
+- ml-architect (opus) : 172/172 relues, 2 désaccords (gabarits), verdict
+  acceptable_apres_arbitrage. A confirmé indépendamment l'accord 72,1 %.
+- eval-scientist (opus) : 172/172 relues, 3 désaccords, verdict
+  acceptable_apres_arbitrage. Observations clés : n effectif ≈ 52 gabarits
+  (pas 172), cellules opus minces, non-séparabilité étage 1 de 3 cellules
+  (la distinction vit dans le TEXTE → argument pour l'étage 2/R6).
+
+**Arbitrage orchestrateur (2/3, ma voix sur les 1-contre-1)** :
+- gold-0077..79 traduction juridique officielle : opus→**sonnet** (ml accepté —
+  plafond traduction, cohérence interne du set, l'enjeu probant ne monte pas
+  de palier).
+- gold-0155..57 synthèse fil long : opus→**sonnet** (ml accepté — le volume de
+  contexte seul ne fait pas monter de palier, principe enseigné par le set).
+- gold-0088..91 architecture complexe : **CONSERVÉ opus** (eval rejeté —
+  frontière réelle Sonnet/Opus, conception multi-contraintes au-dessus du dev
+  standard ; conserve la couverture opus de la catégorie code).
+- gold-0167..69 fil mixte code+maths : opus→**sonnet** (eval accepté — prompt
+  et contexte modestes, périmètre Sonnet).
+- gold-0044..47 extraction fil très long : **CONSERVÉ haiku** (eval rejeté —
+  le golden étiquette la SUFFISANCE du modèle, pas l'UX de bascule ; principe
+  anti-volume). NB : ml avait cité ce gabarit en exemple POSITIF.
+- AJOUT post-arbitrage : gabarit multi_tours opus HONNÊTE (gold-0173..75,
+  preuve profonde en fil long — le fond, pas le volume) : les descentes
+  d'arbitrage vidaient sinon la cellule opus de multi_tours. À re-regarder
+  par le panel (eval-scientist propriétaire).
+- Notes juridiques sans drapeau explicitées (cas réaliste : l'utilisateur ne
+  nomme pas le document) — minor ml.
+
+**FIGÉ** : 175 entrées, sha256 dc7e700a…7d58 (`GOLDEN_SHA256`), reviews
+tracées par entrée (158 agree/agree · 9 amended · 8 contesté→conservé),
+`coverage_report.json` (stats + arbitrages), `HUMAN_REVIEW_WELCOME.md`
+(relecture fondateurs non bloquante), test `test_router_golden_frozen.py`
+(hash + schéma + zéro prompt_text + ANTI-FUITE router/data/). Accord
+heuristique final 69,1 % — le gate R3 a une marge réelle.
+Preuves : 90 tests router+api verts, make test complet vert, ruff vert.

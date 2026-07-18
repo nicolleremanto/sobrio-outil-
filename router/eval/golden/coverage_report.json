@@ -1,0 +1,79 @@
+{
+  "n": 175,
+  "by_category": {
+    "code": 24,
+    "extraction": 20,
+    "juridique_contrat": 20,
+    "maths_raisonnement": 24,
+    "multi_tours": 28,
+    "redaction_simple": 20,
+    "resume": 19,
+    "traduction": 20
+  },
+  "by_label": {
+    "claude-haiku-4-5": 66,
+    "claude-opus-4-8": 24,
+    "claude-sonnet-5": 85
+  },
+  "fr_share": 0.7429,
+  "heuristic_agreement": 0.6914,
+  "seed": 2026,
+  "n_gabarits": 53,
+  "by_category_x_label": {
+    "code": {
+      "claude-haiku-4-5": 4,
+      "claude-sonnet-5": 16,
+      "claude-opus-4-8": 4
+    },
+    "extraction": {
+      "claude-haiku-4-5": 14,
+      "claude-sonnet-5": 3,
+      "claude-opus-4-8": 3
+    },
+    "juridique_contrat": {
+      "claude-opus-4-8": 10,
+      "claude-sonnet-5": 7,
+      "claude-haiku-4-5": 3
+    },
+    "maths_raisonnement": {
+      "claude-sonnet-5": 17,
+      "claude-opus-4-8": 4,
+      "claude-haiku-4-5": 3
+    },
+    "multi_tours": {
+      "claude-sonnet-5": 19,
+      "claude-haiku-4-5": 6,
+      "claude-opus-4-8": 3
+    },
+    "redaction_simple": {
+      "claude-haiku-4-5": 13,
+      "claude-sonnet-5": 7
+    },
+    "resume": {
+      "claude-haiku-4-5": 13,
+      "claude-sonnet-5": 6
+    },
+    "traduction": {
+      "claude-haiku-4-5": 10,
+      "claude-sonnet-5": 10
+    }
+  },
+  "by_lang": {
+    "fr": 130,
+    "en": 45
+  },
+  "double_revue": {
+    "processus": "génération builder-core (sonnet) → double-revue INDÉPENDANTE parallèle ml-architect (opus) + eval-scientist (opus) → arbitrage 2/3 orchestrateur",
+    "desaccords_ml": 2,
+    "desaccords_eval": 3,
+    "arbitrages": {
+      "traduction_juridique_officielle (gold-0077..79)": "opus→sonnet (ml accepté : plafond traduction, cohérence interne)",
+      "synthese_fil_long (gold-0155..57)": "opus→sonnet (ml accepté : le volume seul ne monte pas de palier)",
+      "architecture_complexe (gold-0088..91)": "CONSERVÉ opus (eval rejeté : frontière réelle, couverture opus code)",
+      "fil_mixte_code_maths (gold-0167..69)": "opus→sonnet (eval accepté : prompt/contexte modestes)",
+      "extraction_fil_long (gold-0044..47)": "CONSERVÉ haiku (eval rejeté : suffisance ≠ UX de bascule, principe anti-volume)"
+    },
+    "ajout_post_arbitrage": "gabarit multi_tours opus honnête (gold-0173..75 : preuve profonde en fil long) — la catégorie perdait sinon toute couverture opus",
+    "anti_mimetisme": "accord heuristique 69,1% mesuré indépendamment par les DEUX relecteurs avant arbitrage (72,1%) — jamais >95%, le gate R3 garde une marge réelle"
+  }
+}
