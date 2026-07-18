@@ -81,8 +81,8 @@ def test_recommend_varies_with_features(client):
     cases = [
         # (surcharges de features, modèle attendu, règle attendue)
         ({"token_est": 50}, "claude-haiku-4-5", "heuristic:short_simple"),
-        ({"token_est": 50, "has_code": True}, "claude-sonnet-5", "heuristic:code_task"),
-        ({"token_est": 50, "keyword_flags": ["code"]}, "claude-sonnet-5", "heuristic:code_task"),
+        ({"token_est": 50, "has_code": True}, "claude-sonnet-5", "heuristic:code_context"),
+        ({"token_est": 50, "keyword_flags": ["code"]}, "claude-sonnet-5", "heuristic:code_context"),
         (
             {"token_est": 900, "keyword_flags": ["analyse"]},
             "claude-opus-4-8",
@@ -124,3 +124,43 @@ def test_recommend_with_wrong_token_is_401(client):
         headers={"Authorization": "Bearer mauvais-token"},
     )
     assert response.status_code == 401
+
+
+def test_recommend_unknown_router_version_falls_back_to_heuristic(client, test_engine):
+    """policy_json.router_version inconnu (chantier R1) -> heuristique, jamais 500."""
+    with test_engine.begin() as conn:
+        conn.execute(
+            sa.text(
+                "UPDATE orgs SET policy_json = "
+                """'{"router_version": "ml-v42-inexistant"}'::jsonb """
+                "WHERE org_id = 'demo'"
+            )
+        )
+    try:
+        response = client.post(
+            "/v1/recommend", json=make_recommend_body(token_est=50), headers=AUTH_HEADERS
+        )
+        assert response.status_code == 200
+        payload = response.json()
+        _assert_conforms_to_contract(payload)
+        assert payload["rule"] == "heuristic:short_simple"
+    finally:
+        with test_engine.begin() as conn:
+            conn.execute(sa.text("UPDATE orgs SET policy_json = '{}'::jsonb WHERE org_id = 'demo'"))
+
+
+def test_recommend_non_object_policy_falls_back_to_heuristic(client, test_engine):
+    """RÈGLE 3 : un policy_json non-objet (tableau/scalaire) -> heuristique, jamais 500."""
+    with test_engine.begin() as conn:
+        conn.execute(
+            sa.text("UPDATE orgs SET policy_json = '[1, 2, 3]'::jsonb WHERE org_id = 'demo'")
+        )
+    try:
+        response = client.post(
+            "/v1/recommend", json=make_recommend_body(token_est=50), headers=AUTH_HEADERS
+        )
+        assert response.status_code == 200
+        assert response.json()["rule"] == "heuristic:short_simple"
+    finally:
+        with test_engine.begin() as conn:
+            conn.execute(sa.text("UPDATE orgs SET policy_json = '{}'::jsonb WHERE org_id = 'demo'"))

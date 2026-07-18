@@ -43,13 +43,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r api/requirements.txt -r connector/requirements.txt \
                       -r warehouse/requirements.txt -r report/requirements.txt
-          pip install -e ./warehouse
+          pip install -e ./warehouse -e ./router
 
       - name: Lint (ruff)
-        run: ruff check api connector warehouse report
+        run: ruff check router api connector warehouse report
 
       - name: Tests (pytest)
-        run: pytest api/tests connector/tests warehouse/tests report/tests
+        run: pytest router/tests api/tests connector/tests warehouse/tests report/tests
 
   node:
     runs-on: ubuntu-latest

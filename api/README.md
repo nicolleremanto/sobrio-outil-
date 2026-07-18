@@ -11,8 +11,11 @@ recommandation qui varie selon les features pour que la démo soit vivante.
 - `app/schemas.py` — modèles pydantic v2 fidèles au contrat, `extra="forbid"`
   partout (tout champ inconnu ⇒ 422 — garde-fou anti-fuite, règle n°1).
 - `app/auth.py` — Bearer : `sha256(token)` comparé à `orgs.api_token_hash`, 401 sinon.
-- `app/router.py` — routeur pluggable ; `HeuristicRouterV0` : 3 règles triviales
-  mais explicables (`heuristic:short_simple` / `code_task` / `complex_task`).
+- `app/router.py` — alternatives + estimation d'impact à partir de l'id de
+  modèle recommandé (le routage lui-même vit dans le package `sobrio_router`,
+  racine du repo — chantier R1, `docs/decisions/ROUTEUR_CLASSIFIEUR.md`).
+- `app/router_bridge.py` — construit le routeur effectif par org
+  (`policy_json.router_version`), singletons réutilisés entre requêtes.
 - `app/routes.py` — les 3 routes du contrat (voir ci-dessous).
 - `app/logging_conf.py` — logs JSON structurés SANS contenu + filtre de scrubbing.
 - `app/db.py` — engine SQLAlchemy depuis `DATABASE_URL`, session par requête.
@@ -63,7 +66,7 @@ docker compose -f docker-compose.dev.yml up api
 - [x] Impact en fourchettes via `sobrio_impact` (jamais de scalaire)
 - [x] Logs JSON sans contenu + filtre de scrubbing
 - [x] Test anti-fuite (sentinelle : ni logs, ni stdout, ni base)
-- [ ] TODO(LotB) : routeur v0 heuristique complet
+- [x] Routeur v0 heuristique branché via `sobrio_router` (repli câblé, chantier R1)
 - [ ] TODO(LotB) : budgets d'équipe (`budget` reste `null`)
 - [ ] TODO(LotB) : vraie source de taux EUR/USD
 - [ ] TODO(LotB) : exploitation en mémoire de `prompt_text` quand l'org l'autorise

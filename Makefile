@@ -15,7 +15,7 @@ PYTEST  := .venv/bin/pytest
 RUFF    := .venv/bin/ruff
 ALEMBIC := .venv/bin/alembic
 
-.PHONY: dev test lint demo report sync-fixtures migrate seed
+.PHONY: dev test lint demo report sync-fixtures migrate seed router-bench
 
 ## dev : environnement complet (Postgres + Adminer + API --reload) + migrations + seed
 dev:
@@ -32,14 +32,18 @@ migrate:
 seed:
 	$(PY) warehouse/seed.py --org demo
 
+## router-bench : preuve budget étage 1 (p95 < 5 ms CPU) ; écrit router/artifacts/bench/latest.json
+router-bench:
+	$(PY) router/bench.py
+
 ## test : tests Python (tous les lots) puis tests de l'extension
 test:
-	$(PYTEST) api/tests connector/tests warehouse/tests report/tests
+	$(PYTEST) router/tests api/tests connector/tests warehouse/tests report/tests
 	$(PNPM) -C extension test
 
 ## lint : ruff (Python) puis eslint/prettier (extension)
 lint:
-	$(RUFF) check api connector warehouse report
+	$(RUFF) check router api connector warehouse report
 	$(PNPM) -C extension lint
 
 ## report : génère le rapport mensuel PDF du mois de démo (2026-06)

@@ -22,6 +22,12 @@ extension/.wxt/
 # Sorties générées
 report/out/
 out/
+
+# Routeur (Lot B) : artefacts de modèles ignorés (R5, potentiellement gros),
+# petits rapports (bench, éval) VERSIONNÉS — cf. router/CONVERGENCE_LEDGER.md.
+router/artifacts/*
+!router/artifacts/bench/
+!router/artifacts/bench/*
 # Exception : captures visuelles FINALES versionnées de l'extension (le
 # répertoire out/ générique les attraperait sinon). L'extension/.gitignore
 # ignore le reste de out/ et ne garde que final/.

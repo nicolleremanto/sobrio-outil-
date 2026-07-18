@@ -15,13 +15,15 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from pydantic import ValidationError
+from sobrio_router import features_to_signals
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from .auth import Org, get_current_org
 from .catalog import visible_model_ids
 from .db import get_session
-from .router import HeuristicRouterV0, build_alternatives, build_impact_estimate
+from .router import build_alternatives, build_impact_estimate
+from .router_bridge import router_for_org
 from .schemas import (
     ExtensionConfig,
     RecoEvent,
@@ -32,10 +34,6 @@ from .schemas import (
 logger = logging.getLogger("sobrio.api")
 
 router = APIRouter(prefix="/v1")
-
-# Routeur pluggable — remplacer l'implémentation ici quand le v0 complet
-# arrivera. TODO(LotB) : injection configurable par org (policy_json).
-_reco_router = HeuristicRouterV0()
 
 # Libellés par défaut de l'extension (français d'abord).
 _DEFAULT_MESSAGES_FR = {
@@ -62,9 +60,12 @@ def recommend(
     # Ne pas relire body.prompt_text au-delà de cette ligne : ignoré en v0.
     del body.prompt_text
 
-    decision = _reco_router.decide(body.features)
-    alternatives = build_alternatives(decision, body.features)
-    impact = build_impact_estimate(decision, body.features)
+    # Adaptateur transitoire features -> signals (RFC-0001) ; routeur
+    # effectif résolu par org (policy_json.router_version — chantier R1).
+    signals = features_to_signals(body.features)
+    decision = router_for_org(org.policy_json).decide(signals)
+    alternatives = build_alternatives(decision.model, body.features)
+    impact = build_impact_estimate(decision.model, body.features)
     reco_id = uuid4()
 
     # INSERT réel : features_json = UNIQUEMENT les features du contrat —
@@ -90,7 +91,7 @@ def recommend(
             "ts": datetime.now(tz=UTC),
             "surface": body.surface,
             "features": json.dumps(body.features.model_dump()),
-            "model": decision.model_id,
+            "model": decision.model,
             "confidence": decision.confidence,
             "rule": decision.rule,
             "wh_min": impact.energy_wh_min,
@@ -109,7 +110,7 @@ def recommend(
 
     return RecommendResponse(
         reco_id=reco_id,
-        recommended_model=decision.model_id,
+        recommended_model=decision.model,
         confidence=decision.confidence,
         rule=decision.rule,
         alternatives=alternatives,
