@@ -217,3 +217,12 @@ def test_metadata_complet(artefact_v05: Path):
         ("calibrator.json", "sha256_calibrator_json"),
     ):
         assert hashlib.sha256((artefact_v05 / filename).read_bytes()).hexdigest() == metadata[key]
+
+
+def test_fit_isotonic_refuses_degenerate_calibrator():
+    """Minor qa R5 r0 : un calibrateur à < 2 points est refusé AU TRAIN
+    (diagnostic au bon moment), plus seulement au chargement."""
+    import pytest as _pytest
+
+    with _pytest.raises(ValueError, match="dégénéré"):
+        train_v05.fit_isotonic([0.8, 0.8, 0.8], [True, True, False])

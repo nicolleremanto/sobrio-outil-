@@ -118,6 +118,37 @@ tout se branche derrière ; rien ne change côté extension ni côté contrat `/
   inclus — le volet ECE initial utilisait 0.07+0.01, bit-exact en IEEE-754,
   et ne testait rien : attrapé par qa en r4).
 
+## Intégrité de l'évaluation — statut du golden set (R5, ronde 0)
+
+- **Le golden est PARTIELLEMENT BRÛLÉ comme set de sélection** (major eval
+  R5 r0, assumé et tracé) : deux choix de conception de v0.5 — la méthode de
+  calibration (min conservateur retenu contre température et isotonique
+  pleine) et la pondération de la val d'early stopping — ont été tranchés en
+  comparant les métriques GOLDEN de ~6 variantes. Les chiffres golden de
+  v0.5 (dont l'écart de bande 0,0093) sont donc des estimateurs OPTIMISTES
+  (minimum sélectionné sur le set de test). Atténuations vérifiées par le
+  panel : toutes les variantes mesurées passaient le gate (le verdict de
+  promotion est invariant à la sélection) ; le min conservateur a un
+  rationnel produit a priori ; la spec divulguait ces mesures ouvertement.
+- **Règles en conséquence** : (1) toute décision FUTURE de méthode de
+  calibration/architecture se prend sur une tranche tenue à l'écart ou sur
+  données fraîches (télémétrie v1) — plus jamais sur le golden ; (2) les
+  bornes cliquet issues de v0.5 (ex. bande previous + tol = 0,0293) se
+  traitent avec prudence : un futur candidat qui échoue DE PEU sur une borne
+  cliquet héritée d'un chiffre sélectionné mérite un examen humain, pas un
+  rejet aveugle (le gate reste la règle ; l'examen est une revue de la borne,
+  pas un waiver du candidat).
+- **Plafond absolu de bande (7-bis, 0,10) — caractère BILATÉRAL documenté**
+  (minor eval r0) : l'écart |justesse − confiance| plafonne aussi la
+  SOUS-confiance (direction produit-sûre, coût = un clic) et, à n < 25, le
+  bruit binomial peut dépasser 0,10 sans défaut réel. Assumé comme hygiène
+  fail-closed d'une action SANS clic ; à réexaminer si un candidat sûr mais
+  timide échoue uniquement là-dessus.
+- **Val in-sample pour le calibrateur** (minor dq r0) : les métriques VAL
+  (ece, bande) du rapport de train sont mesurées sur les données qui ont
+  ajusté le calibrateur — indicatives seulement ; l'éval qui fait foi est le
+  harnais sur le golden.
+
 ## §7 — Budgets (miroir du ledger)
 
 Étage 1 p95 < 5 ms CPU · Étage 2 p95 < 30 ms CPU · `/v1/recommend` p95

@@ -239,6 +239,14 @@ def fit_isotonic(conf_val: list[float], correct_val: list[bool]) -> tuple[list[f
         if x_max > x_min:
             xs.append(x_max)
             ys.append(valeur)
+    if len(xs) < 2:
+        # Refus AU TRAIN (minor qa R5 r0) : un calibrateur à < 2 points est
+        # inutilisable (interpolation impossible) — le chargeur le refusait
+        # déjà, mais échouer ICI donne le diagnostic au bon moment.
+        raise ValueError(
+            f"calibrateur isotonique dégénéré ({len(xs)} point de contrôle) — "
+            "val trop petite ou confiances constantes, entraînement refusé"
+        )
     return xs, ys
 
 

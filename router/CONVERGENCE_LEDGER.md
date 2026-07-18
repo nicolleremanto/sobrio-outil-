@@ -1009,3 +1009,62 @@ après promotion (TODO R7 rechargement à chaud) · PROMOTED_DIR par chemin
 repo (surcharge env = TODO R7 VPS) · risque « géométrie des gabarits »
 consigné (val 87,6 % vs golden 82,9 % — la recalibration v1 sur télémétrie
 réelle reste l'objectif produit).
+
+## R5 — round 0, verdicts (commit abbe26a, panel 6 juges Fable)
+
+| agent            | modèle | scores (dims)                                        | blocking | major | verdict |
+|------------------|--------|------------------------------------------------------|----------|-------|---------|
+| ml-architect (P) | fable  | spec5 features5 calibration5 fuites-ml5 extens4      | 0        | 0     | GREEN   |
+| eval-scientist   | fable  | éval4 gate5 plafond5 honnêteté3 repro5               | 0        | 1     | YELLOW  |
+| data-quality     | fable  | étanchéité5 déséquilibre5 intégrité5 robustesse5 tr4 | 0        | 0     | GREEN   |
+| qa-auditor       | fable  | couverture5 contrat5 erreurs5 clarté5 régressions5   | 0        | 0     | GREEN   |
+| privacy-sentinel | fable  | —                                                    | PASS     | —     | PASS    |
+| cost-guard       | fable  | —                                                    | PASS     | —     | PASS    |
+
+→ **Ronde JAUNE (major eval — INTÉGRITÉ MÉTHODOLOGIQUE).** Le split est
+prouvé étanche (recalcul indépendant des buckets), la calibration recalculée
+à 0,0 près, le plafond 0,10 VALIDÉ par eval, les 28 tests jugés substantiels
+(qa 5 partout). MAIS eval a établi que DEUX choix de conception (méthode de
+calibration ; pondération de la val d'early stopping) ont été tranchés par
+comparaison des métriques GOLDEN de ~6 variantes — une sélection sur le set
+de test : le chiffre-phare bande 0,0093 est un estimateur OPTIMISTE, le NB
+d'intégrité de la spec (« hyperparamètres premier jet ») était vrai au sens
+strict mais TROMPEUR sur le processus, et le cliquet previous fige cette
+chance. Atténuations vérifiées par eval : toutes les variantes passaient le
+gate (verdict de promotion INVARIANT à la sélection) ; divulgation ouverte
+dans la spec (impureté méthodologique, pas dissimulation).
+
+**Corrections ronde 0 :**
+- **[major eval]** Consigné dans ROUTEUR_CLASSIFIEUR.md (« Intégrité de
+  l'évaluation — statut du golden set ») : golden PARTIELLEMENT BRÛLÉ comme
+  set de sélection ; règles : futures décisions de calibration sur données
+  tenues à l'écart/télémétrie v1 UNIQUEMENT ; bornes cliquet héritées de
+  v0.5 → examen humain de la borne si un candidat échoue de peu (le gate
+  reste la règle). NB d'intégrité élargi ICI : la sélection sur golden est
+  reconnue comme telle.
+- **[minors ml/eval/dq/qa — traçabilité]** Les 4 écarts de spec ÉNUMÉRÉS
+  (relevés indépendamment par ml, identiques à ceux du builder) :
+  (a) bridge lit ml.PROMOTED_DIR à l'appel (testabilité, même prod) ;
+  (b) matrices numpy float64 explicites (déterminisme lgb.Dataset) ;
+  (c) interp_conf partagé ml.py→train (zéro réimplémentation) ;
+  (d) PAV avec agrégation des x égaux avant ajustement (48 points vs ~46
+  ancrés, égalité vérifiée à 0,0 près par le PAV indépendant de ml).
+- **[minor eval]** Plafond 7-bis : caractère BILATÉRAL documenté
+  (sous-confiance plafonnée pareil ; n<25 bruité) — doc.
+- **[minor eval]** Bornes CLI opérateur : --bande-ecart-max ∈ ]0, 0.5]
+  (1.0 neutralisait le 7-bis), --budget-ms fini > 0 → exit 2 (+5 tests
+  paramétrés ; le chemin de promotion n'y passait déjà pas).
+- **[minor qa]** Calibrateur isotonique dégénéré (< 2 points) refusé AU
+  TRAIN (diagnostic au bon moment) + test.
+- **[minor dq]** Val in-sample pour le calibrateur : documenté (indicatif ;
+  le harnais golden fait foi).
+- **[consignés sans action]** ml : 1 sous-dim en bande auto (0,8 % — la
+  direction dangereuse, surveillance télémétrie v1, TODO R7 monitoring) ;
+  68 % des décisions golden en bande auto (paramètre produit actif) ;
+  tranches minces bruitées (n=181 — recalibration v1 = vrai correctif) ;
+  valeurs négatives tolérées par design (pydantic garde l'amont) ; qa :
+  rapports d'éval réécrits par les cibles make (friction connue).
+
+Preuves : 317 router+api verts (+6), sha model.txt STABLE (43a61267… — les
+gardes ne touchent pas l'entraînement), gate PASS rejoué, make test complet
+vert, ruff verts.

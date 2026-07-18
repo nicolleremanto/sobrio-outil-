@@ -21,8 +21,8 @@
   },
   "exactitude_ponderee": 0.732,
   "ece": 0.0934,
-  "p50_ms": 0.0075,
-  "p95_ms": 0.0128,
+  "p50_ms": 0.0098,
+  "p95_ms": 0.0152,
   "calibration_bande_auto": {
     "seuil": 0.75,
     "n": 66,
@@ -205,6 +205,6 @@
   },
   "router_name": "heuristic",
   "golden_sha": "6120df28f72c68bef9fab30c5ac193419999f326fa7a4ab537c55097007a2868",
-  "date": "2026-07-18T20:29:35.768223+00:00",
-  "git_sha": "b3fbdcc"
+  "date": "2026-07-18T20:43:56.750612+00:00",
+  "git_sha": "abbe26a"
 }

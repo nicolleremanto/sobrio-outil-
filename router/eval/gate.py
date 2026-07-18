@@ -388,6 +388,23 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
+    # Bornes des paramètres opérateur (minor eval R5 r0) : un --bande-ecart-max
+    # à 1.0 neutraliserait le critère 7-bis, un budget non fini le critère de
+    # latence — fail-closed, comme le reste de la CLI.
+    if not (math.isfinite(args.budget_ms) and args.budget_ms > 0):
+        print(
+            f"FAIL : --budget-ms doit être un nombre fini > 0 (reçu {args.budget_ms})",
+            file=sys.stderr,
+        )
+        return 2
+    if not (math.isfinite(args.bande_ecart_max) and 0 < args.bande_ecart_max <= 0.5):
+        print(
+            f"FAIL : --bande-ecart-max doit être dans ]0, 0.5] (reçu {args.bande_ecart_max}) — "
+            "au-delà, le plafond absolu du critère 7-bis serait neutralisé",
+            file=sys.stderr,
+        )
+        return 2
+
     # Chargement FAIL-CLOSED : un fichier introuvable/illisible produit un
     # message de diagnostic propre (pas un traceback brut) et un exit dédié.
     try:

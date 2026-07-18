@@ -614,3 +614,44 @@ def test_repartition_rules_retro_compatible_et_ignore_du_gate():
     candidate = _report(exactitude_ponderee=0.95, repartition_rules={"fallback:heuristic": 181})
     result = evaluate_gate(candidate, _report())
     assert result.passed is True
+
+
+# ---------------------------------------------------------------------------
+# Bornes CLI du gate (minor eval R5 r0) : paramètres opérateur fail-closed.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("flag", "value"),
+    [
+        ("--bande-ecart-max", "1.0"),  # neutraliserait le critère 7-bis
+        ("--bande-ecart-max", "0"),
+        ("--bande-ecart-max", "nan"),
+        ("--budget-ms", "inf"),
+        ("--budget-ms", "-1"),
+    ],
+)
+def test_gate_cli_rejects_out_of_range_operator_params(tmp_path, flag, value):
+    import json
+
+    candidate_path = tmp_path / "candidate.json"
+    baseline_path = tmp_path / "baseline.json"
+    candidate_path.write_text(json.dumps(_report(exactitude_ponderee=0.95)))
+    baseline_path.write_text(json.dumps(_report()))
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(Path(__file__).resolve().parents[1] / "eval" / "gate.py"),
+            "--candidate",
+            str(candidate_path),
+            "--baseline",
+            str(baseline_path),
+            flag,
+            value,
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert proc.returncode == 2
+    assert "FAIL" in proc.stderr and "Traceback" not in proc.stderr
