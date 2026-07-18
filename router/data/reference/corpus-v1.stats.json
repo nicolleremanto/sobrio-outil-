@@ -1,0 +1,96 @@
+{
+  "n": 30000,
+  "seed": 4242,
+  "bruit_rate_parametre": 0.03,
+  "bruit_rate_effectif": 0.0296,
+  "by_category": {
+    "code": 4200,
+    "extraction": 3600,
+    "juridique_contrat": 3000,
+    "maths_raisonnement": 2400,
+    "multi_tours": 5400,
+    "redaction_simple": 4800,
+    "resume": 3600,
+    "traduction": 3000
+  },
+  "by_label": {
+    "claude-haiku-4-5": 9680,
+    "claude-opus-4-8": 4435,
+    "claude-sonnet-5": 15885
+  },
+  "by_category_x_label": {
+    "code": {
+      "claude-haiku-4-5": 851,
+      "claude-opus-4-8": 868,
+      "claude-sonnet-5": 2481
+    },
+    "extraction": {
+      "claude-haiku-4-5": 1705,
+      "claude-opus-4-8": 556,
+      "claude-sonnet-5": 1339
+    },
+    "juridique_contrat": {
+      "claude-haiku-4-5": 614,
+      "claude-opus-4-8": 1189,
+      "claude-sonnet-5": 1197
+    },
+    "maths_raisonnement": {
+      "claude-haiku-4-5": 579,
+      "claude-opus-4-8": 408,
+      "claude-sonnet-5": 1413
+    },
+    "multi_tours": {
+      "claude-haiku-4-5": 1223,
+      "claude-opus-4-8": 605,
+      "claude-sonnet-5": 3572
+    },
+    "redaction_simple": {
+      "claude-haiku-4-5": 2176,
+      "claude-opus-4-8": 336,
+      "claude-sonnet-5": 2288
+    },
+    "resume": {
+      "claude-haiku-4-5": 1565,
+      "claude-opus-4-8": 259,
+      "claude-sonnet-5": 1776
+    },
+    "traduction": {
+      "claude-haiku-4-5": 967,
+      "claude-opus-4-8": 214,
+      "claude-sonnet-5": 1819
+    }
+  },
+  "by_lang": {
+    "en": 7676,
+    "fr": 21260,
+    "other": 1064
+  },
+  "fr_share": 0.7087,
+  "plages": {
+    "token_est": {
+      "min": 5,
+      "max": 1399
+    },
+    "char_len": {
+      "min": 17,
+      "max": 6316
+    },
+    "msg_count": {
+      "min": 0,
+      "max": 68
+    },
+    "context_token_est": {
+      "min": 0,
+      "max": 32656
+    },
+    "recos_shown": {
+      "min": 0,
+      "max": 13
+    },
+    "derogations_up": {
+      "min": 0,
+      "max": 11
+    }
+  },
+  "taux_doublons_signature": 0.0281
+}

@@ -1,0 +1,59 @@
+{
+  "n": 30000,
+  "taux_doublons_signature": 0.0281,
+  "seuil_alerte_doublons": 0.05,
+  "equilibre_categorie_x_label": {
+    "cellules_vides": [],
+    "ratio_max_min": 16.69,
+    "seuil_alerte_ratio": 20.0,
+    "cellules": {
+      "code": {
+        "claude-haiku-4-5": 851,
+        "claude-opus-4-8": 868,
+        "claude-sonnet-5": 2481
+      },
+      "extraction": {
+        "claude-haiku-4-5": 1705,
+        "claude-opus-4-8": 556,
+        "claude-sonnet-5": 1339
+      },
+      "juridique_contrat": {
+        "claude-haiku-4-5": 614,
+        "claude-opus-4-8": 1189,
+        "claude-sonnet-5": 1197
+      },
+      "maths_raisonnement": {
+        "claude-haiku-4-5": 579,
+        "claude-opus-4-8": 408,
+        "claude-sonnet-5": 1413
+      },
+      "multi_tours": {
+        "claude-haiku-4-5": 1223,
+        "claude-opus-4-8": 605,
+        "claude-sonnet-5": 3572
+      },
+      "redaction_simple": {
+        "claude-haiku-4-5": 2176,
+        "claude-opus-4-8": 336,
+        "claude-sonnet-5": 2288
+      },
+      "resume": {
+        "claude-haiku-4-5": 1565,
+        "claude-opus-4-8": 259,
+        "claude-sonnet-5": 1776
+      },
+      "traduction": {
+        "claude-haiku-4-5": 967,
+        "claude-opus-4-8": 214,
+        "claude-sonnet-5": 1819
+      }
+    }
+  },
+  "violations_bornes": {},
+  "fr_share": 0.7087,
+  "seuil_fr_min": 0.5,
+  "verdict": {
+    "ok": true,
+    "alertes": []
+  }
+}

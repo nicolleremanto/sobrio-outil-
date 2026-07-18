@@ -661,3 +661,58 @@ reasoning@0.75 à 51,5 % dans la bande d'auto-bascule — objectif de
 recalibration transmis à R5). Deux leçons d'intégrité de l'orchestrateur
 attrapées par les juges (test bit-exact « qui ne testait rien », prose du
 ledger citant ce qu'elle purgeait).
+
+---
+
+## R4 — round 0 (construction builder-core/sonnet, vérifiée par l'orchestrateur)
+
+**Livré :** router/data/{generate_corpus,quality_report,public_datasets,distill}.py
++ LICENSES.md + reference/{metadata,stats,quality}.json + 3 fichiers de tests
+(43 nouveaux) + fixtures neutres + cibles make router-corpus /
+router-corpus-check + .gitignore (artifacts non versionnés).
+
+**Décisions d'orchestration consignées :**
+- Seed corpus 4242 ≠ 2026 (golden) : aucune corrélation d'échantillonnage
+  avec le juge de paix.
+- Format jsonl.gz STDLIB (gzip mtime=0 pour un sha reproductible) — pas de
+  pandas/pyarrow (contrainte disque + router stdlib-only).
+- Corpus NON versionné (régénérable au seed près) ; seuls générateur +
+  metadata/stats/quality du run de référence 30k sont commités
+  (router/data/reference/).
+- distill.py : AUCUN import de SDK payant ni de client HTTP dans router/ —
+  le chemin payant valide les gates (SOBRIO_ALLOW_PAID_CALLS=1 +
+  SOBRIO_MAX_SPEND_USD, défaut 20) puis S'ARRÊTE avant tout appel :
+  l'intégration du client API sera livrée avec la décision fondateurs
+  (l'invariant cost-guard « zéro motif réseau dans router/ » reste prouvable
+  par grep). Estimation réelle : distiller 30k lignes avec un teacher opus ≈
+  59,90 $ > cap 20 $ — la décision fondateurs devra arbitrer (teacher moins
+  cher / sous-échantillon).
+- LICENSES.md : LMSYS-Chat-1M, Chatbot Arena, RouteLLM = **NON UTILISÉ**
+  (licences non ouvertes/ambiguës, prompts tiers en tension avec la règle
+  n°1) — adaptateurs construits mais éteints (flag), revue licence humaine
+  requise avant toute activation.
+- Divergence corpus/golden ASSUMÉE : le golden laisse des cellules
+  catégorie×opus vides par sobriété (jugement) ; le corpus d'ENTRAÎNEMENT
+  couvre toutes les cellules (opus rare mais présent) — documentée dans le
+  générateur.
+- Correction orchestrateur post-construction : les fixtures datasets et 2
+  chaînes du test contenaient des PHRASES INVENTÉES type prompt —
+  neutralisées en soupe de mots-vides + marqueurs (mêmes branches exercées :
+  lang fr/en/other, has_code, has_math ; jurisprudence privacy R2-r0 : rien
+  qui RESSEMBLE à un prompt, même inventé).
+- Bug de déterminisme attrapé par le builder : itération sur frozenset
+  VISIBLE_MODELS (ordre dépendant de PYTHONHASHSEED) cassait la
+  reproductibilité INTER-processus → sorted() + preuve cmp binaire de 2 .gz
+  générés dans 2 process.
+
+**Corpus de référence (seed 4242, n=30 000, sha d13011af…) — vérifié de
+première main :** quality ok:true, 0 alerte ; doublons signature 2,81 %
+(< 5 %) ; fr 70,9 % ; ratio max/min cellules 16,7 (< 20) ; 0 cellule vide ;
+labels haiku 9 680 / sonnet 15 885 / opus 4 435 ; bruit effectif 2,96 % ;
+génération < 1 s ; échantillon 500 lignes : zéro texte, zéro gold-*, 50
+lignes rechargées en Signals sans erreur ; anti-fuite : intersection de
+signatures corpus×golden vide (testé) ; grep réseau router/ : 0.
+
+Preuves : 174 router + 26 api verts (+43), make router-corpus (30k, ok:true)
++ router-corpus-check verts, make test complet vert (218 ext), ruff
+check+format verts.

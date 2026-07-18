@@ -1,0 +1,11 @@
+{
+  "seed": 4242,
+  "n": 30000,
+  "generator_version": "1.0.0",
+  "generator": "router/data/generate_corpus.py",
+  "sha256_gz": "d13011af6b6f8a7dc9a79631d4eb71b58fe8f09887550475a466433fc9d57102",
+  "date_generation": "2026-07-18T17:59:45.359659+00:00",
+  "bruit_rate_parametre": 0.03,
+  "invariant_5_6": "seed fixé, version épinglée (generator_version), sha256 committé pour ce run — reproductible via : python router/data/generate_corpus.py --n 30000 --seed 4242 --bruit 0.03",
+  "seed_different_du_golden": "seed=4242 volontairement DIFFÉRENT du seed=2026 du golden set (router/eval/golden/generate_golden.py) — évite toute corrélation d'échantillonnage avec le juge de paix (chantier R2/R3), cf. docstring du module."
+}
