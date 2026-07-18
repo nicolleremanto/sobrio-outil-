@@ -33,7 +33,7 @@ router/artifacts/*
 # Corpus synthétique R4 (démarrage à froid) : régénérable au seed près
 # (DEFAULT_SEED=4242, router/data/generate_corpus.py) — jamais commité
 # (peut atteindre plusieurs dizaines de Mo). Seuls le générateur et les
-# petits JSON (metadata/stats/quality) d'un run de RÉFÉRENCE sont
+# petits JSON (metadata/stats/quality/bruit) d'un run de RÉFÉRENCE sont
 # versionnés, dans router/data/reference/ (cible `make router-corpus`).
 router/data/artifacts/
 # Exception : captures visuelles FINALES versionnées de l'extension (le

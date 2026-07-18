@@ -15,10 +15,15 @@ activées :
   simulation ne prétend imiter QUE la FORME du pipeline (déterminisme,
   absence de texte, structure du rapport), jamais un JUGEMENT réel.
 - `run_real(...)` (chemin payant) vérifie dans l'ordre : (1)
-  `SOBRIO_ALLOW_PAID_CALLS == "1"` (sinon refus explicite), (2) le coût
-  ESTIMÉ (nb de lignes × prix catalogue, AUCUN appel réseau) reste sous le
-  cap `SOBRIO_MAX_SPEND_USD` (défaut 20 $, sinon refus explicite), puis
-  **S'ARRÊTE TOUJOURS AVANT TOUT APPEL** avec le message : « run réel =
+  `SOBRIO_ALLOW_PAID_CALLS == "1"` (sinon refus explicite) ; (2)
+  `SOBRIO_MAX_SPEND_USD` est un nombre FINI strictement positif (M5,
+  correction ronde 0 : `nan`/`inf` rendaient la comparaison de coût
+  SILENCIEUSEMENT toujours favorable — un bypass complet du gate — sinon
+  `SpendCapError` fail-closed AVANT toute estimation, `--real` en CLI la
+  traduit en message propre + exit 2) ; (3) le coût ESTIMÉ (nb de lignes ×
+  prix catalogue, AUCUN appel réseau) reste sous ce cap (défaut 20 $, sinon
+  refus explicite), puis **S'ARRÊTE TOUJOURS AVANT TOUT APPEL** avec le
+  message : « run réel =
   décision fondateurs (docs/decisions.md) — l'intégration du client API sera
   livrée avec cette décision. » Ce chemin n'a — et n'aura jamais dans ce
   module — d'implémentation d'appel réseau : c'est une DÉCISION
@@ -52,7 +57,9 @@ import argparse
 import gzip
 import hashlib
 import json
+import math
 import os
+import sys
 from collections import Counter
 from pathlib import Path
 
@@ -87,9 +94,47 @@ _NOTE_CGU = (
 _stop_counter = 0
 
 
+class SpendCapError(ValueError):
+    """`SOBRIO_MAX_SPEND_USD` invalide (M5, correction ronde 0) — fail-closed dédié.
+
+    Sous-classe de `ValueError` (pas `RuntimeError`, cf. les autres refus de
+    `run_real`) : erreur de VALIDATION D'ENTRÉE, distincte d'un refus de
+    gate — permet à `main()` de la traiter séparément (message propre, exit
+    2, jamais de traceback brut) sans intercepter les refus de gate légitimes.
+    """
+
+
 def get_stop_counter() -> int:
     """Nombre de fois où `run_real(...)` a franchi les gates et s'est arrêté volontairement."""
     return _stop_counter
+
+
+def _parse_spend_cap(raw: str | None) -> float:
+    """Parse et valide `SOBRIO_MAX_SPEND_USD` : float FINI strictement positif.
+
+    Fail-closed (M5, correction ronde 0, prouvé par exécution) : AVANT cette
+    garde, ``float("nan")`` et ``float("inf")`` passaient la comparaison
+    ``cout_estime_usd > cap`` de façon SILENCIEUSEMENT favorable
+    (``x > nan`` est toujours `False`, ``x > inf`` aussi pour tout `x` fini)
+    — un bypass complet du gate de dépense sans jamais lever d'erreur.
+    `math.isfinite` exclut nan ET les deux infinis ; `cap <= 0` est rejeté
+    séparément (un cap négatif ou nul ne peut légitimement jamais être
+    franchi, ce qui serait un refus TOUJOURS silencieux, pas une protection).
+    `raw is None` (variable absente) retourne le défaut documenté — c'est la
+    SEULE valeur non explicitement fournie qui échappe à la validation
+    stricte, puisqu'elle ne vient pas d'une saisie utilisateur.
+    """
+    if raw is None:
+        return _DEFAULT_MAX_SPEND_USD
+    try:
+        cap = float(raw)
+    except (TypeError, ValueError) as exc:
+        raise SpendCapError(f"{_ENV_CAP} invalide (nombre attendu, reçu {raw!r}) : {exc}") from exc
+    if not math.isfinite(cap) or cap <= 0:
+        raise SpendCapError(
+            f"{_ENV_CAP} doit être un nombre FINI strictement positif (reçu {raw!r} -> {cap!r})"
+        )
+    return cap
 
 
 def _read_rows(path: Path) -> list[dict]:
@@ -192,10 +237,12 @@ def run_real(
 ) -> None:
     """Chemin PAYANT — lève TOUJOURS avant tout appel (voir docstring du module).
 
-    Gates, DANS L'ORDRE : (1) `SOBRIO_ALLOW_PAID_CALLS == "1"`, (2) coût
-    estimé <= `SOBRIO_MAX_SPEND_USD` (défaut 20 $). Les deux franchies, la
-    fonction lève quand même — le franchissement est compté
-    (`get_stop_counter()`) mais AUCUN appel n'a jamais lieu dans ce module.
+    Gates, DANS L'ORDRE : (1) `SOBRIO_ALLOW_PAID_CALLS == "1"`, (2)
+    `SOBRIO_MAX_SPEND_USD` VALIDE — fini, strictement positif (M5, sinon
+    `SpendCapError` AVANT toute estimation de coût, fail-closed), (3) coût
+    estimé <= ce cap (défaut 20 $). Les trois franchies, la fonction lève
+    quand même — le franchissement est compté (`get_stop_counter()`) mais
+    AUCUN appel n'a jamais lieu dans ce module.
     """
     global _stop_counter
     if os.environ.get(_ENV_ALLOW) != "1":
@@ -203,10 +250,7 @@ def run_real(
             f"run réel refusé : {_ENV_ALLOW} doit valoir '1' (défaut : dry-run, aucune "
             "dépense) — voir docs/decisions/ROUTEUR_CLASSIFIEUR.md §5.4"
         )
-    try:
-        cap = float(os.environ.get(_ENV_CAP, _DEFAULT_MAX_SPEND_USD))
-    except ValueError as exc:
-        raise RuntimeError(f"{_ENV_CAP} invalide (nombre attendu) : {exc}") from exc
+    cap = _parse_spend_cap(os.environ.get(_ENV_CAP))  # SpendCapError si invalide (M5)
 
     estimate = estimate_cost(corpus_path, teacher_model)
     if estimate["cout_estime_usd"] > cap:
@@ -238,7 +282,14 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.real:
-        run_real(args.corpus, args.teacher_model)  # lève toujours
+        try:
+            run_real(args.corpus, args.teacher_model)  # lève toujours
+        except SpendCapError as exc:
+            # M5 : validation d'entrée fail-closed — message propre + exit 2,
+            # jamais de traceback brut (distinct des refus de gate légitimes,
+            # RuntimeError, qui restent propagés tels quels — cf. tests).
+            print(f"FAIL : {exc}", file=sys.stderr)
+            return 2
         return 1  # inatteignable
 
     report = dry_run(args.corpus, args.teacher_model)

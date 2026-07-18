@@ -716,3 +716,59 @@ signatures corpus×golden vide (testé) ; grep réseau router/ : 0.
 Preuves : 174 router + 26 api verts (+43), make router-corpus (30k, ok:true)
 + router-corpus-check verts, make test complet vert (218 ext), ruff
 check+format verts.
+
+## R4 — round 0, verdicts (commit c44f7e0, panel 5 juges)
+
+| agent            | modèle | scores (dims)                                       | blocking | major | verdict |
+|------------------|--------|-----------------------------------------------------|----------|-------|---------|
+| data-quality (P) | sonnet | réalisme3 équilibre4 cohérence5 étiquettes3 robust3 | 0        | 3     | YELLOW  |
+| eval-scientist   | opus   | anti-fuite2 seed5 principes3 repro5 intégrité4      | 0        | 2     | **RED** |
+| qa-auditor       | sonnet | couverture3 contrat3 erreurs2 clarté4 régressions5  | 0        | 4     | YELLOW  |
+| privacy-sentinel | sonnet | —                                                   | PASS     | —     | PASS    |
+| cost-guard       | haiku  | —                                                   | PASS     | —     | PASS    |
+
+→ Ronde **RED**. La propriété-TITRE du chantier était FAUSSE au N livré :
+l'anti-fuite n'était prouvée qu'à n=5000 (intersection vide → passage à
+vide) alors que le corpus 30k contenait 6 collisions de signature exactes
+avec le golden (5 « freebies » même-label gonflant le futur gate + gold-0072
+en CONFLIT de label). Autres majors prouvés : 3 descriptions de gabarits
+copiées mot à mot du golden (+ ~18 paraphrases) ; 35 groupes de doublons
+CONTRADICTOIRES hors-bruit invisibles du quality report ; opus juridique
+39,6 % injustifié (2x les autres, mission sobriété) ; --n négatif → corpus
+incohérent silencieux (slicing négatif de _allocate) ; garde import réseau
+aveugle aux from-import ; cap SOBRIO_MAX_SPEND_USD contournable par
+nan/inf ; validation CLI absente.
+
+**Corrections (builder-core, vérifiées de première main par l'orchestrateur) :**
+- **M1 anti-fuite PAR CONSTRUCTION** : générateur golden-aware (signatures
+  via loader, re-tirage déterministe plafonné, compteurs en metadata) + test
+  d'overlap AU N LIVRÉ (30k régénérées en mémoire, < 2 s) + test rapide 5k
+  conservé. Run de référence : 8 rejets anti-fuite, 0 abandon, overlap = 0
+  (re-prouvé par script indépendant de l'orchestrateur).
+- **M3 anti-contradiction PAR CONSTRUCTION** : re-tirage si une signature
+  existante porte un autre label vérité-terrain (48 rejets, 0 abandon) ;
+  annexe bruit.json (889 ids) ; quality_report sépare doublons même-label
+  (739) / contradictions-bruit (75, attendues ≈ 3 %) / contradictions
+  HORS-BRUIT (0 par construction, alerte sinon) — re-prouvé indépendamment.
+- **M2** : 47 descriptions réécrites structurelles ; tests : intersection de
+  chaînes exacte vide + distance de Levenshtein normalisée min 0.674
+  (seuil 0.55).
+- **M4** : opus juridique_contrat 40→20/100 (20,1 % livré, cohérent code
+  20,7 %/maths 17 %), redistribué vers sonnet, rationnel documenté.
+- **M5** : cap fail-closed (_parse_spend_cap : fini, > 0, bool exclu) —
+  nan/inf/-5/abc/vide → SpendCapError → exit 2 propre (prouvé : exit réel 2).
+- **M6** : garde réseau regex (import|from) sur les 4 modules de
+  router/data/ + preuve d'injection (l'ancienne garde ratait
+  from httpx import…, la nouvelle le détecte).
+- **M7** : --n > 0, --bruit ∈ [0,1], chemins → exit 2 propres ; _allocate
+  lève sur total < 0.
+- Minors : test has_math, note_cgu comparée au contenu réel, référence sans
+  date volatile, rationale seed reformulée (l'indépendance vient des
+  gabarits + re-tirage, pas du seed).
+
+**Nouveau corpus de référence : sha be96b691…, generator 1.1.0.**
+
+Preuves : 228 router + 26 api verts (+54), make router-corpus ok:true (sha
+vérifié par shasum indépendant), router-corpus-check vert, make test complet
+vert (218 ext), ruff verts, overlap 30k×golden = 0 et contradictions
+hors-bruit = 0 re-prouvés par scripts orchestrateur, from-imports réseau : 0.

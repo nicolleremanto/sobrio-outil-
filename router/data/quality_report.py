@@ -4,13 +4,26 @@ Module autonome (même convention que `router/eval/loader.py` /
 `router/data/generate_corpus.py`) : importé par script direct ou par les
 tests via `sys.path.insert(0, "router/data")`.
 
-`analyze(rows)` est une fonction PURE (aucune I/O) qui consomme une liste de
-lignes DÉJÀ chargées (dicts `{"id", "category", "label", "signals"}`) et
-retourne un rapport JSON-sérialisable :
+`analyze(rows, bruit_ids=None)` est une fonction PURE (aucune I/O) qui
+consomme une liste de lignes DÉJÀ chargées (dicts `{"id", "category",
+"label", "signals"}`) et retourne un rapport JSON-sérialisable :
 
-- **doublons** : taux de lignes dont la signature de SIGNAUX (JSON canonique
-  de `signals`, triée) est un doublon exact d'une autre ligne — alerte au-delà
-  de 5 %.
+- **doublons/contradictions (M3, correction ronde 0)** : sur les groupes de
+  lignes à signature de SIGNAUX identique, distingue TROIS catégories —
+  doublons MÊME LABEL (inoffensifs, deux lignes identiques et cohérentes),
+  contradictions issues du BRUIT contrôlé (labels différents, mais
+  EXPLIQUÉS par `--bruit` : attendues, ≈ taux de bruit), contradictions
+  HORS BRUIT (labels différents sans explication par le bruit — attendues à
+  ZÉRO par construction depuis la garde anti-contradiction de
+  `generate_corpus.py` ; ALERTE si > 0, signe d'un défaut du générateur).
+  La ventilation bruit/hors-bruit exige l'annexe `corpus-v1.bruit.json`
+  (`bruit_ids`, ids des lignes bruitées — PAS dans le corpus lui-même,
+  schéma des lignes inchangé) : si absente (corpus plus ancien, fixture de
+  test), TOUTE contradiction est comptée hors-bruit par défaut (conservateur
+  — fail-visible plutôt que masquer une contradiction faute d'annexe).
+  `taux_doublons_signature` (champ historique, conservé pour compatibilité)
+  reste le taux TOTAL (doublons + contradictions confondus) — alerte
+  au-delà de 5 %.
 - **équilibre catégorie×label** : sur les 24 cellules (8 catégories ×
   `VISIBLE_MODELS`), alerte si une cellule attendue est VIDE, ou si le ratio
   max/min des cellules non vides dépasse 20.
@@ -35,7 +48,7 @@ from __future__ import annotations
 import argparse
 import gzip
 import json
-from collections import Counter
+import sys
 from pathlib import Path
 
 from sobrio_router import VISIBLE_MODELS
@@ -43,6 +56,9 @@ from sobrio_router import VISIBLE_MODELS
 ARTIFACTS_DIR = Path(__file__).resolve().parent / "artifacts"
 DEFAULT_CORPUS = ARTIFACTS_DIR / "corpus-v1.jsonl.gz"
 DEFAULT_OUT = ARTIFACTS_DIR / "corpus-v1.quality.json"
+# Nom FIXE de l'annexe bruit écrite par `generate_corpus.py` (M3b) — toujours
+# à côté du corpus qu'elle documente, quel que soit `--out-dir`.
+_BRUIT_ANNEXE_NAME = "corpus-v1.bruit.json"
 
 _DUP_ALERT_THRESHOLD = 0.05
 _BALANCE_RATIO_ALERT = 20.0
@@ -73,10 +89,76 @@ def _read_rows(path: Path) -> list[dict]:
     return [json.loads(line) for line in raw.splitlines() if line.strip()]
 
 
-def _duplicate_rate(rows: list[dict]) -> float:
-    signatures = Counter(json.dumps(r["signals"], sort_keys=True) for r in rows)
-    n_dup = sum(count - 1 for count in signatures.values() if count > 1)
-    return n_dup / len(rows)
+def _load_bruit_ids(corpus_path: Path) -> frozenset[str] | None:
+    """Charge l'annexe bruit (`corpus-v1.bruit.json`, M3) si présente à côté du corpus.
+
+    Fichier ANNEXE écrit par `generate_corpus.py`, jamais dans le corpus
+    lui-même (schéma des lignes inchangé). Absente (corpus plus ancien,
+    fixture de test fabriquée à la main) : retourne `None` — `analyze`
+    dégrade alors la ventilation bruit/hors-bruit (voir docstring de module).
+    """
+    bruit_path = corpus_path.parent / _BRUIT_ANNEXE_NAME
+    if not bruit_path.exists():
+        return None
+    payload = json.loads(bruit_path.read_text(encoding="utf-8"))
+    return frozenset(payload.get("bruit_ids", []))
+
+
+def _group_by_signature(rows: list[dict]) -> dict[str, list[dict]]:
+    """Groupe les lignes par signature de SIGNAUX (JSON canonique, triée)."""
+    groups: dict[str, list[dict]] = {}
+    for r in rows:
+        groups.setdefault(json.dumps(r["signals"], sort_keys=True), []).append(r)
+    return groups
+
+
+def _duplicate_rate(groups: dict[str, list[dict]], n: int) -> float:
+    n_dup = sum(len(g) - 1 for g in groups.values() if len(g) > 1)
+    return n_dup / n
+
+
+def _label_contradiction_breakdown(
+    groups: dict[str, list[dict]], bruit_ids: frozenset[str] | None
+) -> dict:
+    """Sépare, parmi les groupes de signature dupliquée, doublons vs contradictions (M3).
+
+    Voir la docstring de module pour la définition des trois catégories.
+    Sans annexe bruit (`bruit_ids is None`), toute contradiction est comptée
+    HORS bruit par défaut (conservateur, fail-visible).
+    """
+    n_doublons_meme_label = 0
+    n_contradictions_bruit = 0
+    n_contradictions_hors_bruit = 0
+    exemples_hors_bruit: list[str] = []
+
+    for group in groups.values():
+        if len(group) < 2:
+            continue
+        labels = {r["label"] for r in group}
+        if len(labels) == 1:
+            n_doublons_meme_label += len(group) - 1
+            continue
+        if bruit_ids is None:
+            n_contradictions_hors_bruit += len(group) - 1
+            exemples_hors_bruit.extend(r["id"] for r in group)
+            continue
+        non_bruit_labels = {r["label"] for r in group if r["id"] not in bruit_ids}
+        if len(non_bruit_labels) > 1:
+            # Au moins deux lignes NON bruitées se contredisent : contradiction
+            # STRUCTURELLE, jamais expliquée par le bruit contrôlé — attendue
+            # à zéro par construction (garde anti-contradiction, M3).
+            n_contradictions_hors_bruit += len(group) - 1
+            exemples_hors_bruit.extend(r["id"] for r in group)
+        else:
+            n_contradictions_bruit += len(group) - 1
+
+    return {
+        "annexe_bruit_disponible": bruit_ids is not None,
+        "n_doublons_meme_label": n_doublons_meme_label,
+        "n_contradictions_bruit": n_contradictions_bruit,
+        "n_contradictions_hors_bruit": n_contradictions_hors_bruit,
+        "exemples_contradictions_hors_bruit": sorted(exemples_hors_bruit)[:20],
+    }
 
 
 def _balance_report(rows: list[dict]) -> dict:
@@ -134,17 +216,32 @@ def _bounds_violations(rows: list[dict]) -> dict[str, int]:
     return violations
 
 
-def analyze(rows: list[dict]) -> dict:
-    """Calcule le rapport data-quality complet sur des lignes DÉJÀ chargées."""
+def analyze(rows: list[dict], bruit_ids: frozenset[str] | None = None) -> dict:
+    """Calcule le rapport data-quality complet sur des lignes DÉJÀ chargées.
+
+    `bruit_ids` (M3, correction ronde 0) : ids des lignes bruitées (annexe
+    `corpus-v1.bruit.json` de `generate_corpus.py`), pour ventiler les
+    contradictions bruit/hors-bruit — `None` si l'annexe est indisponible
+    (dégrade la ventilation, voir docstring de module).
+    """
     alertes: list[str] = []
     n = len(rows)
     if n == 0:
         return {"n": 0, "verdict": {"ok": False, "alertes": ["corpus vide"]}}
 
-    taux_doublons = _duplicate_rate(rows)
+    groups = _group_by_signature(rows)
+    taux_doublons = _duplicate_rate(groups, n)
     if taux_doublons > _DUP_ALERT_THRESHOLD:
         alertes.append(
             f"taux de doublons de signature {taux_doublons:.2%} > seuil {_DUP_ALERT_THRESHOLD:.0%}"
+        )
+
+    contradictions = _label_contradiction_breakdown(groups, bruit_ids)
+    if contradictions["n_contradictions_hors_bruit"] > 0:
+        alertes.append(
+            f"{contradictions['n_contradictions_hors_bruit']} lignes en CONTRADICTION "
+            "HORS bruit (signature identique, label différent, ATTENDU 0 par construction) "
+            f"— exemples : {contradictions['exemples_contradictions_hors_bruit'][:5]}"
         )
 
     balance = _balance_report(rows)
@@ -169,6 +266,14 @@ def analyze(rows: list[dict]) -> dict:
         "n": n,
         "taux_doublons_signature": round(taux_doublons, 4),
         "seuil_alerte_doublons": _DUP_ALERT_THRESHOLD,
+        "doublons_detail": {
+            **contradictions,
+            "taux_doublons_meme_label": round(contradictions["n_doublons_meme_label"] / n, 4),
+            "taux_contradictions_bruit": round(contradictions["n_contradictions_bruit"] / n, 4),
+            "taux_contradictions_hors_bruit": round(
+                contradictions["n_contradictions_hors_bruit"] / n, 4
+            ),
+        },
         "equilibre_categorie_x_label": balance,
         "violations_bornes": violations,
         "fr_share": round(fr_share, 4),
@@ -178,15 +283,30 @@ def analyze(rows: list[dict]) -> dict:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """CLI — `--corpus` inexistant/illisible : message propre + exit 2 (M7), pas de traceback."""
     parser = argparse.ArgumentParser(description="Rapport data-quality du corpus R4.")
     parser.add_argument("--corpus", type=Path, default=DEFAULT_CORPUS)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     args = parser.parse_args(argv)
 
-    rows = _read_rows(args.corpus)
-    report = analyze(rows)
+    if not args.corpus.exists():
+        print(f"--corpus introuvable : {args.corpus}", file=sys.stderr)
+        return 2
 
-    args.out.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        rows = _read_rows(args.corpus)
+    except (OSError, gzip.BadGzipFile, json.JSONDecodeError, UnicodeDecodeError) as exc:
+        print(f"--corpus illisible ({args.corpus}) : {exc}", file=sys.stderr)
+        return 2
+
+    bruit_ids = _load_bruit_ids(args.corpus)
+    report = analyze(rows, bruit_ids)
+
+    try:
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        print(f"--out invalide ({args.out}) : {exc}", file=sys.stderr)
+        return 2
     args.out.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
     verdict = report["verdict"]

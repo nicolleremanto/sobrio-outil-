@@ -49,17 +49,23 @@ router-eval:
 ## (documentée ici, cf. .gitignore) : router/data/artifacts/ n'est JAMAIS
 ## commité (régénérable au seed près, seed figé DEFAULT_SEED=4242) — seuls
 ## le générateur (generate_corpus.py) et les petits JSON (metadata/stats/
-## quality) d'un run de RÉFÉRENCE sont versionnés, copiés dans
-## router/data/reference/ par cette cible.
+## quality/bruit) d'un run de RÉFÉRENCE sont versionnés, copiés dans
+## router/data/reference/ par cette cible. NORMALISATION (minor, correction
+## ronde 0) : la copie de référence de metadata.json retire la clé VOLATILE
+## `date_generation` (change à chaque régénération sans rapport avec le
+## contenu) — la référence ne se salit plus dans git à chaque run ; le
+## sha256_gz du .gz reste la SEULE vérité de contenu, inchangé par cette
+## normalisation.
 router-corpus:
 	$(PY) router/data/generate_corpus.py --out-dir router/data/artifacts
 	$(PY) router/data/quality_report.py \
 		--corpus router/data/artifacts/corpus-v1.jsonl.gz \
 		--out router/data/artifacts/corpus-v1.quality.json
 	mkdir -p router/data/reference
-	cp router/data/artifacts/corpus-v1.metadata.json router/data/reference/
+	$(PY) -c "import json; from pathlib import Path; src = Path('router/data/artifacts/corpus-v1.metadata.json'); data = json.loads(src.read_text(encoding='utf-8')); data.pop('date_generation', None); Path('router/data/reference/corpus-v1.metadata.json').write_text(json.dumps(data, indent=2, ensure_ascii=False) + chr(10), encoding='utf-8')"
 	cp router/data/artifacts/corpus-v1.stats.json router/data/reference/
 	cp router/data/artifacts/corpus-v1.quality.json router/data/reference/
+	cp router/data/artifacts/corpus-v1.bruit.json router/data/reference/
 
 ## router-corpus-check : boucle rapide — petit corpus (500 lignes, même seed
 ## de référence) + quality report + tests router/data (sortie dans un

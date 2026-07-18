@@ -1,11 +1,13 @@
 {
   "seed": 4242,
   "n": 30000,
-  "generator_version": "1.0.0",
+  "generator_version": "1.1.0",
   "generator": "router/data/generate_corpus.py",
-  "sha256_gz": "d13011af6b6f8a7dc9a79631d4eb71b58fe8f09887550475a466433fc9d57102",
-  "date_generation": "2026-07-18T17:59:45.359659+00:00",
+  "sha256_gz": "be96b691bbb29838668d7506e32d6d7e766e77f6b7a6be1defe17eaea38969ba",
   "bruit_rate_parametre": 0.03,
+  "n_rejets_anti_fuite": 8,
+  "n_rejets_contradiction": 48,
+  "n_abandons": 0,
   "invariant_5_6": "seed fixé, version épinglée (generator_version), sha256 committé pour ce run — reproductible via : python router/data/generate_corpus.py --n 30000 --seed 4242 --bruit 0.03",
-  "seed_different_du_golden": "seed=4242 volontairement DIFFÉRENT du seed=2026 du golden set (router/eval/golden/generate_golden.py) — évite toute corrélation d'échantillonnage avec le juge de paix (chantier R2/R3), cf. docstring du module."
+  "seed_different_du_golden": "seed=4242 volontairement DIFFÉRENT du seed=2026 du golden set (router/eval/golden/generate_golden.py) — précaution SUPPLÉMENTAIRE contre une corrélation d'échantillonnage fine avec le juge de paix (chantier R2/R3) ; l'absence de chevauchement EXACT n'en dépend PAS (elle vient des gabarits indépendants ET de la garde anti-fuite par re-tirage, cf. docstring du module — corrigé ronde 0, M1)."
 }

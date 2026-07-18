@@ -1,7 +1,17 @@
 {
   "n": 30000,
-  "taux_doublons_signature": 0.0281,
+  "taux_doublons_signature": 0.0271,
   "seuil_alerte_doublons": 0.05,
+  "doublons_detail": {
+    "annexe_bruit_disponible": true,
+    "n_doublons_meme_label": 739,
+    "n_contradictions_bruit": 75,
+    "n_contradictions_hors_bruit": 0,
+    "exemples_contradictions_hors_bruit": [],
+    "taux_doublons_meme_label": 0.0246,
+    "taux_contradictions_bruit": 0.0025,
+    "taux_contradictions_hors_bruit": 0.0
+  },
   "equilibre_categorie_x_label": {
     "cellules_vides": [],
     "ratio_max_min": 16.69,
@@ -19,8 +29,8 @@
       },
       "juridique_contrat": {
         "claude-haiku-4-5": 614,
-        "claude-opus-4-8": 1189,
-        "claude-sonnet-5": 1197
+        "claude-opus-4-8": 604,
+        "claude-sonnet-5": 1782
       },
       "maths_raisonnement": {
         "claude-haiku-4-5": 579,
@@ -50,7 +60,7 @@
     }
   },
   "violations_bornes": {},
-  "fr_share": 0.7087,
+  "fr_share": 0.7126,
   "seuil_fr_min": 0.5,
   "verdict": {
     "ok": true,

@@ -9,21 +9,54 @@ part (règle n°1, CLAUDE.md), format EXACT du schéma `Signals`
 Module autonome (pas de paquet installé) : importé soit en script direct
 (`python router/data/generate_corpus.py`), soit par les tests
 (`router/tests/test_router_data_corpus.py`), qui ajoutent `router/data/` à
-`sys.path` — même convention que `router/eval/loader.py`.
+`sys.path` — même convention que `router/eval/loader.py`. Ce module insère
+lui-même `router/eval/` dans `sys.path` (voir plus bas) pour devenir
+GOLDEN-AWARE (correction M1, ronde 0) : il importe `loader.golden_signatures`
+pour RE-TIRER, PENDANT la génération, toute ligne dont la signature de
+signaux coïnciderait avec le golden — jamais les VALEURS du golden, seule la
+fonction de hachage (`loader.signal_signature`) est partagée.
 
-── Seed (4242) ──────────────────────────────────────────────────────────────
+── Anti-fuite ET anti-contradiction PAR CONSTRUCTION (M1 + M3) ──────────────
+Deux gardes actives PENDANT la génération de chaque ligne (voir `generate()`,
+`_MAX_RETIRAGE_ATTEMPTS`) :
+
+1. **Anti-fuite (M1)** : si la signature de signaux d'une ligne candidate
+   coïncide EXACTEMENT avec une entrée du golden set (`loader.golden_signatures()`),
+   la ligne est RE-TIRÉE (nouveau jitter, même flux `rng` continué — flux
+   DÉRIVÉ déterministe, pas un nouveau seed) jusqu'à `_MAX_RETIRAGE_ATTEMPTS`
+   tentatives ; au-delà, la ligne est ABANDONNÉE (comptée, jamais silencieuse).
+   Cette garde rend le docstring VRAI par construction (avant cette
+   correction, l'affirmation « aucun chevauchement possible » n'était pas
+   vérifiée au N livré — voir ledger R4 ronde 0).
+2. **Anti-contradiction (M3)** : le générateur maintient une table
+   signature → label VÉRITÉ (le label du gabarit, AVANT toute bascule de
+   bruit) au fil de la génération ; toute ligne dont la signature coïnciderait
+   avec une signature déjà vue mais un label VÉRITÉ différent (gabarits
+   différents, parfois cross-catégorie) est également RE-TIRÉE puis, au-delà
+   du plafond, ABANDONNÉE. Les SEULES contradictions qui subsistent dans le
+   corpus livré sont celles introduites ENSUITE, volontairement, par le flux
+   de bruit contrôlé (`--bruit`, voir plus bas) — jamais des contradictions
+   structurelles entre gabarits. `quality_report.py` mesure les deux
+   catégories séparément via l'annexe `corpus-v1.bruit.json`.
+
+── Indépendance training/éval : gabarits ET re-tirage, PAS le seed seul ────
 Le seed par défaut (4242) est DÉLIBÉRÉMENT DIFFÉRENT du seed du golden set
-(2026, `router/eval/golden/generate_golden.py`). Motif : même si aucun
-chevauchement direct n'est possible par construction (gabarits distincts,
-espace d'ids disjoint `corp-*` / préfixe du golden (`router/eval/golden/`),
-catégories reprises mais scénarios
-reformulés — jamais copiés ni paraphrasés), partager un seed avec le juge de
-paix créerait une CORRÉLATION D'ÉCHANTILLONNAGE inutile et risquée entre les
-données d'entraînement et l'ensemble qui départage les candidats (gate R3) :
-un biais de génération commun aux deux (même tirage de jitter, mêmes
-coïncidences numériques) pourrait artificiellement gonfler l'accord
-entraînement↔évaluation sans rapport avec la qualité réelle du classifieur.
-Deux flux indépendants, deux seeds indépendants.
+(2026, `router/eval/golden/generate_golden.py`), mais ce n'est PAS ce qui
+garantit l'absence de chevauchement — un seed différent réduit la
+PROBABILITÉ de collision, il ne l'élimine pas (deux flux aléatoires
+indépendants peuvent, par pur hasard, produire la même signature). Ce qui
+élimine RÉELLEMENT le chevauchement, c'est la conjonction de deux mécanismes
+STRUCTURELS : (a) des gabarits distincts, reformulés au fond, jamais copiés
+ni paraphrasés (catégories reprises, scénarios indépendants) — qui rend la
+collision rare ; (b) la garde anti-fuite ci-dessus, qui RE-TIRE activement
+toute collision résiduelle plutôt que de compter sur la rareté seule — qui
+rend la collision impossible au N livré (garantie vérifiée par le test
+`test_no_exact_signal_signature_overlap_with_golden`, régénéré AU N LIVRÉ,
+30 000 lignes, pas un échantillon réduit). Le seed différent reste une
+précaution SUPPLÉMENTAIRE contre une corrélation d'échantillonnage plus
+subtile (biais de tirage commun aux deux flux, même sans collision exacte de
+signature) entre les données d'entraînement et le juge de paix (gate R3) :
+deux flux indépendants, deux seeds indépendants, ceinture ET bretelles.
 
 ── Principes d'étiquetage (PRINCIPES DE FOND, PAS des entrées reprises) ─────
 Comme le golden (même mandat, cf. `generate_golden.py` et
@@ -104,14 +137,24 @@ import gzip
 import hashlib
 import json
 import random
+import sys
 from collections import Counter
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
-from sobrio_router import VISIBLE_MODELS
+# Module autonome (cf. docstring) : insère `router/eval/` en tête de
+# `sys.path` pour devenir GOLDEN-AWARE (M1) — idempotent si déjà inséré par
+# l'appelant (tests). Doit précéder l'import de `loader`.
+_EVAL_DIR = str(Path(__file__).resolve().parents[1] / "eval")
+if _EVAL_DIR not in sys.path:
+    sys.path.insert(0, _EVAL_DIR)
 
-__version__ = "1.0.0"
+from loader import golden_signatures, signal_signature  # noqa: E402
+
+from sobrio_router import VISIBLE_MODELS  # noqa: E402
+
+__version__ = "1.1.0"
 
 DEFAULT_N = 30_000
 DEFAULT_SEED = 4242
@@ -119,6 +162,10 @@ DEFAULT_BRUIT_RATE = 0.03
 # Décalage du flux de bruit — voir note de module ci-dessus (isolation des
 # deux sources de variation : signaux vs. bascule d'étiquette).
 _BRUIT_SEED_OFFSET = 1_000_003
+# Plafond de tentatives de re-tirage (M1 anti-fuite, M3 anti-contradiction) :
+# au-delà, la ligne est ABANDONNÉE plutôt que de boucler indéfiniment — cf.
+# docstring de module et `generate()`.
+_MAX_RETIRAGE_ATTEMPTS = 50
 
 ARTIFACTS_DIR = Path(__file__).resolve().parent / "artifacts"
 
@@ -212,28 +259,37 @@ class _Template:
 
 # ---------------------------------------------------------------------------
 # Gabarits, groupés par catégorie (mêmes 8 catégories que le golden set).
+#
+# `note` (M2, correction ronde 0) : formulation STRUCTURELLE — paramètres,
+# plages, rôle statistique du gabarit dans sa catégorie — JAMAIS une scène
+# narrative façon golden (`generate_golden.py`). Vérifié par script dédié
+# (`_verifier_notes_distinctes`, exécuté par les tests et en CLI) : aucune
+# chaîne EXACTE en commun avec les notes du golden.
 # ---------------------------------------------------------------------------
 TEMPLATES: tuple[_Template, ...] = (
-    # === redaction_simple =====================================================
+    # === redaction_simple ======================================================
     _Template(
         "redaction_simple",
         "claude-haiku-4-5",
         18,
-        "e-mail interne bref à un collègue, ton neutre, sujet routinier (congés, logistique).",
+        "ancre basse de la catégorie : token_est 20-80, zéro paramètre de style imposé — "
+        "poids dominant (18), fixe le mode le plus fréquent de la cellule haiku.",
         token_est=(20, 80),
     ),
     _Template(
         "redaction_simple",
         "claude-haiku-4-5",
         14,
-        "message client court de confirmation (rendez-vous, commande), factuel.",
+        "variante confirmation/logistique, même plage courte (20-70 tok.) que l'ancre ci-dessus "
+        "mais contenu factuel figé — élargit la cellule haiku sans changer son centre.",
         token_est=(20, 70),
     ),
     _Template(
         "redaction_simple",
         "claude-haiku-4-5",
         8,
-        "short informal status update to a colleague, routine subject, English.",
+        "réplique EN de la cellule haiku (lang_weights fixé à en), plage 15-50 tok. — assure "
+        "un plancher non-fr dans une catégorie majoritairement fr (poids mineur 8).",
         token_est=(15, 50),
         lang_weights=_LANG_EN_FIXED,
     ),
@@ -241,22 +297,24 @@ TEMPLATES: tuple[_Template, ...] = (
         "redaction_simple",
         "claude-sonnet-5",
         18,
-        "note de service à diffusion large, ton institutionnel précis à respecter.",
+        "saut de palier motivé par une contrainte de registre (précision institutionnelle "
+        "imposée), token_est 150-350 : au-delà de la plage haiku sans franchir le seuil opus.",
         token_est=(150, 350),
     ),
     _Template(
         "redaction_simple",
         "claude-sonnet-5",
         16,
-        "offre d'emploi rédigée avec la voix de marque de l'entreprise, contrainte stylistique "
-        "explicite.",
+        "seconde variante sonnet : contrainte de style EXPLICITE (paramètre distinctif de "
+        "cette cellule) plutôt qu'un simple effet de longueur, token_est 300-550.",
         token_est=(300, 550),
     ),
     _Template(
         "redaction_simple",
         "claude-sonnet-5",
         8,
-        "product landing copy with a specific brand-voice constraint, English.",
+        "réplique EN de la cellule sonnet (lang_weights fixé à en), token_est 80-200, même "
+        "paramètre de contrainte-style que la variante fr — poids mineur symétrique.",
         token_est=(80, 200),
         lang_weights=_LANG_EN_FIXED,
     ),
@@ -264,16 +322,18 @@ TEMPLATES: tuple[_Template, ...] = (
         "redaction_simple",
         "claude-opus-4-8",
         5,
-        "discours institutionnel à très fort enjeu (crise, changement stratégique majeur), "
-        "stratégie rhétorique fine et anticipation des réactions parties prenantes requises.",
+        "seule cellule opus de la catégorie, poids MINIMAL (5) par construction (plafond de "
+        "sobriété) : token_est 200-450, réservée aux cas où l'enjeu institutionnel dépasse "
+        "structurellement le périmètre nominal de la catégorie — jamais un remplissage.",
         token_est=(200, 450),
     ),
-    # === resume ================================================================
+    # === resume =================================================================
     _Template(
         "resume",
         "claude-haiku-4-5",
         20,
-        "résumé bref d'un compte-rendu de réunion interne standard.",
+        "ancre basse : token_est 100-300, poids maximal de la catégorie (20) — centre de masse "
+        "de la cellule haiku, aucun paramètre conversationnel actif.",
         token_est=(100, 300),
         keyword_flags=("resume",),
     ),
@@ -281,7 +341,8 @@ TEMPLATES: tuple[_Template, ...] = (
         "resume",
         "claude-haiku-4-5",
         16,
-        "résumé court d'une revue de presse sectorielle courante.",
+        "second point de la cellule haiku, plage légèrement décalée (120-320 tok.) — élargit "
+        "la dispersion sans introduire de nouveau paramètre catégoriel.",
         token_est=(120, 320),
         keyword_flags=("resume",),
     ),
@@ -289,7 +350,8 @@ TEMPLATES: tuple[_Template, ...] = (
         "resume",
         "claude-haiku-4-5",
         8,
-        "brief summary of a routine status report, English.",
+        "réplique EN (lang_weights=en) de la cellule haiku, token_est 100-260, poids mineur — "
+        "plancher non-fr symétrique aux autres catégories.",
         token_est=(100, 260),
         keyword_flags=("resume",),
         lang_weights=_LANG_EN_FIXED,
@@ -298,7 +360,8 @@ TEMPLATES: tuple[_Template, ...] = (
         "resume",
         "claude-sonnet-5",
         20,
-        "résumé long d'un rapport d'audit dense, au-delà du seuil de longueur.",
+        "franchissement de palier par LONGUEUR SEULE : token_est 900-1400 franchit le seuil "
+        "haut, PLAFONNÉ sonnet (jamais opus pour le seul volume, cf. tête de module).",
         token_est=(900, 1400),
         keyword_flags=("resume",),
     ),
@@ -306,7 +369,8 @@ TEMPLATES: tuple[_Template, ...] = (
         "resume",
         "claude-sonnet-5",
         18,
-        "résumé exigeant une interprétation nuancée d'un document de veille concurrentielle.",
+        "franchissement de palier par NATURE (paramètre distinct du précédent) : token_est "
+        "200-500, plage moyenne mais exige un traitement au-delà de la transformation légère.",
         token_est=(200, 500),
         keyword_flags=("resume",),
     ),
@@ -314,7 +378,9 @@ TEMPLATES: tuple[_Template, ...] = (
         "resume",
         "claude-sonnet-5",
         12,
-        "résumé d'une note technique moyenne, fil déjà engagé mais léger.",
+        "seule cellule à fil non-vierge de la catégorie (msg_count 5-9, current_model=haiku) : "
+        "isole l'effet du paramètre conversationnel du volume brut de prompt (150-300 tok. "
+        "moins que l'ancre haiku ci-dessus en tokens de contexte cumulés).",
         token_est=(300, 600),
         keyword_flags=("resume",),
         msg_count=(5, 9),
@@ -325,8 +391,8 @@ TEMPLATES: tuple[_Template, ...] = (
         "resume",
         "claude-opus-4-8",
         6,
-        "synthèse stratégique multi-sources exigeant une mise en perspective experte et des "
-        "recommandations argumentées — dépasse le simple résumé.",
+        "seule cellule opus, poids mineur (6) : token_est 400-700 — paramètre distinctif = "
+        "sortie attendue au format recommandation argumentée, pas une simple compression.",
         token_est=(400, 700),
         keyword_flags=("resume",),
     ),
@@ -335,15 +401,16 @@ TEMPLATES: tuple[_Template, ...] = (
         "extraction",
         "claude-haiku-4-5",
         22,
-        "extraction de champs structurés (dates, montants, références) depuis un document court.",
+        "ancre basse, poids maximal (22) : token_est 70-220, sortie strictement structurée, "
+        "aucun paramètre de contexte étendu.",
         token_est=(70, 220),
     ),
     _Template(
         "extraction",
         "claude-haiku-4-5",
         16,
-        "extraction mécanique d'une liste d'éléments dans un fil de discussion déjà volumineux "
-        "— tâche simple malgré le volume de contexte.",
+        "test anti-volume dédié : msg_count 16-28 / tok_per_msg 220-340 (contexte élevé) mais "
+        "token_est prompt réduit (60-150) — isole le paramètre volume du paramètre difficulté.",
         token_est=(60, 150),
         msg_count=(16, 28),
         tok_per_msg=(220, 340),
@@ -353,7 +420,7 @@ TEMPLATES: tuple[_Template, ...] = (
         "extraction",
         "claude-haiku-4-5",
         8,
-        "structured extraction of contact details from a short block of text, English.",
+        "réplique EN de l'ancre (lang_weights=en), token_est 60-180, poids mineur symétrique.",
         token_est=(60, 180),
         lang_weights=_LANG_EN_FIXED,
     ),
@@ -361,22 +428,24 @@ TEMPLATES: tuple[_Template, ...] = (
         "extraction",
         "claude-sonnet-5",
         22,
-        "extraction avec interprétation d'informations ambiguës ou implicites, texte de longueur "
-        "moyenne.",
+        "paramètre distinctif = ambiguïté de la source (pas la longueur) : token_est 150-300, "
+        "poids égal à l'ancre haiku — cellule sonnet centrale de la catégorie.",
         token_est=(150, 300),
     ),
     _Template(
         "extraction",
         "claude-sonnet-5",
         14,
-        "extraction de tendances chiffrées depuis un rapport financier moyen, discernement requis.",
+        "second point sonnet, domaine chiffré/financier, token_est 250-450 — même palier que "
+        "le précédent, paramètre de contenu différent (discernement quantitatif).",
         token_est=(250, 450),
     ),
     _Template(
         "extraction",
         "claude-opus-4-8",
         10,
-        "extraction et qualification de clauses à risque dans un contrat dense à fort enjeu.",
+        "cellule opus n°1 : drapeau `contrat` actif, token_est 400-700 — la QUALIFICATION du "
+        "risque (au-delà de la localisation mécanique) est le paramètre qui monte le palier.",
         token_est=(400, 700),
         keyword_flags=("contrat",),
     ),
@@ -384,8 +453,9 @@ TEMPLATES: tuple[_Template, ...] = (
         "extraction",
         "claude-opus-4-8",
         4,
-        "extraction de signaux faibles dans un dossier d'audit interne multi-documents, "
-        "jugement expert requis.",
+        "cellule opus n°2, poids résiduel (4) : drapeau `analyse` actif, token_est 500-800, "
+        "source multi-documents — second paramètre indépendant du premier (signal faible vs "
+        "clause à risque), garantit ≥ 2 gabarits opus distincts pour la catégorie.",
         token_est=(500, 800),
         keyword_flags=("analyse",),
     ),
@@ -394,7 +464,8 @@ TEMPLATES: tuple[_Template, ...] = (
         "traduction",
         "claude-haiku-4-5",
         22,
-        "traduction courte et standard d'un texte simple, sans exigence stylistique.",
+        "ancre basse, poids maximal (22) : token_est 80-300, aucune contrainte de fidélité "
+        "stylistique — plafond haiku par défaut de la catégorie.",
         token_est=(80, 300),
         keyword_flags=("traduction",),
     ),
@@ -402,7 +473,7 @@ TEMPLATES: tuple[_Template, ...] = (
         "traduction",
         "claude-haiku-4-5",
         10,
-        "short routine translation of a simple sentence, English source.",
+        "réplique EN de l'ancre (source en, lang_weights=en), token_est 60-250, poids mineur.",
         token_est=(60, 250),
         keyword_flags=("traduction",),
         lang_weights=_LANG_EN_FIXED,
@@ -411,7 +482,8 @@ TEMPLATES: tuple[_Template, ...] = (
         "traduction",
         "claude-sonnet-5",
         20,
-        "traduction longue d'un document technique, au-delà du seuil de longueur.",
+        "franchissement par LONGUEUR SEULE (paramètre identique au cas resume) : token_est "
+        "900-1300, PLAFONNÉ sonnet — le volume ne fait jamais monter à opus.",
         token_est=(900, 1300),
         keyword_flags=("traduction",),
     ),
@@ -419,7 +491,8 @@ TEMPLATES: tuple[_Template, ...] = (
         "traduction",
         "claude-sonnet-5",
         18,
-        "traduction courte mais littéraire, préservation du ton et des jeux de mots.",
+        "franchissement par NATURE : token_est 80-200 (court) mais paramètre de préservation "
+        "de forme (registre/jeu de mots) actif — la longueur seule ne l'aurait pas justifié.",
         token_est=(80, 200),
         keyword_flags=("traduction",),
     ),
@@ -427,7 +500,8 @@ TEMPLATES: tuple[_Template, ...] = (
         "traduction",
         "claude-sonnet-5",
         14,
-        "traduction administrative de longueur moyenne, fil déjà présent mais léger.",
+        "seule cellule à fil non-vierge (msg_count 4-7, current_model=haiku) : isole l'effet "
+        "conversationnel, token_est 300-600, registre administratif standard.",
         token_est=(300, 600),
         keyword_flags=("traduction",),
         msg_count=(4, 7),
@@ -438,8 +512,9 @@ TEMPLATES: tuple[_Template, ...] = (
         "traduction",
         "claude-sonnet-5",
         10,
-        "official terminology-sensitive translation of moderate length, English — reste une "
-        "traduction (transformation à faible risque) : le modèle intermédiaire suffit.",
+        "double drapeau (traduction+contrat) EN, token_est 300-600 — contrôle de cohérence "
+        "interne du set : la sensibilité terminologique ne franchit PAS le plafond sonnet de "
+        "la catégorie (transformation, pas rédaction juridique de fond).",
         token_est=(300, 600),
         keyword_flags=("traduction", "contrat"),
         lang_weights=_LANG_EN_FIXED,
@@ -448,8 +523,8 @@ TEMPLATES: tuple[_Template, ...] = (
         "traduction",
         "claude-opus-4-8",
         6,
-        "localisation intégrale d'une campagne multilingue à fort enjeu de marque — dépasse la "
-        "traduction littérale, réinvention créative et stratégique du message.",
+        "seule cellule opus, poids mineur (6) : token_est 200-450 — paramètre distinctif = "
+        "sortie CRÉATIVE/stratégique, sort du périmètre transformation-fidèle de la catégorie.",
         token_est=(200, 450),
         keyword_flags=("traduction",),
     ),
@@ -458,7 +533,7 @@ TEMPLATES: tuple[_Template, ...] = (
         "code",
         "claude-haiku-4-5",
         16,
-        "question de code triviale, syntaxe d'une ligne.",
+        "ancre basse : token_est 10-40, un seul point de syntaxe — plancher de la catégorie.",
         token_est=(10, 40),
         has_code=True,
         keyword_flags=("code",),
@@ -467,7 +542,7 @@ TEMPLATES: tuple[_Template, ...] = (
         "code",
         "claude-haiku-4-5",
         4,
-        "trivial one-line syntax question, English.",
+        "réplique EN de l'ancre (lang_weights=en), token_est 10-35, poids résiduel (4).",
         token_est=(10, 35),
         has_code=True,
         keyword_flags=("code",),
@@ -477,7 +552,8 @@ TEMPLATES: tuple[_Template, ...] = (
         "code",
         "claude-sonnet-5",
         22,
-        "débogage d'une fonction de taille moyenne avec erreur logique non triviale.",
+        "cellule sonnet dominante (22) : token_est 150-400, correction d'un défaut logique — "
+        "paramètre = présence d'un bug identifié, pas la taille du fichier.",
         token_est=(150, 400),
         has_code=True,
         keyword_flags=("code",),
@@ -486,7 +562,7 @@ TEMPLATES: tuple[_Template, ...] = (
         "code",
         "claude-sonnet-5",
         10,
-        "moderate debugging of a medium-sized function, English.",
+        "réplique EN de la cellule précédente (lang_weights=en), token_est 150-350.",
         token_est=(150, 350),
         has_code=True,
         keyword_flags=("code",),
@@ -496,7 +572,8 @@ TEMPLATES: tuple[_Template, ...] = (
         "code",
         "claude-sonnet-5",
         16,
-        "génération d'un script utilitaire de complexité moyenne avec gestion d'erreurs.",
+        "second point sonnet, paramètre = production (pas correction), token_est 150-350 avec "
+        "exigence de robustesse (gestion d'erreurs) explicite.",
         token_est=(150, 350),
         has_code=True,
         keyword_flags=("code",),
@@ -505,7 +582,8 @@ TEMPLATES: tuple[_Template, ...] = (
         "code",
         "claude-sonnet-5",
         12,
-        "revue de code standard sur un fichier de taille moyenne.",
+        "troisième point sonnet, paramètre = relecture (pas écriture), token_est 300-600 — "
+        "volume plus élevé par nature de la tâche (fichier entier), pas par choix de palier.",
         token_est=(300, 600),
         has_code=True,
         keyword_flags=("code",),
@@ -514,8 +592,9 @@ TEMPLATES: tuple[_Template, ...] = (
         "code",
         "claude-opus-4-8",
         12,
-        "conception d'une architecture logicielle complexe multi-contraintes, fil déjà engagé "
-        "avec du code vu précédemment.",
+        "cellule opus n°1, fil non-vierge (msg_count 10-18, seen_code=True, current_model="
+        "sonnet) : token_est 400-900 — paramètre = contraintes MULTIPLES simultanées sur la "
+        "structure logicielle, pas le volume du fil.",
         token_est=(400, 900),
         has_code=True,
         keyword_flags=("code",),
@@ -528,8 +607,9 @@ TEMPLATES: tuple[_Template, ...] = (
         "code",
         "claude-opus-4-8",
         8,
-        "diagnostic d'un bug de concurrence subtil et intermittent en système distribué, "
-        "raisonnement causal profond requis.",
+        "cellule opus n°2, fil vierge, token_est 250-550 — second paramètre indépendant du "
+        "premier (non-déterminisme temporel plutôt que contraintes structurelles), garantit "
+        "≥ 2 gabarits opus distincts.",
         token_est=(250, 550),
         has_code=True,
         keyword_flags=("code",),
@@ -539,7 +619,7 @@ TEMPLATES: tuple[_Template, ...] = (
         "maths_raisonnement",
         "claude-haiku-4-5",
         18,
-        "conversion d'unité ou calcul trivial.",
+        "ancre basse : token_est 15-50, une seule opération/conversion — plancher haiku.",
         token_est=(15, 50),
         has_math=True,
     ),
@@ -547,7 +627,7 @@ TEMPLATES: tuple[_Template, ...] = (
         "maths_raisonnement",
         "claude-haiku-4-5",
         6,
-        "trivial unit conversion, English.",
+        "réplique EN de l'ancre (lang_weights=en), token_est 15-45, poids résiduel (6).",
         token_est=(15, 45),
         has_math=True,
         lang_weights=_LANG_EN_FIXED,
@@ -556,7 +636,8 @@ TEMPLATES: tuple[_Template, ...] = (
         "maths_raisonnement",
         "claude-sonnet-5",
         20,
-        "calcul à plusieurs étapes avec risque réel d'erreur de calcul.",
+        "cellule sonnet dominante (20) : token_est 120-300, paramètre = enchaînement de "
+        "plusieurs opérations avec risque d'erreur cumulée.",
         token_est=(120, 300),
         has_math=True,
     ),
@@ -564,7 +645,8 @@ TEMPLATES: tuple[_Template, ...] = (
         "maths_raisonnement",
         "claude-sonnet-5",
         16,
-        "exercice de mathématiques de niveau lycée à plusieurs étapes.",
+        "second point sonnet, registre scolaire, token_est 150-350 — même paramètre "
+        "multi-étapes que le précédent, domaine différent.",
         token_est=(150, 350),
         has_math=True,
     ),
@@ -572,7 +654,7 @@ TEMPLATES: tuple[_Template, ...] = (
         "maths_raisonnement",
         "claude-sonnet-5",
         10,
-        "multi-step reasoning problem requiring careful logic, English.",
+        "réplique EN de la cellule sonnet (lang_weights=en), token_est 150-300.",
         token_est=(150, 300),
         has_math=True,
         lang_weights=_LANG_EN_FIXED,
@@ -581,7 +663,8 @@ TEMPLATES: tuple[_Template, ...] = (
         "maths_raisonnement",
         "claude-sonnet-5",
         14,
-        "problème de logique métier de difficulté moyenne (planification, optimisation simple).",
+        "quatrième point sonnet, domaine combinatoire/optimisation, token_est 100-250 — "
+        "paramètre = structure du problème plutôt que calcul arithmétique pur.",
         token_est=(100, 250),
         has_math=True,
     ),
@@ -589,16 +672,34 @@ TEMPLATES: tuple[_Template, ...] = (
         "maths_raisonnement",
         "claude-opus-4-8",
         16,
-        "démonstration mathématique profonde et originale, plusieurs étapes de preuve rigoureuse.",
+        "seule cellule opus, poids élevé (16, cf. maths ~17% de la catégorie, référence "
+        "interne pour l'étalonnage des autres catégories) : token_est 150-400, paramètre = "
+        "originalité de la démonstration, pas sa longueur.",
         token_est=(150, 400),
         has_math=True,
     ),
     # === juridique_contrat =======================================================
+    # Rééquilibrage M4 (correction ronde 0, data-quality) : la part opus de
+    # cette catégorie était à 39,6 % (poids 20+10+10=40/100) — DEUX FOIS le
+    # ratio des autres catégories à cellule opus dense (code 20,7 %, maths
+    # 17 %, cf. les gabarits ci-dessus). Rationnel du nouveau poids cible
+    # (~20/100 = 20 %, soit environ 1 dossier juridique sur 5, PAS 2 sur 5) :
+    # l'examen d'un contrat franchit RAREMENT le seuil opus dans un flux
+    # d'entreprise réel — la majorité des contrats (types, gabarits connus)
+    # relève d'une relecture/rédaction standard (sonnet) ; seule une clause
+    # AMBIGUË à fort enjeu, une négociation multi-parties, ou une analyse
+    # cross-juridictions exigent réellement le palier le plus capable. Fixer
+    # opus à 40 % aurait fait de la catégorie une exception statistique sans
+    # justification de fond (mission sobriété du chantier) — le poids retiré
+    # (20 points) est redistribué à sonnet (relecture/rédaction standard),
+    # PAS à haiku (la vérification mécanique reste, elle, une minorité
+    # honnête de la catégorie, inchangée à 20 %).
     _Template(
         "juridique_contrat",
         "claude-haiku-4-5",
         16,
-        "vérification mécanique de la présence d'une clause précise dans un contrat court.",
+        "ancre basse : token_est 80-200, contrôle de PRÉSENCE d'une clause nommée — pas "
+        "d'interprétation requise.",
         token_est=(80, 200),
         keyword_flags=("contrat",),
     ),
@@ -606,37 +707,44 @@ TEMPLATES: tuple[_Template, ...] = (
         "juridique_contrat",
         "claude-haiku-4-5",
         4,
-        "contrôle de conformité RGPD basique sur une clause standard de traitement de données.",
+        "second point haiku, poids résiduel (4) : contrôle de conformité sur un référentiel "
+        "fixe (RGPD), token_est 100-250 — même nature mécanique que l'ancre.",
         token_est=(100, 250),
         keyword_flags=("contrat",),
     ),
     _Template(
         "juridique_contrat",
         "claude-sonnet-5",
-        22,
-        "relecture standard d'un contrat type sans clause inhabituelle, longueur moyenne.",
+        32,
+        "cellule sonnet dominante (32/100, cf. rééquilibrage M4 ci-dessus) : token_est "
+        "320-550, relecture d'un contrat au gabarit connu, aucune clause hors norme.",
         token_est=(320, 550),
     ),
     _Template(
         "juridique_contrat",
         "claude-sonnet-5",
-        18,
-        "rédaction d'une clause contractuelle standard à partir d'un modèle connu.",
+        28,
+        "second point sonnet (28/100) : token_est 350-600, production d'une clause à partir "
+        "d'un modèle existant — paramètre PRODUCTION plutôt que relecture, même palier.",
         token_est=(350, 600),
     ),
     _Template(
         "juridique_contrat",
         "claude-opus-4-8",
-        20,
-        "analyse fine de clauses contractuelles ambiguës à fort enjeu, longueur importante.",
+        10,
+        "cellule opus n°1, poids réduit (10/100, cf. rééquilibrage M4) : token_est 500-900, "
+        "paramètre = ambiguïté de clause à fort enjeu — le CAS RARE qui justifie réellement "
+        "le palier le plus capable, pas le défaut de la catégorie.",
         token_est=(500, 900),
         keyword_flags=("contrat", "analyse"),
     ),
     _Template(
         "juridique_contrat",
         "claude-opus-4-8",
-        10,
-        "cross-jurisdiction contract risk analysis at high stakes, English, fil déjà engagé.",
+        5,
+        "cellule opus n°2, poids minimal (5/100) : EN, fil non-vierge (msg_count 10-16, "
+        "seen_reasoning=True, current_model=opus), token_est 600-900 — paramètre = "
+        "MULTI-JURIDICTIONS, indépendant du paramètre du gabarit précédent.",
         token_est=(600, 900),
         keyword_flags=("contrat", "analyse"),
         lang_weights=_LANG_EN_FIXED,
@@ -648,9 +756,10 @@ TEMPLATES: tuple[_Template, ...] = (
     _Template(
         "juridique_contrat",
         "claude-opus-4-8",
-        10,
-        "négociation contractuelle complexe multi-parties, analyse juridique poussée, fil "
-        "déjà engagé.",
+        5,
+        "cellule opus n°3, poids minimal (5/100) : fil non-vierge (msg_count 15-25, "
+        "seen_reasoning=True, current_model=opus), token_est 700-950 — paramètre = "
+        "MULTI-PARTIES, troisième source indépendante de justification opus de la catégorie.",
         token_est=(700, 950),
         keyword_flags=("contrat", "analyse"),
         msg_count=(15, 25),
@@ -663,8 +772,9 @@ TEMPLATES: tuple[_Template, ...] = (
         "multi_tours",
         "claude-sonnet-5",
         14,
-        "prompt très bref demandant le détail des étapes du raisonnement, fil déjà engagé sur "
-        "une démonstration mathématique.",
+        "prompt court (token_est 5-15) mais fil déjà porteur d'un raisonnement mathématique "
+        "(seen_math/seen_reasoning=True, msg_count 4-10) — paramètre CONVERSATIONNEL, pas le "
+        "prompt lui-même, qui pilote le palier.",
         token_est=(5, 15),
         keyword_flags=("demonstration",),
         msg_count=(4, 10),
@@ -680,7 +790,9 @@ TEMPLATES: tuple[_Template, ...] = (
         "multi_tours",
         "claude-sonnet-5",
         14,
-        "fil déjà engagé sur du code, nouvelle demande de correction ponctuelle et brève.",
+        "variante code : fil porteur (seen_code=True, msg_count 4-9), prompt court "
+        "(token_est 10-40) — même structure paramétrique que le gabarit précédent, domaine "
+        "différent.",
         token_est=(10, 40),
         msg_count=(4, 9),
         tok_per_msg=(80, 180),
@@ -694,9 +806,9 @@ TEMPLATES: tuple[_Template, ...] = (
         "multi_tours",
         "claude-sonnet-5",
         12,
-        "fil déjà très long et dense, nouvelle demande de synthèse générale recoupant "
-        "l'ensemble des échanges — la synthèse dense reste du ressort du modèle intermédiaire, "
-        "le volume seul ne fait pas monter de palier.",
+        "test anti-volume dédié : msg_count 25-45 (le plus élevé du set), token_est prompt "
+        "modéré (150-400) — isole le paramètre volume de contexte du paramètre difficulté, "
+        "PLAFONNÉ sonnet par construction.",
         token_est=(150, 400),
         msg_count=(25, 45),
         tok_per_msg=(200, 320),
@@ -709,8 +821,9 @@ TEMPLATES: tuple[_Template, ...] = (
         "multi_tours",
         "claude-sonnet-5",
         10,
-        "nouvelle question de synthèse argumentée après plusieurs dérogations utilisateur vers "
-        "un modèle plus capable que la recommandation précédente.",
+        "paramètre dérogations ÉLEVÉ (derogations_up 3-6) avec recos_followed_ratio BAS "
+        "(0.15-0.4) — profil utilisateur qui s'écarte fréquemment de la recommandation "
+        "affichée, token_est 200-400.",
         token_est=(200, 400),
         msg_count=(8, 14),
         tok_per_msg=(80, 150),
@@ -723,8 +836,8 @@ TEMPLATES: tuple[_Template, ...] = (
         "multi_tours",
         "claude-haiku-4-5",
         14,
-        "fil informel et déjà long, échanges courts et légers, nouvelle question factuelle "
-        "brève et anodine.",
+        "fil long (msg_count 16-26) mais tok_per_msg FAIBLE (15-40, le plus bas du set) — "
+        "paramètre = densité d'échange légère malgré le volume de tours, token_est 15-45.",
         token_est=(15, 45),
         msg_count=(16, 26),
         tok_per_msg=(15, 40),
@@ -737,8 +850,9 @@ TEMPLATES: tuple[_Template, ...] = (
         "multi_tours",
         "claude-sonnet-5",
         10,
-        "fil où les recommandations précédentes ont été largement suivies, nouvelle demande de "
-        "rédaction de longueur moyenne.",
+        "paramètre recos_followed_ratio ÉLEVÉ (0.75-0.95, symétrique du gabarit "
+        "dérogations-élevées ci-dessus), token_est 200-400 — profil qui suit largement les "
+        "recommandations affichées.",
         token_est=(200, 400),
         msg_count=(8, 14),
         tok_per_msg=(60, 120),
@@ -751,9 +865,10 @@ TEMPLATES: tuple[_Template, ...] = (
         "multi_tours",
         "claude-sonnet-5",
         8,
-        "fil mixte déjà engagé sur code et maths, nouvelle question combinant les deux "
-        "domaines de façon soutenue — prompt et contexte modestes, périmètre du modèle "
-        "intermédiaire.",
+        "double paramètre conversationnel (seen_code ET seen_math simultanés), token_est "
+        "400-700 modéré — combinaison de deux domaines qui reste, PAR CONSTRUCTION du set, "
+        "dans le palier intermédiaire (aucun des deux domaines n'est individuellement à un "
+        "niveau de complexité opus ici).",
         token_est=(400, 700),
         msg_count=(10, 18),
         tok_per_msg=(100, 200),
@@ -768,8 +883,9 @@ TEMPLATES: tuple[_Template, ...] = (
         "multi_tours",
         "claude-haiku-4-5",
         8,
-        "fil bref déjà sur le modèle le plus capable, nouvelle question de clarification très "
-        "courte et triviale.",
+        "current_model=opus (le plus capable déjà en cours) avec prompt minimal (token_est "
+        "10-35, msg_count 3-6) — teste la borne basse indépendamment du modèle courant du "
+        "fil : le paramètre PROMPT prime sur le paramètre current_model.",
         token_est=(10, 35),
         msg_count=(3, 6),
         tok_per_msg=(50, 100),
@@ -782,9 +898,9 @@ TEMPLATES: tuple[_Template, ...] = (
         "multi_tours",
         "claude-opus-4-8",
         6,
-        "fil de démonstration mathématique profonde poursuivi sur de nombreux tours, nouvelle "
-        "étape décisive de la preuve exigeant un raisonnement original soutenu — le fond, pas "
-        "le volume, justifie le modèle le plus capable.",
+        "cellule opus n°1 : combinaison seen_math+seen_reasoning+msg_count élevé (15-25) — "
+        "trois paramètres CONVERSATIONNELS simultanés distincts, pas un effet de volume seul "
+        "(token_est modéré 300-600).",
         token_est=(300, 600),
         has_math=True,
         keyword_flags=("demonstration",),
@@ -801,9 +917,10 @@ TEMPLATES: tuple[_Template, ...] = (
         "multi_tours",
         "claude-opus-4-8",
         4,
-        "fil juridique déjà long et dense, nouvelle demande de synthèse des risques croisés "
-        "entre clauses interdépendantes, à fort enjeu — l'interdépendance des risques, pas le "
-        "volume, exige le modèle le plus capable.",
+        "cellule opus n°2, poids résiduel (4) : drapeaux contrat+analyse combinés à un fil "
+        "juridique déjà dense (msg_count 14-22, current_model=opus) — second paramètre "
+        "indépendant du premier (domaine juridique vs mathématique), garantit ≥ 2 gabarits "
+        "opus distincts pour la catégorie.",
         token_est=(300, 600),
         keyword_flags=("contrat", "analyse"),
         msg_count=(14, 22),
@@ -844,7 +961,17 @@ def _allocate(total: int, weights: dict) -> dict:
     Pure arithmétique (aucun aléa) : le résultat ne dépend que de `total` et
     `weights`, jamais de l'ordre d'itération du générateur aléatoire —
     l'allocation catégorie/gabarit reste stable indépendamment du seed.
+
+    Garde interne (M7, correction ronde 0) : `total < 0` levait un défaut
+    SILENCIEUX — `remainder = total - sum(base.values())` devenait négatif et
+    `order[:remainder]` (slicing négatif Python : compte depuis la FIN de la
+    liste) attribuait le reste aux MAUVAISES clés sans jamais lever d'erreur.
+    Prouvé par exécution (`_allocate(-3, {"a": 1, "b": 1})` retournait un
+    résultat plausible mais faux). `total == 0` reste valide (retourne toutes
+    les clés à 0) : seul un total négatif est un abus d'appel.
     """
+    if total < 0:
+        raise ValueError(f"_allocate : total doit être >= 0 (reçu {total!r})")
     keys = list(weights)
     total_weight = sum(weights.values())
     raw = {k: total * weights[k] / total_weight for k in keys}
@@ -942,7 +1069,7 @@ def _build_row(rng: random.Random, template: _Template) -> dict:
 
 
 def generate(n: int, seed: int = DEFAULT_SEED, bruit_rate: float = DEFAULT_BRUIT_RATE):
-    """Engendre `n` lignes de corpus + les statistiques associées.
+    """Engendre jusqu'à `n` lignes de corpus + les statistiques associées.
 
     Un SEUL flux `random.Random(seed)` pour les signaux (ordre : catégories
     triées alphabétiquement, puis gabarits dans l'ordre de `TEMPLATES`, puis
@@ -950,10 +1077,31 @@ def generate(n: int, seed: int = DEFAULT_SEED, bruit_rate: float = DEFAULT_BRUIT
     pour le bruit d'étiquetage (isolation documentée en tête de module).
     Reproductible à l'octet près : deux appels avec le même `(n, seed,
     bruit_rate)` produisent des listes STRICTEMENT identiques.
+
+    Anti-fuite (M1) + anti-contradiction (M3) : chaque ligne candidate est
+    RE-TIRÉE (nouveaux tirages consommés sur le MÊME flux `rng`, donc
+    toujours déterministe) tant que sa signature (a) coïncide avec le golden
+    set ou (b) contredit le label VÉRITÉ déjà associé à cette signature dans
+    CE run — jusqu'à `_MAX_RETIRAGE_ATTEMPTS` tentatives, au-delà desquelles
+    la ligne est ABANDONNÉE (comptée, jamais silencieuse — voir les
+    compteurs `n_rejets_anti_fuite`/`n_rejets_contradiction`/`n_abandons_*`
+    du rapport de stats). Le bruit d'étiquetage n'est appliqué qu'APRÈS
+    acceptation d'une ligne, sur le label VÉRITÉ déjà enregistré — les
+    contradictions qu'il introduit ensuite sont donc TOUJOURS attribuables
+    au bruit contrôlé, jamais à un défaut structurel du générateur.
+
+    Lève `ValueError` si `n <= 0` ou `bruit_rate` hors `[0, 1]` (M7) — la CLI
+    (`main()`) valide ces mêmes contraintes en amont avec un message propre.
     """
+    if n <= 0:
+        raise ValueError(f"n doit être un entier > 0 (reçu {n!r})")
+    if not (0.0 <= bruit_rate <= 1.0):
+        raise ValueError(f"bruit_rate doit être dans [0, 1] (reçu {bruit_rate!r})")
+
     _valider_templates()
     rng = random.Random(seed)
     rng_bruit = random.Random(seed + _BRUIT_SEED_OFFSET)
+    golden_sigs = golden_signatures()
 
     by_category: dict[str, list[_Template]] = {}
     for t in TEMPLATES:
@@ -963,33 +1111,103 @@ def generate(n: int, seed: int = DEFAULT_SEED, bruit_rate: float = DEFAULT_BRUIT
 
     rows: list[dict] = []
     bruit_appliques = 0
+    n_rejets_anti_fuite = 0
+    n_rejets_contradiction = 0
+    n_abandons_anti_fuite = 0
+    n_abandons_contradiction = 0
+    signature_labels: dict[tuple, str] = {}
+
     for category in sorted(CATEGORY_WEIGHTS):
         templates = by_category[category]
         tmpl_weights = {i: t.weight for i, t in enumerate(templates)}
         tmpl_counts = _allocate(cat_counts[category], tmpl_weights)
         for i, template in enumerate(templates):
             for _ in range(tmpl_counts[i]):
-                row = _build_row(rng, template)
-                if rng_bruit.random() < bruit_rate:
+                accepted: dict | None = None
+                accepted_sig: tuple | None = None
+                last_fail: str | None = None
+                for _attempt in range(_MAX_RETIRAGE_ATTEMPTS):
+                    candidate = _build_row(rng, template)
+                    sig = signal_signature(
+                        candidate["signals"]["prompt"], candidate["signals"]["conversation"]
+                    )
+                    if sig in golden_sigs:
+                        n_rejets_anti_fuite += 1
+                        last_fail = "anti_fuite"
+                        continue
+                    label_existant = signature_labels.get(sig)
+                    if label_existant is not None and label_existant != candidate["label"]:
+                        n_rejets_contradiction += 1
+                        last_fail = "contradiction"
+                        continue
+                    accepted, accepted_sig = candidate, sig
+                    break
+
+                if accepted is None:
+                    if last_fail == "contradiction":
+                        n_abandons_contradiction += 1
+                    else:
+                        n_abandons_anti_fuite += 1
+                    continue
+
+                # Label VÉRITÉ enregistré AVANT toute bascule de bruit (M3) :
+                # les contradictions du bruit contrôlé ne polluent jamais
+                # cette table, seule source de vérité anti-contradiction.
+                signature_labels.setdefault(accepted_sig, accepted["label"])
+
+                is_bruit = rng_bruit.random() < bruit_rate
+                if is_bruit:
                     # `sorted(...)` : VISIBLE_MODELS est un frozenset, son ordre
                     # d'itération dépend du hash randomization (PYTHONHASHSEED,
                     # différent par PROCESSUS) — sans tri explicite, `rng_bruit.choice`
                     # piocherait un index déterministe dans un ORDRE non déterministe,
                     # cassant la reproductibilité inter-run (§5.6). Piège découvert et
                     # corrigé pendant la vérification empirique du déterminisme.
-                    autres = [m for m in sorted(VISIBLE_MODELS) if m != row["label"]]
-                    row = {**row, "label": rng_bruit.choice(autres)}
+                    autres = [m for m in sorted(VISIBLE_MODELS) if m != accepted["label"]]
+                    accepted = {**accepted, "label": rng_bruit.choice(autres)}
                     bruit_appliques += 1
-                rows.append(row)
+                accepted["_bruit"] = is_bruit
+                rows.append(accepted)
 
     rng.shuffle(rows)
-    final_rows = [{"id": f"corp-{i:06d}", **row} for i, row in enumerate(rows, start=1)]
 
-    stats = _compute_stats(final_rows, seed, bruit_rate, bruit_appliques)
-    return final_rows, stats
+    final_rows: list[dict] = []
+    bruit_ids: list[str] = []
+    for i, row in enumerate(rows, start=1):
+        row_id = f"corp-{i:06d}"
+        is_bruit = row.pop("_bruit")
+        final_rows.append({"id": row_id, **row})
+        if is_bruit:
+            bruit_ids.append(row_id)
+
+    stats = _compute_stats(
+        final_rows,
+        seed,
+        bruit_rate,
+        bruit_appliques,
+        n_rejets_anti_fuite=n_rejets_anti_fuite,
+        n_rejets_contradiction=n_rejets_contradiction,
+        n_abandons_anti_fuite=n_abandons_anti_fuite,
+        n_abandons_contradiction=n_abandons_contradiction,
+    )
+    # `bruit_ids` (3e valeur) : liste des ids EFFECTIVEMENT bruités — annexe
+    # `corpus-v1.bruit.json` écrite par `main()` (M3b), JAMAIS dans le corpus
+    # ni dans `stats` (évite d'alourdir `router/data/reference/*.stats.json`
+    # d'une liste ~ n*bruit_rate ids à chaque régénération de référence).
+    return final_rows, stats, bruit_ids
 
 
-def _compute_stats(rows: list[dict], seed: int, bruit_rate: float, bruit_appliques: int) -> dict:
+def _compute_stats(
+    rows: list[dict],
+    seed: int,
+    bruit_rate: float,
+    bruit_appliques: int,
+    *,
+    n_rejets_anti_fuite: int = 0,
+    n_rejets_contradiction: int = 0,
+    n_abandons_anti_fuite: int = 0,
+    n_abandons_contradiction: int = 0,
+) -> dict:
     n = len(rows)
     by_category: Counter = Counter(r["category"] for r in rows)
     by_label: Counter = Counter(r["label"] for r in rows)
@@ -1042,6 +1260,16 @@ def _compute_stats(rows: list[dict], seed: int, bruit_rate: float, bruit_appliqu
             "derogations_up": _plage(derogations),
         },
         "taux_doublons_signature": round(n_dup / n, 4) if n else 0.0,
+        # M1 (anti-fuite) + M3 (anti-contradiction), correction ronde 0 : voir
+        # docstring de `generate()`. > 0 est ATTENDU sur un grand corpus (des
+        # collisions résiduelles surviennent, re-tirées) ; `n_abandons_*` > 0
+        # signalerait un plafond de tentatives trop bas (à surveiller, pas
+        # une erreur en soi tant que la proportion reste négligeable vs `n`).
+        "n_rejets_anti_fuite": n_rejets_anti_fuite,
+        "n_rejets_contradiction": n_rejets_contradiction,
+        "n_abandons_anti_fuite": n_abandons_anti_fuite,
+        "n_abandons_contradiction": n_abandons_contradiction,
+        "n_abandons": n_abandons_anti_fuite + n_abandons_contradiction,
     }
 
 
@@ -1060,11 +1288,19 @@ def _write_gz(path: Path, rows: list[dict]) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """CLI — validations FAIL-CLOSED (M7) : message propre + exit 2, jamais de traceback brut."""
     parser = argparse.ArgumentParser(
         description="Génère le corpus synthétique R4 (démarrage à froid, étage 1)."
     )
     parser.add_argument(
-        "--n", type=int, default=DEFAULT_N, help=f"nombre de lignes (défaut {DEFAULT_N})"
+        "--n",
+        type=int,
+        default=DEFAULT_N,
+        help=(
+            f"nombre de lignes (défaut {DEFAULT_N}) — doit être > 0 ; plage livrable "
+            "TYPIQUE 20 000-50 000 (démarrage à froid, cf. docstring du module), non "
+            "imposée par ce garde-fou"
+        ),
     )
     parser.add_argument(
         "--seed", type=int, default=DEFAULT_SEED, help=f"graine (défaut {DEFAULT_SEED})"
@@ -1073,17 +1309,33 @@ def main(argv: list[str] | None = None) -> int:
         "--bruit",
         type=float,
         default=DEFAULT_BRUIT_RATE,
-        help=f"taux de bruit d'étiquetage, 0 pour désactiver (défaut {DEFAULT_BRUIT_RATE})",
+        help=(
+            f"taux de bruit d'étiquetage dans [0, 1], 0 pour désactiver "
+            f"(défaut {DEFAULT_BRUIT_RATE})"
+        ),
     )
     parser.add_argument("--out-dir", type=Path, default=ARTIFACTS_DIR, help="répertoire de sortie")
     args = parser.parse_args(argv)
 
-    rows, stats = generate(args.n, args.seed, args.bruit)
+    if args.n <= 0:
+        print(f"--n doit être un entier > 0 (reçu {args.n})", file=sys.stderr)
+        return 2
+    if not (0.0 <= args.bruit <= 1.0):
+        print(f"--bruit doit être dans [0, 1] (reçu {args.bruit})", file=sys.stderr)
+        return 2
 
-    args.out_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        args.out_dir.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        print(f"--out-dir invalide ({args.out_dir}) : {exc}", file=sys.stderr)
+        return 2
+
+    rows, stats, bruit_ids = generate(args.n, args.seed, args.bruit)
+
     corpus_path = args.out_dir / "corpus-v1.jsonl.gz"
     metadata_path = args.out_dir / "corpus-v1.metadata.json"
     stats_path = args.out_dir / "corpus-v1.stats.json"
+    bruit_path = args.out_dir / "corpus-v1.bruit.json"
 
     sha = _write_gz(corpus_path, rows)
 
@@ -1095,6 +1347,9 @@ def main(argv: list[str] | None = None) -> int:
         "sha256_gz": sha,
         "date_generation": datetime.now(tz=UTC).isoformat(),
         "bruit_rate_parametre": args.bruit,
+        "n_rejets_anti_fuite": stats["n_rejets_anti_fuite"],
+        "n_rejets_contradiction": stats["n_rejets_contradiction"],
+        "n_abandons": stats["n_abandons"],
         "invariant_5_6": (
             "seed fixé, version épinglée (generator_version), sha256 committé pour ce run — "
             "reproductible via : python router/data/generate_corpus.py "
@@ -1102,14 +1357,30 @@ def main(argv: list[str] | None = None) -> int:
         ),
         "seed_different_du_golden": (
             f"seed={args.seed} volontairement DIFFÉRENT du seed=2026 du golden set "
-            "(router/eval/golden/generate_golden.py) — évite toute corrélation "
-            "d'échantillonnage avec le juge de paix (chantier R2/R3), cf. docstring du module."
+            "(router/eval/golden/generate_golden.py) — précaution SUPPLÉMENTAIRE contre une "
+            "corrélation d'échantillonnage fine avec le juge de paix (chantier R2/R3) ; "
+            "l'absence de chevauchement EXACT n'en dépend PAS (elle vient des gabarits "
+            "indépendants ET de la garde anti-fuite par re-tirage, cf. docstring du module — "
+            "corrigé ronde 0, M1)."
         ),
     }
     metadata_path.write_text(
         json.dumps(metadata, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
     stats_path.write_text(json.dumps(stats, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    bruit_annexe = {
+        "avertissement": (
+            "ANNEXE (M3) — ids des lignes dont le label a été basculé par le bruit contrôlé "
+            "(`--bruit`) : PAS dans le corpus lui-même (schéma des lignes inchangé), consommée "
+            "par quality_report.py SI PRÉSENTE pour ventiler contradictions bruit/hors-bruit."
+        ),
+        "bruit_rate_parametre": args.bruit,
+        "n_bruit": len(bruit_ids),
+        "bruit_ids": bruit_ids,
+    }
+    bruit_path.write_text(
+        json.dumps(bruit_annexe, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
 
     print(f"corpus-v1.jsonl.gz : {stats['n']} lignes -> {corpus_path}")
     print(f"par catégorie : {stats['by_category']}")
@@ -1117,6 +1388,14 @@ def main(argv: list[str] | None = None) -> int:
     print(f"part FR : {stats['fr_share']:.1%}")
     print(f"bruit effectif : {stats['bruit_rate_effectif']:.2%}")
     print(f"doublons de signature : {stats['taux_doublons_signature']:.2%}")
+    print(
+        f"anti-fuite : {stats['n_rejets_anti_fuite']} rejets, "
+        f"{stats['n_abandons_anti_fuite']} abandons"
+    )
+    print(
+        f"anti-contradiction : {stats['n_rejets_contradiction']} rejets, "
+        f"{stats['n_abandons_contradiction']} abandons"
+    )
     print(f"sha256 : {sha}")
     return 0
 

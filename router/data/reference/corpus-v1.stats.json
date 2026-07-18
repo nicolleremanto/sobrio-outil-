@@ -15,8 +15,8 @@
   },
   "by_label": {
     "claude-haiku-4-5": 9680,
-    "claude-opus-4-8": 4435,
-    "claude-sonnet-5": 15885
+    "claude-opus-4-8": 3850,
+    "claude-sonnet-5": 16470
   },
   "by_category_x_label": {
     "code": {
@@ -31,8 +31,8 @@
     },
     "juridique_contrat": {
       "claude-haiku-4-5": 614,
-      "claude-opus-4-8": 1189,
-      "claude-sonnet-5": 1197
+      "claude-opus-4-8": 604,
+      "claude-sonnet-5": 1782
     },
     "maths_raisonnement": {
       "claude-haiku-4-5": 579,
@@ -61,11 +61,11 @@
     }
   },
   "by_lang": {
-    "en": 7676,
-    "fr": 21260,
-    "other": 1064
+    "en": 7561,
+    "fr": 21377,
+    "other": 1062
   },
-  "fr_share": 0.7087,
+  "fr_share": 0.7126,
   "plages": {
     "token_est": {
       "min": 5,
@@ -73,7 +73,7 @@
     },
     "char_len": {
       "min": 17,
-      "max": 6316
+      "max": 6315
     },
     "msg_count": {
       "min": 0,
@@ -81,7 +81,7 @@
     },
     "context_token_est": {
       "min": 0,
-      "max": 32656
+      "max": 28251
     },
     "recos_shown": {
       "min": 0,
@@ -89,8 +89,13 @@
     },
     "derogations_up": {
       "min": 0,
-      "max": 11
+      "max": 10
     }
   },
-  "taux_doublons_signature": 0.0281
+  "taux_doublons_signature": 0.0271,
+  "n_rejets_anti_fuite": 8,
+  "n_rejets_contradiction": 48,
+  "n_abandons_anti_fuite": 0,
+  "n_abandons_contradiction": 0,
+  "n_abandons": 0
 }

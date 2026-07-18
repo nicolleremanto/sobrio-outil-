@@ -115,6 +115,14 @@ def test_convert_detects_code_hint():
     assert signals["prompt"]["has_code"] is True
 
 
+def test_convert_detects_math_hint():
+    """Minor (correction ronde 0) : `has_math` n'avait aucun test dédié, symétrique
+    de `test_convert_detects_code_hint` ci-dessus — matériau minimal, pas un prompt."""
+    record = {"conversation": [{"role": "user", "content": "2 + 2 = 4"}]}
+    signals = public_datasets.convert_lmsys_record(record)
+    assert signals["prompt"]["has_math"] is True
+
+
 def test_convert_lang_heuristic_fr_vs_en():
     # Soupe de mots-vides : exerce la détection de langue sans qu'aucune
     # chaîne ne ressemble à un prompt (règle n°1, appliquée même au matériau
