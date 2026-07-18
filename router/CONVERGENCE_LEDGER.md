@@ -576,7 +576,7 @@ non-inclusif, 0 régression masquée), mais la suite ne le protégeait pas.
 - **[major qa]** Test paramétré : un cas PAR site (ece-baseline,
   ece-previous, sous-baseline, sous-previous — le site bande était déjà
   couvert), chaque référence choisie authentiquement non-exacte vers le bas
-  (0.06/0.09 pour tol 0.01 ; 0.12/0.15 pour tol 0.02) + GARDE-FOU en tête de
+  (références liantes 0.06/0.06 pour tol 0.01 ; 0.12/0.15 pour tol 0.02 — corrigé r5 : la première version disait 0.06/0.09, or 0.09 est le plafond dérivé non-liant du cas ece-previous, pas une référence) + GARDE-FOU en tête de
   test : le cas s'auto-invalide si le couple (référence, tolérance) est
   bit-exact (le défaut du test r3 ne peut plus se reproduire). PROUVÉ par
   mutation : les 5 mutations (retrait individuel de chaque round) sont
@@ -591,6 +591,38 @@ non-inclusif, 0 régression masquée), mais la suite ne le protégeait pas.
 - **[minor qa — écarté]** Le mnémonique de flags ligne 88 : classé
   vocabulaire système par privacy-sentinel (examens r3 ET r4 concordants).
 
-Preuves : 131 tests router verts (+1 net : 4 cas paramétrés remplacent le
-volet ECE mensonger), mutation 5/5 tuées, api/tests verts, make test complet
-vert, ruff check+format verts.
+Preuves : 131 tests router verts (+4 collectés : 127 → 131, les 4 cas
+paramétrés s'ajoutent, l'ancien test amputé de son volet ECE compte
+toujours 1 — décompte corrigé r5, la première version disait « +1 net »),
+mutation 5/5 tuées, api/tests verts, make test complet vert, ruff
+check+format verts.
+
+## R3 — round 5 (commit dea57d7, panel 5 juges — mutation re-prouvée)
+
+| agent          | modèle | scores (dims)                                        | blocking | major | verdict |
+|----------------|--------|------------------------------------------------------|----------|-------|---------|
+| eval-scientist | opus   | validité5 robustesse5 contrainte-r2:5 seuils5 repro5 | 0        | 0     | GREEN   |
+| ml-architect   | opus   | pertinence5 fuites5 calibration5 ext-r5:4 expl5      | 0        | 0     | GREEN   |
+| qa-auditor     | sonnet | couverture5 contrat5 erreurs5 clarté4 régressions5   | 0        | 0     | GREEN   |
+| privacy-sentinel | sonnet | —                                                  | PASS     | —     | PASS    |
+| cost-guard     | haiku  | —                                                    | PASS     | —     | PASS    |
+
+→ **Ronde VERTE (1/2).** La couverture par mutation a été RE-PROUVÉE
+indépendamment par privacy-sentinel (worktree éphémère : 5/5 tuées, chaque
+site par SON cas dédié, repo principal clean après chaque mutation) et le
+garde-fou Decimal vérifié par fabrication d'un cas bit-exact (rejeté avec le
+bon message AVANT l'assertion substantielle). qa a re-exécuté son mutation
+testing : GREEN.
+
+**Minors ronde 5 → corrigés avant ronde 6 :**
+- **[ml — symétrie]** Le cas bande (0.18+0.02, ex-test séparé r3) ne portait
+  pas le garde-fou Decimal : replié comme 5e ligne de la famille paramétrée
+  (une édition future vers un couple bit-exact s'auto-invaliderait désormais,
+  comme les 4 autres). Mutation re-prouvée après repli : 5/5 tuées.
+- **[eval + qa — exactitude du journal]** Deux imprécisions de MA prose r4
+  corrigées en place avec trace : références ECE liantes 0.06/0.06 (pas
+  0.06/0.09 — 0.09 était le plafond dérivé non-liant) ; décompte de tests
+  +4 collectés 127→131 (pas « +1 net »).
+
+Preuves : 131 router + 26 api verts, mutation 5/5 tuées post-repli, make
+test complet vert (218 ext), ruff check+format verts.

@@ -410,24 +410,18 @@ def test_per_confidence_block_never_loses_cells_on_collision():
 # ---------------------------------------------------------------------------
 
 
-def test_gate_bound_inclusive_even_when_float_addition_rounds_down():
-    """qa r3, prouvé par scan : 0.18 + 0.02 = 0.19999999999999998 en flottant —
-    un candidat EXACTEMENT à 0.20 était rejeté malgré la borne documentée <=
-    inclusive. Bornes arrondies à 10 décimales : la limite exacte passe."""
-    band = {"seuil": 0.75, "n": 40, "taux_justesse": 0.60, "confiance_moyenne": 0.78}
-    candidate = _report(exactitude_ponderee=0.95, calibration_bande_auto={**band, "ecart": 0.20})
-    baseline = _report(calibration_bande_auto={**band, "ecart": 0.18})
-    result = evaluate_gate(candidate, baseline)
-    assert not any(r.startswith("FAIL bande-auto") for r in result.reasons)
+# qa ronde 4 (mutation testing) : le premier test de bornes (r3) utilisait
+# pour l'ECE 0.07 + 0.01, qui est BIT-EXACT en IEEE-754 — il n'exerçait donc
+# JAMAIS la branche flottante non-exacte, et 4 des 5 sites round(., 10) du
+# gate n'étaient tués par aucun test. Chaque cas ci-dessous choisit une
+# référence dont l'addition flottante arrondit EN DESSOUS de la somme
+# décimale exacte (vérifié par le garde-fou en tête de test) et vise UN site
+# précis : retirer le round() de ce site fait échouer ce cas et lui seul.
+# Ronde 5 (ml) : le cas bande (0.18 + 0.02, ex-test séparé r3) est replié ici
+# pour hériter du même garde-fou anti-cas-inutile — symétrie des 5 sites.
+_BANDE_REF = {"seuil": 0.75, "n": 40, "taux_justesse": 0.60, "confiance_moyenne": 0.78}
 
 
-# qa ronde 4 (mutation testing) : le volet ECE du test ci-dessus utilisait
-# 0.07 + 0.01, qui est BIT-EXACT en IEEE-754 — il n'exerçait donc JAMAIS la
-# branche flottante non-exacte, et 4 des 5 sites round(., 10) du gate
-# n'étaient tués par aucun test. Chaque cas ci-dessous choisit une référence
-# dont l'addition flottante arrondit EN DESSOUS de la somme décimale exacte
-# (vérifié par le garde-fou en tête de test) et vise UN site précis :
-# retirer le round() de ce site fait échouer ce cas et lui seul.
 @pytest.mark.parametrize(
     ("site", "criterion", "candidate_over", "baseline_over", "previous_over"),
     [
@@ -457,6 +451,14 @@ def test_gate_bound_inclusive_even_when_float_addition_rounds_down():
             {"sous_dimensionnement": {"n": 36, "taux": 0.20}},
             {"sous_dimensionnement": {"n": 27, "taux": 0.15}},
         ),
+        # Bande auto (référence mesurée) : 0.18+0.02 < 0.20 (qa r3, replié r5).
+        (
+            "bande",
+            "FAIL bande-auto",
+            {"calibration_bande_auto": {**_BANDE_REF, "ecart": 0.20}},
+            {"calibration_bande_auto": {**_BANDE_REF, "ecart": 0.18}},
+            None,
+        ),
     ],
 )
 def test_gate_each_rounding_site_inclusive_at_exact_limit(
@@ -469,6 +471,8 @@ def test_gate_each_rounding_site_inclusive_at_exact_limit(
     ref_report = previous_over if previous_over is not None else baseline_over
     if "ece" in ref_report:
         ref, tol = ref_report["ece"], 0.01
+    elif "calibration_bande_auto" in ref_report:
+        ref, tol = ref_report["calibration_bande_auto"]["ecart"], 0.02
     else:
         ref, tol = ref_report["sous_dimensionnement"]["taux"], 0.02
     assert ref + tol < float(Decimal(str(ref)) + Decimal(str(tol))), (
