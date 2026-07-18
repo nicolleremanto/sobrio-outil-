@@ -30,17 +30,37 @@ _DEFAULT_VERSION = "heuristic"
 _KNOWN_VERSIONS = frozenset({_DEFAULT_VERSION})
 
 
+def _build_primary(version: str) -> Router:
+    """Construit le routeur primaire d'une version — PEUT lever (artefact).
+
+    v0 : l'heuristique (construction infaillible). R5 branchera ici le
+    chargement d'un artefact ML (`ml_v05`) — qui, lui, peut échouer si
+    l'artefact est manquant/corrompu : c'est précisément pourquoi l'appelant
+    enveloppe cette construction d'un try/except (invariant §5.2, correction
+    ronde 0 : un échec au CHARGEMENT contournerait sinon le SafeRouter).
+    """
+    return HeuristicRouter()
+
+
 @lru_cache(maxsize=8)
 def _router_for_version(version: str) -> Router:
     """Singleton de routeur par version reconnue — réutilisé entre requêtes.
 
     Un `SafeRouter` neuf par requête recréerait un `ThreadPoolExecutor` à
     chaque appel (coûteux, et sans intérêt : cf. `sobrio_router.safe`).
+
+    GARDE DE CONSTRUCTION (invariant §5.2) : si la construction du primaire
+    lève (artefact ML manquant/corrompu au chargement — R5), on sert un
+    `SafeRouter(primary=None)` : chaque décision part du repli heuristique,
+    marquée `fallback:heuristic`, sans jamais faire un 500. Le repli est
+    MÉMORISÉ par le lru_cache : un artefact réparé exige un redémarrage du
+    service (assumé v0 — TODO R7 : rechargement à chaud avec invalidation).
     """
-    # v0 : le "primary" EST déjà l'heuristique (rien d'autre à essayer) ;
-    # l'enveloppe SafeRouter reste en place pour l'invariant §5.2 dès qu'un
-    # vrai routeur ML remplacera le primary (v0.5, R5).
-    return SafeRouter(primary=HeuristicRouter(), fallback=HeuristicRouter())
+    try:
+        primary: Router | None = _build_primary(version)
+    except Exception:
+        primary = None  # échec au chargement ⇒ repli permanent, API verte
+    return SafeRouter(primary=primary, fallback=HeuristicRouter())
 
 
 def router_for_org(policy_json: dict[str, Any] | None) -> Router:

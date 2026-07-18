@@ -26,7 +26,7 @@ docs interactives sur `/docs`, Adminer sur http://localhost:8080).
 | Lot | Périmètre | Propriétaire | Commandes |
 |-----|-----------|--------------|-----------|
 | A | Extension navigateur (WXT + TS) — affiche la recommandation, ne modifie jamais le DOM fonctionnel | _(à remplir)_ | `cd extension && pnpm dev` · `pnpm -C extension test` · `pnpm -C extension lint` |
-| B | API backend (FastAPI) — `/v1/recommend`, `/v1/telemetry/reco_event`, `/v1/extension/config` | _(à remplir)_ | `make dev` · `.venv/bin/pytest api/tests` |
+| B | API backend (FastAPI) — `/v1/recommend`, `/v1/telemetry/reco_event`, `/v1/extension/config` + **routeur** `router/` (classifieur, pas de LLM — `docs/decisions/ROUTEUR_CLASSIFIEUR.md`) | _(à remplir)_ | `make dev` · `.venv/bin/pytest api/tests router/tests` · `make router-bench` |
 | C | Connecteur facturation Anthropic (lecture seule, Usage & Cost, Analytics) | _(à remplir)_ | `make sync-fixtures` · `.venv/bin/pytest connector/tests` |
 | D | Entrepôt Postgres (métadonnées uniquement) + module d'impact `sobrio_impact` (fourchettes) | _(à remplir)_ | `make migrate` · `make seed` · `.venv/bin/pytest warehouse/tests` |
 | E | Rapport mensuel PDF deux volets (Jinja2 + WeasyPrint) | _(à remplir)_ | `make report` · `.venv/bin/pytest report/tests` |
@@ -40,6 +40,7 @@ sobrio-outil/
 │                     # model_catalog.yaml, CHANGELOG.md — modification = RFC obligatoire
 ├── extension/        # Lot A — extension navigateur (WXT + TypeScript + pnpm)
 ├── api/              # Lot B — API FastAPI (pydantic v2)
+├── router/           # Lot B — routeur de recommandation (sobrio_router : classifieur, pas de LLM)
 ├── connector/        # Lot C — connecteur Anthropic Admin (httpx, lecture seule)
 ├── warehouse/        # Lot D — entrepôt (SQLAlchemy + Alembic) + module sobrio_impact
 ├── report/           # Lot E — rapport mensuel PDF (Jinja2 + WeasyPrint)

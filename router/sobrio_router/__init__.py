@@ -9,12 +9,13 @@ signaux.
 from __future__ import annotations
 
 from .adapter import features_to_signals
-from .heuristic import HeuristicRouter
+from .heuristic import VISIBLE_MODELS, HeuristicRouter
 from .interface import Router
 from .safe import SafeRouter
 from .types import ConversationSignals, Decision, PromptSignals, Signals
 
 __all__ = [
+    "VISIBLE_MODELS",
     "ConversationSignals",
     "Decision",
     "HeuristicRouter",

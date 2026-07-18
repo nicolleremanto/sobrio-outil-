@@ -14,7 +14,17 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class PromptSignals:
-    """Signaux calculés sur le SEUL dernier prompt (jamais son texte)."""
+    """Signaux calculés sur le SEUL dernier prompt (jamais son texte).
+
+    EXCEPTION RÉSERVÉE — `prompt_text` (étage 2, R6) : point d'extension
+    documenté DÈS MAINTENANT pour ne pas casser l'interface plus tard
+    (revue ml-architect, ronde 0). Contrat d'usage STRICT :
+    - `None` partout en v0/v0.5 (l'étage 1 l'IGNORE inconditionnellement) ;
+    - alimenté UNIQUEMENT si la politique d'org a `send_prompt_text=true`
+      (l'étage 2 REFUSE de fonctionner s'il est absent — verrou R6) ;
+    - traité EN MÉMOIRE seulement : JAMAIS stocké, loggé, sérialisé ni
+      inclus dans un artefact/rapport (règle n°1, privacy-sentinel).
+    """
 
     char_len: int
     token_est: int
@@ -22,6 +32,7 @@ class PromptSignals:
     has_code: bool
     has_math: bool
     keyword_flags: tuple[str, ...]
+    prompt_text: str | None = None
 
 
 @dataclass(frozen=True)

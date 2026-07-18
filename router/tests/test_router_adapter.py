@@ -57,8 +57,11 @@ def test_has_math_defaults_to_false():
     assert signals.prompt.has_math is False
 
 
-def test_has_attachment_hint_not_interpreted():
-    """v0 : `has_attachment_hint` n'influence ni prompt ni conversation (TODO RFC)."""
+def test_has_attachment_hint_maps_to_heavy_flag():
+    """Correction ronde 0 (ml-architect) : pièce jointe = signal fort de tâche
+    documentaire -> mappée prudemment sur le drapeau lourd `analyse` (un prompt
+    court AVEC pièce jointe ne doit pas partir sur le modèle le plus léger).
+    TODO(RFC) : champ dédié dans `signals` plutôt que ce repli sémantique."""
     with_hint = features_to_signals(
         _FakeFeatures(
             char_len=1, token_est=1, lang="fr", has_code=False, has_attachment_hint=True,
@@ -71,7 +74,8 @@ def test_has_attachment_hint_not_interpreted():
             keyword_flags=[],
         )
     )
-    assert with_hint == without_hint
+    assert "analyse" in with_hint.prompt.keyword_flags
+    assert "analyse" not in without_hint.prompt.keyword_flags
 
 
 def test_conversation_is_fully_neutral():

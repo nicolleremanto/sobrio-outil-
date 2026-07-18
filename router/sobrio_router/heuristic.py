@@ -32,6 +32,13 @@ _HEAVY_FLAGS = frozenset({"contrat", "analyse"})
 # recommandent les petits modèles pour ces tâches à faible risque.
 _LIGHT_TRANSFORM_FLAGS = frozenset({"resume", "traduction"})
 
+# Ids VISIBLES du catalogue — les SEULES étiquettes que ce routeur peut
+# produire (claude-fable-5 est visible:false, RFC-0002 : jamais recommandé).
+# Un test (`test_router_catalog.py`) recoupe cette constante avec
+# contracts/model_catalog.yaml, la source de vérité. `SafeRouter` s'en sert
+# aussi pour VALIDER la sortie de tout routeur primaire (invariant §5.2).
+VISIBLE_MODELS = frozenset({"claude-haiku-4-5", "claude-sonnet-5", "claude-opus-4-8"})
+
 
 @dataclass(frozen=True)
 class _Rule:
@@ -76,17 +83,46 @@ def _reasoning_context(s: Signals) -> bool:
     )
 
 
+def _is_light_transform_intent(s: Signals) -> bool:
+    """Résumé/traduction SANS flag lourd : intention de transformation légère.
+
+    Un « résume ce contrat » porte les deux flags (resume + contrat) : le flag
+    lourd l'emporte — ce n'est plus une transformation légère, la règle
+    complex_task doit décider (correction ronde 0, ml-architect).
+    """
+    flags = set(s.prompt.keyword_flags)
+    return bool(flags & _LIGHT_TRANSFORM_FLAGS) and not (flags & _HEAVY_FLAGS)
+
+
 def _light_transform(s: Signals) -> bool:
     """Résumé/traduction courts, contexte de conversation encore petit.
 
     Transformations légères : les guides fournisseurs les confient aux
     petits modèles — à condition que le prompt ET le contexte restent
-    modestes (un résumé de contexte massif n'est plus « léger »).
+    modestes. Borne INCLUSIVE (<= 800) : la règle jumelle
+    `light_transform_long` prend le relais STRICTEMENT au-delà — aucune
+    bande morte au seuil (correction ronde 0, ml-architect).
     """
-    flags = set(s.prompt.keyword_flags)
     return (
-        bool(flags & _LIGHT_TRANSFORM_FLAGS)
-        and s.prompt.token_est < 800
+        _is_light_transform_intent(s)
+        and s.prompt.token_est <= 800
+        and s.conversation.context_token_est < 4000
+    )
+
+
+def _light_transform_long(s: Signals) -> bool:
+    """Résumé/traduction LONGS : montée PLAFONNÉE au modèle intermédiaire.
+
+    Une longue traduction/un long résumé reste une transformation à faible
+    risque (guide fournisseur) : elle ne doit JAMAIS partir sur le modèle le
+    plus cher — plafond Sonnet, quel que soit le volume du prompt
+    (correction ronde 0, ml-architect : avant, resume@1000 → Opus).
+    Un contexte de conversation massif (>= 4000) reste, lui, du ressort de
+    complex_task (résumer un fil énorme n'est plus « léger »).
+    """
+    return (
+        _is_light_transform_intent(s)
+        and s.prompt.token_est > 800
         and s.conversation.context_token_est < 4000
     )
 
@@ -121,6 +157,12 @@ def _always(_: Signals) -> bool:
     return True
 
 
+# Note calibration (assumée, ronde 0) : reasoning_context long vaut 0.75, PILE
+# le seuil `auto_confidence_threshold` par défaut de l'extension (RFC-0003,
+# bascule auto si confiance >= seuil). C'est VOULU : maths/raisonnement sur un
+# prompt long et explicite est un signal solide — la bascule automatique y est
+# légitime. Les confiances restent non calibrées statistiquement en v0
+# (TODO R5 : calibration Platt/isotonique sur données réelles).
 _RULES: tuple[_Rule, ...] = (
     _Rule("heuristic:code_context", _code_context, lambda _s: ("claude-sonnet-5", 0.70)),
     _Rule(
@@ -129,6 +171,11 @@ _RULES: tuple[_Rule, ...] = (
         lambda s: ("claude-sonnet-5", _reasoning_confidence(s)),
     ),
     _Rule("heuristic:light_transform", _light_transform, lambda _s: ("claude-haiku-4-5", 0.70)),
+    _Rule(
+        "heuristic:light_transform_long",
+        _light_transform_long,
+        lambda _s: ("claude-sonnet-5", 0.65),
+    ),
     _Rule("heuristic:short_simple", _short_simple, lambda _s: ("claude-haiku-4-5", 0.80)),
     _Rule("heuristic:complex_task", _complex_task, lambda _s: ("claude-opus-4-8", 0.65)),
     _Rule("heuristic:default_balanced", _always, lambda _s: ("claude-sonnet-5", 0.55)),

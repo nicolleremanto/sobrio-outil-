@@ -105,10 +105,15 @@ def test_light_transform_traduction():
     assert decision.rule == "heuristic:light_transform"
 
 
-def test_light_transform_requires_small_prompt():
-    """token_est >= 800 : trop long pour rester une transformation « légère »."""
-    decision = router.decide(make_signals(token_est=800, keyword_flags=("resume",)))
-    assert decision.rule != "heuristic:light_transform"
+def test_light_transform_long_prompt_caps_at_sonnet():
+    """Correction ronde 0 : au-delà de 800 tokens, une transformation légère
+    monte au modèle intermédiaire (light_transform_long) — JAMAIS Opus, et
+    aucune bande morte au seuil (800 inclus reste léger -> Haiku)."""
+    at_threshold = router.decide(make_signals(token_est=800, keyword_flags=("resume",)))
+    assert at_threshold.rule == "heuristic:light_transform"
+    beyond = router.decide(make_signals(token_est=801, keyword_flags=("resume",)))
+    assert beyond.rule == "heuristic:light_transform_long"
+    assert beyond.model == "claude-sonnet-5"
 
 
 def test_light_transform_requires_small_conversation_context():
