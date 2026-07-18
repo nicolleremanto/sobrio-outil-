@@ -21,8 +21,15 @@
   },
   "exactitude_ponderee": 0.732,
   "ece": 0.0934,
-  "p50_ms": 0.0104,
-  "p95_ms": 0.0135,
+  "p50_ms": 0.0072,
+  "p95_ms": 0.0117,
+  "calibration_bande_auto": {
+    "seuil": 0.75,
+    "n": 66,
+    "taux_justesse": 0.6515,
+    "confiance_moyenne": 0.775,
+    "ecart": 0.1235
+  },
   "matrice_confusion": {
     "labels": [
       "claude-haiku-4-5",
@@ -151,6 +158,6 @@
   },
   "router_name": "heuristic",
   "golden_sha": "6120df28f72c68bef9fab30c5ac193419999f326fa7a4ab537c55097007a2868",
-  "date": "2026-07-18T15:53:35.703618+00:00",
-  "git_sha": "7bdce16"
+  "date": "2026-07-18T16:09:02.895610+00:00",
+  "git_sha": "44690a5"
 }

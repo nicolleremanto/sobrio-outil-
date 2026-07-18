@@ -49,10 +49,18 @@ _MODEL_RANK: dict[str, int] = {
 # visibles du catalogue (source de vérité `sobrio_router.VISIBLE_MODELS`,
 # elle-même recoupée avec `contracts/model_catalog.yaml` par
 # `test_router_corrections_r0.py`).
-assert set(_MODEL_RANK) == VISIBLE_MODELS, "désynchronisation _MODEL_RANK / VISIBLE_MODELS"
+if set(_MODEL_RANK) != VISIBLE_MODELS:  # pas un assert : doit tenir même sous python -O
+    raise RuntimeError("désynchronisation _MODEL_RANK / VISIBLE_MODELS")
 
 # Ordre catalogue stable pour la matrice de confusion (du moins au plus cher).
 _CATALOG_ORDER: tuple[str, ...] = tuple(sorted(_MODEL_RANK, key=lambda m: _MODEL_RANK[m]))
+
+# Seuil d'auto-bascule de l'extension (RFC-0003, auto_confidence_threshold
+# par défaut) : les décisions à confiance >= ce seuil déclenchent la bascule
+# SANS clic. La métrique `calibration_bande_auto` mesure la fiabilité RÉELLE
+# de ces décisions-là — l'ECE global (bins égaux) peut la masquer
+# (découverte ronde 0 : heuristique à 51,5 % de justesse dans cette bande).
+_AUTO_THRESHOLD = 0.75
 
 _ARTIFACTS_DIR = Path(__file__).resolve().parents[1] / "artifacts" / "eval"
 
@@ -96,6 +104,13 @@ def compute_ece(confidences: list[float], corrects: list[bool], n_bins: int = 10
     poids). La borne haute 1.0 tombe dans le DERNIER bin (comme un
     histogramme à bornes [k/n_bins, (k+1)/n_bins), sauf le dernier fermé des
     deux côtés). Un bin vide ne contribue rien (poids nul, pas de division).
+
+    LIMITE (v0, documentée ronde 0) : l'heuristique n'émet que 6 valeurs de
+    confiance discrètes dans [0.55, 0.80] — seuls ~4 bins sont peuplés, la
+    résolution 10 bins est majoritairement inutilisée et l'ECE global peut
+    masquer un défaut localisé (d'où la métrique complémentaire
+    `calibration_bande_auto`). À réexaminer en R5 quand le classifieur
+    produira une distribution de confiance continue.
     """
     n = len(confidences)
     if n == 0:
@@ -167,6 +182,35 @@ def _category_by_label_informatif(
     }
 
 
+def _auto_band_calibration(confidences: list[float], corrects: list[bool]) -> dict:
+    """Fiabilité des décisions à confiance >= seuil d'auto-bascule (RFC-0003).
+
+    `ecart` = |taux_justesse - confiance_moyenne| des décisions de la bande :
+    c'est la sur/sous-confiance EFFECTIVE là où le produit agit sans clic.
+    Le gate exige la NON-RÉGRESSION de cet écart (critère bande-auto).
+    Bande vide (aucune décision >= seuil) : n=0, ecart=0.0 (rien à dégrader).
+    """
+    indices = [i for i, c in enumerate(confidences) if c >= _AUTO_THRESHOLD]
+    if not indices:
+        return {
+            "seuil": _AUTO_THRESHOLD,
+            "n": 0,
+            "taux_justesse": None,
+            "confiance_moyenne": None,
+            "ecart": 0.0,
+        }
+    n = len(indices)
+    taux = sum(1 for i in indices if corrects[i]) / n
+    conf = sum(confidences[i] for i in indices) / n
+    return {
+        "seuil": _AUTO_THRESHOLD,
+        "n": n,
+        "taux_justesse": round(taux, 4),
+        "confiance_moyenne": round(conf, 4),
+        "ecart": round(abs(taux - conf), 4),
+    }
+
+
 def evaluate_router(router: Router, entries: list[GoldenEntry]) -> dict:
     """Évalue `router` sur `entries` : chronomètre chaque `decide()`, calcule les métriques.
 
@@ -216,6 +260,7 @@ def evaluate_router(router: Router, entries: list[GoldenEntry]) -> dict:
         "ece": round(compute_ece(confidences, corrects), 4),
         "p50_ms": round(_percentile(sorted_latencies, 0.50), 4),
         "p95_ms": round(_percentile(sorted_latencies, 0.95), 4),
+        "calibration_bande_auto": _auto_band_calibration(confidences, corrects),
         "matrice_confusion": _confusion_matrix(labels, predictions),
         "categorie_x_label_informatif": _category_by_label_informatif(categories, labels, corrects),
     }

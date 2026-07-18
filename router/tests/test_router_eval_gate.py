@@ -27,6 +27,15 @@ def _report(**overrides: object) -> dict:
         "ece": 0.05,
         "p95_ms": 2.0,
         "golden_sha": _SHA_A,
+        # Champs exigés par le durcissement ronde 0 (schéma + nouveaux critères).
+        "sous_dimensionnement": {"n": 10, "taux": 0.10},
+        "calibration_bande_auto": {
+            "seuil": 0.75,
+            "n": 40,
+            "taux_justesse": 0.80,
+            "confiance_moyenne": 0.78,
+            "ecart": 0.02,
+        },
     }
     base.update(overrides)
     return base
@@ -46,7 +55,9 @@ def test_gate_passes_when_all_criteria_met():
 
     assert isinstance(result, GateResult)
     assert result.passed is True
-    assert len(result.reasons) == 5  # baseline + previous + ece + latence + golden_sha
+    # baseline + previous + calibration + calibration-régression + latence
+    # + sous-dimensionnement + bande-auto + golden_sha
+    assert len(result.reasons) == 8
     assert all(reason.startswith("PASS") for reason in result.reasons)
 
 
@@ -57,7 +68,7 @@ def test_gate_passes_without_previous_four_criteria_only():
     result = evaluate_gate(candidate, baseline, previous=None)
 
     assert result.passed is True
-    assert len(result.reasons) == 4  # pas de critère "previous"
+    assert len(result.reasons) == 7  # pas de critère "previous"
     assert all(reason.startswith("PASS") for reason in result.reasons)
 
 
@@ -106,7 +117,7 @@ def test_gate_fails_when_ece_too_high():
     result = evaluate_gate(candidate, baseline, previous=None)
 
     assert result.passed is False
-    assert any(r.startswith("FAIL calibration") for r in result.reasons)
+    assert any(r.startswith("FAIL calibration :") for r in result.reasons)
     # Les autres critères restent PASS (échec isolé sur l'ECE).
     assert any(r.startswith("PASS baseline") for r in result.reasons)
     assert any(r.startswith("PASS latence") for r in result.reasons)

@@ -26,20 +26,61 @@ PAS un LLM** :
 L'interface `Router.decide(signals) -> Decision{model, confidence, rule}` est **stable** :
 tout se branche derrière ; rien ne change côté extension ni côté contrat `/v1/recommend`.
 
-## Invariants (incarnés par privacy-sentinel et cost-guard, non waivables)
+## §5 — Invariants (incarnés par privacy-sentinel et cost-guard, non waivables)
 
-1. Aucun texte de prompt stocké ni loggé, nulle part (base, logs, artefacts, rapports —
+> Les renvois du code (« §5.2 », « §5.3 »…) pointent vers les items numérotés
+> ci-dessous ; les budgets chiffrés sont en §7.
+
+**§5.1** Aucun texte de prompt stocké ni loggé, nulle part (base, logs, artefacts, rapports —
    les rapports citent des ids, jamais des textes).
-2. **Repli heuristique systématique** : artefact manquant, erreur, timeout interne
+**§5.2** **Repli heuristique systématique** : artefact manquant, erreur, timeout interne
    > 50 ms ⇒ réponse via la v0 heuristique, silencieusement, `rule="fallback:heuristic"`.
    Le routeur ML ne peut JAMAIS rendre l'API indisponible.
-3. **Gate de promotion** : un artefact n'est promu que s'il bat les heuristiques ET
+**§5.3** **Gate de promotion** : un artefact n'est promu que s'il bat les heuristiques ET
    l'artefact précédent sur le golden set figé, avec calibration acceptable.
-4. **Coûts** : tout appel API payant (distillation, étiquetage) en dry-run par défaut ;
+**§5.4** **Coûts** : tout appel API payant (distillation, étiquetage) en dry-run par défaut ;
    l'exécution réelle exige `SOBRIO_ALLOW_PAID_CALLS=1` + cap `SOBRIO_MAX_SPEND_USD`
    (défaut 20). La CI ne dépense jamais un centime.
-5. **Licences** : registre `router/data/LICENSES.md` rempli AVANT usage de tout dataset.
-6. **Reproductibilité** : seeds fixés, versions épinglées, `metadata.json` par artefact.
+**§5.5** **Licences** : registre `router/data/LICENSES.md` rempli AVANT usage de tout dataset.
+**§5.6** **Reproductibilité** : seeds fixés, versions épinglées, `metadata.json` par artefact.
+
+## Gate de promotion (§5.3) — seuils chiffrés et rationnels (chantier R3)
+
+- **Exactitude pondérée** `1 − (2·sous + sur) / (2n)` : le SOUS-dimensionnement
+  compte double. Réconciliation avec la mission de sobriété (revue r0) : le
+  sur-dimensionnement est le gaspillage que Sobrio combat, mais un routeur qui
+  SOUS-sert détruit la confiance produit et pousse l'utilisateur à
+  sur-provisionner en permanence — pire pour la sobriété à terme. Le
+  sur-dimensionnement reste pénalisé (1x) ET gardé par le critère dédié de
+  non-régression du sous-dim + le reporting brut (les deux exactitudes
+  figurent au rapport ; le score pondéré n'est pas une « exactitude » au sens
+  strict, c'est un score à coût asymétrique).
+- **ECE ≤ 0.10 (absolu)** : plafond d'hygiène — marge au-dessus de la baseline
+  heuristique vivante (0.0934) pour ne pas rendre la première promotion
+  impossible, MAIS complété par la **non-régression** `ece(candidat) ≤
+  ece(référence) + 0.01` vs baseline ET previous : la calibration ne peut
+  jamais dériver silencieusement vers la borne (revue r0).
+- **Sous-dimensionnement non-régressif** : `taux(candidat) ≤ taux(baseline)
+  + 0.02` — LE coût produit ne se dégrade pas même si l'agrégat monte.
+- **Bande d'auto-bascule (confiance ≥ 0.75, RFC-0003)** : l'ECE global à bins
+  égaux peut masquer une sur-confiance précisément là où le produit agit SANS
+  clic (découverte r0 : l'heuristique y est à 51,5 % de justesse). Le harnais
+  mesure `calibration_bande_auto.ecart` et le gate exige la non-régression
+  (`+ 0.02`). La recalibration de fond de cette bande est un objectif R5.
+- **Latence : budget ABSOLU** (p95 ≤ 5 ms étage 1, ≤ 30 ms étage 2) — pas de
+  critère relatif : le contrat de latence est le budget, pas l'artefact
+  précédent (décision assumée, revue qa r0).
+- **Épinglage** : les rapports comparés doivent porter le hash CANONIQUE du
+  golden figé (`GOLDEN_SHA256`) — injecté par la CLI, pas seulement l'accord
+  interne candidat/baseline.
+- **Tolérances** (0.01 ECE, 0.02 taux) : marges d'estimation sur n=181 points
+  (n effectif ≈ 55 gabarits) — cf. limites_statistiques du coverage_report.
+
+## §7 — Budgets (miroir du ledger)
+
+Étage 1 p95 < 5 ms CPU · Étage 2 p95 < 30 ms CPU · `/v1/recommend` p95
+< 150 ms · RAM < 1 Go · artefacts : étage 1 < 20 Mo, étage 2 < 500 Mo ·
+dépense API : 0,00 $.
 
 ## Alternatives rejetées
 

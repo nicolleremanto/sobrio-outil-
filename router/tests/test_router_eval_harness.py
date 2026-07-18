@@ -41,6 +41,7 @@ _EXPECTED_KEYS = {
     "ece",
     "p50_ms",
     "p95_ms",
+    "calibration_bande_auto",
     "matrice_confusion",
     "categorie_x_label_informatif",
     "router_name",

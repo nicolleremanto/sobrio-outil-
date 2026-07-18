@@ -365,3 +365,53 @@ fragiles. Livré : golden.jsonl 181 entrées FIGÉ (sha 6120df28…), double-rev
 COMPLÈTE (eval r1 + ml r2, verdicts au ledger), anti-fuite prouvée active,
 limites statistiques versionnées, contrainte de gate transmise à R3 (opus en
 AGRÉGÉ/relatif seulement). Dépense totale : 0,00 $.
+
+---
+
+## R3 — round 0 (commit 44690a5, construction builder-core/sonnet)
+
+| agent            | scores                                                                  | blocking | major | verdict    |
+| ---------------- | ----------------------------------------------------------------------- | -------- | ----- | ---------- |
+| eval-scientist   | métriques 4,5 · robustesse-gate 3 · contrainte-R2 5 · seuils 3,5 · repro 4,5 | 0   | 3     | **YELLOW** |
+| ml-architect     | pertinence 4 · fuites 5 · calibration 3,5 · extensibilité 4 · explic 4  | 0        | 1     | **YELLOW** |
+| qa-auditor       | couv 4 · contrat 5 · erreurs 4 · clarté 5 · régressions 5               | 0        | 0     | **GREEN**  |
+| privacy-sentinel | — (rapports = nombres/ids seulement)                                    | PASS     | —     | **PASS**   |
+| cost-guard       | — (zéro dépense)                                                        | PASS     | —     | **PASS**   |
+
+→ Ronde **YELLOW**. Les juges opus ont pris le gate en défaut PAR EXÉCUTION —
+tous les trous corrigés :
+
+- **[major eval]** AUCUNE validation de schéma : exactitude=5.0 / ece=-1 /
+  p95=-5 → PASS ; clé manquante → KeyError brut. → **corrigé** :
+  `_validate_report` fail-closed (bornes, finitude via isfinite, bool exclu,
+  sha256-hex, sous-dim, bande auto) sur candidat ET baseline ET previous +
+  9 cas de test paramétrés.
+- **[major eval]** golden_sha : seul l'accord INTERNE était vérifié — deux
+  rapports « d'accord » sur un set étranger passaient. → **corrigé** :
+  épinglage au hash CANONIQUE (`expected_golden_sha`, injecté TOUJOURS par la
+  CLI depuis GOLDEN_SHA256) + tests (dont un test CLI bout-en-bout).
+- **[major eval + ml]** Calibration : seuil 0.10 non documenté ET régressable
+  (candidat à ECE 0.0999 < baseline 0.0934 passait). → **corrigé** : critère
+  de NON-RÉGRESSION `ece ≤ référence + 0.01` (baseline ET previous) + section
+  « seuils chiffrés » dans ROUTEUR_CLASSIFIEUR.md (rationnels documentés).
+- **[major ml — DÉCOUVERTE]** Angle mort de la bande d'auto-bascule : la règle
+  reasoning long émet confiance 0.75 (= seuil de bascule SANS clic RFC-0003)
+  mais n'est correcte que **51,5 %** sur le golden — masqué par l'ECE global
+  (bin [0.7,0.8) moyenné). → **corrigé** : métrique `calibration_bande_auto`
+  (n, justesse, écart des décisions ≥ 0.75) dans le harnais + critère de
+  non-régression au gate. DÉCOUVERTE CONSIGNÉE : la recalibration de fond de
+  cette bande est un objectif R5 (l'heuristique R1 reste inchangée — le gate
+  protège désormais la bande pour tout candidat).
+- **[minors corrigés]** non-régression du sous-dimensionnement (LE coût
+  produit) au gate · CLI fail-closed (fichier manquant → message propre exit
+  2, pas de traceback) · assert module-level → raise (tenait pas sous -O) ·
+  2 tests branches défensives harnais (registre inconnu, modèle hors
+  catalogue) · doc §5.1-5.6 + §7 numérotés (traçabilité des renvois du code) ·
+  réconciliation pondération 2x ↔ mission sobriété documentée · limite ECE
+  bins/confiances discrètes documentée · rapport régénéré sur le commit
+  courant (git_sha exact).
+- **[minor assumé]** latence : budget ABSOLU (pas de critère relatif au
+  previous) — documenté comme décision.
+
+Preuves : 142 tests router+api verts (+22), make test complet vert, ruff
+check+format verts, gate re-testé fail-closed sur tous les cas prouvés.
