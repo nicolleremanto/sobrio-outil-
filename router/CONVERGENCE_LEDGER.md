@@ -38,8 +38,8 @@ RAM < 1 Go · artefacts : étage 1 < 20 Mo, étage 2 < 500 Mo · dépense API : 
 | -------- | -------------------------------------------------- | ------------- | ------- |
 | R1       | Socle du routeur & v0 heuristique branchée         | 2/2 (r2 & r3) | **CONVERGÉ** |
 | R2       | Golden set (juge de paix)                          | 2/2 (r2 & r3) | **CONVERGÉ** |
-| R3       | Protocole d'évaluation & harnais + gate            | 1/2           | en cours |
-| R4       | Corpus de démarrage à froid                        | 0/2           | à venir |
+| R3       | Protocole d'évaluation & harnais + gate            | 2/2 (r5 & r6) | **CONVERGÉ** |
+| R4       | Corpus de démarrage à froid                        | 0/2           | en cours |
 | R5       | Pipeline d'entraînement & classifieur v0.5         | 0/2           | à venir |
 | R6       | Étage 2 embeddings (construit, ÉTEINT par défaut)  | 0/2           | à venir |
 | R7       | Recalibration, monitoring & déploiement VPS        | 0/2           | à venir |
@@ -626,3 +626,38 @@ testing : GREEN.
 
 Preuves : 131 router + 26 api verts, mutation 5/5 tuées post-repli, make
 test complet vert (218 ext), ruff check+format verts.
+
+## R3 — round 6 (commit c759768, panel 5 juges — CONVERGENCE)
+
+| agent          | modèle | scores (dims)                                        | blocking | major | verdict |
+|----------------|--------|------------------------------------------------------|----------|-------|---------|
+| eval-scientist | opus   | validité5 robustesse5 contrainte-r2:5 seuils5 repro5 | 0        | 0     | GREEN   |
+| ml-architect   | opus   | pertinence5 fuites5 calibration5 ext-r5:4 expl5      | 0        | 0     | GREEN   |
+| qa-auditor     | sonnet | couverture5 contrat5 erreurs5 clarté5 régressions5   | 0        | 0     | GREEN   |
+| privacy-sentinel | sonnet | —                                                  | PASS     | —     | PASS    |
+| cost-guard     | haiku  | —                                                    | PASS     | —     | PASS    |
+
+→ **Ronde VERTE (2/2 consécutives, r5 & r6) — CHANTIER R3 CONVERGÉ.**
+Mutation 5/5 re-prouvée par DEUX juges indépendants (privacy en worktree
+éphémère, qa) ; repli du cas bande vérifié fidèle ; corrections de prose
+authentifiées ; golden figé intact (sha recalculé) ; gate.py et harness.py
+relus INTÉGRALEMENT par privacy (aucun chemin de code ne manipule de texte) ;
+dépense chantier entier : 0,00 $ (cost, bilan rondes 0→6).
+
+**Observations informatives consignées (aucune action avant clôture) :**
+- [eval] Le garde-fou du test paramétré choisit sa référence par heuristique
+  (previous sinon baseline) — coïncide avec la référence liante pour les 5
+  lignes actuelles (prouvé par mutation) ; une future ligne « previous
+  non-liant » vérifierait le mauvais couple. Latent, à garder en tête lors
+  d'ajouts de cas.
+- [ml] TODO(R5) déjà tracé (plafond absolu de bande si baseline
+  non-heuristique à bande vide) — à porter à l'ordre du jour du panel R5.
+
+**Bilan R3 (6 rondes) :** le gate est passé d'un comparateur naïf à une
+pièce de sûreté fail-closed : schéma validé, épinglage canonique,
+non-régression ECE/sous-dim/bande vs min des références MESURÉES, bornes
+inclusives prouvées par mutation, découverte produit majeure (règle
+reasoning@0.75 à 51,5 % dans la bande d'auto-bascule — objectif de
+recalibration transmis à R5). Deux leçons d'intégrité de l'orchestrateur
+attrapées par les juges (test bit-exact « qui ne testait rien », prose du
+ledger citant ce qu'elle purgeait).
