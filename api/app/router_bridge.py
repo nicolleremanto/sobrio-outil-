@@ -5,10 +5,13 @@ QUELLE instance de `sobrio_router.Router` sert une organisation, à partir de
 la clé `router_version` de `policy_json` (mécanisme interne, hors schéma
 `ExtensionConfig` — pas exposé à l'extension).
 
-v0 : toute valeur de `router_version` résout vers le même
-`SafeRouter(HeuristicRouter(), HeuristicRouter())` — la vraie sélection
-(v0.5 classifieur, v1 recalibré par org) arrivera aux chantiers suivants
-(docs/decisions/ROUTEUR_CLASSIFIEUR.md, séquence produit).
+R5 : `router_version="ml_v05"` résout vers `SafeRouter(MLRouter(promoted))`.
+CANARY PER-ORG : le défaut RESTE `heuristic` — une org bascule sur ml_v05
+via `policy_json.router_version="ml_v05"` (activation org par org, décision
+fondateurs, hors code). Artefact manquant/corrompu/lightgbm absent : la
+garde de construction sert `SafeRouter(primary=None)` — API verte,
+`rule="fallback:heuristic"` (invariant §5.2). Limite lru_cache : artefact
+promu/réparé => redémarrage API (TODO R7 : rechargement à chaud).
 """
 
 from __future__ import annotations
@@ -24,21 +27,25 @@ from sobrio_router import HeuristicRouter, Router, SafeRouter
 # une politique mal saisie ne doit jamais faire échouer /v1/recommend.
 _DEFAULT_VERSION = "heuristic"
 
-# Versions reconnues en R1 : une seule. Le dict existe déjà (plutôt qu'un
-# simple `if`) pour que R5/R7 ajoutent une entrée sans toucher la fonction
-# de résolution ci-dessous.
-_KNOWN_VERSIONS = frozenset({_DEFAULT_VERSION})
+# Versions reconnues (R5) : le classifieur ml_v05 s'ajoute à l'heuristique.
+_KNOWN_VERSIONS = frozenset({_DEFAULT_VERSION, "ml_v05"})
 
 
 def _build_primary(version: str) -> Router:
     """Construit le routeur primaire d'une version — PEUT lever (artefact).
 
-    v0 : l'heuristique (construction infaillible). R5 branchera ici le
-    chargement d'un artefact ML (`ml_v05`) — qui, lui, peut échouer si
+    `ml_v05` : import DIFFÉRÉ de `sobrio_router.ml` (lightgbm y est lui-même
+    paresseux, §7.1) et chargement de l'artefact PROMU — qui peut échouer si
     l'artefact est manquant/corrompu : c'est précisément pourquoi l'appelant
     enveloppe cette construction d'un try/except (invariant §5.2, correction
     ronde 0 : un échec au CHARGEMENT contournerait sinon le SafeRouter).
+    `ml.PROMOTED_DIR` est lu À L'APPEL (attribut de module, pas une valeur
+    figée) : testable par monkeypatch, surcharge env TODO R7.
     """
+    if version == "ml_v05":
+        from sobrio_router import ml  # import différé (§7.1)
+
+        return ml.MLRouter(ml.PROMOTED_DIR)
     return HeuristicRouter()
 
 

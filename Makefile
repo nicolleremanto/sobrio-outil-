@@ -16,7 +16,7 @@ RUFF    := .venv/bin/ruff
 ALEMBIC := .venv/bin/alembic
 
 .PHONY: dev test lint demo report sync-fixtures migrate seed router-bench router-eval \
-	router-corpus router-corpus-check
+	router-corpus router-corpus-check router-train router-gate router-promote router-rollback
 
 # Routeur évalué par `router-eval` (registre : heuristic ; extensible R5 : ml_v05).
 ROUTER ?= heuristic
@@ -76,6 +76,27 @@ router-corpus-check:
 		--corpus router/data/artifacts/check/corpus-v1.jsonl.gz \
 		--out router/data/artifacts/check/corpus-v1.quality.json
 	$(PYTEST) router/tests -k "data" -q
+
+## router-train : entraîne le candidat v0.5 depuis le corpus de référence -> router/artifacts/models/candidate/
+router-train:
+	$(PY) router/train/train_v05.py
+
+## router-gate : évals fraîches (heuristic + candidat) puis gate R3 (previous injecté s'il existe)
+router-gate:
+	$(PY) router/eval/harness.py --router heuristic
+	$(PY) router/eval/harness.py --router ml_v05_candidate
+	$(PY) router/eval/gate.py \
+	  --candidate router/artifacts/eval/ml_v05_candidate-latest.json \
+	  --baseline router/artifacts/eval/heuristic-latest.json \
+	  $$( [ -f router/artifacts/models/promoted/eval-report.json ] && \
+	      echo "--previous router/artifacts/models/promoted/eval-report.json" )
+
+## router-promote : promotion 1 commande (rejoue le gate, §5.3) ; rollback : make router-rollback
+router-promote:
+	$(PY) router/train/promote.py
+
+router-rollback:
+	$(PY) router/train/promote.py --rollback
 
 ## test : tests Python (tous les lots) puis tests de l'extension
 test:

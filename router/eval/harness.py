@@ -28,6 +28,7 @@ import json
 import subprocess
 import sys
 import time
+from collections import Counter
 from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
@@ -35,6 +36,11 @@ from pathlib import Path
 from loader import GoldenEntry, golden_sha256, load_golden
 
 from sobrio_router import VISIBLE_MODELS, HeuristicRouter, Router, SafeRouter
+
+# Import SÛR sans lightgbm ni artefact : l'import de lightgbm est PARESSEUX
+# dans MLRouter.__init__ (spec R5 §7.1) — seule la CONSTRUCTION peut échouer,
+# et elle n'a lieu qu'À LA SÉLECTION d'un routeur ml du registre.
+from sobrio_router.ml import CANDIDATE_DIR, PROMOTED_DIR, MLRouter, MLRouterLoadError
 
 # Rang de coût, du moins cher au plus cher — SOUS-dimensionner = prédire un
 # rang INFÉRIEUR à celui de l'étiquette (modèle moins cher que nécessaire :
@@ -65,11 +71,17 @@ _AUTO_THRESHOLD = 0.75
 
 _ARTIFACTS_DIR = Path(__file__).resolve().parents[1] / "artifacts" / "eval"
 
-# Registre des routeurs évaluables par la CLI — extensible (R5 ajoutera
-# "ml_v05" ici, probablement lui aussi enveloppé dans un SafeRouter par
-# cohérence avec l'invariant §5.2 de production).
+# Registre des routeurs évaluables par la CLI (R5). Les lambdas ne
+# construisent qu'À LA SÉLECTION : `--router heuristic` fonctionne sans
+# lightgbm ni artefact. Les routeurs ml sont enveloppés dans un SafeRouter
+# par PARITÉ DE PRODUCTION (invariant §5.2) — mais un artefact absent ou
+# corrompu à l'éval est un ÉCHEC BRUYANT (REFUS exit 2 dans `main()`), pas
+# un repli : évaluer silencieusement l'heuristique sous une étiquette ml
+# serait une éval « prouvée à vide » (leçon R4).
 _REGISTRY: dict[str, Callable[[], Router]] = {
     "heuristic": lambda: SafeRouter(HeuristicRouter()),
+    "ml_v05": lambda: SafeRouter(MLRouter(PROMOTED_DIR)),  # production parity
+    "ml_v05_candidate": lambda: SafeRouter(MLRouter(CANDIDATE_DIR)),  # pré-promotion
 }
 
 
@@ -106,12 +118,11 @@ def compute_ece(confidences: list[float], corrects: list[bool], n_bins: int = 10
     histogramme à bornes [k/n_bins, (k+1)/n_bins), sauf le dernier fermé des
     deux côtés). Un bin vide ne contribue rien (poids nul, pas de division).
 
-    LIMITE (v0, documentée ronde 0) : l'heuristique n'émet que 6 valeurs de
-    confiance discrètes dans [0.55, 0.80] — seuls ~4 bins sont peuplés, la
-    résolution 10 bins est majoritairement inutilisée et l'ECE global peut
-    masquer un défaut localisé (d'où la métrique complémentaire
-    `calibration_bande_auto`). À réexaminer en R5 quand le classifieur
-    produira une distribution de confiance continue.
+    NOTE (réserve R5 LEVÉE) : la limite v0 — l'heuristique n'émet que 6
+    valeurs de confiance discrètes, seuls ~4 bins peuplés — ne s'applique
+    plus à ml_v05 : ses confiances CONTINUES (softmax calibré) peuplent
+    désormais les 10 bins. La métrique complémentaire
+    `calibration_bande_auto` reste la garde ciblée de la bande d'auto-bascule.
     """
     n = len(confidences)
     if n == 0:
@@ -251,12 +262,14 @@ def evaluate_router(router: Router, entries: list[GoldenEntry]) -> dict:
     predictions: list[str] = []
     confidences: list[float] = []
     latencies_ms: list[float] = []
+    rules: list[str] = []
     for entry in entries:
         start = time.perf_counter()
         decision = router.decide(entry.signals)
         latencies_ms.append((time.perf_counter() - start) * 1000)
         predictions.append(decision.model)
         confidences.append(decision.confidence)
+        rules.append(decision.rule)
 
     n = len(entries)
     labels = [e.label for e in entries]
@@ -295,6 +308,12 @@ def evaluate_router(router: Router, entries: list[GoldenEntry]) -> dict:
         "calibration_par_confiance_informatif": _calibration_by_confidence(confidences, corrects),
         "matrice_confusion": _confusion_matrix(labels, predictions),
         "categorie_x_label_informatif": _category_by_label_informatif(categories, labels, corrects),
+        # Bloc INFORMATIF R5 : comptes par valeur de `Decision.rule`
+        # (vocabulaire système). Détecte une contamination par replis
+        # ponctuels (`fallback:heuristic`, timeouts) dans une éval ml. Le
+        # GATE ne le lit pas (`_validate_report` ignore les clés en plus) ;
+        # `promote.py` le lit, lui (garde anti-contamination, spec R5 §11).
+        "repartition_rules": dict(sorted(Counter(rules).items())),
     }
 
 
@@ -347,7 +366,17 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    report = run(args.router)
+    # Artefact absent/corrompu à l'éval : ÉCHEC BRUYANT, pas de repli (spec
+    # R5 §9) — le repli §5.2 est un invariant de PRODUCTION (bridge), pas
+    # d'évaluation.
+    try:
+        report = run(args.router)
+    except MLRouterLoadError as exc:
+        print(
+            f"REFUS : artefact {args.router} absent ou invalide — rien à évaluer ({exc})",
+            file=sys.stderr,
+        )
+        return 2
 
     _ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
     out_path = _ARTIFACTS_DIR / f"{args.router}-latest.json"

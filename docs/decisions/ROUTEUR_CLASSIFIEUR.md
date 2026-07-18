@@ -63,6 +63,10 @@ tout se branche derrière ; rien ne change côté extension ni côté contrat `/
   pour la baseline courante (0.0934 + 0.01 = 0.1034 > 0.10), le plafond
   ABSOLU est le critère liant ; la non-régression devient liante dès qu'une
   référence mieux calibrée (< 0.09) est promue (effet cliquet voulu).
+  Réserve « ECE bins / confiances discrètes » (r0) LEVÉE par R5 : les
+  confiances CONTINUES de ml_v05 (softmax calibré isotonique conservateur)
+  peuplent désormais les 10 bins — la résolution de l'ECE est pleinement
+  utilisée sur les rapports ml.
 - **Sous-dimensionnement non-régressif** : `taux(candidat) ≤ min(baseline,
   previous) + 0.02` — LE coût produit ne se dégrade pas même si l'agrégat
   monte, ni vs l'heuristique ni vs l'artefact promu (aligné r2).
@@ -94,10 +98,18 @@ tout se branche derrière ; rien ne change côté extension ni côté contrat `/
   seules les références à bande MESURÉE (n > 0) bornent le min — l'écart 0.0
   d'une bande vide est une convention (« rien à dégrader »), pas une mesure,
   et rejetait à tort un candidat mieux calibré que l'heuristique.
-  TODO(R5) : le critère bande reste RELATIF (sans plafond absolu) — ancré
-  aujourd'hui par la bande heuristique toujours mesurée (n=66, plafond
-  effectif 0.1435) ; si une baseline non-heuristique à bande vide devient
-  possible, envisager un plafond absolu d'écart (analogue au 0.10 d'ECE).
+  TRANCHÉ (R5, ex-TODO) : le critère bande porte désormais AUSSI un
+  **plafond ABSOLU d'écart 0.10** (critère 7-bis, CLI `--bande-ecart-max`,
+  borne ≤ inclusive, comparaison directe sans arrondi), évalué dès que la
+  bande candidate est mesurée (n > 0). Rationnel : (1) ferme le vrai trou —
+  si baseline ET previous ont une bande vide, le chemin « rien contre quoi
+  régresser » laissait passer un candidat à écart ARBITRAIRE (atteignable
+  dès qu'un artefact promu à bande vide devient previous ET qu'un rapport
+  baseline dégénéré circule) ; (2) cohérence de motif : même architecture
+  absolu-plus-relatif que l'ECE ; (3) durcissement assumé : 0.10 est plus
+  strict que le plafond relatif hérité (0.1235 + 0.02 = 0.1435) — la
+  recalibration de la bande est L'OBJECTIF R5, marge mesurée du candidat
+  ml_v05 : écart 0.0093, soit ~10x sous le plafond.
   Les bornes référence+tolérance sont arrondies à 10 décimales : ≤ inclusif
   garanti à la limite exacte (l'addition flottante brute ne l'était pas —
   4,93 % des références à 4 décimales pour tol 0.02, 2,68 % pour tol 0.01 ;

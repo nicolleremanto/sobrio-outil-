@@ -45,6 +45,7 @@ _EXPECTED_KEYS = {
     "calibration_par_confiance_informatif",
     "matrice_confusion",
     "categorie_x_label_informatif",
+    "repartition_rules",  # R5 : comptes par Decision.rule (informatif)
     "router_name",
     "golden_sha",
     "date",

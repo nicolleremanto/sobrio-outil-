@@ -121,3 +121,90 @@ def test_primary_construction_failure_serves_fallback(client, monkeypatch):
     finally:
         # Purge le singleton mémorisé pour ne pas polluer les autres tests.
         router_bridge._router_for_version.cache_clear()
+
+
+# ---------------------------------------------------------------------------
+# R5 — `router_version="ml_v05"` : canary per-org derrière le SafeRouter.
+# ---------------------------------------------------------------------------
+
+import sys as _sys  # noqa: E402
+from pathlib import Path as _Path  # noqa: E402
+
+import pytest  # noqa: E402
+
+_ROUTER_DIR = _Path(__file__).resolve().parents[2] / "router"
+for _sub in ("train", "eval"):
+    _p = str(_ROUTER_DIR / _sub)
+    if _p not in _sys.path:
+        _sys.path.insert(0, _p)
+
+
+@pytest.fixture(scope="module")
+def artefact_ml_v05(tmp_path_factory):
+    """Artefact ml_v05 RÉEL (fonctions de train_v05, corpus de référence)."""
+    pytest.importorskip("lightgbm")
+    import train_v05
+
+    if not train_v05.DEFAULT_CORPUS_PATH.is_file():
+        pytest.skip("corpus de référence absent — régénérer via make router-corpus")
+    out_dir = tmp_path_factory.mktemp("artefact-api-ml-v05")
+    train_v05.run_training(train_v05.DEFAULT_CORPUS_PATH, out_dir)
+    return out_dir
+
+
+def _policy_ml_v05(test_engine):
+    _with_policy(test_engine, '\'{"router_version": "ml_v05"}\'')
+
+
+def test_ml_v05_artefact_absent_api_verte(client, test_engine, monkeypatch, tmp_path):
+    """Org ml_v05, PROMOTED_DIR VIDE : /v1/recommend 200, repli heuristique (§5.2)."""
+    from sobrio_router import ml
+
+    _policy_ml_v05(test_engine)
+    monkeypatch.setattr(ml, "PROMOTED_DIR", tmp_path / "promoted-vide")
+    router_bridge._router_for_version.cache_clear()
+    try:
+        response = client.post(
+            "/v1/recommend", json=make_recommend_body(token_est=50), headers=AUTH_HEADERS
+        )
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["rule"] == "fallback:heuristic"
+        assert 0 <= payload["confidence"] <= 1
+    finally:
+        router_bridge._router_for_version.cache_clear()
+        _reset_policy(test_engine)
+
+
+def test_ml_v05_artefact_present(client, test_engine, monkeypatch, artefact_ml_v05):
+    """Org ml_v05, artefact promu présent : 200, rule=ml:v05, modèle visible."""
+    from sobrio_router import VISIBLE_MODELS, ml
+
+    _policy_ml_v05(test_engine)
+    monkeypatch.setattr(ml, "PROMOTED_DIR", artefact_ml_v05)
+    router_bridge._router_for_version.cache_clear()
+    try:
+        response = client.post(
+            "/v1/recommend", json=make_recommend_body(token_est=50), headers=AUTH_HEADERS
+        )
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["rule"] == "ml:v05"
+        assert payload["recommended_model"] in VISIBLE_MODELS
+        assert 0 <= payload["confidence"] <= 1
+    finally:
+        router_bridge._router_for_version.cache_clear()
+        _reset_policy(test_engine)
+
+
+def test_version_inconnue_replie_heuristic(client, test_engine):
+    """`router_version="ml_v99"` (inconnue) : repli silencieux sur l'heuristique."""
+    _with_policy(test_engine, '\'{"router_version": "ml_v99"}\'')
+    try:
+        response = client.post(
+            "/v1/recommend", json=make_recommend_body(token_est=50), headers=AUTH_HEADERS
+        )
+        assert response.status_code == 200
+        assert response.json()["rule"] == "heuristic:short_simple"
+    finally:
+        _reset_policy(test_engine)

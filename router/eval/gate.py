@@ -56,6 +56,14 @@ _DEFAULT_ECE_MAX = 0.10
 _ECE_REGRESSION_TOL = 0.01
 _SOUS_DIM_REGRESSION_TOL = 0.02
 _BANDE_AUTO_REGRESSION_TOL = 0.02
+# Plafond ABSOLU d'écart de bande d'auto-bascule (R5, TODO(R5) du ledger
+# TRANCHÉ — rationnel dans ROUTEUR_CLASSIFIEUR.md) : analogue au 0.10 d'ECE.
+# Ferme le trou « références toutes vides » : sans lui, si baseline ET
+# previous ont une bande vide, un candidat à écart ARBITRAIRE passait le
+# critère relatif. Plus strict que le plafond relatif courant (0.1435) :
+# la recalibration de la bande est L'OBJECTIF R5. Paramètre CLI
+# `--bande-ecart-max` (réutilisable R6, comme `--budget-ms`).
+_DEFAULT_BANDE_ECART_MAX = 0.10
 
 
 @dataclass(frozen=True)
@@ -134,6 +142,7 @@ def evaluate_gate(
     budget_ms: float = _DEFAULT_BUDGET_MS,
     ece_max: float = _DEFAULT_ECE_MAX,
     expected_golden_sha: str | None = None,
+    bande_ecart_max: float = _DEFAULT_BANDE_ECART_MAX,
 ) -> GateResult:
     """Applique les critères du gate de promotion ; FAIL si UN critère échoue.
 
@@ -162,6 +171,12 @@ def evaluate_gate(
        0.75 est à 51,5 % de justesse ; la bande entière à 65,15 %) — critère
        RELATIF pour ne jamais laisser un candidat aggraver la fiabilité de
        l'auto-bascule ;
+    7-bis. bande d'auto-bascule ABSOLUE (R5) : si la bande candidate est
+       MESURÉE (n > 0), `ecart(candidate) <= bande_ecart_max` (0.10 —
+       plafond d'hygiène, même architecture absolu-plus-relatif que l'ECE).
+       Comparaison DIRECTE à une constante : aucun arrondi nécessaire, pas
+       d'addition flottante ; borne <= INCLUSIVE (testée à 0.10 exact).
+       Ferme le trou « toutes références vides » du critère relatif ;
     8. golden_sha : candidat == baseline, ET, si `expected_golden_sha` est
        fourni (la CLI l'injecte TOUJOURS depuis `GOLDEN_SHA256` committé),
        égalité au hash CANONIQUE du set figé.
@@ -302,6 +317,23 @@ def evaluate_gate(
                     "deviendrait moins fiable — RFC-0003)"
                 )
 
+    # Critère 7-bis (R5) : plafond ABSOLU d'écart de bande — évalué UNIQUEMENT
+    # si la bande candidate est MESURÉE (n > 0). Comparaison directe à une
+    # constante (aucun arrondi : pas d'addition flottante), borne <= inclusive.
+    if candidate_bande["n"] > 0:
+        candidate_ecart = candidate_bande["ecart"]
+        if candidate_ecart <= bande_ecart_max:
+            reasons.append(
+                f"PASS bande-auto-absolu : écart candidat {candidate_ecart:.4f} <= "
+                f"plafond {bande_ecart_max:.4f}"
+            )
+        else:
+            passed = False
+            reasons.append(
+                f"FAIL bande-auto-absolu : écart candidat {candidate_ecart:.4f} > "
+                f"plafond {bande_ecart_max:.4f} (là où le produit agit sans clic — RFC-0003)"
+            )
+
     candidate_sha = candidate["golden_sha"]
     baseline_sha = heuristic_baseline["golden_sha"]
     if candidate_sha != baseline_sha:
@@ -345,6 +377,15 @@ def main(argv: list[str] | None = None) -> int:
         default=_DEFAULT_BUDGET_MS,
         help=f"budget p95 en ms (défaut {_DEFAULT_BUDGET_MS}, étage 1 ; 30.0 pour l'étage 2 R6)",
     )
+    parser.add_argument(
+        "--bande-ecart-max",
+        type=float,
+        default=_DEFAULT_BANDE_ECART_MAX,
+        help=(
+            f"plafond ABSOLU d'écart de la bande d'auto-bascule (défaut "
+            f"{_DEFAULT_BANDE_ECART_MAX}, R5 — critère 7-bis, borne <= inclusive)"
+        ),
+    )
     args = parser.parse_args(argv)
 
     # Chargement FAIL-CLOSED : un fichier introuvable/illisible produit un
@@ -369,6 +410,7 @@ def main(argv: list[str] | None = None) -> int:
         previous,
         budget_ms=args.budget_ms,
         expected_golden_sha=golden_sha256(),
+        bande_ecart_max=args.bande_ecart_max,
     )
 
     for reason in result.reasons:

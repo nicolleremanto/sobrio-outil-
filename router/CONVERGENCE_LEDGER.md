@@ -957,3 +957,55 @@ fail-closed (nan/inf/bool), garde réseau regex 2 formes, LICENSES NON
 UTILISÉ ×3, fixtures neutres. Trois leçons d'intégrité orchestrateur/builder
 attrapées par les juges (anti-fuite au mauvais N « prouvée à vide », garde
 tautologique, chemin d'exception CLI mort devenu vivant sans filet).
+
+---
+
+## R5 — round 0 (spec ml-architect + construction builder-core, SOUS FABLE, vérifiées par l'orchestrateur)
+
+**Spec (ml-architect, avec expériences d'ancrage /tmp sur le corpus réel) —
+décisions clés :** 22 features en ORDRE FIGÉ (numériques bruts, lang one-hot,
+6 flags multi-hot sur le vocabulaire clos du corpus, current_model en rang de
+coût ordinal ; prompt_text inconditionnellement ignoré) · écarts R4 tranchés
+(flag demonstration + has_math CONSERVÉS : dormants côté serveur v1.0,
+vivants avec RFC-0001 ; l'adaptateur mappe déjà attachment→analyse) · split
+par SIGNATURE (sha256(signature) % 100 < 15 → val ; déterministe sans RNG ;
+686 groupes multi-lignes jamais scindés) · class_weight balanced
+(1,03/0,61/2,58) · calibration isotonique top-conf CONSERVATRICE
+min(brut, iso(brut)) — la calibration pleine DÉGRADAIT le golden, mesuré ·
+rule="ml:v05" constant · artefacts candidate→promoted→previous (rotation,
+rollback 1 commande) · registre harnais paresseux · plafond ABSOLU d'écart
+de bande 0,10 AJOUTÉ au gate (TODO(R5) tranché — critère 7-bis ; liant :
+plus strict que le relatif hérité 0,1435, durcissement assumé) · params
+LightGBM figés (multiclass, lr 0.08, leaves 31, depth 6, seed 4242,
+deterministic=true). NB d'intégrité consigné : chiffres golden de la spec =
+ancrage architecte, hyperparamètres premier jet NON retunés après lecture du
+golden ; l'éval officielle passe par le harnais.
+
+**Construction (builder-core) :** sobrio_router/{features,ml}.py ·
+router/train/{train_v05,promote}.py · harness (registres paresseux +
+repartition_rules) · gate (critère bande-auto-absolu 0,10) · bridge api
+(ml_v05 canary per-org) · 4 cibles make · +74 tests (311 router+api) ·
+4 écarts de spec consignés avec rationnel (aucun silencieux). Garde réseau
+étendue à router/train/.
+
+**RÉSULTATS RÉELS (re-prouvés par l'orchestrateur de première main) :**
+- Train 30k : split 25 540/4 460, best_iteration 130, artefact 1,22 Mo
+  (< 20 Mo), model.txt BIT-IDENTIQUE sur re-train (sha 43a61267… stable).
+- Golden (harnais) : exactitude pondérée **0,8978** (heuristique 0,732),
+  sous-dim **0,0331** (0,2044), ECE **0,0417** (0,0934), bande n=123 écart
+  **0,0093** (0,1235), p95 0,05 ms. Sur-dim 0,138 vs 0,127 (léger recul,
+  pénalisé 1x, surveillé — tension douce avec la sobriété consignée).
+- **GATE : PASS 9/9** (rejoué par l'orchestrateur avec previous promu — les
+  références min(baseline, previous) se resserrent : ECE ≤ 0,0517, sous-dim
+  ≤ 0,0531, bande ≤ 0,0293 — l'effet cliquet R3 fonctionne en réel).
+- Promotion + rollback exécutés et réversibilité prouvée ; import
+  sobrio_router SANS lightgbm OK (meta-path bloquant) ; API sans artefact →
+  fallback:heuristic (tests bridge) ; grep réseau 0 ; make test complet vert
+  (218 ext) ; artefacts modèles non versionnés (git check-ignore).
+
+**Points ouverts → panel :** valeur 0,10 du plafond absolu (à valider par
+eval-scientist, propriétaire du gate) · lru_cache bridge = redémarrage API
+après promotion (TODO R7 rechargement à chaud) · PROMOTED_DIR par chemin
+repo (surcharge env = TODO R7 VPS) · risque « géométrie des gabarits »
+consigné (val 87,6 % vs golden 82,9 % — la recalibration v1 sur télémétrie
+réelle reste l'objectif produit).

@@ -351,3 +351,29 @@ def test_parse_spend_cap_rejects_bool():
         distill._parse_spend_cap(True)
     with pytest.raises(distill.SpendCapError):
         distill._parse_spend_cap(False)
+
+
+# ---------------------------------------------------------------------------
+# R5 : la garde réseau s'étend à `router/train/` (train_v05, promote — même
+# invariant cost-guard, dépense 0,00 $ : aucun motif réseau dans le pipeline
+# d'entraînement/promotion).
+# ---------------------------------------------------------------------------
+
+_TRAIN_DIR = Path(__file__).resolve().parents[1] / "train"
+
+
+@pytest.mark.parametrize("module_path", sorted(_TRAIN_DIR.glob("*.py")), ids=lambda p: p.name)
+def test_no_network_imports_in_router_train_modules(module_path):
+    source = module_path.read_text(encoding="utf-8")
+    match = _NETWORK_IMPORT_RE.search(source)
+    assert match is None, (
+        f"import réseau interdit détecté dans {module_path.name} : {match.group(0)!r}"
+    )
+    assert "urlopen" not in source
+    assert "Anthropic(" not in source
+
+
+def test_router_train_dir_couvert_par_la_garde():
+    """Garde-fou du garde-fou : le dossier existe et contient bien les deux modules R5."""
+    noms = {p.name for p in _TRAIN_DIR.glob("*.py")}
+    assert {"train_v05.py", "promote.py"} <= noms

@@ -25,6 +25,11 @@ out/
 
 # Routeur (Lot B) : artefacts de modèles ignorés (R5, potentiellement gros),
 # petits rapports (bench, éval) VERSIONNÉS — cf. router/CONVERGENCE_LEDGER.md.
+# router/artifacts/models/ (candidate/promoted/previous, spec R5 §8) : JAMAIS
+# commité — l'identité versionnée vit DANS metadata.json (hash corpus, hash
+# artefacts, best_iteration) et l'artefact est régénérable (train déterministe
+# bit-exact, corpus épinglé). Couvert par le motif ci-dessous (aucune
+# exception ajoutée pour models/).
 router/artifacts/*
 !router/artifacts/bench/
 !router/artifacts/bench/*

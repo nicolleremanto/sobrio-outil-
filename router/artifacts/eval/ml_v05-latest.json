@@ -1,0 +1,456 @@
+{
+  "n": 181,
+  "exactitude_globale": 0.8287,
+  "exactitude_par_categorie": {
+    "code": 0.8148,
+    "extraction": 0.85,
+    "juridique_contrat": 1.0,
+    "maths_raisonnement": 0.5833,
+    "multi_tours": 1.0,
+    "redaction_simple": 0.95,
+    "resume": 0.6842,
+    "traduction": 0.7
+  },
+  "sous_dimensionnement": {
+    "n": 6,
+    "taux": 0.0331
+  },
+  "sur_dimensionnement": {
+    "n": 25,
+    "taux": 0.1381
+  },
+  "exactitude_ponderee": 0.8978,
+  "ece": 0.0417,
+  "p50_ms": 0.0378,
+  "p95_ms": 0.0677,
+  "calibration_bande_auto": {
+    "seuil": 0.75,
+    "n": 123,
+    "taux_justesse": 0.9187,
+    "confiance_moyenne": 0.928,
+    "ecart": 0.0093
+  },
+  "calibration_par_confiance_informatif": {
+    "0.43": {
+      "n": 1,
+      "taux_justesse": 0.0,
+      "confiance_moyenne": 0.4298,
+      "ecart": 0.4298
+    },
+    "0.45": {
+      "n": 2,
+      "taux_justesse": 0.5,
+      "confiance_moyenne": 0.4524,
+      "ecart": 0.0476
+    },
+    "0.46": {
+      "n": 2,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.4611,
+      "ecart": 0.5389
+    },
+    "0.49": {
+      "n": 1,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.4927,
+      "ecart": 0.5073
+    },
+    "0.50": {
+      "n": 3,
+      "taux_justesse": 0.6667,
+      "confiance_moyenne": 0.5016,
+      "ecart": 0.1651
+    },
+    "0.51": {
+      "n": 2,
+      "taux_justesse": 0.5,
+      "confiance_moyenne": 0.5143,
+      "ecart": 0.0143
+    },
+    "0.52": {
+      "n": 1,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.5158,
+      "ecart": 0.4842
+    },
+    "0.53": {
+      "n": 5,
+      "taux_justesse": 0.6,
+      "confiance_moyenne": 0.5304,
+      "ecart": 0.0696
+    },
+    "0.54": {
+      "n": 2,
+      "taux_justesse": 0.0,
+      "confiance_moyenne": 0.5403,
+      "ecart": 0.5403
+    },
+    "0.55": {
+      "n": 2,
+      "taux_justesse": 0.0,
+      "confiance_moyenne": 0.5488,
+      "ecart": 0.5488
+    },
+    "0.57": {
+      "n": 5,
+      "taux_justesse": 0.4,
+      "confiance_moyenne": 0.5684,
+      "ecart": 0.1684
+    },
+    "0.60": {
+      "n": 3,
+      "taux_justesse": 0.6667,
+      "confiance_moyenne": 0.6024,
+      "ecart": 0.0643
+    },
+    "0.61": {
+      "n": 5,
+      "taux_justesse": 0.2,
+      "confiance_moyenne": 0.6106,
+      "ecart": 0.4106
+    },
+    "0.62": {
+      "n": 1,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.6232,
+      "ecart": 0.3768
+    },
+    "0.64": {
+      "n": 1,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.641,
+      "ecart": 0.359
+    },
+    "0.65": {
+      "n": 2,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.6498,
+      "ecart": 0.3502
+    },
+    "0.66": {
+      "n": 5,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.661,
+      "ecart": 0.339
+    },
+    "0.67": {
+      "n": 1,
+      "taux_justesse": 0.0,
+      "confiance_moyenne": 0.6671,
+      "ecart": 0.6671
+    },
+    "0.68": {
+      "n": 1,
+      "taux_justesse": 0.0,
+      "confiance_moyenne": 0.6792,
+      "ecart": 0.6792
+    },
+    "0.69": {
+      "n": 1,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.6868,
+      "ecart": 0.3132
+    },
+    "0.70": {
+      "n": 3,
+      "taux_justesse": 0.6667,
+      "confiance_moyenne": 0.7032,
+      "ecart": 0.0366
+    },
+    "0.71": {
+      "n": 3,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.7086,
+      "ecart": 0.2914
+    },
+    "0.72": {
+      "n": 3,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.7188,
+      "ecart": 0.2812
+    },
+    "0.73": {
+      "n": 1,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.7318,
+      "ecart": 0.2682
+    },
+    "0.74": {
+      "n": 1,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.7361,
+      "ecart": 0.2639
+    },
+    "0.75": {
+      "n": 2,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.7487,
+      "ecart": 0.2513
+    },
+    "0.76": {
+      "n": 3,
+      "taux_justesse": 0.6667,
+      "confiance_moyenne": 0.761,
+      "ecart": 0.0943
+    },
+    "0.77": {
+      "n": 2,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.7684,
+      "ecart": 0.2316
+    },
+    "0.78": {
+      "n": 2,
+      "taux_justesse": 0.5,
+      "confiance_moyenne": 0.7779,
+      "ecart": 0.2779
+    },
+    "0.80": {
+      "n": 2,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.7973,
+      "ecart": 0.2027
+    },
+    "0.81": {
+      "n": 1,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.8055,
+      "ecart": 0.1945
+    },
+    "0.82": {
+      "n": 1,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.8197,
+      "ecart": 0.1803
+    },
+    "0.83": {
+      "n": 2,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.8317,
+      "ecart": 0.1683
+    },
+    "0.84": {
+      "n": 2,
+      "taux_justesse": 0.5,
+      "confiance_moyenne": 0.8429,
+      "ecart": 0.3429
+    },
+    "0.85": {
+      "n": 2,
+      "taux_justesse": 0.5,
+      "confiance_moyenne": 0.8493,
+      "ecart": 0.3493
+    },
+    "0.87": {
+      "n": 2,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.8692,
+      "ecart": 0.1308
+    },
+    "0.88": {
+      "n": 1,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.88,
+      "ecart": 0.12
+    },
+    "0.89": {
+      "n": 5,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.8898,
+      "ecart": 0.1102
+    },
+    "0.90": {
+      "n": 3,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.9018,
+      "ecart": 0.0982
+    },
+    "0.91": {
+      "n": 3,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.9093,
+      "ecart": 0.0907
+    },
+    "0.92": {
+      "n": 4,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.918,
+      "ecart": 0.082
+    },
+    "0.93": {
+      "n": 12,
+      "taux_justesse": 0.9167,
+      "confiance_moyenne": 0.9287,
+      "ecart": 0.012
+    },
+    "0.94": {
+      "n": 6,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.9397,
+      "ecart": 0.0603
+    },
+    "0.95": {
+      "n": 16,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.9495,
+      "ecart": 0.0505
+    },
+    "0.96": {
+      "n": 12,
+      "taux_justesse": 0.9167,
+      "confiance_moyenne": 0.9588,
+      "ecart": 0.0422
+    },
+    "0.97": {
+      "n": 20,
+      "taux_justesse": 0.9,
+      "confiance_moyenne": 0.9712,
+      "ecart": 0.0712
+    },
+    "0.98": {
+      "n": 18,
+      "taux_justesse": 0.8889,
+      "confiance_moyenne": 0.9821,
+      "ecart": 0.0933
+    },
+    "1.00": {
+      "n": 3,
+      "taux_justesse": 1.0,
+      "confiance_moyenne": 0.9974,
+      "ecart": 0.0026
+    }
+  },
+  "matrice_confusion": {
+    "labels": [
+      "claude-haiku-4-5",
+      "claude-sonnet-5",
+      "claude-opus-4-8"
+    ],
+    "matrix": [
+      [
+        55,
+        8,
+        3
+      ],
+      [
+        4,
+        67,
+        14
+      ],
+      [
+        0,
+        2,
+        28
+      ]
+    ]
+  },
+  "categorie_x_label_informatif": {
+    "code": {
+      "claude-haiku-4-5": {
+        "n": 4,
+        "exactitude": 1.0
+      },
+      "claude-opus-4-8": {
+        "n": 7,
+        "exactitude": 0.7143
+      },
+      "claude-sonnet-5": {
+        "n": 16,
+        "exactitude": 0.8125
+      }
+    },
+    "extraction": {
+      "claude-haiku-4-5": {
+        "n": 14,
+        "exactitude": 0.7857
+      },
+      "claude-opus-4-8": {
+        "n": 3,
+        "exactitude": 1.0
+      },
+      "claude-sonnet-5": {
+        "n": 3,
+        "exactitude": 1.0
+      }
+    },
+    "juridique_contrat": {
+      "claude-haiku-4-5": {
+        "n": 3,
+        "exactitude": 1.0
+      },
+      "claude-opus-4-8": {
+        "n": 10,
+        "exactitude": 1.0
+      },
+      "claude-sonnet-5": {
+        "n": 7,
+        "exactitude": 1.0
+      }
+    },
+    "maths_raisonnement": {
+      "claude-haiku-4-5": {
+        "n": 3,
+        "exactitude": 1.0
+      },
+      "claude-opus-4-8": {
+        "n": 4,
+        "exactitude": 1.0
+      },
+      "claude-sonnet-5": {
+        "n": 17,
+        "exactitude": 0.4118
+      }
+    },
+    "multi_tours": {
+      "claude-haiku-4-5": {
+        "n": 6,
+        "exactitude": 1.0
+      },
+      "claude-opus-4-8": {
+        "n": 6,
+        "exactitude": 1.0
+      },
+      "claude-sonnet-5": {
+        "n": 19,
+        "exactitude": 1.0
+      }
+    },
+    "redaction_simple": {
+      "claude-haiku-4-5": {
+        "n": 13,
+        "exactitude": 1.0
+      },
+      "claude-sonnet-5": {
+        "n": 7,
+        "exactitude": 0.8571
+      }
+    },
+    "resume": {
+      "claude-haiku-4-5": {
+        "n": 13,
+        "exactitude": 0.6154
+      },
+      "claude-sonnet-5": {
+        "n": 6,
+        "exactitude": 0.8333
+      }
+    },
+    "traduction": {
+      "claude-haiku-4-5": {
+        "n": 10,
+        "exactitude": 0.7
+      },
+      "claude-sonnet-5": {
+        "n": 10,
+        "exactitude": 0.7
+      }
+    }
+  },
+  "repartition_rules": {
+    "ml:v05": 181
+  },
+  "router_name": "ml_v05",
+  "golden_sha": "6120df28f72c68bef9fab30c5ac193419999f326fa7a4ab537c55097007a2868",
+  "date": "2026-07-18T20:12:27.083443+00:00",
+  "git_sha": "b3fbdcc"
+}

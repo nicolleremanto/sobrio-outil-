@@ -1,0 +1,6 @@
+# Dépendances d'ENTRAÎNEMENT du routeur (chantier R5) — installées dans le
+# venv racine, OPTIONNELLES au runtime : les dépendances du paquet
+# `sobrio_router` (pyproject.toml) restent VIDES, l'import de lightgbm est
+# PARESSEUX (sobrio_router/ml.py §7.1 — le paquet s'importe sans elles).
+lightgbm==4.6.0
+numpy==2.5.1

@@ -452,9 +452,13 @@ _BANDE_REF = {"seuil": 0.75, "n": 40, "taux_justesse": 0.60, "confiance_moyenne"
             {"sous_dimensionnement": {"n": 27, "taux": 0.15}},
         ),
         # Bande auto (référence mesurée) : 0.18+0.02 < 0.20 (qa r3, replié r5).
+        # Critère « FAIL bande-auto : » AVEC séparateur (r5) : le site visé est
+        # le critère RELATIF — le nouveau plafond ABSOLU (« FAIL
+        # bande-auto-absolu », sans arrondi par construction) échoue, lui,
+        # légitimement à 0.20 > 0.10 et ne doit pas être confondu ici.
         (
             "bande",
-            "FAIL bande-auto",
+            "FAIL bande-auto :",
             {"calibration_bande_auto": {**_BANDE_REF, "ecart": 0.20}},
             {"calibration_bande_auto": {**_BANDE_REF, "ecart": 0.18}},
             None,
@@ -506,3 +510,107 @@ def test_per_confidence_block_normalizes_negative_zero_label():
     block = _calibration_by_confidence([-0.001, 0.001], [True, False])
     assert set(block) == {"0.00"}
     assert block["0.00"]["n"] == 2
+
+
+# ---------------------------------------------------------------------------
+# R5 — registre ml du harnais (échec BRUYANT sans artefact) + bloc
+# `repartition_rules` (informatif, ignoré par le gate, spec R5 §9).
+# ---------------------------------------------------------------------------
+
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+
+_SCRIPT_ML_SANS_ARTEFACT = """
+import sys
+from pathlib import Path
+
+sys.path.insert(0, "router/eval")
+import harness
+
+harness._ARTIFACTS_DIR = Path(sys.argv[2])  # jamais d'écriture dans le dépôt
+harness._REGISTRY["ml_v05_candidate"] = lambda: harness.SafeRouter(
+    harness.MLRouter(Path(sys.argv[1]))
+)
+raise SystemExit(harness.main(["--router", "ml_v05_candidate"]))
+"""
+
+_SCRIPT_HEURISTIC_SANS_LIGHTGBM = """
+import sys
+from pathlib import Path
+
+
+class _BloqueurLightgbm:
+    def find_spec(self, name, path=None, target=None):
+        if name == "lightgbm" or name.startswith("lightgbm."):
+            raise ImportError("lightgbm bloque (simulation absence)")
+        return None
+
+
+sys.meta_path.insert(0, _BloqueurLightgbm())
+sys.path.insert(0, "router/eval")
+import harness
+
+harness._ARTIFACTS_DIR = Path(sys.argv[1])  # jamais d'écriture dans le dépôt
+raise SystemExit(harness.main(["--router", "heuristic"]))
+"""
+
+
+def test_registre_ml_sans_artefact_refus_propre(tmp_path: Path):
+    """CLI `--router ml_v05_candidate` sans artefact : exit 2, REFUS, zéro traceback."""
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            _SCRIPT_ML_SANS_ARTEFACT,
+            str(tmp_path / "artefact-inexistant"),
+            str(tmp_path / "eval-out"),
+        ],
+        capture_output=True,
+        text=True,
+        cwd=_REPO_ROOT,
+        timeout=120,
+    )
+    assert proc.returncode == 2, proc.stderr
+    assert "REFUS" in proc.stderr
+    assert "Traceback" not in proc.stderr
+
+
+def test_registre_heuristic_fonctionne_sans_lightgbm_ni_artefact(tmp_path: Path):
+    """`--router heuristic` reste fonctionnel SANS lightgbm et SANS artefact ml."""
+    proc = subprocess.run(
+        [sys.executable, "-c", _SCRIPT_HEURISTIC_SANS_LIGHTGBM, str(tmp_path / "eval-out")],
+        capture_output=True,
+        text=True,
+        cwd=_REPO_ROOT,
+        timeout=120,
+    )
+    assert proc.returncode == 0, proc.stderr
+    assert (tmp_path / "eval-out" / "heuristic-latest.json").is_file()
+
+
+def test_repartition_rules_present_comptes_exacts():
+    """Bloc informatif au rapport : comptes PAR règle == décisions réellement émises."""
+    from sobrio_router import HeuristicRouter, SafeRouter
+
+    entries = load_golden()[:25]
+    report = evaluate_router(SafeRouter(HeuristicRouter()), entries)
+    attendu: dict[str, int] = {}
+    reference = HeuristicRouter()
+    for entry in entries:
+        rule = reference.decide(entry.signals).rule
+        attendu[rule] = attendu.get(rule, 0) + 1
+    assert report["repartition_rules"] == dict(sorted(attendu.items()))
+    assert sum(report["repartition_rules"].values()) == len(entries)
+
+
+def test_repartition_rules_retro_compatible_et_ignore_du_gate():
+    """`_validate_report` accepte un rapport SANS le bloc ; le gate ne le lit pas."""
+    from gate import _validate_report
+
+    sans_bloc = _report()
+    assert "repartition_rules" not in sans_bloc
+    assert _validate_report(sans_bloc, "candidat") == []
+    # Un bloc contaminé n'influence PAS le verdict du gate (c'est promote.py
+    # qui le lit — garde anti-contamination, testée dans test_router_promote).
+    candidate = _report(exactitude_ponderee=0.95, repartition_rules={"fallback:heuristic": 181})
+    result = evaluate_gate(candidate, _report())
+    assert result.passed is True
