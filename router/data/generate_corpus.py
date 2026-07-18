@@ -150,7 +150,7 @@ _EVAL_DIR = str(Path(__file__).resolve().parents[1] / "eval")
 if _EVAL_DIR not in sys.path:
     sys.path.insert(0, _EVAL_DIR)
 
-from loader import golden_signatures, signal_signature  # noqa: E402
+from loader import golden_sha256, golden_signatures, signal_signature  # noqa: E402
 
 from sobrio_router import VISIBLE_MODELS  # noqa: E402
 
@@ -1101,6 +1101,21 @@ def generate(n: int, seed: int = DEFAULT_SEED, bruit_rate: float = DEFAULT_BRUIT
     _valider_templates()
     rng = random.Random(seed)
     rng_bruit = random.Random(seed + _BRUIT_SEED_OFFSET)
+    # Garde de couplage (minor eval r1) : la garde anti-fuite n'a de sens
+    # que contre le golden FIGÉ — un golden dérivé doit faire échouer la
+    # génération bruyamment, pas changer le corpus en silence.
+    # Format du fichier : "<sha256>  golden.jsonl" (style shasum) — premier champ.
+    sha_attendu = (
+        (Path(__file__).resolve().parents[1] / "eval" / "golden" / "GOLDEN_SHA256")
+        .read_text()
+        .split()[0]
+    )
+    sha_reel = golden_sha256()
+    if sha_reel != sha_attendu:
+        raise RuntimeError(
+            f"golden.jsonl a dérivé ({sha_reel[:12]}… != {sha_attendu[:12]}… committé) — "
+            "garde anti-fuite invalidée, génération refusée"
+        )
     golden_sigs = golden_signatures()
 
     by_category: dict[str, list[_Template]] = {}
@@ -1125,7 +1140,8 @@ def generate(n: int, seed: int = DEFAULT_SEED, bruit_rate: float = DEFAULT_BRUIT
             for _ in range(tmpl_counts[i]):
                 accepted: dict | None = None
                 accepted_sig: tuple | None = None
-                last_fail: str | None = None
+                fails_anti_fuite = 0
+                fails_contradiction = 0
                 for _attempt in range(_MAX_RETIRAGE_ATTEMPTS):
                     candidate = _build_row(rng, template)
                     sig = signal_signature(
@@ -1133,18 +1149,22 @@ def generate(n: int, seed: int = DEFAULT_SEED, bruit_rate: float = DEFAULT_BRUIT
                     )
                     if sig in golden_sigs:
                         n_rejets_anti_fuite += 1
-                        last_fail = "anti_fuite"
+                        fails_anti_fuite += 1
                         continue
                     label_existant = signature_labels.get(sig)
                     if label_existant is not None and label_existant != candidate["label"]:
                         n_rejets_contradiction += 1
-                        last_fail = "contradiction"
+                        fails_contradiction += 1
                         continue
                     accepted, accepted_sig = candidate, sig
                     break
 
                 if accepted is None:
-                    if last_fail == "contradiction":
+                    # Attribution par cause DOMINANTE sur l'historique complet
+                    # de la ligne (minor dq/qa r1 : le dernier échec seul
+                    # pouvait masquer la cause majoritaire) ; égalité →
+                    # anti_fuite (la garde la plus critique).
+                    if fails_contradiction > fails_anti_fuite:
                         n_abandons_contradiction += 1
                     else:
                         n_abandons_anti_fuite += 1

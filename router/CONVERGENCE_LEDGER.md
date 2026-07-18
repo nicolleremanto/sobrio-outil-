@@ -772,3 +772,40 @@ Preuves : 228 router + 26 api verts (+54), make router-corpus ok:true (sha
 vérifié par shasum indépendant), router-corpus-check vert, make test complet
 vert (218 ext), ruff verts, overlap 30k×golden = 0 et contradictions
 hors-bruit = 0 re-prouvés par scripts orchestrateur, from-imports réseau : 0.
+
+## R4 — round 1 (commit 14b6b67, panel 5 juges — attaques r0 rejouées)
+
+| agent            | modèle | scores (dims)                                       | blocking | major | verdict |
+|------------------|--------|-----------------------------------------------------|----------|-------|---------|
+| data-quality (P) | sonnet | réalisme5 équilibre5 cohérence5 étiquettes5 robust5 | 0        | 0     | GREEN   |
+| eval-scientist   | opus   | anti-fuite5 seed5 principes4 repro5 intégrité4      | 0        | 0     | GREEN   |
+| qa-auditor       | sonnet | couverture5 contrat5 erreurs4 clarté5 régressions5  | 0        | 0     | GREEN   |
+| privacy-sentinel | sonnet | —                                                   | PASS     | —     | PASS    |
+| cost-guard       | haiku  | —                                                   | PASS     | —     | PASS    |
+
+→ **Ronde VERTE (1/2).** Toutes les attaques r0 rejouées et bloquées ;
+privacy a régénéré le corpus indépendamment (sha be96b691 bit-exact, 8/48/0
+reproduits) et relu le diff intégral (3 579 lignes).
+
+**Minors ronde 1 → corrigés avant ronde 2 :**
+- **[eval]** Rien ne verrouillait les artefacts de référence commités →
+  test qui régénère AU N LIVRÉ (paramètres du metadata) et compare
+  sha256_gz + version du générateur + zéro abandon.
+- **[eval]** Le générateur golden-aware ne vérifiait pas le sha du golden →
+  garde de couplage : golden dérivé ⇒ RuntimeError bruyant (+ test
+  monkeypatché) ; format shasum du fichier GOLDEN_SHA256 parsé (1er champ).
+- **[qa]** Refus de gate LÉGITIMES de distill --real (flag absent, arrêt
+  fondateurs) sortaient en traceback brut exit 1 → REFUS propre + exit 2,
+  style aligné sur router/data/ (+2 tests dont l'arrêt fondateurs gates
+  franchis).
+- **[qa]** « bool exclu » du cap était FAUX (True passait comme 1.0) →
+  isinstance(bool) rejeté, l'affirmation du ledger devient vraie (+ test).
+- **[dq/qa]** Attribution d'abandon par DERNIER échec → par cause DOMINANTE
+  de l'historique de la ligne (égalité → anti_fuite), documentée.
+- **[qa — limite documentée]** La garde réseau reste STATIQUE (un import
+  dynamique importlib/__import__ ne serait pas détecté) — aucun usage dans
+  router/data/, limite notée ici ; défense en profondeur = revue de diff +
+  panels.
+
+Preuves : 232 router + 26 api verts (+4), make router-corpus ok:true (8/48/0
+inchangés, sha be96b691 stable), make test complet vert, ruff verts.

@@ -323,7 +323,31 @@ def test_main_dry_run_writes_report(small_corpus, tmp_path):
     assert written["mode"] == "dry_run"
 
 
-def test_main_real_flag_raises(small_corpus, monkeypatch):
+def test_main_real_flag_clean_refusal_exit_2(small_corpus, monkeypatch, capsys):
+    """Refus de gate LÉGITIME (flag absent) : message propre + exit 2, pas de
+    traceback brut (minor qa ronde 1 — aligné sur le style de router/data/)."""
     monkeypatch.delenv("SOBRIO_ALLOW_PAID_CALLS", raising=False)
-    with pytest.raises(RuntimeError):
-        distill.main(["--corpus", str(small_corpus), "--real"])
+    code = distill.main(["--corpus", str(small_corpus), "--real"])
+    assert code == 2
+    err = capsys.readouterr().err
+    assert "REFUS" in err and "dry-run" in err and "Traceback" not in err
+
+
+def test_main_real_founders_stop_clean_exit_2(small_corpus, monkeypatch, capsys):
+    """Gates franchis (flag + cap suffisant) : l'arrêt « décision fondateurs »
+    est lui aussi un refus propre exit 2 — jamais d'appel réseau."""
+    monkeypatch.setenv("SOBRIO_ALLOW_PAID_CALLS", "1")
+    monkeypatch.setenv("SOBRIO_MAX_SPEND_USD", "100000")
+    code = distill.main(["--corpus", str(small_corpus), "--real"])
+    assert code == 2
+    err = capsys.readouterr().err
+    assert "fondateurs" in err and "Traceback" not in err
+
+
+def test_parse_spend_cap_rejects_bool():
+    """« bool exclu » (minor qa r1) : True passait comme 1.0 — désormais rejeté,
+    l'affirmation du ledger/docstring est vraie (même précaution que SafeRouter)."""
+    with pytest.raises(distill.SpendCapError):
+        distill._parse_spend_cap(True)
+    with pytest.raises(distill.SpendCapError):
+        distill._parse_spend_cap(False)

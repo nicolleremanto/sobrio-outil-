@@ -8,6 +8,7 @@ golden set FIGÉ (anti-fuite par signature).
 
 from __future__ import annotations
 
+import gzip
 import hashlib
 import json
 import subprocess
@@ -661,3 +662,35 @@ def test_delivered_corpus_has_zero_structural_contradictions():
     report = analyze(rows, frozenset(bruit_ids))
     assert report["doublons_detail"]["n_contradictions_hors_bruit"] == 0
     assert report["verdict"]["ok"] is True, report["verdict"]["alertes"]
+
+
+def test_reference_artifacts_locked_to_regeneration():
+    """Minor eval r1 : rien ne verrouillait les artefacts de référence commités.
+    Régénère AU N LIVRÉ avec les paramètres de référence et compare le sha du
+    .gz canonique + la version du générateur à ceux de reference/metadata."""
+    import hashlib
+
+    meta = json.loads(
+        (
+            Path(__file__).resolve().parents[1] / "data" / "reference" / "corpus-v1.metadata.json"
+        ).read_text()
+    )
+    rows, stats, _bruit_ids = generate_corpus.generate(
+        meta["n"], seed=meta["seed"], bruit_rate=meta["bruit_rate_parametre"]
+    )
+    payload = "\n".join(json.dumps(r, ensure_ascii=False) for r in rows) + "\n"
+    compressed = gzip.compress(payload.encode("utf-8"), compresslevel=9, mtime=0)
+    assert hashlib.sha256(compressed).hexdigest() == meta["sha256_gz"]
+    assert meta["generator_version"] == generate_corpus.__version__
+    assert stats["n_abandons"] == meta["n_abandons"] == 0
+
+
+def test_generator_refuses_derived_golden(monkeypatch, tmp_path):
+    """Garde de couplage (minor eval r1) : un golden dérivé fait échouer la
+    génération bruyamment au lieu de changer le corpus en silence."""
+    import loader
+
+    monkeypatch.setattr(loader, "golden_sha256", lambda: "0" * 64)
+    monkeypatch.setattr(generate_corpus, "golden_sha256", lambda: "0" * 64)
+    with pytest.raises(RuntimeError, match="dérivé"):
+        generate_corpus.generate(50, seed=4242, bruit_rate=0.03)

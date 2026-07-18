@@ -126,6 +126,8 @@ def _parse_spend_cap(raw: str | None) -> float:
     """
     if raw is None:
         return _DEFAULT_MAX_SPEND_USD
+    if isinstance(raw, bool):  # même précaution que SafeRouter (R1) : True ≠ 1.0
+        raise SpendCapError(f"{_ENV_CAP} invalide (booléen reçu : {raw!r})")
     try:
         cap = float(raw)
     except (TypeError, ValueError) as exc:
@@ -285,10 +287,15 @@ def main(argv: list[str] | None = None) -> int:
         try:
             run_real(args.corpus, args.teacher_model)  # lève toujours
         except SpendCapError as exc:
-            # M5 : validation d'entrée fail-closed — message propre + exit 2,
-            # jamais de traceback brut (distinct des refus de gate légitimes,
-            # RuntimeError, qui restent propagés tels quels — cf. tests).
+            # M5 : validation d'entrée fail-closed — message propre + exit 2.
             print(f"FAIL : {exc}", file=sys.stderr)
+            return 2
+        except RuntimeError as exc:
+            # Refus de gate LÉGITIMES (flag absent, cap dépassé, arrêt
+            # « décision fondateurs ») : même style que partout dans
+            # router/data/ — message propre + exit 2, jamais de traceback
+            # brut (minor qa ronde 1).
+            print(f"REFUS : {exc}", file=sys.stderr)
             return 2
         return 1  # inatteignable
 
