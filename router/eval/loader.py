@@ -69,7 +69,14 @@ def load_golden(path: Path = GOLDEN_PATH) -> list[GoldenEntry]:
 
 
 def golden_sha256(path: Path = GOLDEN_SHA_PATH) -> str:
-    """Lit le hash sha256 committé du golden set (première colonne du fichier)."""
+    """LIT le hash sha256 COMMITTÉ du golden set (1re colonne de GOLDEN_SHA256).
+
+    ATTENTION (minor eval r2) : cette fonction ne RECALCULE rien — elle lit la
+    valeur enregistrée. Pour vérifier que golden.jsonl n'a pas dérivé, il faut
+    hashlib.sha256(golden.jsonl octets) — cf. test_router_golden_frozen.py et
+    generate_corpus._verifier_golden_fige (la comparer à elle-même est une
+    tautologie, défaut réel attrapé en R4 ronde 2).
+    """
     return path.read_text(encoding="utf-8").split()[0]
 
 

@@ -150,7 +150,7 @@ _EVAL_DIR = str(Path(__file__).resolve().parents[1] / "eval")
 if _EVAL_DIR not in sys.path:
     sys.path.insert(0, _EVAL_DIR)
 
-from loader import golden_sha256, golden_signatures, signal_signature  # noqa: E402
+from loader import golden_signatures, signal_signature  # noqa: E402
 
 from sobrio_router import VISIBLE_MODELS  # noqa: E402
 
@@ -1068,6 +1068,37 @@ def _build_row(rng: random.Random, template: _Template) -> dict:
     }
 
 
+_GOLDEN_DIR = Path(__file__).resolve().parents[1] / "eval" / "golden"
+
+
+def _verifier_golden_fige(golden_dir: Path = _GOLDEN_DIR) -> None:
+    """Garde de couplage : RECALCULE le sha256 des octets de golden.jsonl et le
+    compare au sha COMMITTÉ (1er champ de GOLDEN_SHA256, format shasum).
+
+    Correction ronde 2 (major dq+eval+qa, prouvé par expérience) : la version
+    ronde 1 comparait `golden_sha256()` — qui LIT le fichier GOLDEN_SHA256 —
+    au même fichier lu directement : une tautologie (`x != x`) incapable de
+    détecter une dérive réelle de golden.jsonl. Ici le hash est recalculé
+    sur les OCTETS COURANTS : un golden.jsonl modifié sans re-figeage fait
+    échouer la génération bruyamment, jamais en silence.
+    """
+    sha_attendu = (golden_dir / "GOLDEN_SHA256").read_text(encoding="utf-8").split()[0]
+    sha_octets = hashlib.sha256((golden_dir / "golden.jsonl").read_bytes()).hexdigest()
+    if sha_octets != sha_attendu:
+        raise RuntimeError(
+            f"golden.jsonl a dérivé (octets {sha_octets[:12]}… != {sha_attendu[:12]}… "
+            "committé) — garde anti-fuite invalidée, génération refusée"
+        )
+
+
+def _attribuer_abandon(fails_anti_fuite: int, fails_contradiction: int) -> str:
+    """Cause DOMINANTE de l'historique d'échecs d'une ligne abandonnée (r1) ;
+    égalité → anti_fuite (la garde la plus critique). Extrait pour être
+    testable unitairement (minor eval/qa r2 : chemin latent, 0 abandon réel).
+    """
+    return "contradiction" if fails_contradiction > fails_anti_fuite else "anti_fuite"
+
+
 def generate(n: int, seed: int = DEFAULT_SEED, bruit_rate: float = DEFAULT_BRUIT_RATE):
     """Engendre jusqu'à `n` lignes de corpus + les statistiques associées.
 
@@ -1101,21 +1132,7 @@ def generate(n: int, seed: int = DEFAULT_SEED, bruit_rate: float = DEFAULT_BRUIT
     _valider_templates()
     rng = random.Random(seed)
     rng_bruit = random.Random(seed + _BRUIT_SEED_OFFSET)
-    # Garde de couplage (minor eval r1) : la garde anti-fuite n'a de sens
-    # que contre le golden FIGÉ — un golden dérivé doit faire échouer la
-    # génération bruyamment, pas changer le corpus en silence.
-    # Format du fichier : "<sha256>  golden.jsonl" (style shasum) — premier champ.
-    sha_attendu = (
-        (Path(__file__).resolve().parents[1] / "eval" / "golden" / "GOLDEN_SHA256")
-        .read_text()
-        .split()[0]
-    )
-    sha_reel = golden_sha256()
-    if sha_reel != sha_attendu:
-        raise RuntimeError(
-            f"golden.jsonl a dérivé ({sha_reel[:12]}… != {sha_attendu[:12]}… committé) — "
-            "garde anti-fuite invalidée, génération refusée"
-        )
+    _verifier_golden_fige()
     golden_sigs = golden_signatures()
 
     by_category: dict[str, list[_Template]] = {}
@@ -1160,11 +1177,7 @@ def generate(n: int, seed: int = DEFAULT_SEED, bruit_rate: float = DEFAULT_BRUIT
                     break
 
                 if accepted is None:
-                    # Attribution par cause DOMINANTE sur l'historique complet
-                    # de la ligne (minor dq/qa r1 : le dernier échec seul
-                    # pouvait masquer la cause majoritaire) ; égalité →
-                    # anti_fuite (la garde la plus critique).
-                    if fails_contradiction > fails_anti_fuite:
+                    if _attribuer_abandon(fails_anti_fuite, fails_contradiction) == "contradiction":
                         n_abandons_contradiction += 1
                     else:
                         n_abandons_anti_fuite += 1

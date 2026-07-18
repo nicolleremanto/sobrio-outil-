@@ -809,3 +809,44 @@ reproduits) et relu le diff intégral (3 579 lignes).
 
 Preuves : 232 router + 26 api verts (+4), make router-corpus ok:true (8/48/0
 inchangés, sha be96b691 stable), make test complet vert, ruff verts.
+
+## R4 — round 2 (commit 60ae8f7, panel 5 juges — polish r1 sous scrutin)
+
+| agent            | modèle | scores (dims)                                       | blocking | major | verdict |
+|------------------|--------|-----------------------------------------------------|----------|-------|---------|
+| data-quality (P) | sonnet | réalisme5 équilibre5 cohérence4 étiquettes5 robust3 | 0        | 1     | YELLOW  |
+| eval-scientist   | opus   | anti-fuite3 seed5 principes4 repro5 intégrité4      | 0        | 1     | YELLOW  |
+| qa-auditor       | sonnet | couverture3 contrat2 erreurs3 clarté3 régressions5  | 0        | 1     | YELLOW  |
+| privacy-sentinel | sonnet | —                                                   | PASS     | —     | PASS    |
+| cost-guard       | haiku  | —                                                   | PASS     | —     | PASS    |
+
+→ **Ronde JAUNE — streak remise à ZÉRO (0/2).** Les 3 juges notants ont
+convergé sur LE MÊME défaut de MON polish r1, prouvé par expérience (golden
+muté en sandbox, aucune erreur levée) : la « garde de couplage golden »
+était une TAUTOLOGIE — golden_sha256() LIT le fichier GOLDEN_SHA256 (ne
+recalcule rien), je comparais donc le fichier committé à lui-même
+(« x != x ») ; seul le monkeypatch du test la faisait « marcher ». Le ledger
+affirmait un invariant FAUX. (Atténuation : la dérive réelle du golden
+restait captée par test_router_golden_frozen.py et le corpus livré est
+prouvé sans fuite — la garde était redondante mais inefficace, pas une
+brèche ouverte.)
+
+**Corrections ronde 2 :**
+- **[major ×3]** Garde v2 RÉELLE : _verifier_golden_fige() RECALCULE
+  hashlib.sha256 sur les OCTETS de golden.jsonl et compare au 1er champ du
+  fichier committé ; paramétrable par dossier → testée par DÉRIVE RÉELLE
+  (copie tmp, ligne ajoutée sans re-figeage → RuntimeError ; intact →
+  passe ; ZÉRO monkeypatch) + test de câblage (generate() l'appelle bien).
+- **[minor eval]** loader.golden_sha256 : docstring ATTENTION explicite
+  (elle LIT, ne recalcule pas — le nom trompeur est ce qui a permis la
+  tautologie).
+- **[minor eval/qa]** Attribution d'abandon extraite en _attribuer_abandon()
+  et verrouillée unitairement (49/1, 1/49, égalité → anti_fuite).
+- **[dq — passation R5 consignée]** Le corpus est PRÊT pour LightGBM sous
+  réserves à traiter en R5 : split par SIGNATURE/gabarit (jamais par ligne —
+  739 doublons même-label + 75 bruit fuiteraient entre partitions) ;
+  déséquilibre de classes (opus 12,8 % vs sonnet 54,9 %) → class_weight ;
+  mapping label→index + spec du vecteur de features à livrer en R5.
+
+Preuves : 236 router + 26 api verts (+4), corpus INCHANGÉ (sha be96b691,
+8/48/0), make test complet vert, ruff verts.

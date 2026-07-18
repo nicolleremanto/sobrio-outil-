@@ -685,12 +685,50 @@ def test_reference_artifacts_locked_to_regeneration():
     assert stats["n_abandons"] == meta["n_abandons"] == 0
 
 
-def test_generator_refuses_derived_golden(monkeypatch, tmp_path):
-    """Garde de couplage (minor eval r1) : un golden dérivé fait échouer la
-    génération bruyamment au lieu de changer le corpus en silence."""
-    import loader
+def test_guard_detects_real_golden_drift(tmp_path):
+    """Garde de couplage v2 (major r2 : la v1 comparait GOLDEN_SHA256 à
+    lui-même — tautologie prouvée par les juges). Ici, DÉRIVE RÉELLE, zéro
+    monkeypatch : copie du dossier golden, golden.jsonl muté SANS re-figer
+    GOLDEN_SHA256 → la garde recalcule les octets et refuse."""
+    import shutil
 
-    monkeypatch.setattr(loader, "golden_sha256", lambda: "0" * 64)
-    monkeypatch.setattr(generate_corpus, "golden_sha256", lambda: "0" * 64)
+    golden_dir = Path(generate_corpus.__file__).resolve().parents[1] / "eval" / "golden"
+    copy = tmp_path / "golden"
+    copy.mkdir()
+    for name in ("golden.jsonl", "GOLDEN_SHA256"):
+        shutil.copy(golden_dir / name, copy / name)
+
+    # Intact : la garde passe.
+    generate_corpus._verifier_golden_fige(copy)
+
+    # Dérive réelle (ligne ajoutée, sha committé inchangé) : refus bruyant.
+    with (copy / "golden.jsonl").open("a", encoding="utf-8") as fh:
+        fh.write('{"id": "gold-9999", "category": "code", "label": "claude-haiku-4-5"}\n')
     with pytest.raises(RuntimeError, match="dérivé"):
-        generate_corpus.generate(50, seed=4242, bruit_rate=0.03)
+        generate_corpus._verifier_golden_fige(copy)
+
+
+def test_guard_wired_into_generate(monkeypatch):
+    """La garde v2 est bien APPELÉE par generate() (pas seulement définie)."""
+    calls = []
+    monkeypatch.setattr(
+        generate_corpus,
+        "_verifier_golden_fige",
+        lambda *a, **k: calls.append(True),
+    )
+    generate_corpus.generate(20, seed=4242, bruit_rate=0.0)
+    assert calls == [True]
+
+
+@pytest.mark.parametrize(
+    ("anti_fuite", "contradiction", "attendu"),
+    [
+        (49, 1, "anti_fuite"),  # dominante anti-fuite (le cas du minor r1)
+        (1, 49, "contradiction"),
+        (25, 25, "anti_fuite"),  # égalité → la garde la plus critique
+    ],
+)
+def test_abandon_attribution_by_dominant_cause(anti_fuite, contradiction, attendu):
+    """Chemin d'abandon latent (0 abandon sur le corpus livré) : la règle
+    d'attribution est verrouillée unitairement (minor eval/qa r2)."""
+    assert generate_corpus._attribuer_abandon(anti_fuite, contradiction) == attendu
