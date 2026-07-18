@@ -263,7 +263,7 @@ class _Template:
 # `note` (M2, correction ronde 0) : formulation STRUCTURELLE — paramètres,
 # plages, rôle statistique du gabarit dans sa catégorie — JAMAIS une scène
 # narrative façon golden (`generate_golden.py`). Vérifié par script dédié
-# (`_verifier_notes_distinctes`, exécuté par les tests et en CLI) : aucune
+# (`test_corpus_template_notes_*`, tests uniquement — aucun chemin CLI) : aucune
 # chaîne EXACTE en commun avec les notes du golden.
 # ---------------------------------------------------------------------------
 TEMPLATES: tuple[_Template, ...] = (

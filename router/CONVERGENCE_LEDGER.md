@@ -39,8 +39,8 @@ RAM < 1 Go · artefacts : étage 1 < 20 Mo, étage 2 < 500 Mo · dépense API : 
 | R1       | Socle du routeur & v0 heuristique branchée         | 2/2 (r2 & r3) | **CONVERGÉ** |
 | R2       | Golden set (juge de paix)                          | 2/2 (r2 & r3) | **CONVERGÉ** |
 | R3       | Protocole d'évaluation & harnais + gate            | 2/2 (r5 & r6) | **CONVERGÉ** |
-| R4       | Corpus de démarrage à froid                        | 0/2           | en cours |
-| R5       | Pipeline d'entraînement & classifieur v0.5         | 0/2           | à venir |
+| R4       | Corpus de démarrage à froid                        | 2/2 (r4 & r5) | **CONVERGÉ** |
+| R5       | Pipeline d'entraînement & classifieur v0.5         | 0/2           | en cours |
 | R6       | Étage 2 embeddings (construit, ÉTEINT par défaut)  | 0/2           | à venir |
 | R7       | Recalibration, monitoring & déploiement VPS        | 0/2           | à venir |
 
@@ -915,3 +915,45 @@ convergence (leçon r2 : le polish non jugé est du code nouveau).
   déjà en vol au moment de la directive, a terminé sous l'ancienne
   politique ; effectif à partir du panel R4 ronde 5. La colonne « modèle »
   des tableaux suivants vaut « fable » pour tous.
+
+## R4 — round 5 (commit 9f07a12, panel 5 juges SOUS FABLE — CONVERGENCE)
+
+| agent            | modèle | scores (dims)                                       | blocking | major | verdict |
+|------------------|--------|-----------------------------------------------------|----------|-------|---------|
+| data-quality (P) | fable  | réalisme5 équilibre5 cohérence5 étiquettes5 robust5 | 0        | 0     | GREEN   |
+| eval-scientist   | fable  | anti-fuite5 seed5 principes5 repro5 intégrité5      | 0        | 0     | GREEN   |
+| qa-auditor       | fable  | couverture5 contrat5 erreurs4 clarté5 régressions5  | 0        | 0     | GREEN   |
+| privacy-sentinel | fable  | —                                                   | PASS     | —     | PASS    |
+| cost-guard       | fable  | —                                                   | PASS     | —     | PASS    |
+
+→ **Ronde VERTE (2/2 consécutives, r4 & r5) — CHANTIER R4 CONVERGÉ.**
+Preuves de clôture notables : privacy a scanné EXHAUSTIVEMENT les 30 017
+chaînes du corpus (walk récursif : zéro chaîne à espace ou > 40 car.) et
+l'AST des 28 .py de router/ (426 littéraux multi-mots, tous méta) ; cost a
+rejoué 10 scénarios de gates --real sous HOOK D'AUDIT réseau (zéro événement
+socket ; bonus : le coût estimé 59,08 $ dépasse même le cap défaut 20 $ — le
+chemin payant refuse aujourd'hui sans aucune variable d'env) et prouvé que
+les adaptateurs datasets lèvent NotImplementedError même flag activé (aucune
+capacité réseau n'existe) ; garde golden rejouée e2e dans les 4 cas (dérivé,
+miroir, sha vide, intact).
+
+**Entrées de la spec R5 consignées en clôture :**
+- [dq] Écarts schéma corpus ↔ contrat OpenAPI à trancher dans le mapping
+  features : flag `demonstration` (1 080 lignes) hors enum PromptFeatures ;
+  `has_math` porté par le corpus, `has_attachment_hint` par le contrat.
+- [dq, rappel] Split PAR SIGNATURE (739+75 doublons) ; class_weight (opus
+  12,8 % vs sonnet 54,9 %) ; mapping label→index à livrer.
+- [eval] Commentaire fantôme (`_verifier_notes_distinctes` inexistante) →
+  corrigé dans CE commit de clôture (référence réelle : les 2 tests de
+  distinction des notes ; tests uniquement, aucun chemin CLI).
+- [qa, informatif] OSError d'écriture post-mkdir non enveloppé (résiduel
+  déjà adjugé « aucune action »).
+
+**Bilan R4 (6 rondes) :** corpus 30k signaux golden-aware (sha be96b691,
+anti-fuite et anti-contradiction PAR CONSTRUCTION re-tirage, 8/48/0),
+quality report à 3 compteurs de doublons, garde d'intégrité golden par
+recalcul d'octets (v2 après tautologie prouvée), gates de dépense
+fail-closed (nan/inf/bool), garde réseau regex 2 formes, LICENSES NON
+UTILISÉ ×3, fixtures neutres. Trois leçons d'intégrité orchestrateur/builder
+attrapées par les juges (anti-fuite au mauvais N « prouvée à vide », garde
+tautologique, chemin d'exception CLI mort devenu vivant sans filet).
