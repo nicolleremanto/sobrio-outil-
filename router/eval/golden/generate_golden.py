@@ -766,6 +766,8 @@ GABARITS: tuple[Gabarit, ...] = (
         derogations_up=(0, 1),
     ),
     # === ajout post-arbitrage (R2) : opus honnête en multi_tours ==============
+    # Validé au fond par eval-scientist (panel r1) PUIS ml-architect (panel r2)
+    # — double-revue complète, verdicts détaillés au ledger R2 rounds 1-2.
     # Les deux relecteurs ont fait redescendre les 2 gabarits opus de la
     # catégorie (surdimensionnés) ; ce scénario-ci est un opus DE FOND : une
     # preuve profonde poursuivie en fil long — l'heuristique v0 répondra
@@ -793,15 +795,16 @@ GABARITS: tuple[Gabarit, ...] = (
         recos_followed_ratio=(0.4, 0.8),
         derogations_up=(0, 1),
         review=(
-            "non_soumis: ajout post-arbitrage orchestrateur — relecture formelle "
-            "ml-architect au panel ronde 2 (verdict au ledger)",
+            "valide panel ronde 2 (ml-architect, contexte neuf) — verdict détaillé au "
+            "ledger R2 round 2",
             "valide panel ronde 1 (eval-scientist, contexte neuf) — verdict détaillé au "
             "ledger R2 round 1",
         ),
     ),
     # === ajouts correction ronde 0 (eval-scientist : cellules opus à 1 seul
-    # gabarit = pilier fragile). Étiquettes opus DE FOND, provenance honnête
-    # (non soumis à la double-revue initiale — à revoir par le panel ronde 1).
+    # gabarit = pilier fragile). Étiquettes opus DE FOND — validées au fond par
+    # eval-scientist (panel r1) PUIS ml-architect (panel r2) : double-revue
+    # complète, verdicts détaillés au ledger R2 rounds 1-2.
     Gabarit(
         category="code",
         lang="fr",
@@ -816,8 +819,8 @@ GABARITS: tuple[Gabarit, ...] = (
         has_code=True,
         keyword_flags=("code",),
         review=(
-            "non_soumis: ajout correction ronde 0 — relecture formelle ml-architect au "
-            "panel ronde 2 (verdict au ledger)",
+            "valide panel ronde 2 (ml-architect, contexte neuf) — verdict détaillé au "
+            "ledger R2 round 2",
             "valide panel ronde 1 (eval-scientist, contexte neuf) — verdict détaillé au "
             "ledger R2 round 1",
         ),
@@ -842,8 +845,8 @@ GABARITS: tuple[Gabarit, ...] = (
         recos_followed_ratio=(0.5, 0.9),
         derogations_up=(0, 1),
         review=(
-            "non_soumis: ajout correction ronde 0 — relecture formelle ml-architect au "
-            "panel ronde 2 (verdict au ledger)",
+            "valide panel ronde 2 (ml-architect, contexte neuf) — verdict détaillé au "
+            "ledger R2 round 2",
             "valide panel ronde 1 (eval-scientist, contexte neuf) — verdict détaillé au "
             "ledger R2 round 1",
         ),
@@ -876,6 +879,8 @@ def _valider_gabarits() -> None:
         if g.label == "claude-opus-4-8":
             opus_gabarits[g.category] = opus_gabarits.get(g.category, 0) + 1
     for cat, n in par_categorie.items():
+        # NB : multi_tours est à 31/32 — tout futur ajout dans cette catégorie
+        # exige un rééquilibrage ou une révision ARGUMENTÉE de la borne (eval r2).
         assert 15 <= n <= 32, f"catégorie déséquilibrée : {cat} = {n} instances"
     assert total_fr / total > 0.6, f"part FR insuffisante : {total_fr / total:.0%}"
     # Cellules opus à ≥ 2 gabarits DISTINCTS là où le set en revendique la

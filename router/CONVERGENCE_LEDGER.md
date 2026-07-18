@@ -312,3 +312,27 @@ Corrections avant ronde 2 :
 
 **RE-FIGÉ** : 181 entrées, sha 7782ec5d…, accord heuristique 66,8 %.
 Preuves : 91 tests verts, make test complet vert, ruff check+format verts.
+
+## R2 — round 2 (commit c168828, 6 juges — ml-architect complète la double-revue)
+
+| agent                | scores                                                                | blocking | major | verdict   |
+| -------------------- | --------------------------------------------------------------------- | -------- | ----- | --------- |
+| eval-scientist       | étiquettes 4,5 · représent. 4 · double-revue 4 · figeage 5 · gate 4,5 | 0        | 0     | **GREEN** |
+| ml-architect         | plausib. 4,5 · cohérence 5 · ancrage 5 · symétrie 5 · exploit. 4,5    | 0        | 0     | **GREEN** |
+| qa-auditor           | couv 5 · contrat 5 · erreurs 5 · clarté 4,5 · régressions 5           | 0        | 0     | **GREEN** |
+| data-quality-auditor | dédoublon 5 · équilibre 5 · FR 5 · cohérence 5 · provenance 5         | 0        | 0     | **GREEN** |
+| privacy-sentinel     | — (scan programmatique 181 notes+reviews, zéro citation)              | PASS     | —     | **PASS**  |
+| cost-guard           | — (mandat coût strict : zéro motif payant, 0,00 $)                    | PASS     | —     | **PASS**  |
+
+→ Ronde **VERTE (1/2)** — nouveau streak. ACQUIS : ml-architect a rendu sa
+revue de fond FORMELLE des 9 entrées opus — **les 3 gabarits VALIDÉS AU FOND**
+(preuve profonde « ma spécialité » ; bug de concurrence « une des classes de
+debug causal les plus dures » ; risques croisés « le plus solide — maintien
+SOBRE, current_model déjà opus »). **Symétrie de double-revue COMPLÈTE** sur
+les 181 entrées. Balayage anti-régression : ses 2 arbitrages opus→sonnet bien
+appliqués, zéro régression, les 30 opus tous ancrés à des moteurs de
+profondeur (jamais volume-seul).
+
+Minors polis avant ronde 3 : reviews ml mises à jour d'après son verdict RÉEL
+(« valide panel ronde 2 ») + re-figeage sha 6120df28… · commentaires d'en-tête
+rafraîchis (qa) · vigilance borne multi_tours 31/32 commentée (eval).
