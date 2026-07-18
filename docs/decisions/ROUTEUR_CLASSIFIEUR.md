@@ -136,10 +136,12 @@ tout se branche derrière ; rien ne change côté extension ni côté contrat `/
   calibration/architecture se prend sur une tranche tenue à l'écart ou sur
   données fraîches (télémétrie v1) — plus jamais sur le golden ; (2) les
   bornes cliquet issues de v0.5 (ex. bande previous + tol = 0,0293) se
-  traitent avec prudence : un futur candidat qui échoue DE PEU sur une borne
-  cliquet héritée d'un chiffre sélectionné mérite un examen humain, pas un
-  rejet aveugle (le gate reste la règle ; l'examen est une revue de la borne,
-  pas un waiver du candidat).
+  traitent avec prudence : un futur candidat qui échoue DE PEU — écart à la
+  borne ≤ 0,005 OU ≤ 1 erreur-type de la borne héritée (quantifié r1,
+  réellement appliqué r2 : la première tentative était un patch fantôme) —
+  sur une borne cliquet héritée d'un chiffre sélectionné mérite un examen
+  humain, pas un rejet aveugle (le gate reste la règle ; l'examen est une
+  revue de la borne, pas un waiver du candidat).
 - **Plafond absolu de bande (7-bis, 0,10) — caractère BILATÉRAL documenté**
   (minor eval r0) : l'écart |justesse − confiance| plafonne aussi la
   SOUS-confiance (direction produit-sûre, coût = un clic) et, à n < 25, le

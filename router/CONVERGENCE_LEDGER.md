@@ -1110,3 +1110,40 @@ code nouveau.
 
 Preuves : 319 router+api verts (+2), sha model.txt STABLE (43a61267…), gate
 PASS rejoué, make test complet vert (218 ext), ruff verts.
+
+## R5 — round 2 (commit f9d248c, panel 6 juges Fable)
+
+| agent            | modèle | scores (dims)                                        | blocking | major | verdict |
+|------------------|--------|------------------------------------------------------|----------|-------|---------|
+| ml-architect (P) | fable  | spec4 features5 calibration5 fuites-ml5 extens4      | 0        | 1     | YELLOW  |
+| eval-scientist   | fable  | éval5 gate5 plafond5 honnêteté4 repro5               | 0        | 1     | YELLOW  |
+| data-quality     | fable  | étanchéité5 déséquilibre5 intégrité5 robust4 traça3  | 0        | 1     | YELLOW  |
+| qa-auditor       | fable  | couverture4 contrat5 erreurs5 clarté4 régressions5   | 0        | 1     | YELLOW  |
+| privacy-sentinel | fable  | —                                                    | PASS     | —     | PASS    |
+| cost-guard       | fable  | —                                                    | PASS     | —     | PASS    |
+
+→ **Ronde JAUNE — streak reste 0/2.** QUATRE juges ont convergé sur le même
+défaut de traçabilité : une **correction fantôme de l'orchestrateur** — la
+puce r1 « “de peu” quantifié dans la doc (≤ 0,005 OU ≤ 1 SE) » consignait
+comme FAITE une modification qui n'existait nulle part dans la doc normative
+(le patch .replace() n'avait pas matché et s'était tu ; le hunk voisin
+« estimateur OPTIMISTE » du même lot, lui, était bien passé). Le mécanisme
+est exactement celui que la « note de méthode » du même commit décrivait
+pour le code — mais ici aucun test rouge ne gardait le texte de doc. La
+REVENDICATION r1 ÉTAIT INEXACTE : correction réellement appliquée en r2 (la
+règle 2 de la section Intégrité porte désormais le seuil quantifié, vérifié
+par grep post-édition).
+
+**Reste à traiter à la reprise (ronde 3) — minors consignés :**
+- [ml] Test E2E main() : faire déléguer le monkeypatch à la vraie garde
+  (confiances constantes → garde réelle traversée, patron validé par ml).
+- [ml] Plafonds CLI en constantes nommées (_BUDGET_MS_MAX, _BANDE_ECART_MAX_BOUND).
+- [qa] importorskip(lightgbm)/skip corpus-absent sur le test main() dégénéré ·
+  ligne « VERDICT : FAIL » de la branche bande non assertée · borne haute
+  inclusive --budget-ms 1000 non couverte.
+- [dq] robustesse_pipeline m1 (voir sortie du panel, w131h38fb).
+
+**PAUSE UTILISATEUR (2026-07-18 soir)** : boucle stoppée à la demande du
+fondateur après cette consignation — reprise prévue le lendemain (panel
+ronde 3 après application des minors ci-dessus ; rondes 0-2 consommées,
+5 restantes sous le plafond).
