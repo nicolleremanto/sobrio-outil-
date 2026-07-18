@@ -49,6 +49,7 @@ SEED = 2026
 OUT_DIR = Path(__file__).resolve().parent
 GOLDEN_PATH = OUT_DIR / "golden.jsonl"
 STATS_PATH = OUT_DIR / "coverage_stats.json"
+REPORT_PATH = OUT_DIR / "coverage_report.json"
 
 # Vocabulaire fermé de `keyword_flags` (RFC-0001 : extension de l'enum v1.0
 # `contracts/openapi.yaml` avec `demonstration`, cf. `heuristic.py`).
@@ -97,96 +98,147 @@ class Gabarit:
 GABARITS: tuple[Gabarit, ...] = (
     # === redaction_simple (20 instances) =====================================
     Gabarit(
-        category="redaction_simple", lang="fr", label="claude-haiku-4-5",
+        category="redaction_simple",
+        lang="fr",
+        label="claude-haiku-4-5",
         note="e-mail professionnel court et factuel, ton neutre, fil vierge.",
-        n_instances=4, token_est=(30, 90),
+        n_instances=4,
+        token_est=(30, 90),
     ),
     Gabarit(
-        category="redaction_simple", lang="fr", label="claude-haiku-4-5",
+        category="redaction_simple",
+        lang="fr",
+        label="claude-haiku-4-5",
         note="message de remerciement bref à un client, fil vierge, aucune contrainte de style.",
-        n_instances=3, token_est=(25, 70),
+        n_instances=3,
+        token_est=(25, 70),
     ),
     Gabarit(
-        category="redaction_simple", lang="fr", label="claude-sonnet-5",
+        category="redaction_simple",
+        lang="fr",
+        label="claude-sonnet-5",
         note=(
             "rédaction créative courte mais exigeante, contrainte de ton et de style précise "
             "à respecter, fil vierge."
         ),
-        n_instances=4, token_est=(60, 180),
+        n_instances=4,
+        token_est=(60, 180),
     ),
     Gabarit(
-        category="redaction_simple", lang="en", label="claude-haiku-4-5",
+        category="redaction_simple",
+        lang="en",
+        label="claude-haiku-4-5",
         note=(
             "accroche produit courte et simple, en anglais, fil vierge, aucune exigence "
             "stylistique."
         ),
-        n_instances=3, token_est=(20, 60),
+        n_instances=3,
+        token_est=(20, 60),
     ),
     Gabarit(
-        category="redaction_simple", lang="fr", label="claude-sonnet-5",
+        category="redaction_simple",
+        lang="fr",
+        label="claude-sonnet-5",
         note=(
-            "annonce de recrutement à la voix de marque distinctive, longueur moyenne, "
-            "fil vierge."
+            "annonce de recrutement à la voix de marque distinctive, longueur moyenne, fil vierge."
         ),
-        n_instances=3, token_est=(320, 480),
+        n_instances=3,
+        token_est=(320, 480),
     ),
     Gabarit(
-        category="redaction_simple", lang="en", label="claude-haiku-4-5",
+        category="redaction_simple",
+        lang="en",
+        label="claude-haiku-4-5",
         note="légende de réseau social brève et informelle, en anglais, fil vierge.",
-        n_instances=3, token_est=(15, 50),
+        n_instances=3,
+        token_est=(15, 50),
     ),
     # === resume (19 instances) ================================================
     Gabarit(
-        category="resume", lang="fr", label="claude-haiku-4-5",
+        category="resume",
+        lang="fr",
+        label="claude-haiku-4-5",
         note="résumé court d'un article de presse ordinaire, fil vierge.",
-        n_instances=4, token_est=(100, 350), keyword_flags=("resume",),
+        n_instances=4,
+        token_est=(100, 350),
+        keyword_flags=("resume",),
     ),
     Gabarit(
-        category="resume", lang="fr", label="claude-sonnet-5",
+        category="resume",
+        lang="fr",
+        label="claude-sonnet-5",
         note="résumé long d'un rapport technique dense, au-delà du seuil de longueur, fil vierge.",
-        n_instances=3, token_est=(900, 1400), keyword_flags=("resume",),
+        n_instances=3,
+        token_est=(900, 1400),
+        keyword_flags=("resume",),
     ),
     Gabarit(
-        category="resume", lang="en", label="claude-haiku-4-5",
+        category="resume",
+        lang="en",
+        label="claude-haiku-4-5",
         note="résumé bref d'un compte-rendu de réunion de routine, en anglais, fil vierge.",
-        n_instances=3, token_est=(100, 280), keyword_flags=("resume",),
+        n_instances=3,
+        token_est=(100, 280),
+        keyword_flags=("resume",),
     ),
     Gabarit(
-        category="resume", lang="fr", label="claude-haiku-4-5",
+        category="resume",
+        lang="fr",
+        label="claude-haiku-4-5",
         note="résumé d'une note interne standard de longueur moyenne, fil vierge.",
-        n_instances=3, token_est=(300, 600), keyword_flags=("resume",),
+        n_instances=3,
+        token_est=(300, 600),
+        keyword_flags=("resume",),
     ),
     Gabarit(
-        category="resume", lang="fr", label="claude-haiku-4-5",
+        category="resume",
+        lang="fr",
+        label="claude-haiku-4-5",
         note="résumé très court de notes de réunion informelles, fil déjà engagé mais léger.",
-        n_instances=3, token_est=(80, 200), keyword_flags=("resume",),
-        msg_count=(5, 9), tok_per_msg=(40, 90), current_model="claude-haiku-4-5",
+        n_instances=3,
+        token_est=(80, 200),
+        keyword_flags=("resume",),
+        msg_count=(5, 9),
+        tok_per_msg=(40, 90),
+        current_model="claude-haiku-4-5",
     ),
     Gabarit(
-        category="resume", lang="en", label="claude-sonnet-5",
+        category="resume",
+        lang="en",
+        label="claude-sonnet-5",
         note=(
             "résumé d'un texte de recherche nuancé nécessitant une interprétation fine, "
             "en anglais, fil vierge."
         ),
-        n_instances=3, token_est=(200, 500), keyword_flags=("resume",),
+        n_instances=3,
+        token_est=(200, 500),
+        keyword_flags=("resume",),
     ),
     # === extraction (20 instances) ============================================
     Gabarit(
-        category="extraction", lang="fr", label="claude-haiku-4-5",
+        category="extraction",
+        lang="fr",
+        label="claude-haiku-4-5",
         note=(
             "extraction de champs structurés (dates, montants) depuis un texte court fourni, "
             "fil vierge."
         ),
-        n_instances=4, token_est=(80, 250),
+        n_instances=4,
+        token_est=(80, 250),
     ),
     Gabarit(
-        category="extraction", lang="fr", label="claude-haiku-4-5",
+        category="extraction",
+        lang="fr",
+        label="claude-haiku-4-5",
         note=(
             "extraction mécanique d'une liste d'éléments depuis un fil de discussion déjà "
             "très long, tâche simple malgré le volume de contexte."
         ),
-        n_instances=4, token_est=(60, 150),
-        msg_count=(18, 28), tok_per_msg=(250, 350), current_model="claude-sonnet-5",
+        n_instances=4,
+        token_est=(60, 150),
+        msg_count=(18, 28),
+        tok_per_msg=(250, 350),
+        current_model="claude-sonnet-5",
         review=(
             "agree",
             "contesté→conservé: arbitrage — le golden étiquette la SUFFISANCE du modèle "
@@ -195,104 +247,160 @@ GABARITS: tuple[Gabarit, ...] = (
         ),
     ),
     Gabarit(
-        category="extraction", lang="fr", label="claude-sonnet-5",
+        category="extraction",
+        lang="fr",
+        label="claude-sonnet-5",
         note=(
             "extraction avec interprétation : distinguer des informations ambiguës ou "
             "implicites dans un texte moyen, fil vierge."
         ),
-        n_instances=3, token_est=(150, 280),
+        n_instances=3,
+        token_est=(150, 280),
     ),
     Gabarit(
-        category="extraction", lang="en", label="claude-haiku-4-5",
+        category="extraction",
+        lang="en",
+        label="claude-haiku-4-5",
         note=(
             "extraction structurée de coordonnées depuis un court bloc de texte, en anglais, "
             "fil vierge."
         ),
-        n_instances=3, token_est=(60, 180),
+        n_instances=3,
+        token_est=(60, 180),
     ),
     Gabarit(
-        category="extraction", lang="fr", label="claude-opus-4-8",
+        category="extraction",
+        lang="fr",
+        label="claude-opus-4-8",
         note=(
             "extraction ET qualification de clauses à risque dans un contrat dense et à fort "
             "enjeu, fil vierge."
         ),
-        n_instances=3, token_est=(400, 700), keyword_flags=("contrat",),
+        n_instances=3,
+        token_est=(400, 700),
+        keyword_flags=("contrat",),
     ),
     Gabarit(
-        category="extraction", lang="en", label="claude-haiku-4-5",
+        category="extraction",
+        lang="en",
+        label="claude-haiku-4-5",
         note=(
-            "extraction de chiffres-clés depuis un court extrait financier, en anglais, "
-            "fil vierge."
+            "extraction de chiffres-clés depuis un court extrait financier, en anglais, fil vierge."
         ),
-        n_instances=3, token_est=(50, 150),
+        n_instances=3,
+        token_est=(50, 150),
     ),
     # === traduction (20 instances) ============================================
     Gabarit(
-        category="traduction", lang="fr", label="claude-haiku-4-5",
+        category="traduction",
+        lang="fr",
+        label="claude-haiku-4-5",
         note="traduction courte et standard d'un texte simple, fil vierge.",
-        n_instances=4, token_est=(80, 300), keyword_flags=("traduction",),
+        n_instances=4,
+        token_est=(80, 300),
+        keyword_flags=("traduction",),
     ),
     Gabarit(
-        category="traduction", lang="fr", label="claude-sonnet-5",
+        category="traduction",
+        lang="fr",
+        label="claude-sonnet-5",
         note="traduction longue d'un document technique, au-delà du seuil de longueur, fil vierge.",
-        n_instances=3, token_est=(900, 1300), keyword_flags=("traduction",),
+        n_instances=3,
+        token_est=(900, 1300),
+        keyword_flags=("traduction",),
     ),
     Gabarit(
-        category="traduction", lang="en", label="claude-haiku-4-5",
+        category="traduction",
+        lang="en",
+        label="claude-haiku-4-5",
         note="traduction courte et routinière d'une phrase simple, en anglais, fil vierge.",
-        n_instances=3, token_est=(60, 250), keyword_flags=("traduction",),
+        n_instances=3,
+        token_est=(60, 250),
+        keyword_flags=("traduction",),
     ),
     Gabarit(
-        category="traduction", lang="fr", label="claude-sonnet-5",
+        category="traduction",
+        lang="fr",
+        label="claude-sonnet-5",
         note=(
             "traduction courte mais littéraire, exigeant de préserver le ton et les jeux de "
             "mots, fil vierge."
         ),
-        n_instances=4, token_est=(80, 200), keyword_flags=("traduction",),
+        n_instances=4,
+        token_est=(80, 200),
+        keyword_flags=("traduction",),
     ),
     Gabarit(
-        category="traduction", lang="fr", label="claude-haiku-4-5",
+        category="traduction",
+        lang="fr",
+        label="claude-haiku-4-5",
         note="traduction administrative standard de longueur moyenne, fil déjà présent mais léger.",
-        n_instances=3, token_est=(300, 600), keyword_flags=("traduction",),
-        msg_count=(4, 7), tok_per_msg=(60, 120), current_model="claude-haiku-4-5",
+        n_instances=3,
+        token_est=(300, 600),
+        keyword_flags=("traduction",),
+        msg_count=(4, 7),
+        tok_per_msg=(60, 120),
+        current_model="claude-haiku-4-5",
     ),
     Gabarit(
-        category="traduction", lang="en", label="claude-sonnet-5",
+        category="traduction",
+        lang="en",
+        label="claude-sonnet-5",
         note=(
             "traduction juridique officielle, terminologie exacte requise, en anglais, "
             "longueur moyenne, fil vierge — cela RESTE une traduction (transformation à "
             "faible risque) : le modèle intermédiaire suffit, l'enjeu probant relève de la "
             "relecture humaine, pas d'un palier supérieur."
         ),
-        n_instances=3, token_est=(300, 600), keyword_flags=("traduction", "contrat"),
+        n_instances=3,
+        token_est=(300, 600),
+        keyword_flags=("traduction", "contrat"),
         review=(
-            "amended: plafond traduction — cohérence interne du set (les transformations "
-            "plafonnent à Sonnet), l'enjeu probant ne monte pas de palier",
-            "agree",
+            "amended: opus→sonnet — plafond traduction, cohérence interne du set, "
+            "l'enjeu probant ne monte pas de palier",
+            "agree — avait relu le label INITIAL opus sans le contester ; le label figé "
+            "sonnet vient de l'arbitrage du désaccord ml",
         ),
     ),
     # === code (24 instances) ===================================================
     Gabarit(
-        category="code", lang="fr", label="claude-haiku-4-5",
+        category="code",
+        lang="fr",
+        label="claude-haiku-4-5",
         note="question de code triviale, syntaxe d'une seule ligne, fil vierge.",
-        n_instances=4, token_est=(15, 40), has_code=True, keyword_flags=("code",),
+        n_instances=4,
+        token_est=(15, 40),
+        has_code=True,
+        keyword_flags=("code",),
     ),
     Gabarit(
-        category="code", lang="fr", label="claude-sonnet-5",
+        category="code",
+        lang="fr",
+        label="claude-sonnet-5",
         note=(
             "débogage d'une fonction de taille moyenne avec erreur logique non triviale, "
             "fil vierge."
         ),
-        n_instances=4, token_est=(150, 400), has_code=True, keyword_flags=("code",),
+        n_instances=4,
+        token_est=(150, 400),
+        has_code=True,
+        keyword_flags=("code",),
     ),
     Gabarit(
-        category="code", lang="fr", label="claude-opus-4-8",
+        category="code",
+        lang="fr",
+        label="claude-opus-4-8",
         note=(
             "conception d'une architecture logicielle complexe multi-contraintes, fil déjà "
             "engagé avec du code vu précédemment."
         ),
-        n_instances=4, token_est=(400, 900), has_code=True, keyword_flags=("code",),
-        msg_count=(10, 18), tok_per_msg=(150, 300), seen_code=True,
+        n_instances=4,
+        token_est=(400, 900),
+        has_code=True,
+        keyword_flags=("code",),
+        msg_count=(10, 18),
+        tok_per_msg=(150, 300),
+        seen_code=True,
         current_model="claude-sonnet-5",
         review=(
             "agree",
@@ -302,228 +410,360 @@ GABARITS: tuple[Gabarit, ...] = (
         ),
     ),
     Gabarit(
-        category="code", lang="en", label="claude-sonnet-5",
+        category="code",
+        lang="en",
+        label="claude-sonnet-5",
         note="débogage modéré sur une fonction de taille moyenne, en anglais, fil vierge.",
-        n_instances=3, token_est=(150, 350), has_code=True, keyword_flags=("code",),
+        n_instances=3,
+        token_est=(150, 350),
+        has_code=True,
+        keyword_flags=("code",),
     ),
     Gabarit(
-        category="code", lang="fr", label="claude-sonnet-5",
+        category="code",
+        lang="fr",
+        label="claude-sonnet-5",
         note="revue de code standard sur un fichier de taille moyenne, fil vierge.",
-        n_instances=3, token_est=(300, 600), has_code=True, keyword_flags=("code",),
+        n_instances=3,
+        token_est=(300, 600),
+        has_code=True,
+        keyword_flags=("code",),
     ),
     Gabarit(
-        category="code", lang="en", label="claude-sonnet-5",
+        category="code",
+        lang="en",
+        label="claude-sonnet-5",
         note=(
             "investigation d'un bogue modérément complexe, fil déjà engagé avec du code vu "
             "précédemment, en anglais."
         ),
-        n_instances=3, token_est=(400, 800), has_code=True, keyword_flags=("code",),
-        msg_count=(12, 20), tok_per_msg=(150, 300), seen_code=True,
+        n_instances=3,
+        token_est=(400, 800),
+        has_code=True,
+        keyword_flags=("code",),
+        msg_count=(12, 20),
+        tok_per_msg=(150, 300),
+        seen_code=True,
         current_model="claude-sonnet-5",
     ),
     Gabarit(
-        category="code", lang="fr", label="claude-sonnet-5",
+        category="code",
+        lang="fr",
+        label="claude-sonnet-5",
         note=(
             "génération d'un script utilitaire de complexité moyenne avec gestion d'erreurs, "
             "fil vierge."
         ),
-        n_instances=3, token_est=(150, 350), has_code=True, keyword_flags=("code",),
+        n_instances=3,
+        token_est=(150, 350),
+        has_code=True,
+        keyword_flags=("code",),
     ),
     # === maths_raisonnement (24 instances) =====================================
     Gabarit(
-        category="maths_raisonnement", lang="fr", label="claude-sonnet-5",
+        category="maths_raisonnement",
+        lang="fr",
+        label="claude-sonnet-5",
         note="calcul à plusieurs étapes avec risque réel d'erreur de calcul, fil vierge.",
-        n_instances=4, token_est=(120, 300), has_math=True,
+        n_instances=4,
+        token_est=(120, 300),
+        has_math=True,
     ),
     Gabarit(
-        category="maths_raisonnement", lang="fr", label="claude-sonnet-5",
+        category="maths_raisonnement",
+        lang="fr",
+        label="claude-sonnet-5",
         note="exercice de mathématiques de niveau lycée à plusieurs étapes, fil vierge.",
-        n_instances=4, token_est=(150, 350), has_math=True,
+        n_instances=4,
+        token_est=(150, 350),
+        has_math=True,
     ),
     Gabarit(
-        category="maths_raisonnement", lang="fr", label="claude-opus-4-8",
+        category="maths_raisonnement",
+        lang="fr",
+        label="claude-opus-4-8",
         note=(
             "démonstration mathématique profonde et originale nécessitant plusieurs étapes "
             "de preuve rigoureuse, fil vierge."
         ),
-        n_instances=4, token_est=(150, 400), has_math=True,
+        n_instances=4,
+        token_est=(150, 400),
+        has_math=True,
     ),
     Gabarit(
-        category="maths_raisonnement", lang="en", label="claude-sonnet-5",
+        category="maths_raisonnement",
+        lang="en",
+        label="claude-sonnet-5",
         note=(
             "problème à plusieurs étapes nécessitant un raisonnement soigné, en anglais, "
             "fil vierge."
         ),
-        n_instances=3, token_est=(150, 300), has_math=True,
+        n_instances=3,
+        token_est=(150, 300),
+        has_math=True,
     ),
     Gabarit(
-        category="maths_raisonnement", lang="fr", label="claude-sonnet-5",
+        category="maths_raisonnement",
+        lang="fr",
+        label="claude-sonnet-5",
         note="preuve mathématique standard mais longue, fil vierge.",
-        n_instances=3, token_est=(850, 1200), has_math=True,
+        n_instances=3,
+        token_est=(850, 1200),
+        has_math=True,
     ),
     Gabarit(
-        category="maths_raisonnement", lang="fr", label="claude-sonnet-5",
+        category="maths_raisonnement",
+        lang="fr",
+        label="claude-sonnet-5",
         note="problème de logique de difficulté moyenne, fil vierge.",
-        n_instances=3, token_est=(100, 250), has_math=True,
+        n_instances=3,
+        token_est=(100, 250),
+        has_math=True,
     ),
     Gabarit(
-        category="maths_raisonnement", lang="en", label="claude-haiku-4-5",
+        category="maths_raisonnement",
+        lang="en",
+        label="claude-haiku-4-5",
         note="conversion d'unité triviale, en anglais, fil vierge.",
-        n_instances=3, token_est=(15, 50), has_math=True,
+        n_instances=3,
+        token_est=(15, 50),
+        has_math=True,
     ),
     # === juridique_contrat (20 instances) =======================================
     Gabarit(
-        category="juridique_contrat", lang="fr", label="claude-opus-4-8",
+        category="juridique_contrat",
+        lang="fr",
+        label="claude-opus-4-8",
         note=(
             "analyse fine de clauses contractuelles ambiguës à fort enjeu, fil vierge, "
             "longueur importante."
         ),
-        n_instances=4, token_est=(500, 900), keyword_flags=("contrat", "analyse"),
+        n_instances=4,
+        token_est=(500, 900),
+        keyword_flags=("contrat", "analyse"),
     ),
     Gabarit(
-        category="juridique_contrat", lang="fr", label="claude-sonnet-5",
+        category="juridique_contrat",
+        lang="fr",
+        label="claude-sonnet-5",
         note=(
             "relecture standard d'un contrat type sans clause inhabituelle, fil vierge, "
-            "longueur moyenne — l'utilisateur ne nomme pas le document (« relis ce "
-            "texte ») : aucun drapeau détecté, cas réaliste."
+            "longueur moyenne — demande formulée de manière générique, sans nommer le "
+            "type de document : aucun drapeau détecté, cas réaliste."
         ),
-        n_instances=4, token_est=(320, 550),
+        n_instances=4,
+        token_est=(320, 550),
     ),
     Gabarit(
-        category="juridique_contrat", lang="fr", label="claude-haiku-4-5",
+        category="juridique_contrat",
+        lang="fr",
+        label="claude-haiku-4-5",
         note=(
             "vérification mécanique de la présence d'une clause précise dans un contrat "
             "court, fil vierge."
         ),
-        n_instances=3, token_est=(80, 200), keyword_flags=("contrat",),
+        n_instances=3,
+        token_est=(80, 200),
+        keyword_flags=("contrat",),
     ),
     Gabarit(
-        category="juridique_contrat", lang="en", label="claude-opus-4-8",
+        category="juridique_contrat",
+        lang="en",
+        label="claude-opus-4-8",
         note=(
             "analyse de risque contractuel multi-juridictions à fort enjeu, en anglais, fil "
             "déjà engagé avec du contexte juridique antérieur."
         ),
-        n_instances=3, token_est=(600, 900), keyword_flags=("contrat", "analyse"),
-        msg_count=(10, 16), tok_per_msg=(200, 350), seen_reasoning=True,
+        n_instances=3,
+        token_est=(600, 900),
+        keyword_flags=("contrat", "analyse"),
+        msg_count=(10, 16),
+        tok_per_msg=(200, 350),
+        seen_reasoning=True,
         current_model="claude-opus-4-8",
     ),
     Gabarit(
-        category="juridique_contrat", lang="fr", label="claude-sonnet-5",
+        category="juridique_contrat",
+        lang="fr",
+        label="claude-sonnet-5",
         note=(
             "rédaction d'une clause contractuelle standard à partir d'un modèle connu, fil "
-            "vierge, longueur moyenne — formulation utilisateur générique (« rédige cette "
-            "clause ») : aucun drapeau détecté, cas réaliste."
+            "vierge, longueur moyenne — demande formulée de manière générique, sans "
+            "vocabulaire contractuel explicite : aucun drapeau détecté, cas réaliste."
         ),
-        n_instances=3, token_est=(350, 600),
+        n_instances=3,
+        token_est=(350, 600),
     ),
     Gabarit(
-        category="juridique_contrat", lang="fr", label="claude-opus-4-8",
+        category="juridique_contrat",
+        lang="fr",
+        label="claude-opus-4-8",
         note=(
             "négociation contractuelle complexe multi-parties nécessitant une analyse "
             "juridique poussée, fil déjà engagé."
         ),
-        n_instances=3, token_est=(700, 950), keyword_flags=("contrat", "analyse"),
-        msg_count=(15, 25), tok_per_msg=(200, 350), seen_reasoning=True,
+        n_instances=3,
+        token_est=(700, 950),
+        keyword_flags=("contrat", "analyse"),
+        msg_count=(15, 25),
+        tok_per_msg=(200, 350),
+        seen_reasoning=True,
         current_model="claude-opus-4-8",
     ),
     # === multi_tours (25 instances) — signaux de conversation VARIÉS ============
     Gabarit(
-        category="multi_tours", lang="fr", label="claude-sonnet-5",
+        category="multi_tours",
+        lang="fr",
+        label="claude-sonnet-5",
         note=(
-            "prompt très bref du type « montre les étapes », posé dans un fil déjà engagé "
-            "sur une démonstration mathématique."
+            "prompt très bref demandant le détail des étapes du raisonnement, posé dans "
+            "un fil déjà engagé sur une démonstration mathématique."
         ),
-        n_instances=4, token_est=(5, 15), keyword_flags=("demonstration",),
-        msg_count=(4, 10), tok_per_msg=(60, 150), seen_math=True, seen_reasoning=True,
-        current_model="claude-haiku-4-5", recos_shown=(1, 3),
-        recos_followed_ratio=(0.3, 0.7), derogations_up=(0, 1),
+        n_instances=4,
+        token_est=(5, 15),
+        keyword_flags=("demonstration",),
+        msg_count=(4, 10),
+        tok_per_msg=(60, 150),
+        seen_math=True,
+        seen_reasoning=True,
+        current_model="claude-haiku-4-5",
+        recos_shown=(1, 3),
+        recos_followed_ratio=(0.3, 0.7),
+        derogations_up=(0, 1),
     ),
     Gabarit(
-        category="multi_tours", lang="fr", label="claude-sonnet-5",
+        category="multi_tours",
+        lang="fr",
+        label="claude-sonnet-5",
         note="fil déjà engagé sur du code, nouvelle demande de correction ponctuelle et brève.",
-        n_instances=3, token_est=(10, 40),
-        msg_count=(4, 9), tok_per_msg=(80, 180), seen_code=True,
-        current_model="claude-sonnet-5", recos_shown=(1, 3),
-        recos_followed_ratio=(0.5, 0.9), derogations_up=(0, 1),
+        n_instances=3,
+        token_est=(10, 40),
+        msg_count=(4, 9),
+        tok_per_msg=(80, 180),
+        seen_code=True,
+        current_model="claude-sonnet-5",
+        recos_shown=(1, 3),
+        recos_followed_ratio=(0.5, 0.9),
+        derogations_up=(0, 1),
     ),
     Gabarit(
-        category="multi_tours", lang="fr", label="claude-sonnet-5",
+        category="multi_tours",
+        lang="fr",
+        label="claude-sonnet-5",
         note=(
             "fil déjà très long et dense, nouvelle demande de synthèse générale recoupant "
             "l'ensemble des échanges — la synthèse dense est une tâche du modèle "
             "intermédiaire : le volume de contexte seul ne fait pas monter de palier."
         ),
-        n_instances=3, token_est=(150, 400),
+        n_instances=3,
+        token_est=(150, 400),
         review=(
-            "amended: synthèse dense plafonnée à Sonnet — même tâche cognitive que la "
-            "catégorie resume ; le volume seul ne monte pas de palier (principe du set)",
-            "agree",
+            "amended: opus→sonnet — synthèse dense plafonnée à Sonnet, le volume seul ne "
+            "monte pas de palier (principe du set)",
+            "agree — avait relu le label INITIAL opus sans le contester ; label figé "
+            "sonnet issu de l'arbitrage du désaccord ml",
         ),
-        msg_count=(25, 45), tok_per_msg=(200, 320),
-        current_model="claude-sonnet-5", recos_shown=(2, 5),
-        recos_followed_ratio=(0.4, 0.8), derogations_up=(0, 2),
+        msg_count=(25, 45),
+        tok_per_msg=(200, 320),
+        current_model="claude-sonnet-5",
+        recos_shown=(2, 5),
+        recos_followed_ratio=(0.4, 0.8),
+        derogations_up=(0, 2),
     ),
     Gabarit(
-        category="multi_tours", lang="fr", label="claude-sonnet-5",
+        category="multi_tours",
+        lang="fr",
+        label="claude-sonnet-5",
         note=(
             "nouvelle question de synthèse argumentée de complexité moyenne, après plusieurs "
             "dérogations de l'utilisateur vers un modèle plus capable que la recommandation "
             "précédente."
         ),
-        n_instances=3, token_est=(200, 400),
-        msg_count=(8, 14), tok_per_msg=(80, 150),
-        current_model="claude-haiku-4-5", recos_shown=(6, 10),
-        recos_followed_ratio=(0.15, 0.4), derogations_up=(3, 6),
+        n_instances=3,
+        token_est=(200, 400),
+        msg_count=(8, 14),
+        tok_per_msg=(80, 150),
+        current_model="claude-haiku-4-5",
+        recos_shown=(6, 10),
+        recos_followed_ratio=(0.15, 0.4),
+        derogations_up=(3, 6),
     ),
     Gabarit(
-        category="multi_tours", lang="en", label="claude-haiku-4-5",
+        category="multi_tours",
+        lang="en",
+        label="claude-haiku-4-5",
         note=(
             "fil de discussion informel et déjà long, nombreux échanges courts et légers, "
             "nouvelle question factuelle brève et anodine, en anglais."
         ),
-        n_instances=3, token_est=(15, 45),
-        msg_count=(16, 26), tok_per_msg=(15, 40),
-        current_model="claude-haiku-4-5", recos_shown=(3, 7),
-        recos_followed_ratio=(0.3, 0.6), derogations_up=(0, 2),
+        n_instances=3,
+        token_est=(15, 45),
+        msg_count=(16, 26),
+        tok_per_msg=(15, 40),
+        current_model="claude-haiku-4-5",
+        recos_shown=(3, 7),
+        recos_followed_ratio=(0.3, 0.6),
+        derogations_up=(0, 2),
     ),
     Gabarit(
-        category="multi_tours", lang="fr", label="claude-sonnet-5",
+        category="multi_tours",
+        lang="fr",
+        label="claude-sonnet-5",
         note=(
             "fil où les recommandations précédentes ont été largement suivies, nouvelle "
             "demande de rédaction de longueur moyenne."
         ),
-        n_instances=3, token_est=(200, 400),
-        msg_count=(8, 14), tok_per_msg=(60, 120),
-        current_model="claude-sonnet-5", recos_shown=(8, 14),
-        recos_followed_ratio=(0.75, 0.95), derogations_up=(0, 1),
+        n_instances=3,
+        token_est=(200, 400),
+        msg_count=(8, 14),
+        tok_per_msg=(60, 120),
+        current_model="claude-sonnet-5",
+        recos_shown=(8, 14),
+        recos_followed_ratio=(0.75, 0.95),
+        derogations_up=(0, 1),
     ),
     Gabarit(
-        category="multi_tours", lang="fr", label="claude-sonnet-5",
+        category="multi_tours",
+        lang="fr",
+        label="claude-sonnet-5",
         note=(
             "fil mixte déjà engagé sur du code et des mathématiques, nouvelle question "
             "combinant les deux domaines de façon soutenue — prompt et contexte modestes : "
             "la combinaison reste dans le périmètre du modèle intermédiaire."
         ),
-        n_instances=3, token_est=(400, 700),
+        n_instances=3,
+        token_est=(400, 700),
         review=(
-            "agree",
-            "amended: combinaison code+maths à prompt/contexte modestes — périmètre "
-            "Sonnet (sobriété : le moins cher qui suffit)",
+            "agree — avait relu le label INITIAL opus sans le contester ; label figé "
+            "sonnet issu de l'arbitrage du désaccord eval",
+            "amended: opus→sonnet — combinaison code+maths à prompt/contexte modestes, "
+            "périmètre Sonnet (sobriété : le moins cher qui suffit)",
         ),
-        msg_count=(10, 18), tok_per_msg=(100, 200), seen_code=True, seen_math=True,
-        current_model="claude-sonnet-5", recos_shown=(2, 5),
-        recos_followed_ratio=(0.3, 0.7), derogations_up=(0, 2),
+        msg_count=(10, 18),
+        tok_per_msg=(100, 200),
+        seen_code=True,
+        seen_math=True,
+        current_model="claude-sonnet-5",
+        recos_shown=(2, 5),
+        recos_followed_ratio=(0.3, 0.7),
+        derogations_up=(0, 2),
     ),
     Gabarit(
-        category="multi_tours", lang="en", label="claude-haiku-4-5",
+        category="multi_tours",
+        lang="en",
+        label="claude-haiku-4-5",
         note=(
             "fil bref déjà sur le modèle le plus capable, nouvelle question de clarification "
             "très courte et triviale, en anglais."
         ),
-        n_instances=3, token_est=(10, 35),
-        msg_count=(3, 6), tok_per_msg=(50, 100),
-        current_model="claude-opus-4-8", recos_shown=(1, 3),
-        recos_followed_ratio=(0.5, 1.0), derogations_up=(0, 1),
+        n_instances=3,
+        token_est=(10, 35),
+        msg_count=(3, 6),
+        tok_per_msg=(50, 100),
+        current_model="claude-opus-4-8",
+        recos_shown=(1, 3),
+        recos_followed_ratio=(0.5, 1.0),
+        derogations_up=(0, 1),
     ),
     # === ajout post-arbitrage (R2) : opus honnête en multi_tours ==============
     # Les deux relecteurs ont fait redescendre les 2 gabarits opus de la
@@ -531,21 +771,79 @@ GABARITS: tuple[Gabarit, ...] = (
     # preuve profonde poursuivie en fil long — l'heuristique v0 répondra
     # Sonnet (reasoning_context, sans palier Opus) : mésaccord honnête.
     Gabarit(
-        category="multi_tours", lang="fr", label="claude-opus-4-8",
+        category="multi_tours",
+        lang="fr",
+        label="claude-opus-4-8",
         note=(
             "fil de démonstration mathématique profonde poursuivi sur de nombreux tours, "
             "nouvelle étape décisive de la preuve exigeant un raisonnement original "
             "soutenu — le fond (preuve profonde), pas le volume, justifie le modèle le "
             "plus capable."
         ),
-        n_instances=3, token_est=(300, 600), has_math=True,
+        n_instances=3,
+        token_est=(300, 600),
+        has_math=True,
         keyword_flags=("demonstration",),
-        msg_count=(15, 25), tok_per_msg=(150, 280),
-        seen_math=True, seen_reasoning=True,
-        current_model="claude-sonnet-5", recos_shown=(2, 5),
-        recos_followed_ratio=(0.4, 0.8), derogations_up=(0, 1),
+        msg_count=(15, 25),
+        tok_per_msg=(150, 280),
+        seen_math=True,
+        seen_reasoning=True,
+        current_model="claude-sonnet-5",
+        recos_shown=(2, 5),
+        recos_followed_ratio=(0.4, 0.8),
+        derogations_up=(0, 1),
+        review=(
+            "non_soumis: ajout post-arbitrage par l'orchestrateur — jamais vu par la "
+            "double-revue initiale",
+            "valide_au_fond_panel_r2_r0: étiquette opus jugée honnête par eval-scientist "
+            "(ronde 0) ; provenance initiale agree/agree corrigée (elle était fabriquée)",
+        ),
     ),
-
+    # === ajouts correction ronde 0 (eval-scientist : cellules opus à 1 seul
+    # gabarit = pilier fragile). Étiquettes opus DE FOND, provenance honnête
+    # (non soumis à la double-revue initiale — à revoir par le panel ronde 1).
+    Gabarit(
+        category="code",
+        lang="fr",
+        label="claude-opus-4-8",
+        note=(
+            "diagnostic d'un bug de concurrence subtil et intermittent dans un système "
+            "distribué, raisonnement causal profond requis, fil vierge — le fond (course "
+            "critique non déterministe), pas le volume, justifie le modèle le plus capable."
+        ),
+        n_instances=3,
+        token_est=(250, 550),
+        has_code=True,
+        keyword_flags=("code",),
+        review=(
+            "non_soumis: ajout correction ronde 0 — à revoir par le panel ronde 1",
+            "non_soumis: ajout correction ronde 0 — à revoir par le panel ronde 1",
+        ),
+    ),
+    Gabarit(
+        category="multi_tours",
+        lang="fr",
+        label="claude-opus-4-8",
+        note=(
+            "fil juridique déjà long et dense, nouvelle demande de synthèse des risques "
+            "croisés entre de nombreuses clauses interdépendantes, à fort enjeu — "
+            "l'interdépendance des risques (pas le volume) exige le modèle le plus capable."
+        ),
+        n_instances=3,
+        token_est=(300, 600),
+        keyword_flags=("contrat", "analyse"),
+        msg_count=(14, 22),
+        tok_per_msg=(200, 330),
+        seen_reasoning=True,
+        current_model="claude-opus-4-8",
+        recos_shown=(2, 5),
+        recos_followed_ratio=(0.5, 0.9),
+        derogations_up=(0, 1),
+        review=(
+            "non_soumis: ajout correction ronde 0 — à revoir par le panel ronde 1",
+            "non_soumis: ajout correction ronde 0 — à revoir par le panel ronde 1",
+        ),
+    ),
 )
 
 
@@ -560,6 +858,29 @@ def _valider_gabarits() -> None:
             assert g.current_model in VISIBLE_MODELS, (
                 f"current_model hors catalogue visible : {g.current_model!r}"
             )
+    # Garde-fous d'ÉQUILIBRE (correction ronde 0, eval-scientist) : une édition
+    # fondateur ne doit pas faire dériver silencieusement la couverture.
+    par_categorie: dict[str, int] = {}
+    opus_gabarits: dict[str, int] = {}
+    total_fr = 0
+    total = 0
+    for g in GABARITS:
+        par_categorie[g.category] = par_categorie.get(g.category, 0) + g.n_instances
+        total += g.n_instances
+        if g.lang == "fr":
+            total_fr += g.n_instances
+        if g.label == "claude-opus-4-8":
+            opus_gabarits[g.category] = opus_gabarits.get(g.category, 0) + 1
+    for cat, n in par_categorie.items():
+        assert 15 <= n <= 32, f"catégorie déséquilibrée : {cat} = {n} instances"
+    assert total_fr / total > 0.6, f"part FR insuffisante : {total_fr / total:.0%}"
+    # Cellules opus à ≥ 2 gabarits DISTINCTS là où le set en revendique la
+    # couverture (code, multi_tours — correction ronde 0) ; les autres cellules
+    # opus minces sont ASSUMÉES et documentées dans coverage_report.json.
+    for cat in ("code", "multi_tours"):
+        assert opus_gabarits.get(cat, 0) >= 2, (
+            f"couverture opus trop mince en {cat} : {opus_gabarits.get(cat, 0)} gabarit(s)"
+        )
 
 
 def _build_prompt(rng: random.Random, g: Gabarit) -> tuple[dict, tuple[str, ...]]:
@@ -593,7 +914,11 @@ def _build_conversation(rng: random.Random, g: Gabarit) -> dict:
         context_token_est = max(0, msg_count * tok_per_msg + bruit)
     else:
         context_token_est = 0
-    recos_shown = rng.randint(*g.recos_shown)
+    # Une recommandation ne peut s'afficher qu'à un tour UTILISATEUR :
+    # recos_shown est plafonné à ceil(msg_count/2) (correction ronde 0,
+    # data-quality : gold-0165 affichait 10 recos pour 9 messages).
+    max_user_turns = (msg_count + 1) // 2
+    recos_shown = min(rng.randint(*g.recos_shown), max_user_turns)
     if recos_shown > 0:
         ratio = rng.uniform(*g.recos_followed_ratio)
         recos_followed = min(recos_shown, round(recos_shown * ratio))
@@ -657,7 +982,8 @@ def generate() -> tuple[list[dict], list[tuple[Signals, str]]]:
 def _heuristic_agreement(diagnostics: list[tuple[Signals, str]]) -> float:
     """DIAGNOSTIC seul (JAMAIS utilisé pour étiqueter) : taux d'accord `HeuristicRouter`.
 
-    Attendu ~70-90 % : un set où l'heuristique aurait 100 % raison ne
+    Attendu ~65-90 % (les arbitrages post-génération font baisser
+    l'accord) : un set où l'heuristique aurait 100 % raison ne
     servirait à rien comme juge de paix (gate R3 infranchissable).
     """
     routeur = HeuristicRouter()
@@ -667,6 +993,52 @@ def _heuristic_agreement(diagnostics: list[tuple[Signals, str]]) -> float:
         if decision.model == label:
             accords += 1
     return accords / len(diagnostics) if diagnostics else 0.0
+
+
+# Trace du processus de revue (R2) — régénérée avec le set, JAMAIS éditée à la
+# main dans coverage_report.json (correction ronde 0, eval-scientist).
+DOUBLE_REVUE = {
+    "processus": (
+        "génération builder-core (sonnet) → double-revue INDÉPENDANTE parallèle "
+        "ml-architect (opus) + eval-scientist (opus) → arbitrage 2/3 orchestrateur → "
+        "corrections ronde 0 du panel de juges (provenances honnêtes, ajouts opus)"
+    ),
+    "desaccords_ml": 2,
+    "desaccords_eval": 3,
+    "arbitrages": {
+        "traduction_juridique_officielle (gold-0077..79)": "opus→sonnet (ml accepté)",
+        "synthese_fil_long (gold-0155..57)": "opus→sonnet (ml accepté)",
+        "architecture_complexe (gold-0088..91)": "CONSERVÉ opus (eval rejeté, arbitrage documenté)",
+        "fil_mixte_code_maths (gold-0167..69)": "opus→sonnet (eval accepté)",
+        "extraction_fil_long (gold-0044..47)": "CONSERVÉ haiku (eval rejeté, arbitrage documenté)",
+    },
+    "ajouts_non_soumis_double_revue": (
+        "3 gabarits opus marqués review='non_soumis…' / 'valide_au_fond…' — provenance "
+        "HONNÊTE, soumis au panel de juges des rondes suivantes"
+    ),
+}
+
+LIMITES_STATISTIQUES = {
+    "n_effectif": (
+        "les instances d'un même gabarit ne diffèrent que par un jitter numérique seedé : "
+        "le n effectif ≈ nombre de gabarits (voir n_gabarits), pas le nombre de lignes"
+    ),
+    "cellules_opus": (
+        "certaines cellules catégorie×opus restent minces (extraction, maths) : le gate "
+        "R3 doit consommer les métriques opus en AGRÉGÉ/relatif uniquement — JAMAIS de "
+        "seuil opus par cellule"
+    ),
+    "non_separabilite_etage_1": (
+        "des cellules adjacentes (ex. maths opus vs sonnet) ne diffèrent que par la "
+        "nature SÉMANTIQUE de la tâche, invisible aux signaux : un classifieur étage 1 a "
+        "un plafond de justesse < 100 % sur le golden SANS rapport avec sa qualité — "
+        "argument documenté pour l'étage 2 (R6)"
+    ),
+    "cellules_vides_par_design": (
+        "redaction_simple/opus, resume/opus, traduction/opus sont VIDES par principe "
+        "(plafonds de sobriété du set)"
+    ),
+}
 
 
 def _coverage_stats(entries: list[dict], heuristic_agreement: float) -> dict:
@@ -703,6 +1075,25 @@ def main() -> None:
 
     with STATS_PATH.open("w", encoding="utf-8") as f:
         json.dump(stats, f, ensure_ascii=False, indent=2)
+        f.write("\n")
+
+    by_cat_label: dict[str, dict[str, int]] = {}
+    by_lang: Counter = Counter()
+    for e in entries:
+        by_cat_label.setdefault(e["category"], {})
+        by_cat_label[e["category"]][e["label"]] = by_cat_label[e["category"]].get(e["label"], 0) + 1
+        by_lang[e["lang"]] += 1
+    report = {
+        **stats,
+        "by_category_x_label": {
+            k: dict(sorted(v.items())) for k, v in sorted(by_cat_label.items())
+        },
+        "by_lang": dict(sorted(by_lang.items())),
+        "double_revue": DOUBLE_REVUE,
+        "limites_statistiques": LIMITES_STATISTIQUES,
+    }
+    with REPORT_PATH.open("w", encoding="utf-8") as f:
+        json.dump(report, f, ensure_ascii=False, indent=2)
         f.write("\n")
 
     print(f"golden.jsonl : {stats['n']} lignes -> {GOLDEN_PATH}")

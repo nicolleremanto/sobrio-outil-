@@ -11,7 +11,9 @@ bloquant pour les chantiers en cours) :
 
 1. Modifier le gabarit concerné dans `generate_golden.py` (étiquette `label`,
    justification `note`) — jamais `golden.jsonl` à la main.
-2. Régénérer : `.venv/bin/python router/eval/golden/generate_golden.py`.
+2. Régénérer : `.venv/bin/python router/eval/golden/generate_golden.py`
+   (réécrit `golden.jsonl`, `coverage_stats.json` ET `coverage_report.json` —
+   ne jamais éditer ces trois fichiers à la main).
 3. Re-figer : `shasum -a 256 golden.jsonl` → mettre à jour `GOLDEN_SHA256`.
 4. Le test `router/tests/test_router_golden_frozen.py` doit rester vert.
 
@@ -19,6 +21,10 @@ Principe d'étiquetage : **le modèle le moins cher qui SUFFIT réellement** à 
 tâche décrite par les signaux (sobriété) ; `claude-fable-5` exclu (RFC-0002).
 Le set ne contient AUCUN texte de prompt (règle n°1) — uniquement des signaux
 numériques et des descriptions abstraites de scénarios.
+
+Limites statistiques documentées dans `coverage_report.json`
+(`limites_statistiques`) : n effectif ≈ nombre de gabarits, cellules opus
+minces → le gate R3 consomme l'opus en agrégé/relatif uniquement.
 
 ⚠️ Ce set ne sert JAMAIS à l'entraînement (anti-fuite testée) : il départage
 les candidats (gate de promotion, chantier R3).

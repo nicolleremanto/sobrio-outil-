@@ -1,49 +1,49 @@
 {
-  "n": 175,
+  "n": 181,
   "by_category": {
-    "code": 24,
+    "code": 27,
     "extraction": 20,
     "juridique_contrat": 20,
     "maths_raisonnement": 24,
-    "multi_tours": 28,
+    "multi_tours": 31,
     "redaction_simple": 20,
     "resume": 19,
     "traduction": 20
   },
   "by_label": {
     "claude-haiku-4-5": 66,
-    "claude-opus-4-8": 24,
+    "claude-opus-4-8": 30,
     "claude-sonnet-5": 85
   },
-  "fr_share": 0.7429,
-  "heuristic_agreement": 0.6914,
+  "fr_share": 0.7514,
+  "heuristic_agreement": 0.6685,
   "seed": 2026,
-  "n_gabarits": 53,
+  "n_gabarits": 55,
   "by_category_x_label": {
     "code": {
       "claude-haiku-4-5": 4,
-      "claude-sonnet-5": 16,
-      "claude-opus-4-8": 4
+      "claude-opus-4-8": 7,
+      "claude-sonnet-5": 16
     },
     "extraction": {
       "claude-haiku-4-5": 14,
-      "claude-sonnet-5": 3,
-      "claude-opus-4-8": 3
+      "claude-opus-4-8": 3,
+      "claude-sonnet-5": 3
     },
     "juridique_contrat": {
+      "claude-haiku-4-5": 3,
       "claude-opus-4-8": 10,
-      "claude-sonnet-5": 7,
-      "claude-haiku-4-5": 3
+      "claude-sonnet-5": 7
     },
     "maths_raisonnement": {
-      "claude-sonnet-5": 17,
+      "claude-haiku-4-5": 3,
       "claude-opus-4-8": 4,
-      "claude-haiku-4-5": 3
+      "claude-sonnet-5": 17
     },
     "multi_tours": {
-      "claude-sonnet-5": 19,
       "claude-haiku-4-5": 6,
-      "claude-opus-4-8": 3
+      "claude-opus-4-8": 6,
+      "claude-sonnet-5": 19
     },
     "redaction_simple": {
       "claude-haiku-4-5": 13,
@@ -59,21 +59,26 @@
     }
   },
   "by_lang": {
-    "fr": 130,
-    "en": 45
+    "en": 45,
+    "fr": 136
   },
   "double_revue": {
-    "processus": "génération builder-core (sonnet) → double-revue INDÉPENDANTE parallèle ml-architect (opus) + eval-scientist (opus) → arbitrage 2/3 orchestrateur",
+    "processus": "génération builder-core (sonnet) → double-revue INDÉPENDANTE parallèle ml-architect (opus) + eval-scientist (opus) → arbitrage 2/3 orchestrateur → corrections ronde 0 du panel de juges (provenances honnêtes, ajouts opus)",
     "desaccords_ml": 2,
     "desaccords_eval": 3,
     "arbitrages": {
-      "traduction_juridique_officielle (gold-0077..79)": "opus→sonnet (ml accepté : plafond traduction, cohérence interne)",
-      "synthese_fil_long (gold-0155..57)": "opus→sonnet (ml accepté : le volume seul ne monte pas de palier)",
-      "architecture_complexe (gold-0088..91)": "CONSERVÉ opus (eval rejeté : frontière réelle, couverture opus code)",
-      "fil_mixte_code_maths (gold-0167..69)": "opus→sonnet (eval accepté : prompt/contexte modestes)",
-      "extraction_fil_long (gold-0044..47)": "CONSERVÉ haiku (eval rejeté : suffisance ≠ UX de bascule, principe anti-volume)"
+      "traduction_juridique_officielle (gold-0077..79)": "opus→sonnet (ml accepté)",
+      "synthese_fil_long (gold-0155..57)": "opus→sonnet (ml accepté)",
+      "architecture_complexe (gold-0088..91)": "CONSERVÉ opus (eval rejeté, arbitrage documenté)",
+      "fil_mixte_code_maths (gold-0167..69)": "opus→sonnet (eval accepté)",
+      "extraction_fil_long (gold-0044..47)": "CONSERVÉ haiku (eval rejeté, arbitrage documenté)"
     },
-    "ajout_post_arbitrage": "gabarit multi_tours opus honnête (gold-0173..75 : preuve profonde en fil long) — la catégorie perdait sinon toute couverture opus",
-    "anti_mimetisme": "accord heuristique 69,1% mesuré indépendamment par les DEUX relecteurs avant arbitrage (72,1%) — jamais >95%, le gate R3 garde une marge réelle"
+    "ajouts_non_soumis_double_revue": "3 gabarits opus marqués review='non_soumis…' / 'valide_au_fond…' — provenance HONNÊTE, soumis au panel de juges des rondes suivantes"
+  },
+  "limites_statistiques": {
+    "n_effectif": "les instances d'un même gabarit ne diffèrent que par un jitter numérique seedé : le n effectif ≈ nombre de gabarits (voir n_gabarits), pas le nombre de lignes",
+    "cellules_opus": "certaines cellules catégorie×opus restent minces (extraction, maths) : le gate R3 doit consommer les métriques opus en AGRÉGÉ/relatif uniquement — JAMAIS de seuil opus par cellule",
+    "non_separabilite_etage_1": "des cellules adjacentes (ex. maths opus vs sonnet) ne diffèrent que par la nature SÉMANTIQUE de la tâche, invisible aux signaux : un classifieur étage 1 a un plafond de justesse < 100 % sur le golden SANS rapport avec sa qualité — argument documenté pour l'étage 2 (R6)",
+    "cellules_vides_par_design": "redaction_simple/opus, resume/opus, traduction/opus sont VIDES par principe (plafonds de sobriété du set)"
   }
 }

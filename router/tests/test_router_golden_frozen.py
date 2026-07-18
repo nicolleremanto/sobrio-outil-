@@ -68,12 +68,20 @@ def test_golden_entries_well_formed():
         assert "pending" not in e["review"].values(), e["id"]
 
 
-def test_golden_never_leaks_into_training_data():
-    """ANTI-FUITE : aucun id gold-* dans router/data/ (corpus d'entraînement)."""
-    if not _DATA_DIR.exists():
-        return  # pas encore de corpus (R4) — le test protège dès sa création
+def _scan_for_gold_ids(data_dir: pathlib.Path) -> list[str]:
+    """Cherche des ids gold-* dans un répertoire de corpus (anti-fuite).
+
+    Seuil de 200 Mo : évite de charger en mémoire un très gros parquet/binaire ;
+    les corpus R4 sont attendus BIEN en dessous (le test échouerait d'ailleurs
+    à l'ouverture d'un binaire non-texte via errors="ignore" sans le seuil, il
+    ne fait que borner le coût). NB : cette garde attrape la fuite d'IDS ; la
+    déduplication au niveau SIGNAUX (vecteurs quasi-dupliqués golden↔train)
+    relève du pipeline R4/R5 (data-quality-auditor).
+    """
     offenders: list[str] = []
-    for path in _DATA_DIR.rglob("*"):
+    if not data_dir.exists():
+        return offenders
+    for path in data_dir.rglob("*"):
         if not path.is_file() or path.stat().st_size > 200_000_000:
             continue
         try:
@@ -82,4 +90,26 @@ def test_golden_never_leaks_into_training_data():
             continue
         if "gold-" in content:
             offenders.append(str(path))
+    return offenders
+
+
+def test_golden_never_leaks_into_training_data():
+    """ANTI-FUITE : aucun id gold-* dans router/data/ (corpus d'entraînement).
+
+    Vacuité assumée tant que router/data/ n'existe pas (R4) — la garde est
+    PROUVÉE ACTIVE par le test de fixture ci-dessous (correction ronde 0,
+    eval-scientist : un garde jamais déclenché ne prouve rien).
+    """
+    offenders = _scan_for_gold_ids(_DATA_DIR)
     assert not offenders, f"ids du golden set trouvés dans les corpus : {offenders}"
+
+
+def test_leak_guard_actually_fires(tmp_path):
+    """Fixture : la garde DÉTECTE réellement un id gold-* planté dans un corpus."""
+    corpus = tmp_path / "corpus.jsonl"
+    corpus.write_text('{"id": "train-1", "source": "copie interdite de gold-0042"}\n')
+    offenders = _scan_for_gold_ids(tmp_path)
+    assert offenders == [str(corpus)]
+    # Et un corpus propre ne déclenche rien.
+    corpus.write_text('{"id": "train-1", "source": "synthétique"}\n')
+    assert _scan_for_gold_ids(tmp_path) == []

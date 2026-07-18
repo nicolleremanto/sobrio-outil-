@@ -227,3 +227,52 @@ tracées par entrée (158 agree/agree · 9 amended · 8 contesté→conservé),
 (hash + schéma + zéro prompt_text + ANTI-FUITE router/data/). Accord
 heuristique final 69,1 % — le gate R3 a une marge réelle.
 Preuves : 90 tests router+api verts, make test complet vert, ruff vert.
+
+## R2 — round 0 (commit 22d4b11)
+
+| agent                | scores                                                          | blocking | major | verdict    |
+| -------------------- | --------------------------------------------------------------- | -------- | ----- | ---------- |
+| eval-scientist       | étiquettes 4 · représent. 3 · double-revue 3 · figeage 3,5 · gate 3,5 | 0  | 3     | **YELLOW** |
+| qa-auditor           | couv 5 · contrat 5 · erreurs 4 · clarté 5 · régressions 5       | 0        | 0     | **GREEN**  |
+| data-quality-auditor | dédoublon 3 · équilibre 3 · FR 5 · cohérence 4 · provenance 2   | 0        | 3     | **YELLOW** |
+| privacy-sentinel     | 3 violations (citations de formulations utilisateur)            | —        | —     | **FAIL**   |
+| cost-guard           | — (zéro dépense)                                                | PASS     | —     | **PASS**   |
+
+→ Ronde **RED** (FAIL sentinel). Les juges ont attrapé — entre autres — DEUX
+fautes de L'ORCHESTRATEUR lui-même. Tout corrigé :
+
+- **[FAIL privacy + major data]** 11 notes citaient entre guillemets des
+  formulations utilisateur quasi-littérales (« relis ce texte », « rédige
+  cette clause », « montre les étapes ») = amorces de prompt. DEUX de ces
+  citations venaient de MA correction du minor flags de la double-revue. →
+  **corrigé** : notes réécrites en description INDIRECTE, zéro citation.
+- **[major eval — INTÉGRITÉ]** La trace de revue de gold-0173..75 (mon ajout
+  post-arbitrage) affirmait agree/agree alors que la double-revue n'a JAMAIS
+  vu ce gabarit : provenance FABRIQUÉE par le défaut du dataclass. →
+  **corrigé** : provenance honnête (« non_soumis: ajout post-arbitrage… » /
+  « valide_au_fond_panel_r2_r0… » — eval-scientist a réellement validé le
+  fond en ronde 0). Leçon consignée : un défaut de champ ne doit jamais
+  pouvoir affirmer une revue qui n'a pas eu lieu.
+- **[major eval]** Cellules opus à 1 seul gabarit (pilier fragile) → **corrigé** :
+  +2 gabarits opus DISTINCTS (code : bug de concurrence subtil ; multi_tours :
+  synthèse de risques croisés juridiques), marqués « non_soumis — à revoir par
+  le panel ronde 1 » (provenance honnête) + garde-fou d'équilibre dans
+  _valider_gabarits (≥2 gabarits opus en code/multi_tours, catégories 15-32,
+  FR>60 %) + LIMITES_STATISTIQUES versionnées dans coverage_report.json
+  (n_eff≈gabarits ; opus en AGRÉGÉ/relatif seulement pour le gate R3 ;
+  plafond de justesse étage 1 sur cellules non séparables → argument R6).
+- **[major eval+qa]** coverage_report.json écrit à la main, non gardé →
+  **corrigé** : généré par generate_golden.py (narratif DOUBLE_REVUE +
+  limites en constantes versionnées), procédure HUMAN_REVIEW mise à jour.
+- **[major data]** gold-0165 : recos_shown=10 > tours utilisateur possibles
+  (9 messages) → **corrigé** : plafond recos_shown ≤ ceil(msg_count/2) dans
+  le générateur.
+- **[minors]** reviews des arbitrages ANCRÉES au label vu (« agree — avait
+  relu le label INITIAL opus… ») · test anti-fuite : garde extraite +
+  **fixture prouvant le déclenchement** + seuil 200 Mo commenté + dédup
+  signaux documentée → R4/R5 · bande d'accord ajustée ~65-90 ·
+  ruff format appliqué · pseudo-réplication documentée (limites).
+
+**RE-FIGÉ** : 181 entrées (66 haiku / 85 sonnet / 30 opus), sha e795537a…,
+75,1 % FR, accord heuristique 66,8 %, reproductible. Preuves : 91 tests
+router+api verts, make test complet vert, ruff check+format verts.
