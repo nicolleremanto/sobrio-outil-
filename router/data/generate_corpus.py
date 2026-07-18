@@ -1082,7 +1082,12 @@ def _verifier_golden_fige(golden_dir: Path = _GOLDEN_DIR) -> None:
     sur les OCTETS COURANTS : un golden.jsonl modifié sans re-figeage fait
     échouer la génération bruyamment, jamais en silence.
     """
-    sha_attendu = (golden_dir / "GOLDEN_SHA256").read_text(encoding="utf-8").split()[0]
+    champs = (golden_dir / "GOLDEN_SHA256").read_text(encoding="utf-8").split()
+    if not champs or len(champs[0]) != 64:
+        raise RuntimeError(
+            "GOLDEN_SHA256 vide ou malformé — garde anti-fuite invalidée, génération refusée"
+        )
+    sha_attendu = champs[0]
     sha_octets = hashlib.sha256((golden_dir / "golden.jsonl").read_bytes()).hexdigest()
     if sha_octets != sha_attendu:
         raise RuntimeError(
@@ -1363,7 +1368,14 @@ def main(argv: list[str] | None = None) -> int:
         print(f"--out-dir invalide ({args.out_dir}) : {exc}", file=sys.stderr)
         return 2
 
-    rows, stats, bruit_ids = generate(args.n, args.seed, args.bruit)
+    try:
+        rows, stats, bruit_ids = generate(args.n, args.seed, args.bruit)
+    except RuntimeError as exc:
+        # Refus de garde (golden dérivé) : même contrat que le reste de la CLI
+        # et que distill --real — message propre + exit 2, jamais de traceback
+        # brut (major qa r3 : ce chemin est devenu VIVANT avec la garde v2).
+        print(f"REFUS : {exc}", file=sys.stderr)
+        return 2
 
     corpus_path = args.out_dir / "corpus-v1.jsonl.gz"
     metadata_path = args.out_dir / "corpus-v1.metadata.json"

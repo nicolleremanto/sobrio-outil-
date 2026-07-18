@@ -850,3 +850,39 @@ brèche ouverte.)
 
 Preuves : 236 router + 26 api verts (+4), corpus INCHANGÉ (sha be96b691,
 8/48/0), make test complet vert, ruff verts.
+
+## R4 — round 3 (commit 2664c80, panel 5 juges — garde v2 re-éprouvée)
+
+| agent            | modèle | scores (dims)                                       | blocking | major | verdict |
+|------------------|--------|-----------------------------------------------------|----------|-------|---------|
+| data-quality (P) | sonnet | réalisme5 équilibre5 cohérence5 étiquettes5 robust5 | 0        | 0     | GREEN   |
+| eval-scientist   | opus   | anti-fuite5 seed5 principes5 repro5 intégrité5      | 0        | 0     | GREEN   |
+| qa-auditor       | sonnet | couverture4 contrat3 erreurs3 clarté4 régressions5  | 0        | 1     | YELLOW  |
+| privacy-sentinel | sonnet | —                                                   | PASS     | —     | PASS    |
+| cost-guard       | haiku  | —                                                   | PASS     | —     | PASS    |
+
+→ **Ronde JAUNE (major qa) — streak reste 0/2.** La garde v2 FONCTIONNE
+(dq/eval : dérive rejouée dans les deux sens, mutation testing du câblage,
+overlap 0 re-prouvé — aucune fuite possible). Mais qa a prouvé en
+bout-en-bout ce que les tests unitaires ne voyaient pas : en rendant VIVANT
+le chemin d'exception de la garde (mort sous la v1 tautologique), la
+correction r2 exposait un RuntimeError NON rattrapé par main() → traceback
+brut exit 1 sur le VRAI CLI (make router-corpus), en contradiction avec le
+contrat documenté de main() (« message propre + exit 2 »).
+
+**Corrections ronde 3 :**
+- **[major qa]** main() rattrape le refus de garde → « REFUS : … » exit 2
+  (style aligné distill --real) + test BOUT-EN-BOUT subprocess : copie
+  sandbox de router/, golden.jsonl muté, vrai CLI → exit 2, REFUS, zéro
+  traceback (le test qui aurait révélé le major).
+- **[minors dq/eval/qa]** Sens miroir testé (GOLDEN_SHA256 muté, jsonl
+  intact → refus) · GOLDEN_SHA256 vide/malformé → RuntimeError propre (plus
+  d'IndexError ; fail-closed dans tous les cas) · spy du câblage verrouille
+  les ARGUMENTS (appel sans arg = dossier réel par défaut).
+- **[observation eval consignée]** L'intégrité des octets du golden dans le
+  chemin eval/gate est portée par test_golden_hash_is_frozen (séparation
+  correcte, pré-existante R3) — aucun site d'appel ne se fie faussement au
+  lecteur golden_sha256().
+
+Preuves : 237 router + 26 api verts (+1 e2e), corpus INCHANGÉ (sha be96b691,
+8/48/0), make test complet vert, ruff verts.

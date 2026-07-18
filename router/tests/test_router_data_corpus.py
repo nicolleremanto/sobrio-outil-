@@ -707,17 +707,66 @@ def test_guard_detects_real_golden_drift(tmp_path):
     with pytest.raises(RuntimeError, match="dérivé"):
         generate_corpus._verifier_golden_fige(copy)
 
+    # Sens MIROIR (minor dq r3) : golden.jsonl intact, GOLDEN_SHA256 muté.
+    shutil.copy(golden_dir / "golden.jsonl", copy / "golden.jsonl")
+    (copy / "GOLDEN_SHA256").write_text("f" * 64 + "  golden.jsonl\n", encoding="utf-8")
+    with pytest.raises(RuntimeError, match="dérivé"):
+        generate_corpus._verifier_golden_fige(copy)
+
+    # Fichier sha vide/malformé (minor eval r3) : RuntimeError propre, pas IndexError.
+    (copy / "GOLDEN_SHA256").write_text("", encoding="utf-8")
+    with pytest.raises(RuntimeError, match="malformé"):
+        generate_corpus._verifier_golden_fige(copy)
+
 
 def test_guard_wired_into_generate(monkeypatch):
-    """La garde v2 est bien APPELÉE par generate() (pas seulement définie)."""
+    """La garde v2 est APPELÉE par generate() — et SANS argument, donc sur le
+    _GOLDEN_DIR réel par défaut (minor qa r3 : le spy verrouille les args)."""
     calls = []
     monkeypatch.setattr(
         generate_corpus,
         "_verifier_golden_fige",
-        lambda *a, **k: calls.append(True),
+        lambda *a, **k: calls.append((a, k)),
     )
     generate_corpus.generate(20, seed=4242, bruit_rate=0.0)
-    assert calls == [True]
+    assert calls == [((), {})]
+
+
+def test_cli_end_to_end_refuses_derived_golden(tmp_path):
+    """Bout-en-bout (major qa r3) : le VRAI chemin CLI (subprocess, comme
+    make router-corpus) sur une copie sandbox de router/ au golden dérivé →
+    « REFUS » propre exit 2, pas de traceback — le test qui aurait révélé le
+    major (la garde levait, main() ne rattrapait pas)."""
+    import shutil as _shutil
+
+    src = Path(generate_corpus.__file__).resolve().parents[1]
+    sandbox = tmp_path / "router"
+    _shutil.copytree(
+        src,
+        sandbox,
+        ignore=_shutil.ignore_patterns(
+            "artifacts", "tests", "__pycache__", "*.egg-info", ".pytest_cache"
+        ),
+    )
+    with (sandbox / "eval" / "golden" / "golden.jsonl").open("a", encoding="utf-8") as fh:
+        fh.write('{"id": "gold-9998", "category": "resume", "label": "claude-haiku-4-5"}\n')
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(sandbox / "data" / "generate_corpus.py"),
+            "--n",
+            "20",
+            "--out-dir",
+            str(tmp_path / "out"),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    assert proc.returncode == 2
+    assert "REFUS" in proc.stderr and "dérivé" in proc.stderr
+    assert "Traceback" not in proc.stderr
 
 
 @pytest.mark.parametrize(
