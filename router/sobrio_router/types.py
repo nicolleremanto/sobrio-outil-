@@ -9,7 +9,7 @@ fermé (règle n°1 — jamais de contenu de prompt stocké ni loggé).
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
@@ -32,7 +32,11 @@ class PromptSignals:
     has_code: bool
     has_math: bool
     keyword_flags: tuple[str, ...]
-    prompt_text: str | None = None
+    # repr=False (correction ronde 1, privacy-sentinel) : le texte ne doit
+    # JAMAIS sortir via repr()/str()/f-string — un log de debug ou une
+    # exception non rattrapée sérialiserait sinon le prompt en clair dès que
+    # l'étage 2 alimentera ce champ. Testé (test_router_corrections_r1).
+    prompt_text: str | None = field(default=None, repr=False)
 
 
 @dataclass(frozen=True)

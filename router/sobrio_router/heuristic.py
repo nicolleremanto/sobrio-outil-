@@ -144,12 +144,18 @@ def _short_simple(s: Signals) -> bool:
 
 
 def _complex_task(s: Signals) -> bool:
-    """Flag lourd (contrat/analyse) OU prompt long OU contexte de conversation long."""
+    """Flag lourd (contrat/analyse) OU prompt long OU contexte de conversation long.
+
+    Borne contexte INCLUSIVE (>= 4000), en MIROIR EXACT du `< 4000` des règles
+    de transformation légère : à 4000 pile, c'est complex_task qui décide —
+    aucune couture où un contexte long retomberait sur default_balanced
+    (correction ronde 1, ml-architect : `> 4000` laissait le point 4000 filer).
+    """
     flags = set(s.prompt.keyword_flags)
     return (
         bool(flags & _HEAVY_FLAGS)
         or s.prompt.token_est > 800
-        or s.conversation.context_token_est > 4000
+        or s.conversation.context_token_est >= 4000
     )
 
 

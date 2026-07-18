@@ -27,6 +27,7 @@ fallback, marquée `fallback:heuristic`, sans thread ni exception.
 from __future__ import annotations
 
 import concurrent.futures
+import math
 
 from .heuristic import VISIBLE_MODELS, HeuristicRouter
 from .interface import Router
@@ -78,15 +79,25 @@ class SafeRouter(Router):
     def _validated(self, decision: Decision) -> Decision | None:
         """Valide la sortie du primaire ; None si elle est inutilisable.
 
+        TOUS les champs sont validés (corrections rondes 0 ET 1) :
         - modèle : DOIT appartenir aux ids visibles du catalogue ;
-        - confiance : DOIT être un nombre fini — clampée ensuite à [0, 1]
-          (un léger débordement de calibration ne justifie pas un repli,
-          mais NaN/inf/type étranger si).
+        - rule : DOIT être une chaîne non vide (un `rule=None` transmis tel
+          quel ferait un 500 pydantic au contrat — trou trouvé par qa r1) ;
+        - confiance : DOIT être un nombre RÉEL FINI — `math.isfinite` rejette
+          NaN ET ±inf, et `bool` est explicitement exclu (True est un int en
+          Python — trou trouvé par ml-architect r1). Un débordement FINI est
+          ensuite clampé à [0, 1] (léger défaut de calibration, pas une panne).
         """
         if decision.model not in self._allowed_models:
             return None
+        if not isinstance(decision.rule, str) or not decision.rule:
+            return None
         confidence = decision.confidence
-        if not isinstance(confidence, (int, float)) or confidence != confidence:  # NaN
+        if (
+            isinstance(confidence, bool)
+            or not isinstance(confidence, (int, float))
+            or not math.isfinite(float(confidence))
+        ):
             return None
         clamped = min(1.0, max(0.0, float(confidence)))
         if clamped == decision.confidence:

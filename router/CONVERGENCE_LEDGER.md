@@ -99,3 +99,37 @@ chirurgicaux spécifiés par les juges, arbitrage consigné) :
 
 Preuves après correction : 78 tests router+api verts (+18), make test complet
 vert (128 py + 218 ext), ruff/lint verts, bench p95 0,0108 ms.
+
+## R1 — round 1 (commit 93bdd97)
+
+| agent            | scores                                                            | blocking | major | verdict    |
+| ---------------- | ----------------------------------------------------------------- | -------- | ----- | ---------- |
+| qa-auditor       | couv 3 · contrat 4 · erreurs 2 · clarté 4 · régressions 5         | 0        | 1     | **YELLOW** |
+| ml-architect     | règles 4,5 · seuils 4 · interface 4,5 · repli-ml 3,5 · explic 4,5 | 0        | 1     | **YELLOW** |
+| privacy-sentinel | 1 violation REPRODUITE (repr/str)                                 | —        | —     | **FAIL**   |
+| cost-guard       | — (17 preuves, zéro dépense)                                      | PASS     | —     | **PASS**   |
+
+→ Ronde **RED** (FAIL sentinel, non waivable). Les juges ont trouvé des trous
+DANS MES CORRECTIONS de la ronde 0 — tous reproduits par exécution, tous
+corrigés :
+
+- **[FAIL privacy]** `PromptSignals.prompt_text` (champ réservé r0) sortait en
+  clair dans `repr()`/`str()` du dataclass (reproduit avec SECRET_LEAK_TEST) :
+  un log de debug/exception sérialiserait le prompt dès que l'étage 2
+  l'alimentera — en contradiction avec le contrat documenté SUR la classe. →
+  **corrigé** `field(default=None, repr=False)` + test (repr/str/f-string de
+  PromptSignals ET Signals sans le texte ; champ lisible en accès direct).
+- **[major qa]** `_validated` ne validait pas `rule` : `rule=None` transmis →
+  500 pydantic REPRODUIT via TestClient. → **corrigé** : rule doit être une
+  chaîne non vide, sinon repli + 3 tests (None/int/vide).
+- **[major ml]** confiance ±inf et bool passaient le filtre NaN (`inf` clampé
+  à 1.0 avec rule primaire conservée = artefact corrompu maquillé en décision
+  sûre, danger seuil auto 0.75). → **corrigé** `math.isfinite` + exclusion
+  bool + 3 tests (+inf/-inf/True).
+- **[minor ml]** borne contexte : `> 4000` laissait le point 4000 filer sur
+  default_balanced alors que l'invariant annoncé disait `>= 4000`. →
+  **corrigé** borne inclusive en miroir exact du `< 4000` des règles légères
+  + test au point de couture.
+
+Preuves après correction : 86 tests router+api verts (+8), make test complet
+vert, ruff/lint verts, bench p95 0,0115 ms.
