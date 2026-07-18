@@ -793,10 +793,10 @@ GABARITS: tuple[Gabarit, ...] = (
         recos_followed_ratio=(0.4, 0.8),
         derogations_up=(0, 1),
         review=(
-            "non_soumis: ajout post-arbitrage par l'orchestrateur — jamais vu par la "
-            "double-revue initiale",
-            "valide_au_fond_panel_r2_r0: étiquette opus jugée honnête par eval-scientist "
-            "(ronde 0) ; provenance initiale agree/agree corrigée (elle était fabriquée)",
+            "non_soumis: ajout post-arbitrage orchestrateur — relecture formelle "
+            "ml-architect au panel ronde 2 (verdict au ledger)",
+            "valide panel ronde 1 (eval-scientist, contexte neuf) — verdict détaillé au "
+            "ledger R2 round 1",
         ),
     ),
     # === ajouts correction ronde 0 (eval-scientist : cellules opus à 1 seul
@@ -816,8 +816,10 @@ GABARITS: tuple[Gabarit, ...] = (
         has_code=True,
         keyword_flags=("code",),
         review=(
-            "non_soumis: ajout correction ronde 0 — à revoir par le panel ronde 1",
-            "non_soumis: ajout correction ronde 0 — à revoir par le panel ronde 1",
+            "non_soumis: ajout correction ronde 0 — relecture formelle ml-architect au "
+            "panel ronde 2 (verdict au ledger)",
+            "valide panel ronde 1 (eval-scientist, contexte neuf) — verdict détaillé au "
+            "ledger R2 round 1",
         ),
     ),
     Gabarit(
@@ -840,8 +842,10 @@ GABARITS: tuple[Gabarit, ...] = (
         recos_followed_ratio=(0.5, 0.9),
         derogations_up=(0, 1),
         review=(
-            "non_soumis: ajout correction ronde 0 — à revoir par le panel ronde 1",
-            "non_soumis: ajout correction ronde 0 — à revoir par le panel ronde 1",
+            "non_soumis: ajout correction ronde 0 — relecture formelle ml-architect au "
+            "panel ronde 2 (verdict au ledger)",
+            "valide panel ronde 1 (eval-scientist, contexte neuf) — verdict détaillé au "
+            "ledger R2 round 1",
         ),
     ),
 )

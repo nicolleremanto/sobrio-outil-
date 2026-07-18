@@ -39,7 +39,11 @@ def test_maps_prompt_fields_faithfully():
 
 def test_keyword_flags_become_a_tuple():
     features = _FakeFeatures(
-        char_len=1, token_est=1, lang="en", has_code=False, has_attachment_hint=False,
+        char_len=1,
+        token_est=1,
+        lang="en",
+        has_code=False,
+        has_attachment_hint=False,
         keyword_flags=[],
     )
     signals = features_to_signals(features)
@@ -50,7 +54,11 @@ def test_keyword_flags_become_a_tuple():
 def test_has_math_defaults_to_false():
     """`has_math` n'existe pas dans `features` v1.0 (nouveau signal RFC-0001)."""
     features = _FakeFeatures(
-        char_len=1, token_est=1, lang="fr", has_code=False, has_attachment_hint=False,
+        char_len=1,
+        token_est=1,
+        lang="fr",
+        has_code=False,
+        has_attachment_hint=False,
         keyword_flags=[],
     )
     signals = features_to_signals(features)
@@ -64,13 +72,21 @@ def test_has_attachment_hint_maps_to_heavy_flag():
     TODO(RFC) : champ dédié dans `signals` plutôt que ce repli sémantique."""
     with_hint = features_to_signals(
         _FakeFeatures(
-            char_len=1, token_est=1, lang="fr", has_code=False, has_attachment_hint=True,
+            char_len=1,
+            token_est=1,
+            lang="fr",
+            has_code=False,
+            has_attachment_hint=True,
             keyword_flags=[],
         )
     )
     without_hint = features_to_signals(
         _FakeFeatures(
-            char_len=1, token_est=1, lang="fr", has_code=False, has_attachment_hint=False,
+            char_len=1,
+            token_est=1,
+            lang="fr",
+            has_code=False,
+            has_attachment_hint=False,
             keyword_flags=[],
         )
     )
@@ -80,7 +96,11 @@ def test_has_attachment_hint_maps_to_heavy_flag():
 
 def test_conversation_is_fully_neutral():
     features = _FakeFeatures(
-        char_len=999, token_est=999, lang="other", has_code=True, has_attachment_hint=True,
+        char_len=999,
+        token_est=999,
+        lang="other",
+        has_code=True,
+        has_attachment_hint=True,
         keyword_flags=["contrat"],
     )
     signals = features_to_signals(features)

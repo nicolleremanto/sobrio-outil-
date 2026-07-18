@@ -186,9 +186,7 @@ def get_extension_config(
     # policy_json est censé être un objet JSON, mais on ne suppose rien (règle 3) :
     # un tableau/scalaire mal saisi ne doit pas lever AttributeError → 500.
     policy = org.policy_json if isinstance(org.policy_json, dict) else {}
-    overrides = {
-        key: value for key, value in policy.items() if key in ExtensionConfig.model_fields
-    }
+    overrides = {key: value for key, value in policy.items() if key in ExtensionConfig.model_fields}
     # Robustesse (règle 3) : un policy_json mal formé ne doit JAMAIS produire un
     # 500. On assainit CLÉ PAR CLÉ — chaque override valide est retenu, seule la
     # valeur fautive est écartée. Ainsi un assist_mode=guide (kill-switch

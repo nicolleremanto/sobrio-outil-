@@ -276,3 +276,39 @@ fautes de L'ORCHESTRATEUR lui-même. Tout corrigé :
 **RE-FIGÉ** : 181 entrées (66 haiku / 85 sonnet / 30 opus), sha e795537a…,
 75,1 % FR, accord heuristique 66,8 %, reproductible. Preuves : 91 tests
 router+api verts, make test complet vert, ruff check+format verts.
+
+## R2 — round 1 (commit cffc4f0)
+
+| agent                | scores                                                              | blocking | major | verdict   |
+| -------------------- | ------------------------------------------------------------------- | -------- | ----- | --------- |
+| eval-scientist       | étiquettes 4,5 · représent. 4 · double-revue 4 · figeage 5 · gate 4,5 | 0      | 0     | **GREEN** |
+| qa-auditor           | couv 5 · contrat 5 · erreurs 4 · clarté 4 · régressions 5           | 0        | 0     | **GREEN** |
+| data-quality-auditor | dédoublon 5 · équilibre 5 · FR 5 · cohérence 5 · provenance 4       | 0        | 0     | **GREEN** |
+| privacy-sentinel     | — (scan exhaustif 181 notes + gabarits : zéro citation)             | PASS     | —     | **PASS**  |
+| cost-guard           | 1 « violation » : le 175 vs 181 de HUMAN_REVIEW (défaut DOC)        | —        | —     | **FAIL**  |
+
+→ Ronde **ÉCHOUÉE** (FAIL cost-guard, non waivable — appliqué à la lettre).
+Note d'orchestration TRANSPARENTE : le motif du FAIL est un défaut documentaire
+réel (déjà en minor chez qa et data) mais HORS du mandat coût du garde — toutes
+ses preuves de dépense sont vertes (0,00 $). La règle « un FAIL n'est jamais
+waivable » s'applique quand même : la ronde échoue, le streak repart de zéro.
+
+ACQUIS MAJEUR de la ronde : eval-scientist a rendu sa REVUE DE FOND FORMELLE
+des 3 gabarits opus non_soumis — **tous VALIDÉS AU FOND** (gold-0173..75 preuve
+profonde ; gold-0176..78 bug de concurrence, résidu non-séparabilité assumé ;
+gold-0179..81 risques croisés juridiques, « le plus solide des trois »).
+
+Corrections avant ronde 2 :
+- **corrigé** HUMAN_REVIEW sans chiffre en dur (pointe coverage_stats.json:n) —
+  le motif du FAIL.
+- **corrigé** reviews mises à jour d'après le verdict RÉEL d'eval ronde 1
+  (« valide panel ronde 1 (eval-scientist, contexte neuf) — verdict au
+  ledger ») ; ml_architect reste honnêtement « non_soumis — relecture formelle
+  au panel ronde 2 » : le panel ronde 2 inclut ml-architect en 6e juge pour
+  compléter la symétrie de double-revue des 9 entrées opus.
+- **corrigé** résidu d'hygiène : ruff format appliqué aux 3 fichiers R1
+  (routes.py, test_router_adapter, test_router_corrections_r1) — repo
+  format-clean intégral.
+
+**RE-FIGÉ** : 181 entrées, sha 7782ec5d…, accord heuristique 66,8 %.
+Preuves : 91 tests verts, make test complet vert, ruff check+format verts.

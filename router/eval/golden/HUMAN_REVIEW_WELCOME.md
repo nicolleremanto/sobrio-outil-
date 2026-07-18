@@ -1,7 +1,8 @@
 # Relecture humaine bienvenue — golden set du routeur
 
-Ce dossier contient le **juge de paix** du routeur Sobrio : 175 scénarios
-étiquetés (`golden.jsonl`), générés par gabarits (`generate_golden.py`),
+Ce dossier contient le **juge de paix** du routeur Sobrio : les scénarios
+étiquetés (`golden.jsonl` — effectif exact : champ `n` de `coverage_stats.json`,
+qui se régénère avec le set), générés par gabarits (`generate_golden.py`),
 **doublement relus** par deux agents indépendants (ml-architect, eval-scientist)
 puis arbitrés — la trace de revue est dans le champ `review` de chaque entrée
 et dans `coverage_report.json`.

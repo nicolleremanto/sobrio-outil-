@@ -88,17 +88,13 @@ def test_safe_router_rejects_empty_rule():
 
 def test_safe_router_rejects_positive_infinity():
     """+inf n'est PAS un débordement fini : artefact corrompu -> repli, pas 1.0."""
-    rogue = _StubRouter(
-        Decision(model="claude-sonnet-5", confidence=float("inf"), rule="ml:v05")
-    )
+    rogue = _StubRouter(Decision(model="claude-sonnet-5", confidence=float("inf"), rule="ml:v05"))
     decision = SafeRouter(primary=rogue).decide(make_signals(token_est=50))
     assert decision.rule == "fallback:heuristic"
 
 
 def test_safe_router_rejects_negative_infinity():
-    rogue = _StubRouter(
-        Decision(model="claude-sonnet-5", confidence=float("-inf"), rule="ml:v05")
-    )
+    rogue = _StubRouter(Decision(model="claude-sonnet-5", confidence=float("-inf"), rule="ml:v05"))
     decision = SafeRouter(primary=rogue).decide(make_signals(token_est=50))
     assert decision.rule == "fallback:heuristic"
 
