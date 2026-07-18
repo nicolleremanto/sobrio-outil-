@@ -58,8 +58,9 @@ _CATALOG_ORDER: tuple[str, ...] = tuple(sorted(_MODEL_RANK, key=lambda m: _MODEL
 # Seuil d'auto-bascule de l'extension (RFC-0003, auto_confidence_threshold
 # par défaut) : les décisions à confiance >= ce seuil déclenchent la bascule
 # SANS clic. La métrique `calibration_bande_auto` mesure la fiabilité RÉELLE
-# de ces décisions-là — l'ECE global (bins égaux) peut la masquer
-# (découverte ronde 0 : heuristique à 51,5 % de justesse dans cette bande).
+# de ces décisions-là — l'ECE global (bins égaux) peut la masquer.
+# Chiffres précis (r0/r1) : la RÈGLE reasoning long (conf 0.75) est à 51,5 %
+# de justesse ; la BANDE >= 0.75 entière est à 65,15 % (écart 0.1235).
 _AUTO_THRESHOLD = 0.75
 
 _ARTIFACTS_DIR = Path(__file__).resolve().parents[1] / "artifacts" / "eval"
@@ -211,6 +212,26 @@ def _auto_band_calibration(confidences: list[float], corrects: list[bool]) -> di
     }
 
 
+def _calibration_by_confidence(confidences: list[float], corrects: list[bool]) -> dict:
+    """Diagnostic PAR valeur de confiance distincte — INFORMATIF SEULEMENT (r1, ml).
+
+    Permet à la recalibration R5 de viser la tranche précise (ex. 0.75) plutôt
+    que l'agrégat de bande, qui peut moyenner une tranche mal calibrée avec une
+    tranche saine. Le gate ne lit PAS ce bloc (agrégats/relatif seulement).
+    """
+    groups: dict[float, list[int]] = {}
+    for i, confidence in enumerate(confidences):
+        groups.setdefault(round(confidence, 4), []).append(i)
+    return {
+        f"{conf:.2f}": {
+            "n": len(indices),
+            "taux_justesse": round(sum(1 for i in indices if corrects[i]) / len(indices), 4),
+            "ecart": round(abs(sum(1 for i in indices if corrects[i]) / len(indices) - conf), 4),
+        }
+        for conf, indices in sorted(groups.items())
+    }
+
+
 def evaluate_router(router: Router, entries: list[GoldenEntry]) -> dict:
     """Évalue `router` sur `entries` : chronomètre chaque `decide()`, calcule les métriques.
 
@@ -261,13 +282,19 @@ def evaluate_router(router: Router, entries: list[GoldenEntry]) -> dict:
         "p50_ms": round(_percentile(sorted_latencies, 0.50), 4),
         "p95_ms": round(_percentile(sorted_latencies, 0.95), 4),
         "calibration_bande_auto": _auto_band_calibration(confidences, corrects),
+        "calibration_par_confiance_informatif": _calibration_by_confidence(confidences, corrects),
         "matrice_confusion": _confusion_matrix(labels, predictions),
         "categorie_x_label_informatif": _category_by_label_informatif(categories, labels, corrects),
     }
 
 
 def _git_sha() -> str:
-    """Sha court du commit courant ; "unknown" hors dépôt git (ne doit jamais planter l'éval)."""
+    """Sha court du commit de GÉNÉRATION du rapport (HEAD au moment du run).
+
+    NB : un rapport committé référence donc le commit PARENT de son propre
+    commit d'artefact (impossible d'embarquer le sha de son futur commit) —
+    sémantique documentée, revue r1. "unknown" hors dépôt git.
+    """
     try:
         result = subprocess.run(
             ["git", "rev-parse", "--short", "HEAD"],

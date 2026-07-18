@@ -260,3 +260,50 @@ def test_real_heuristic_report_satisfies_gate_schema():
     assert any(r.startswith("FAIL baseline") for r in result.reasons)
     # La bande d'auto-bascule est mesurée sur le rapport réel.
     assert report["calibration_bande_auto"]["n"] > 0
+
+
+# ---------------------------------------------------------------------------
+# Références vs previous (minors ml ronde 1 — tranché : min(baseline, previous)).
+# ---------------------------------------------------------------------------
+
+
+def test_gate_sous_dim_guards_versus_previous_too():
+    """Un candidat qui bat l'heuristique mais régresse LE coût produit vs
+    l'artefact promu doit échouer (asymétrie de référence corrigée, r1 ml)."""
+    candidate = _report(exactitude_ponderee=0.95, sous_dimensionnement={"n": 27, "taux": 0.15})
+    baseline = _report(sous_dimensionnement={"n": 36, "taux": 0.20})  # borne large : 0.22
+    previous = _report(sous_dimensionnement={"n": 18, "taux": 0.10})  # borne stricte : 0.12
+    result = evaluate_gate(candidate, baseline, previous)
+    assert result.passed is False
+    assert any(r.startswith("FAIL sous-dimensionnement") for r in result.reasons)
+
+
+def test_gate_auto_band_guards_versus_previous_too():
+    """Même patron pour la fiabilité de l'auto-bascule : le plancher heuristique
+    large (0.1235) ne redevient jamais la référence après une promotion."""
+    band = {"seuil": 0.75, "confiance_moyenne": 0.78, "n": 40, "taux_justesse": 0.70}
+    candidate = _report(exactitude_ponderee=0.95, calibration_bande_auto={**band, "ecart": 0.10})
+    baseline = _report(calibration_bande_auto={**band, "ecart": 0.12})  # borne large : 0.14
+    previous = _report(calibration_bande_auto={**band, "ecart": 0.02})  # borne stricte : 0.04
+    result = evaluate_gate(candidate, baseline, previous)
+    assert result.passed is False
+    assert any(r.startswith("FAIL bande-auto") for r in result.reasons)
+
+
+# ---------------------------------------------------------------------------
+# Diagnostic par valeur de confiance (minor ml r1 — informatif, jamais lu par le gate).
+# ---------------------------------------------------------------------------
+
+
+def test_harness_reports_per_confidence_calibration_informative():
+    from sobrio_router import HeuristicRouter, SafeRouter
+
+    entries = load_golden()
+    report = evaluate_router(SafeRouter(HeuristicRouter()), entries)
+    block = report["calibration_par_confiance_informatif"]
+    assert sum(cell["n"] for cell in block.values()) == len(entries)
+    for cell in block.values():
+        assert 0.0 <= cell["taux_justesse"] <= 1.0
+        assert cell["ecart"] >= 0.0
+    # La tranche découverte en r0 est visible individuellement (règle à 0.75).
+    assert "0.75" in block

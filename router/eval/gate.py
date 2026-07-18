@@ -150,9 +150,10 @@ def evaluate_gate(
        Budget ABSOLU assumé — pas de critère relatif : le contrat de latence
        est le budget, pas l'artefact précédent (décision documentée) ;
     6. sous-dimensionnement NON-RÉGRESSIF : `taux(candidate) <=
-       taux(baseline) + 0.02` — LE coût produit ne doit pas se dégrader même
-       si l'agrégat pondéré monte (durcissement r0, ml-architect) ;
-    7. bande d'auto-bascule : `ecart(candidate) <= ecart(baseline) + 0.02` —
+       min(baseline, previous) + 0.02` — LE coût produit ne doit pas se
+       dégrader, ni vs l'heuristique ni vs l'artefact promu (r0 + r1) ;
+    7. bande d'auto-bascule : `ecart(candidate) <= min(baseline, previous)
+       + 0.02` —
        les décisions à confiance >= 0.75 déclenchent la bascule SANS clic
        (RFC-0003) ; l'ECE global peut masquer une sur-confiance dans cette
        bande précise (découverte r0 : l'heuristique y est à 51,5 % de
@@ -238,7 +239,14 @@ def evaluate_gate(
 
     candidate_sous = candidate["sous_dimensionnement"]["taux"]
     baseline_sous = heuristic_baseline["sous_dimensionnement"]["taux"]
+    # Référence = min(baseline, previous) — tranché r1 (ml) : une fois un
+    # artefact ML promu, le candidat ne peut pas régresser vers le plancher
+    # heuristique large. Même patron que l'ECE.
     sous_bound = baseline_sous + _SOUS_DIM_REGRESSION_TOL
+    if previous is not None:
+        sous_bound = min(
+            sous_bound, previous["sous_dimensionnement"]["taux"] + _SOUS_DIM_REGRESSION_TOL
+        )
     if candidate_sous <= sous_bound:
         reasons.append(
             f"PASS sous-dimensionnement : taux candidat {candidate_sous:.4f} <= "
@@ -260,6 +268,11 @@ def evaluate_gate(
         )
     else:
         bande_bound = baseline_bande["ecart"] + _BANDE_AUTO_REGRESSION_TOL
+        if previous is not None:
+            bande_bound = min(
+                bande_bound,
+                previous["calibration_bande_auto"]["ecart"] + _BANDE_AUTO_REGRESSION_TOL,
+            )
         if candidate_bande["ecart"] <= bande_bound:
             reasons.append(
                 f"PASS bande-auto : écart candidat {candidate_bande['ecart']:.4f} <= "

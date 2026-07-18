@@ -21,14 +21,46 @@
   },
   "exactitude_ponderee": 0.732,
   "ece": 0.0934,
-  "p50_ms": 0.0075,
-  "p95_ms": 0.0126,
+  "p50_ms": 0.008,
+  "p95_ms": 0.0156,
   "calibration_bande_auto": {
     "seuil": 0.75,
     "n": 66,
     "taux_justesse": 0.6515,
     "confiance_moyenne": 0.775,
     "ecart": 0.1235
+  },
+  "calibration_par_confiance_informatif": {
+    "0.55": {
+      "n": 19,
+      "taux_justesse": 0.8421,
+      "ecart": 0.2921
+    },
+    "0.60": {
+      "n": 7,
+      "taux_justesse": 0.5714,
+      "ecart": 0.0286
+    },
+    "0.65": {
+      "n": 26,
+      "taux_justesse": 0.5,
+      "ecart": 0.15
+    },
+    "0.70": {
+      "n": 63,
+      "taux_justesse": 0.7143,
+      "ecart": 0.0143
+    },
+    "0.75": {
+      "n": 33,
+      "taux_justesse": 0.5152,
+      "ecart": 0.2348
+    },
+    "0.80": {
+      "n": 33,
+      "taux_justesse": 0.7879,
+      "ecart": 0.0121
+    }
   },
   "matrice_confusion": {
     "labels": [
@@ -158,6 +190,6 @@
   },
   "router_name": "heuristic",
   "golden_sha": "6120df28f72c68bef9fab30c5ac193419999f326fa7a4ab537c55097007a2868",
-  "date": "2026-07-18T16:10:49.107155+00:00",
-  "git_sha": "a5205fc"
+  "date": "2026-07-18T16:25:22.682332+00:00",
+  "git_sha": "aa98fc4"
 }

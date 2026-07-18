@@ -38,7 +38,7 @@ RAM < 1 Go · artefacts : étage 1 < 20 Mo, étage 2 < 500 Mo · dépense API : 
 | -------- | -------------------------------------------------- | ------------- | ------- |
 | R1       | Socle du routeur & v0 heuristique branchée         | 2/2 (r2 & r3) | **CONVERGÉ** |
 | R2       | Golden set (juge de paix)                          | 2/2 (r2 & r3) | **CONVERGÉ** |
-| R3       | Protocole d'évaluation & harnais + gate            | 0/2           | en cours |
+| R3       | Protocole d'évaluation & harnais + gate            | 1/2           | en cours |
 | R4       | Corpus de démarrage à froid                        | 0/2           | à venir |
 | R5       | Pipeline d'entraînement & classifieur v0.5         | 0/2           | à venir |
 | R6       | Étage 2 embeddings (construit, ÉTEINT par défaut)  | 0/2           | à venir |
@@ -415,3 +415,45 @@ tous les trous corrigés :
 
 Preuves : 142 tests router+api verts (+22), make test complet vert, ruff
 check+format verts, gate re-testé fail-closed sur tous les cas prouvés.
+
+## R3 — round 1 (commit aa98fc4, panel 5 juges, attaques r0 REJOUÉES)
+
+| agent          | modèle | scores (dims)                                        | blocking | major | verdict |
+|----------------|--------|------------------------------------------------------|----------|-------|---------|
+| eval-scientist | opus   | validité5 robustesse5 contrainte-r2:5 seuils4 repro5 | 0        | 0     | GREEN   |
+| ml-architect   | opus   | pertinence4.5 fuites5 calibration4 ext-r5:4.5 expl4.5| 0        | 0     | GREEN   |
+| qa-auditor     | sonnet | couverture5 contrat5 erreurs5 clarté5 régressions5   | 0        | 0     | GREEN   |
+| privacy-sentinel | sonnet | —                                                  | PASS     | —     | PASS    |
+| cost-guard     | haiku  | —                                                    | PASS     | —     | PASS    |
+
+→ **Ronde VERTE (1/2 consécutive).** Attaques ronde 0 rejouées et bloquées,
+vérifiées PAR EXÉCUTION par les juges : rapports invalides → FAIL schéma ;
+sha étranger via CLI → FAIL canonique ; ECE 0.0999 vs baseline 0.05 → FAIL
+calibration-régression exit 1 ; régression bande (écart 0.23 vs réel 0.1235)
+→ FAIL bande-auto exit 1. Recalcul indépendant de la bande par ml : match
+EXACT à 4 décimales (n=66, justesse 0.6515, confiance 0.775, écart 0.1235).
+
+**Minors ronde 1 → corrigés avant ronde 2 :**
+- **[ml — précision]** Le chiffre 51,5 % était attribué à LA BANDE dans la
+  doc/commentaires alors qu'il mesure LA RÈGLE reasoning@0.75 (n=33) ; la
+  bande ≥ 0.75 entière est à 65,15 % (short_simple@0.80 : 78,8 %). → doc +
+  commentaires corrigés, les deux chiffres distingués.
+- **[ml — tranché avant R5]** Asymétrie de référence : sous-dim et bande
+  n'étaient gardés que vs baseline (l'ECE l'était vs les deux). → étendu :
+  min(baseline, previous) + tol pour les TROIS garde-fous — un candidat ne
+  peut jamais régresser vers le plancher heuristique après une promotion.
+  +2 tests.
+- **[ml — outillage R5]** L'écart de bande agrégé peut moyenner une tranche
+  malade (reasoning@0.75, gap 0.235) avec une saine (short_simple@0.80, gap
+  0.012). → bloc informatif `calibration_par_confiance_informatif` (n,
+  justesse, écart PAR valeur de confiance) au rapport — le gate ne le lit
+  pas ; la recalibration R5 visera la tranche 0.75 précise. +1 test.
+- **[eval — doc]** Non-régression ECE non-liante pour la baseline courante
+  (0.1034 > plafond 0.10) : explicité (effet cliquet voulu) · arithmétique
+  des tolérances montrée (SE≈0.054 à n_eff=55 ; tol 0.02 ≈ 0.35 SE,
+  conservateur) · git_sha = commit de GÉNÉRATION (parent du commit
+  d'artefact) documenté dans le harnais.
+
+Preuves : 145 tests router+api verts (+3), make test complet vert (195 py +
+218 ext), ruff check+format verts, rapport heuristique régénéré (métriques
+inchangées).

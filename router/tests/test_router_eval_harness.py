@@ -42,6 +42,7 @@ _EXPECTED_KEYS = {
     "p50_ms",
     "p95_ms",
     "calibration_bande_auto",
+    "calibration_par_confiance_informatif",
     "matrice_confusion",
     "categorie_x_label_informatif",
     "router_name",

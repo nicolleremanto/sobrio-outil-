@@ -59,14 +59,22 @@ tout se branche derrière ; rien ne change côté extension ni côté contrat `/
   heuristique vivante (0.0934) pour ne pas rendre la première promotion
   impossible, MAIS complété par la **non-régression** `ece(candidat) ≤
   ece(référence) + 0.01` vs baseline ET previous : la calibration ne peut
-  jamais dériver silencieusement vers la borne (revue r0).
+  jamais dériver silencieusement vers la borne (revue r0). NB (revue r1) :
+  pour la baseline courante (0.0934 + 0.01 = 0.1034 > 0.10), le plafond
+  ABSOLU est le critère liant ; la non-régression devient liante dès qu'une
+  référence mieux calibrée (< 0.09) est promue (effet cliquet voulu).
 - **Sous-dimensionnement non-régressif** : `taux(candidat) ≤ taux(baseline)
   + 0.02` — LE coût produit ne se dégrade pas même si l'agrégat monte.
 - **Bande d'auto-bascule (confiance ≥ 0.75, RFC-0003)** : l'ECE global à bins
   égaux peut masquer une sur-confiance précisément là où le produit agit SANS
-  clic (découverte r0 : l'heuristique y est à 51,5 % de justesse). Le harnais
-  mesure `calibration_bande_auto.ecart` et le gate exige la non-régression
-  (`+ 0.02`). La recalibration de fond de cette bande est un objectif R5.
+  clic. Découverte r0, chiffres PRÉCIS (revue ml r1) : la RÈGLE
+  `reasoning_context` long (confiance 0.75 pile) n'est correcte qu'à
+  **51,5 %** (n=33) ; la BANDE ≥ 0.75 dans son ensemble est à 65,15 %
+  (confiance moyenne 0.775, écart 0.1235 — `short_simple`@0.80 est bien
+  calibrée à 78,8 %). Le harnais mesure `calibration_bande_auto.ecart` (+
+  un diagnostic informatif PAR valeur de confiance) et le gate exige la
+  non-régression (`+ 0.02`, vs baseline ET previous). La recalibration de
+  fond de la tranche 0.75 est un objectif R5.
 - **Latence : budget ABSOLU** (p95 ≤ 5 ms étage 1, ≤ 30 ms étage 2) — pas de
   critère relatif : le contrat de latence est le budget, pas l'artefact
   précédent (décision assumée, revue qa r0).
@@ -75,6 +83,13 @@ tout se branche derrière ; rien ne change côté extension ni côté contrat `/
   interne candidat/baseline.
 - **Tolérances** (0.01 ECE, 0.02 taux) : marges d'estimation sur n=181 points
   (n effectif ≈ 55 gabarits) — cf. limites_statistiques du coverage_report.
+  Arithmétique (revue r1) : SE ≈ √(p(1−p)/n_eff) ≈ 0.054 pour p≈0.2 à
+  n_eff=55 ; tol 0.02 ≈ 0.35 SE — bande de non-régression CONSERVATRICE
+  (penche vers le blocage), choix assumé.
+- **Références de non-régression** (tranché r1, avant R5) : sous-dim, bande
+  auto ET ECE sont gardés vs baseline ET previous (le min des deux + tol) —
+  un candidat ne peut jamais régresser vers le plancher heuristique une fois
+  un artefact ML promu.
 
 ## §7 — Budgets (miroir du ledger)
 
