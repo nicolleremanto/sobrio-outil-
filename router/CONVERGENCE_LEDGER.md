@@ -41,7 +41,7 @@ RAM < 1 Go · artefacts : étage 1 < 20 Mo, étage 2 < 500 Mo · dépense API : 
 | R3       | Protocole d'évaluation & harnais + gate            | 2/2 (r5 & r6) | **CONVERGÉ** |
 | R4       | Corpus de démarrage à froid                        | 2/2 (r4 & r5) | **CONVERGÉ** |
 | R5       | Pipeline d'entraînement & classifieur v0.5         | 0/2           | en cours |
-| R6       | Étage 2 embeddings (construit, ÉTEINT par défaut)  | 0/2           | à venir |
+| R6       | Étage 2 embeddings (à construire, ÉTEINT par défaut) | 0/2         | à venir |
 | R7       | Recalibration, monitoring & déploiement VPS        | 0/2           | à venir |
 
 ---
@@ -1141,7 +1141,16 @@ par grep post-édition).
 - [qa] importorskip(lightgbm)/skip corpus-absent sur le test main() dégénéré ·
   ligne « VERDICT : FAIL » de la branche bande non assertée · borne haute
   inclusive --budget-ms 1000 non couverte.
-- [dq] robustesse_pipeline m1 (voir sortie du panel, w131h38fb).
+- [dq] robustesse_pipeline m1 (DQ-R2-m1, substance consignée ici le 2026-07-19
+  car la sortie de panel n'était pas archivée dans le repo) : le test
+  `test_main_converts_degenerate_calibrator_to_clean_refusal`
+  (router/tests/test_router_train.py) n'a ni `pytest.importorskip("lightgbm")`
+  (contrairement à son jumeau test_garde_stratification) ni garde d'absence
+  du corpus (artefacts gitignorés) : sur clone frais, main() refuse « corpus
+  introuvable » avant d'atteindre la garde dégénérée → assertion fausse ;
+  sans lightgbm, ERROR au lieu de skip. Le « 319 verts » ne tient que sur la
+  machine de référence. Correctif : skips conditionnels alignés sur les
+  autres tests du fichier.
 
 **PAUSE UTILISATEUR (2026-07-18 soir)** : boucle stoppée à la demande du
 fondateur après cette consignation — reprise prévue le lendemain (panel
@@ -1156,3 +1165,52 @@ ronde 3 après application des minors ci-dessus ; rondes 0-2 consommées,
   (Fable 5) — finalisation mécanique de la directive fondateur du 2026-07-18,
   déjà effective dans les panels depuis R4 ronde 5. Boucle NON relancée
   (toujours en pause utilisateur).
+
+## Audit de reprise (2026-07-19) — demandé par le fondateur avant relance
+
+Directive : « relance la boucle en mettant juste avant la relance une
+vérification par fable de tout ce qui a été fait déjà ». Panel d'audit de
+4 vérificateurs indépendants à contexte neuf (100 % Fable), HEAD 6d9fa97.
+
+| auditeur         | verdict          | bloquant | majeur | mineur |
+|------------------|------------------|----------|--------|--------|
+| exec-verifier    | GO               | 0        | 0      | 2      |
+| ledger-verifier  | GO_AVEC_RESERVES | 0        | 0      | 2      |
+| sentinelles (A+B)| GO               | 0        | 0      | 1      |
+| ml-state-verifier| GO               | 0        | 0      | 2      |
+
+→ **GO.** Preuves de première main (pas de confiance héritée) : suite
+router+api rejouée = 319 verts exactement ; make test = 369 Python + 218 ext
+verts ; ruff vert (82 fichiers) ; empreintes recalculées conformes (golden
+6120df28, model promu 43a61267, corpus be96b691) ; gate REJOUÉ sur évals
+fraîches au HEAD = VERDICT PASS 9/9, métriques bit-identiques aux 4
+décimales (pondérée 0,8978, sous-dim 0,0331, ECE 0,0417, bande 0,0093) ;
+correction « de peu » réellement présente dans la doc normative ; invariants
+privacy et coût re-balayés SAINS (features sans texte, corpus 30k sans
+prompt_text, dry-run + cap fail-closed, garde anti-réseau double périmètre).
+
+Réserves consignées (aucune ne bloque la relance) :
+- **[fait]** 32 commits d'avance jamais poussés (machine au disque quasi
+  plein = point de défaillance unique) → `git push` effectué (f9ed7a6..6d9fa97).
+- **[fait]** Minor dq de la ronde 3 renvoyait à une sortie de panel hors
+  repo → substance consignée ci-dessus (DQ-R2-m1).
+- **[fait]** Libellé R6 du tableau d'état (« construit » → « à construire »).
+- **[→ ronde 3]** Découvert par les sentinelles : l'assert de chrono du test
+  anti-fuite au N livré (router/tests/test_router_data_corpus.py, seuil
+  2,0 s) passe AVANT l'assertion substantielle d'intersection vide et a
+  flaké en suite chargée (2,37 s mesuré) : la preuve anti-fuite ne doit
+  jamais être otage de l'horloge → découpler, à traiter avec les minors r2.
+- **[→ ronde 3]** Découvert par ml-state : libellé factice « ml:v0.5 » dans
+  test_router_safe.py vs constante réelle « ml:v05 » (cosmétique).
+- **[noté]** candidate/ = run de reproduction bit-identique du promu (preuve
+  de déterminisme) : ne PAS relancer promote machinalement — seul un vrai
+  retrain porteur de changement justifiera une promotion.
+- **[noté]** Rapports d'éval versionnés à champs volatils (date/p50/p95/
+  git_sha, commités au git_sha 01dfb57) : métriques substantielles
+  reproduites bit-identiques au HEAD, aucune fausse prémisse ; friction déjà
+  tracée (minor qa R5-r0), décision de fond laissée au chantier.
+- **[noté]** À partir de la ronde 3, archiver un condensé des verdicts de
+  panel dans le repo (traçabilité indépendante de la session).
+
+**RELANCE DE LA BOUCLE** : reprise effective — application des minors r2
+(+ les 2 découvertes d'audit), puis panel R5 ronde 3.
