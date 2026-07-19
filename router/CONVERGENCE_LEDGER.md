@@ -1214,3 +1214,54 @@ Réserves consignées (aucune ne bloque la relance) :
 
 **RELANCE DE LA BOUCLE** : reprise effective — application des minors r2
 (+ les 2 découvertes d'audit), puis panel R5 ronde 3.
+
+## R5 — round 3 (commits 07daab7 + 67cf62c, panel 6 juges Fable — archivé router/panels/R5-r3.json)
+
+| agent            | modèle | scores (dims)                                        | blocking | major | verdict |
+|------------------|--------|------------------------------------------------------|----------|-------|---------|
+| ml-architect (P) | fable  | spec5 features5 calibration5 fuites-ml5 extens4      | 0        | 0     | GREEN   |
+| eval-scientist   | fable  | éval5 gate5 plafond5 honnêteté5 repro5               | 0        | 0     | GREEN   |
+| data-quality     | fable  | étanchéité5 déséquilibre5 intégrité5 robust3 traça4  | 0        | 1     | YELLOW  |
+| qa-auditor       | fable  | couverture4 contrat5 erreurs4 clarté5 régressions5   | 0        | 0     | GREEN   |
+| privacy-sentinel | fable  | —                                                    | PASS     | —     | PASS    |
+| cost-guard       | fable  | —                                                    | PASS     | —     | PASS    |
+
+→ **Ronde JAUNE — streak reste 0/2** (rondes 0-3 consommées, 4 restantes).
+
+**Major DQ-R3-M1** (prouvé par exécution sous simulation, zéro fichier
+modifié) : la CLASSE du défaut DQ-R2-m1 persiste dans 5 tests jumeaux — le
+correctif 67cf62c ne couvrait que l'instance consignée. Corpus absent
+(clone frais) : test_garde_stratification asserte un message jamais atteint
+(main() refuse « corpus introuvable » avant la garde), test_train_ne_lit_
+jamais_golden et test_determinisme_train propagent RefusError. lightgbm
+absent : test_golden_sha_malforme_refuse et test_corpus_epingle sortent en
+ERROR (import paresseux de run_training AVANT toute garde). Mesuré :
+3 failed/19 skipped sans corpus, 2 failed sans lightgbm.
+
+**Précision de traçabilité (DQ-R3-m2, consignée ici même)** : le message du
+commit 67cf62c (« skips clone frais ») et la puce d'audit correspondante
+revendiquaient une robustesse clone-frais que le fichier n'avait pas — le
+lot ne couvrait QUE l'instance DQ-R2-m1 consignée ; la classe résiduelle
+(5 tests) est l'objet de DQ-R3-M1, traitée en ronde 4. La chaîne
+revendication→preuve est ainsi rétablie.
+
+**Minors consolidés pour la ronde 4** (recoupements entre juges fusionnés) :
+- [dq+qa] Import paresseux lightgbm de run_training → RefusError propre
+  (« dépendances d'entraînement absentes — installer requirements-ml »),
+  + test subprocess exit 2 sans traceback (DQ-R3-m1 = QA-R3-m3).
+- [ml+es] Cas d'acceptation à la borne --bande-ecart-max 0.5 exact
+  (symétrique du --budget-ms 1000 ajouté en r3) (ML-R3-m3 = ES-R5r3-m2).
+- [qa] Câblage CLI non tué par mutation : cas où le flag FAIT basculer le
+  verdict (rapport p95 20 ms : FAIL par défaut / PASS avec --budget-ms 30 ;
+  symétrique bande) (QA-R3-m1).
+- [qa] Branche --val-pct hors bornes jamais couverte : cas 0 et 100 →
+  exit 2 + « REFUS » + « [1, 99] » (QA-R3-m2).
+- [ml] Garde de dérive au chargement PARTIELLE : MLRouter ne compare que
+  feature_spec.names ; étendre à langs + flag_vocab + current_model_rank +
+  version (même patron fail-closed que label_mapping) (ML-R3-m2).
+- [es] Doc normative : « p95 < 5 ms » (§7 et l.14) vs « ≤ » (section seuils
+  et gate.py) — harmoniser sur ≤ / consigner la convention de borne
+  inclusive (ES-R5r3-m1).
+- [es] Harnais : valider les confiances (réel fini [0,1], bool exclu) dans
+  evaluate_router, même patron que le refus modèle hors catalogue
+  (ES-R5r3-m3).

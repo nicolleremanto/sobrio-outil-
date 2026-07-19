@@ -1,0 +1,189 @@
+{
+  "chantier": "R5",
+  "round": 3,
+  "head": "67cf62c",
+  "date": "2026-07-19",
+  "ronde": "JAUNE",
+  "juges": [
+    {
+      "agent": "ml-architect",
+      "chantier": "R5",
+      "round": 3,
+      "scores": {
+        "spec": 5,
+        "features": 5,
+        "calibration": 5,
+        "fuites_ml": 5,
+        "extensibilite": 4
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "ML-R3-m1",
+          "quoi": "Le correctif « skips clone frais » (67cf62c) ne couvre que le test E2E dégénéré : trois jumeaux dépendent encore du corpus gitignoré sans garde d'absence. Prouvé par exécution (corpus absent simulé) : main() refuse « corpus introuvable » AVANT la garde de stratification, donc l'assertion sur le message « déséquilibré » de test_garde_stratification devient fausse ; test_train_ne_lit_jamais_golden et test_determinisme_train laissent RefusError se propager (ERROR au lieu de skip). Même classe exacte que DQ-R2-m1, réparée pour un seul des jumeaux.",
+          "ou": "router/tests/test_router_train.py:86 et :105 ; router/tests/test_router_ml.py:91-92",
+          "correction": "Ajouter la même garde conditionnelle que le reste du fichier (skip si train_v05.DEFAULT_CORPUS_PATH absent — ou faire consommer la fixture corpus_rows / artefact_v05 qui skippe déjà) aux trois tests."
+        },
+        {
+          "id": "ML-R3-m2",
+          "quoi": "Garde de dérive artefact/code (§2) partielle au chargement : MLRouter ne vérifie que feature_spec.names alors que metadata.json consigne aussi langs, flag_vocab et current_model_rank (train_v05.py:381-392) précisément comme enregistrement de dérive. Un changement des VALEURS de rang de CURRENT_MODEL_RANK (features.py:48-54) entre l'entraînement d'un artefact et son service chargerait l'ancien artefact silencieusement avec une sémantique de feature décalée — seuls les tests côté code (épinglage partiel) protègent, pas le chargeur fail-closed qui est pourtant la garde déclarée.",
+          "ou": "router/sobrio_router/ml.py:146-148",
+          "correction": "Comparer au chargement l'intégralité du feature_spec (names + langs + flag_vocab + current_model_rank sérialisé + version) aux constantes courantes de features.py, MLRouterLoadError sur tout écart — même patron que label_mapping."
+        },
+        {
+          "id": "ML-R3-m3",
+          "quoi": "Asymétrie de couverture des bornes CLI : la borne haute inclusive vient d'être testée pour --budget-ms 1000 exact (minor qa r3) mais pas pour --bande-ecart-max 0.5 exact, alors que le code implémente la même inclusion (]0, 0.5], gate.py:410) et que la paramétrisation existante ne teste que le rejet (1.0, 0, nan).",
+          "ou": "router/tests/test_router_eval_gate_hardening.py:624-704 (cas 0.5 exact absent)",
+          "correction": "Ajouter un cas d'acceptation --bande-ecart-max 0.5 exact (exit 0, VERDICT : PASS) à côté du cas --budget-ms 1000, pour tuer la mutation <= vers < sur cette borne aussi."
+        }
+      ],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "eval-scientist",
+      "chantier": "R5",
+      "round": 3,
+      "scores": {
+        "evaluation": 5,
+        "gate": 5,
+        "plafond": 5,
+        "honnetete": 5,
+        "repro": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "ES-R5r3-m1",
+          "quoi": "Incohérence strict/non-strict du budget de latence à la borne exacte dans la doc normative : « p95 < 5 ms » (l.14 et §7 l.158) vs « p95 ≤ 5 ms » (section seuils l.85), alors que le gate implémente <= (gate.py:259) — un candidat à p95 exactement 5,0 ms passe le gate mais viole la formulation du §7.",
+          "ou": "docs/decisions/ROUTEUR_CLASSIFIEUR.md:14,85,158 vs router/eval/gate.py:259",
+          "correction": "Harmoniser la doc sur ≤ (conforme au code et à la section seuils) ou consigner explicitement la convention de borne inclusive dans le §7 ; aucun changement de code requis."
+        },
+        {
+          "id": "ES-R5r3-m2",
+          "quoi": "Asymétrie de couverture des bornes CLI : la borne haute inclusive --budget-ms 1000 est testée (acceptée), mais --bande-ecart-max à 0,5 exact (borne haute de ]0, 0.5], _BANDE_ECART_MAX_BOUND) n'a aucun test d'acceptation à la limite — seule la valeur 1.0 (refus) est couverte.",
+          "ou": "router/tests/test_router_eval_gate_hardening.py:624-704 (cas 0.5 absent) vs router/eval/gate.py:74,409-411",
+          "correction": "Ajouter un cas at_bound --bande-ecart-max 0.5 attendu accepté (exit 0, VERDICT PASS) dans test_gate_cli_rejects_huge_budget_and_accepts_valid_bounds, symétrique du cas --budget-ms 1000."
+        },
+        {
+          "id": "ES-R5r3-m3",
+          "quoi": "Garde défensive asymétrique du harnais : evaluate_router refuse bruyamment un modèle hors catalogue (harness.py:278-284) mais ne valide pas les confiances — un routeur non enveloppé par SafeRouter qui émettrait une confiance NaN fait crasher compute_ece (int(NaN) à harness.py:132) en ValueError non structurée au lieu d'un diagnostic clair ; inatteignable via le registre (tout y est SafeRouter-wrappé, qui garantit [0,1]), donc poli seulement.",
+          "ou": "router/eval/harness.py:132,278-284",
+          "correction": "Étendre la boucle de validation post-décision aux confiances (nombre réel fini dans [0,1], bool exclu — même patron que gate._is_finite_number) avec un message analogue à celui du modèle hors catalogue, ou documenter que evaluate_router exige un routeur SafeRouter-wrappé."
+        }
+      ],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "data-quality",
+      "chantier": "R5",
+      "round": 3,
+      "scores": {
+        "etancheite_split": 5,
+        "traitement_desequilibre": 5,
+        "integrite_donnees": 5,
+        "robustesse_pipeline": 3,
+        "tracabilite": 4
+      },
+      "blocking": [],
+      "major": [
+        {
+          "id": "DQ-R3-M1",
+          "quoi": "La classe de défaut DQ-R2-m1 (« le 319 verts ne tient que sur la machine de référence ») persiste dans 5 tests jumeaux, prouvé par exécution sous simulation (plugin scratchpad, zéro fichier repo modifié). CORPUS ABSENT (gitignoré, donc absent sur clone frais) : test_garde_stratification échoue — main() refuse « corpus introuvable » avant d'atteindre la garde de stratification monkeypatchée, l'assertion sur le message « déséquilibré » devient fausse ; test_train_ne_lit_jamais_golden et test_determinisme_train échouent — RefusError non gérée propage. LIGHTGBM ABSENT (blocage fidèle par ModuleNotFoundError) : test_golden_sha_malforme_refuse et test_corpus_epingle sortent en ERROR au lieu de skip, car run_training importe lightgbm (train_v05.py:292) AVANT toute garde fail-closed — même le REFUS attendu n'est jamais atteint. Résultat mesuré : 3 failed/19 skipped (sans corpus, suite router entière) et 2 failed (sans lightgbm). Le correctif r3 consigné (une seule instance) est réel et fonctionne — le test dégénéré skippe proprement dans les deux scénarios — mais le libellé du commit 67cf62c (« skips clone frais ») dépasse le périmètre effectivement corrigé.",
+          "ou": "router/tests/test_router_train.py:73 (test_garde_stratification), :96 (test_train_ne_lit_jamais_golden), :120 (test_golden_sha_malforme_refuse), :132 (test_corpus_epingle) ; router/tests/test_router_ml.py:85 (test_determinisme_train)",
+          "correction": "Appliquer aux 5 jumeaux exactement le patron du correctif r3 : garde `if not train_v05.DEFAULT_CORPUS_PATH.is_file(): pytest.skip(...)` (ou fixture corpus_rows) sur les 3 tests dépendant du corpus, et `pytest.importorskip(\"lightgbm\")` sur test_golden_sha_malforme_refuse et test_corpus_epingle (dont le chemin main() traverse l'import paresseux de run_training). Vérifier par la même simulation : suite router = 0 failed avec corpus absent ET avec lightgbm absent."
+        }
+      ],
+      "minor": [
+        {
+          "id": "DQ-R3-m1",
+          "quoi": "Contrat CLI fail-closed du train violé quand lightgbm manque : run_training importe lightgbm paresseusement (train_v05.py:292) mais main() n'attrape que RefusError — sur un environnement sans requirements-ml, `python router/train/train_v05.py` sort en traceback ModuleNotFoundError brut exit 1, en contradiction avec le docstring du module (« Validations FAIL-CLOSED (exit 2, REFUS : …) ») et avec le précédent du chargeur : MLRouter convertit, lui, ImportError en MLRouterLoadError (ml.py:107-110). C'est la cause racine des 2 échecs lightgbm-absent du major.",
+          "ou": "router/train/train_v05.py:292 (import paresseux) et :459-463 (try/except de main)",
+          "correction": "Envelopper l'import paresseux : `try: import lightgbm as lgb; import numpy except ImportError as exc: raise RefusError(f\"dépendance d'entraînement absente : {exc.__class__.__name__} — installer router/requirements-ml.txt\") from exc` — aligné sur le patron MLRouter ; ajouter le test du chemin main() correspondant (exit 2, « REFUS », zéro traceback)."
+        },
+        {
+          "id": "DQ-R3-m2",
+          "quoi": "Précision de traçabilité à consigner avec la correction du major : le message du commit 67cf62c (« skips clone frais ») et la puce ledger correspondante revendiquent une robustesse clone-frais que le fichier n'a pas encore (5 jumeaux restants) — le périmètre consigné DQ-R2-m1 (un test) était, lui, exact et honnêtement livré ; il s'agit d'un libellé trop large, pas d'une correction fantôme. À noter aussi : la citation de test_garde_stratification comme jumeau-modèle dans DQ-R2-m1 ne valait que pour importorskip, pas pour la garde corpus qui lui manque.",
+          "ou": "router/CONVERGENCE_LEDGER.md (entrée ronde 2, puce DQ-R2-m1 et entrée à venir de la ronde 3)",
+          "correction": "Dans l'entrée ledger de la ronde 3, consigner explicitement que le lot 67cf62c couvrait la seule instance consignée et que la classe résiduelle (5 tests) est traitée par DQ-R3-M1 — la chaîne revendication→preuve reste alors exacte."
+        }
+      ],
+      "verdict": "YELLOW"
+    },
+    {
+      "agent": "qa-auditor",
+      "chantier": "R5",
+      "round": 3,
+      "scores": {
+        "couverture": 4,
+        "contrat": 5,
+        "erreurs": 4,
+        "clarte": 5,
+        "regressions": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "QA-R3-m1",
+          "quoi": "Câblage CLI des flags opérateur non tué par mutation : supprimer budget_ms=args.budget_ms et/ou bande_ecart_max=args.bande_ecart_max de l'appel evaluate_gate() dans main() laisse les 319 tests verts — prouvé par analyse exhaustive des tests invoquant le CLI (tous utilisent des rapports p95 2.0 / écart 0.02 qui passent AUSSI sous les défauts 5.0/0.10 ; test_gate_cli_rejects_huge_budget_and_accepts_valid_bounds passe --budget-ms 30 et --bande-ecart-max 0.10 = défaut sans jamais faire basculer le verdict ; test_bande_plafond_absolu_cli_parametrable appelle evaluate_gate directement, pas main()). Le contrat documenté « paramètre CLI réutilisable R6 » n'est prouvé qu'au niveau fonction. Accessoirement, la ligne « VERDICT : FAIL » du chemin exit 1 (gate FAIL normal) n'est assertée nulle part sur stderr.",
+          "ou": "router/eval/gate.py:437-444 (appel evaluate_gate) · router/tests/test_router_eval_gate_hardening.py:662-704",
+          "correction": "Ajouter un cas CLI où le flag FAIT basculer le verdict : rapport à p95_ms 20.0 → sans flag exit 1 (asserter « VERDICT : FAIL » sur stderr, couvre aussi le chemin exit 1), puis avec --budget-ms 30 exit 0 ; symétriquement écart 0.12 refusé par défaut puis accepté avec --bande-ecart-max 0.15."
+        },
+        {
+          "id": "QA-R3-m2",
+          "quoi": "Branche de refus CLI --val-pct hors bornes jamais couverte : aucun test n'exerce train_v05.main() avec --val-pct 0/100/négatif ni n'asserte le message « [1, 99] » (grep : seul un défaut d'argument de stub matche val_pct dans router/tests). Un mutant supprimant la garde sort encore en 2 mais via « partition vide » de verifier_stratification — diagnostic faux, garde dédiée morte sans témoin.",
+          "ou": "router/train/train_v05.py:452-454 · router/tests/test_router_train.py (aucun cas)",
+          "correction": "Deux cas paramétrés sur main([\"--val-pct\", \"0\"]) et [\"--val-pct\", \"100\"] : exit 2 + « REFUS » + « [1, 99] » dans stderr (tue le mutant en distinguant le message de la garde dédiée de celui de la stratification)."
+        },
+        {
+          "id": "QA-R3-m3",
+          "quoi": "CLI train sans lightgbm : run_training importe lightgbm/numpy (ligne 292) hors du try/except RefusError de main() → ImportError brut, traceback complet, exit 1 — PROUVÉ par exécution (sous-processus avec meta-path bloquant lightgbm : returncode 1, traceback pointant train_v05.py:292 ; aucune écriture, l'import précède tout accès disque). Asymétrique avec le CLI jumeau harness.py:372-379 qui convertit la même condition (lightgbm absent → MLRouterLoadError) en REFUS propre exit 2, et en tension avec le contrat du docstring de main() (« refus propres exit 2 »). Minor et non major : dépendance d'environnement documentée (requirements-ml.txt), jamais atteinte sur le poste de référence.",
+          "ou": "router/train/train_v05.py:292-293 et 459-463",
+          "correction": "Encapsuler l'import paresseux : try: import lightgbm as lgb / import numpy except ImportError as exc: raise RefusError(f\"dépendances d'entraînement absentes ({exc.__class__.__name__}) — installer router/requirements-ml.txt\") ; test subprocess aligné sur le patron _SCRIPT_HEURISTIC_SANS_LIGHTGBM existant."
+        }
+      ],
+      "verdict": "GREEN"
+    }
+  ],
+  "sentinelles": [
+    {
+      "agent": "privacy-sentinel",
+      "chantier": "R5",
+      "round": 3,
+      "verdict": "PASS",
+      "violations": [],
+      "preuves": [
+        "git show 07daab7 (router/CONVERGENCE_LEDGER.md, +60 lignes) relu integralement : l'entree d'audit de reprise ne contient que des ids de tests, des empreintes sha256 (6120df28, 43a61267, be96b691) et des metriques chiffrees — aucune citation ni paraphrase de texte utilisateur, conforme a la jurisprudence R3-r3 (ledger lignes 526-537).",
+        "git show 67cf62c relu integralement (5 fichiers) : le corpus reduit du test E2E (router/tests/test_router_train.py:236-283) est construit EXCLUSIVEMENT a partir de lignes du corpus de reference (cles id/category/label/signals, signaux numeriques + vocabulaire clos), ecrit dans un tmp_path pytest ephemere ; aucun champ texte introduit.",
+        "Corpus de reference (router/data/artifacts/corpus-v1.jsonl.gz) decompresse EN MEMOIRE et scanne programmatiquement : 30 000 lignes, 0 chaine > 40 caracteres ou > 4 mots ; valeurs = 8 categories, 3 labels catalogue, 6 flags fermes, 3 langs — aucun prompt_text nulle part.",
+        "router/sobrio_router/features.py:96-115 : signals_to_vector ne lit jamais prompt_text (aucune reference au champ dans le corps) ; invariant §5.1 prouve par test_router_features.py:126-137 (vecteur identique avec/sans texte), rejoue vert.",
+        "router/sobrio_router/types.py:39 : prompt_text = field(repr=False) ; test anti-fuite repr/str/f-string test_router_corrections_r1.py:36-57 rejoue vert — 100 tests des fichiers privacy-pertinents passes (79 + 21).",
+        "Tous les artefacts JSON scannes programmatiquement (router/artifacts/eval/*.json, router/artifacts/models/{promoted,candidate,previous}/metadata.json + calibrator.json + eval-report.json, router/artifacts/bench/latest.json, router/data/{artifacts,reference}/*.json) : uniquement hashes, versions, noms de features, ids (corp-NNNNNN dans bruit.json) et metriques ; test_zero_texte_artefacts (test_router_train.py:160-169, regex _CHAINE_SYSTEME_RE ligne 29) vert.",
+        "router/artifacts/models/promoted/model.txt : les 121 tokens hors vocabulaire features sont tous des cles d'hyperparametres LightGBM ; booster.feature_name() borne aux 22 FEATURE_NAMES (test_router_train.py:168-169).",
+        "Golden set (router/eval/golden/golden.jsonl, 181 entrees) : champ note = descriptions indirectes 3e personne ; les 16 ids signales par heuristique (gold-0077..0079, 0101..0103, 0128..0131, 0139..0144) inspectes un a un — aucune formulation imperative type amorce de prompt ; la purge R2-r0 tient.",
+        "router/CONVERGENCE_LEDGER.md (1216 lignes au HEAD) : les 35 segments entre guillemets balayes un a un — vocabulaire systeme, labels de verdict et meta-discussion uniquement ; ligne 88 = mnemonique deja examine et classe vocabulaire systeme par les sentinelles r3 ET r4 (consigne lignes 591-592), decision tranchee non recyclee ; aucune nouvelle occurrence de la classe purgee en R3-r3.",
+        "Gate rejoue EN LECTURE SEULE sur les rapports existants (python router/eval/gate.py --candidate ml_v05_candidate-latest.json --baseline heuristic-latest.json --previous promoted/eval-report.json) : VERDICT PASS 9/9, sortie composee exclusivement de metriques, seuils et du golden_sha — aucun texte ; aucun fichier modifie, aucun artefact regenere.",
+        "Sites de sortie du pipeline audites : train_v05.py:453-480 (compteurs, class_weights, sha256, chemins), promote.py:125-186 (raisons de gate, chemins), harness.py:375-386 (rapport JSON numerique + golden_sha/git_sha), gate.py (constantes _BUDGET_MS_MAX/_BANDE_ECART_MAX_BOUND dans les messages) — aucun chemin de code ne serialise de contenu de prompt.",
+        "Scan regex des 15 fichiers du perimetre R5 (tests train/safe/features/ml/eval_*/data_corpus + features.py, ml.py, train_v05.py, promote.py, gate.py, harness.py) : zero litteral de chaine ressemblant a une formulation utilisateur ; les sentinelles de test existantes (SECRET_LEAK_TEST_R1, chaines auto-descriptives de test_router_features.py:137 et test_router_corrections_r0.py:204) sont des fixtures en memoire qui PROUVENT l'invariant, jamais persistees."
+      ]
+    },
+    {
+      "agent": "cost-guard",
+      "chantier": "R5",
+      "round": 3,
+      "verdict": "PASS",
+      "violations": [],
+      "preuves": [
+        "Dry-run par défaut intact : router/data/distill.py — dry_run() chemin par défaut (l.211-234), run_real() gates dans l'ordre (flag l.250, cap fail-closed l.255, estimation locale <= cap l.257-262) puis raise INCONDITIONNEL avant tout appel (l.264-269) ; aucun client réseau nulle part dans router/.",
+        "Cap fail-closed prouvé par exécution : _parse_spend_cap (distill.py l.112-139) rejette nan/inf/-inf/-5/abc/vide/bool, défaut 20.0 (l.84) ; .venv/bin/pytest router/tests/test_router_data_distill.py = 42 passed (0.12 s), compteur d'arrêt = 0 sur tous les refus (tests l.266-310).",
+        "Garde anti-réseau tenue et rejouée : _NETWORK_IMPORT_RE (test_router_data_distill.py l.33-36) couvre import ET from-import ; 4 modules router/data/ (l.65-75) + glob router/train/ (l.362-373) + garde-fou du garde-fou (l.376-379) — tous verts ; contre-grep indépendant de TOUT router/ (aiohttp inclus) = 0 occurrence ; seul subprocess (router/eval/harness.py l.328) = git rev-parse local.",
+        "Commits depuis r2 sans affaiblissement : 07daab7 = router/CONVERGENCE_LEDGER.md seul (60 insertions docs) ; 67cf62c = router/eval/gate.py (constantes _BUDGET_MS_MAX/_BANDE_ECART_MAX_BOUND, l.71-72) + 4 fichiers de tests — aucun fichier de router/data/, router/train/, .github/ ou Makefile touché ; 6d9fa97 = frontmatter model: inherit uniquement (diff .claude/agents/cost-guard.md = 1 ligne).",
+        "CI à 0 centime : .github/workflows/ci.yml — Postgres service local, apt/pip/ruff/pytest/pnpm uniquement ; aucun SOBRIO_ALLOW_PAID_CALLS, aucune clé API, aucun service payant ; tests connector en CI sur Postgres local + fixtures locales (connector/tests/conftest.py l.21-27).",
+        "Dépense mission 0,00 $ : gate REJOUÉ en lecture seule sur router/artifacts/eval/{ml_v05_candidate,heuristic}-latest.json + promoted/eval-report.json = VERDICT PASS 9/9 exit 0, git status propre avant/après ; suite router complète 290 verts en local ; env sans variable SOBRIO_* ; .env.example/Makefile/ops sans flag payant ; cibles make router-* toutes en Python local (Makefile l.39-99).",
+        "Note (non-violation, pré-existante R4-M6, poli éventuel) : la garde data est une liste paramétrée figée des 4 modules existants (test_router_data_distill.py l.65-67) là où la garde train utilise un glob — un futur 5e module de router/data/ ne serait pas auto-couvert ; défense en profondeur derrière l'invariant principal (aucun client réseau dans router/), qui reste vrai et testé."
+      ]
+    }
+  ]
+}
