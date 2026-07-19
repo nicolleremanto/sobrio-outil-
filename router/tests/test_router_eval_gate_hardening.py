@@ -654,7 +654,9 @@ def test_gate_cli_rejects_out_of_range_operator_params(tmp_path, flag, value):
         timeout=30,
     )
     assert proc.returncode == 2
-    assert "FAIL" in proc.stderr and "Traceback" not in proc.stderr
+    # Ligne de verdict assertée pour LES DEUX branches de refus (minor qa r3 :
+    # la branche budget l'était déjà via le test ci-dessous — alignée ici).
+    assert "VERDICT : FAIL" in proc.stderr and "Traceback" not in proc.stderr
 
 
 def test_gate_cli_rejects_huge_budget_and_accepts_valid_bounds(tmp_path):
@@ -692,3 +694,11 @@ def test_gate_cli_rejects_huge_budget_and_accepts_valid_bounds(tmp_path):
     )
     assert valid.returncode == 0
     assert "VERDICT : PASS" in valid.stderr  # le verdict sort sur stderr (contrat CLI)
+
+    # Borne haute INCLUSIVE (minor qa r3) : --budget-ms 1000 exact est dans
+    # ]0, 1000] — accepté, aucun refus (le p95 du rapport, 2.0 ms, passe).
+    at_bound = subprocess.run(
+        base_cmd + ["--budget-ms", "1000"], capture_output=True, text=True, timeout=30
+    )
+    assert at_bound.returncode == 0
+    assert "VERDICT : PASS" in at_bound.stderr

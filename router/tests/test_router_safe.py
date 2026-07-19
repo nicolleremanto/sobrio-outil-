@@ -70,7 +70,7 @@ def test_primary_timeout_falls_back_to_heuristic_rule():
 
 
 def test_primary_healthy_decision_passes_through_unchanged():
-    expected = Decision(model="claude-sonnet-5", confidence=0.42, rule="ml:v0.5")
+    expected = Decision(model="claude-sonnet-5", confidence=0.42, rule="ml:v05")
     safe = SafeRouter(primary=_StaticRouter(expected), fallback=HeuristicRouter(), timeout_s=0.050)
     decision = safe.decide(make_signals())
     assert decision == expected  # rule PAS remplacée : le primaire a répondu à temps.

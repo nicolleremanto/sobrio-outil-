@@ -284,14 +284,14 @@ def test_no_exact_signal_signature_overlap_with_golden_at_delivered_n():
     """CORRECTION STRUCTURELLE (M1, ronde 0) : le test tournait AVANT à n=5000 — intersection
     vide « à vide », le corpus livré (30 000) n'était JAMAIS vérifié. Ce test régénère le N
     LIVRÉ EN MÉMOIRE (aucune écriture disque) et prouve l'intersection vide, chronométré
-    (< 2 s, cf. assertion) — la garde anti-fuite par re-tirage rend le docstring de
-    `generate_corpus.py` VRAI par construction, plus seulement plausible par rareté.
+    (cf. assertion de budget EN FIN de test) — la garde anti-fuite par re-tirage rend le
+    docstring de `generate_corpus.py` VRAI par construction, plus seulement plausible par
+    rareté.
     """
     golden_sigs = golden_signatures()
     start = time.perf_counter()
     rows, stats, _ = generate(generate_corpus.DEFAULT_N, seed=generate_corpus.DEFAULT_SEED)
     elapsed = time.perf_counter() - start
-    assert elapsed < 2.0, f"régénération 30 000 lignes trop lente pour la boucle : {elapsed:.2f}s"
     assert stats["n"] == generate_corpus.DEFAULT_N
 
     corpus_sigs = {
@@ -299,6 +299,13 @@ def test_no_exact_signal_signature_overlap_with_golden_at_delivered_n():
     }
     overlap = golden_sigs & corpus_sigs
     assert not overlap, f"signatures partagées golden/corpus au N LIVRÉ : {overlap}"
+
+    # Chrono APRÈS la preuve substantielle (minor sentinelles r3) : l'ancien
+    # seuil de 2,0 s placé AVANT l'intersection a flaké sous suite chargée
+    # (2,37 s mesuré) et empêchait la preuve anti-fuite de s'exécuter. Marge
+    # documentée : 5,0 s ≈ 2x le pire mesuré — le budget de boucle reste
+    # surveillé sans plus jamais masquer l'assertion d'intersection vide.
+    assert elapsed < 5.0, f"régénération 30 000 lignes trop lente pour la boucle : {elapsed:.2f}s"
 
 
 def test_golden_signatures_matches_local_reconstruction():

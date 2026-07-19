@@ -64,6 +64,14 @@ _BANDE_AUTO_REGRESSION_TOL = 0.02
 # la recalibration de la bande est L'OBJECTIF R5. Paramètre CLI
 # `--bande-ecart-max` (réutilisable R6, comme `--budget-ms`).
 _DEFAULT_BANDE_ECART_MAX = 0.10
+# Plafonds des paramètres opérateur de la CLI (minors eval R5 r0/r1, extraits
+# en constantes nommées r3) : un --bande-ecart-max au-delà de 0.5
+# neutraliserait le critère 7-bis, un budget non fini OU énorme (1e9) le
+# critère de latence — fail-closed, comme le reste de la CLI. Le plafond
+# budget couvre étage 1 (5 ms), étage 2 R6 (30 ms) et /v1/recommend (150 ms)
+# avec marge. Utilisés par la validation ET par les messages d'erreur.
+_BUDGET_MS_MAX = 1000.0
+_BANDE_ECART_MAX_BOUND = 0.5
 
 
 @dataclass(frozen=True)
@@ -388,21 +396,22 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    # Bornes des paramètres opérateur (minors eval R5 r0/r1) : un
-    # --bande-ecart-max à 1.0 neutraliserait le critère 7-bis, un budget non
-    # fini OU énorme (1e9) le critère de latence — fail-closed, comme le reste
-    # de la CLI. Plafond 1000 ms : couvre étage 1 (5), étage 2 R6 (30) et
-    # /v1/recommend (150) avec marge.
-    if not (math.isfinite(args.budget_ms) and 0 < args.budget_ms <= 1000.0):
+    # Bornes des paramètres opérateur (minors eval R5 r0/r1) : plafonds
+    # nommés en tête de module (_BUDGET_MS_MAX, _BANDE_ECART_MAX_BOUND),
+    # partagés entre validation et messages — rationnel là-bas.
+    if not (math.isfinite(args.budget_ms) and 0 < args.budget_ms <= _BUDGET_MS_MAX):
         print(
-            f"FAIL : --budget-ms doit être dans ]0, 1000] ms (reçu {args.budget_ms})",
+            f"FAIL : --budget-ms doit être dans ]0, {_BUDGET_MS_MAX:g}] ms (reçu {args.budget_ms})",
             file=sys.stderr,
         )
         print("VERDICT : FAIL", file=sys.stderr)
         return 2
-    if not (math.isfinite(args.bande_ecart_max) and 0 < args.bande_ecart_max <= 0.5):
+    if not (
+        math.isfinite(args.bande_ecart_max) and 0 < args.bande_ecart_max <= _BANDE_ECART_MAX_BOUND
+    ):
         print(
-            f"FAIL : --bande-ecart-max doit être dans ]0, 0.5] (reçu {args.bande_ecart_max}) — "
+            f"FAIL : --bande-ecart-max doit être dans ]0, {_BANDE_ECART_MAX_BOUND:g}] "
+            f"(reçu {args.bande_ecart_max}) — "
             "au-delà, le plafond absolu du critère 7-bis serait neutralisé",
             file=sys.stderr,
         )

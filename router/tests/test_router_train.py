@@ -229,15 +229,59 @@ def test_fit_isotonic_refuses_degenerate_calibrator():
         train_v05.fit_isotonic([0.8, 0.8, 0.8], [True, True, False])
 
 
-def test_main_converts_degenerate_calibrator_to_clean_refusal(monkeypatch, capsys, tmp_path):
-    """Le chemin main() RÉEL attrape la garde dégénérée : REFUS propre exit 2,
-    pas de traceback (le handler existant couvre désormais cette garde)."""
+def test_main_converts_degenerate_calibrator_to_clean_refusal(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture,
+    corpus_rows: list[dict],
+):
+    """Le chemin main() traverse la VRAIE garde dégénérée (minor ml r3 : elle
+    était monkeypatchée — plus maintenant). Corpus RÉDUIT à 60 lignes de train
+    (< 2 x min_data_in_leaf=50 : aucun split possible, modèle constant), donc
+    confiances val CONSTANTES -> un seul point de contrôle isotonique -> le
+    VRAI `fit_isotonic` lève RefusError, que main() convertit en « REFUS »
+    propre exit 2. Seule l'INFRASTRUCTURE (corpus réduit, référence sha) est
+    monkeypatchée — la garde, elle, est réelle."""
+    pytest.importorskip("lightgbm")
 
-    def _degenerate(*args, **kwargs):
-        raise train_v05.RefusError("calibrateur isotonique dégénéré (test)")
+    # Sélection DÉTERMINISTE 20 train + 4 val PAR label via les buckets réels
+    # de `split_by_signature` : parts de classe 1/3 des deux côtés (écart 0,
+    # garde de stratification muette), chaque classe présente au train.
+    voulu_train, voulu_val = 20, 4
+    choisis: list[dict] = []
+    for label in LABEL_ORDER:
+        pris_train = pris_val = 0
+        for row in corpus_rows:
+            if row["label"] != label:
+                continue
+            sig = signal_signature(row["signals"]["prompt"], row["signals"]["conversation"])
+            bucket = int(hashlib.sha256(repr(sig).encode("utf-8")).hexdigest(), 16) % 100
+            if bucket < train_v05.DEFAULT_VAL_PCT:
+                if pris_val < voulu_val:
+                    choisis.append(row)
+                    pris_val += 1
+            elif pris_train < voulu_train:
+                choisis.append(row)
+                pris_train += 1
+            if pris_train == voulu_train and pris_val == voulu_val:
+                break
+        assert pris_train == voulu_train and pris_val == voulu_val
 
-    monkeypatch.setattr(train_v05, "fit_isotonic", _degenerate)
-    code = train_v05.main(["--out-dir", str(tmp_path)])
+    payload = "\n".join(json.dumps(r, ensure_ascii=False) for r in choisis) + "\n"
+    corpus_reduit = tmp_path / "corpus-reduit.jsonl.gz"
+    corpus_reduit.write_bytes(gzip.compress(payload.encode("utf-8")))
+    reference = tmp_path / "reference.metadata.json"
+    reference.write_text(
+        json.dumps({"sha256_gz": hashlib.sha256(corpus_reduit.read_bytes()).hexdigest()}),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(train_v05, "REFERENCE_METADATA_PATH", reference)
+
+    code = train_v05.main(
+        ["--corpus", str(corpus_reduit), "--out-dir", str(tmp_path / "jamais-ecrit")]
+    )
     assert code == 2
     err = capsys.readouterr().err
     assert "REFUS" in err and "dégénéré" in err
+    # Le refus précède toute écriture : aucun artefact partiel.
+    assert not (tmp_path / "jamais-ecrit").exists()
