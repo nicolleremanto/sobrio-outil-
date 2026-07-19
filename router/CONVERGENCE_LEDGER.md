@@ -1147,3 +1147,12 @@ par grep post-édition).
 fondateur après cette consignation — reprise prévue le lendemain (panel
 ronde 3 après application des minors ci-dessus ; rondes 0-2 consommées,
 5 restantes sous le plafond).
+
+## Décision d'orchestration (datée) — alignement des définitions d'agents
+
+- **2026-07-19** — Les frontmatter `model:` des 12 fichiers `.claude/agents/*.md`
+  (sonnet/opus/haiku de l'équipe initiale) sont passés à `inherit` : plus
+  aucun chemin ne peut retomber sur un autre modèle que celui de la session
+  (Fable 5) — finalisation mécanique de la directive fondateur du 2026-07-18,
+  déjà effective dans les panels depuis R4 ronde 5. Boucle NON relancée
+  (toujours en pause utilisateur).
