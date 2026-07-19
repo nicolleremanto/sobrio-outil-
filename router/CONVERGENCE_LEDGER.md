@@ -1265,3 +1265,15 @@ revendication→preuve est ainsi rétablie.
 - [es] Harnais : valider les confiances (réel fini [0,1], bool exclu) dans
   evaluate_router, même patron que le refus modèle hors catalogue
   (ES-R5r3-m3).
+
+**PAUSE UTILISATEUR (2026-07-19, ~12h45)** : boucle stoppée à la demande du
+fondateur (limites hebdomadaires de tokens presque atteintes). Le build de
+la ronde 4 (major DQ-R3-M1 + 7 minors ci-dessus) a été INTERROMPU EN VOL :
+ses éditions partielles NON VÉRIFIÉES (6 fichiers) sont dans
+`git stash` (« ronde 4 PARTIELLE non vérifiée — … wf_05c0733a stoppé en
+vol ») — à la reprise, NE PAS les committer telles quelles : soit relancer
+le build proprement depuis HEAD 9fdb6fc (les constats normatifs sont dans
+router/panels/R5-r3.json + la liste ci-dessus), soit dépiler le stash et le
+faire re-vérifier intégralement (patch-verifier + simulations clone-frais)
+avant tout commit. Puis panel ronde 4. Compteur inchangé : rondes 0-3
+consommées, 4 restantes, streak 0/2.
