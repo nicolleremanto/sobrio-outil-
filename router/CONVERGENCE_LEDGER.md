@@ -41,7 +41,7 @@ RAM < 1 Go · artefacts : étage 1 < 20 Mo, étage 2 < 500 Mo · dépense API : 
 | R3       | Protocole d'évaluation & harnais + gate            | 2/2 (r5 & r6) | **CONVERGÉ** |
 | R4       | Corpus de démarrage à froid                        | 2/2 (r4 & r5) | **CONVERGÉ** |
 | R5       | Pipeline d'entraînement & classifieur v0.5         | 2/2 (r4 & r5) | **CONVERGÉ** |
-| R6       | Étage 2 embeddings (construit, ÉTEINT ; geste fondateur différé) | 0/2 (reset r2) | en panels |
+| R6       | Étage 2 embeddings (construit, ÉTEINT ; geste fondateur différé) | 1/2 (r3) | en panels |
 | R7       | Recalibration, monitoring & déploiement VPS        | 0/2           | à venir |
 
 ---
@@ -1635,7 +1635,7 @@ l'orchestrateur AVANT la ronde 2, vérifiés inline, jugés par elle :**
 | ml-architect (P) | fable  | spec5 pipeline4 calibration5 robustesse4 extens5     | 0        | 1     | YELLOW  |
 | eval-scientist   | fable  | éval5 gate5 honnêteté3 repro2 budgets5               | 1        | 0     | RED     |
 | data-quality     | fable  | étanchéité5 intégrité5 robustesse3 traça4 global3    | 1        | 0     | RED     |
-| qa-auditor       | fable  | couverture5 contrat5 erreurs5 clarté5 régressions3   | 0        | ~     | YELLOW  |
+| qa-auditor       | fable  | couverture5 contrat5 erreurs5 clarté5 régressions3   | 0        | 1     | YELLOW  |
 | privacy-sentinel | fable  | —                                                    | **FAIL** | —     | **FAIL**|
 | cost-guard       | fable  | — (0,00 $ inchangé ; constat hors périmètre relayé)  | PASS     | —     | PASS    |
 
@@ -1663,7 +1663,10 @@ discipline existe précisément pour ça.
 
 **Réparation (post-panel, geste orchestrateur)** : pyc empoisonné purgé
 (+ 3 pyc orphelins api/tests), suite rejouée = 662 verts + 4 skips,
-arbre propre.
+arbre propre. *Rectification (r3)* : le compte était inexact d'une
+unité — un 4e orphelin inerte (test_zzz_…, échappé au glob test_zz_*)
+a été purgé en r3, avec les caches morts d'interpréteurs étrangers
+(cpython-313/314, .opt-1 périmés) signalés par l'audit bytecode.
 
 **RÈGLE DURCIE (applicable immédiatement, tous agents ET orchestrateur)** :
 toute mutation de preuve se fait en COPIE TMP au scratchpad, JAMAIS en
@@ -1671,3 +1674,24 @@ place dans l'arbre versionné — la restauration bit-exacte de la source
 ne restaure pas les caches dérivés ; à défaut absolu,
 PYTHONDONTWRITEBYTECODE=1 obligatoire sur tout run impliquant un mutant,
 suivi d'une purge du __pycache__ du module muté et d'un run de contrôle.
+
+## R6 — round 3 (HEAD de7dcd7, panel 6 juges Fable — archivé router/panels/R6-r3.json)
+
+| agent            | modèle | scores (dims)                                        | blocking | major | verdict |
+|------------------|--------|------------------------------------------------------|----------|-------|---------|
+| ml-architect (P) | fable  | spec5 pipeline5 calibration5 robustesse4 extens5     | 0        | 0     | GREEN   |
+| eval-scientist   | fable  | éval5 gate5 honnêteté4 repro5 budgets5               | 0        | 0     | GREEN   |
+| data-quality     | fable  | étanchéité5 intégrité5 robustesse5 traça4 global5    | 0        | 0     | GREEN   |
+| qa-auditor       | fable  | couverture5 contrat5 erreurs5 clarté5 régressions5   | 0        | 0     | GREEN   |
+| privacy-sentinel | fable  | — (bytecode servi == compilation fraîche, prouvé)    | PASS     | —     | PASS    |
+| cost-guard       | fable  | — (0,00 $ ; note d'hygiène caches relayée)           | PASS     | —     | PASS    |
+
+→ **Ronde VERTE — streak 1/2** (rondes 0-3 consommées, 4 restantes).
+La réparation du bytecode est vérifiée par les juges mêmes qui avaient
+levé le rouge : audit bytecode exhaustif (150 pyc hors venv), 103 pyc
+3.12 TOUS conformes aux sources, zéro divergent — classe du poison
+éradiquée. Minors r3 (tous des gestes opérateur/consignation, appliqués
+immédiatement) : 4e orphelin inerte purgé + rectification du compte de
+réparation (ci-dessus), cellule « ~ » → « 1 » au tableau r2, caches
+morts d'interpréteurs étrangers purgés (hygiène). Suite re-vérifiée
+après purges : 662 verts + 4 skips.

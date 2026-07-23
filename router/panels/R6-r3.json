@@ -1,0 +1,162 @@
+{
+  "chantier": "R6",
+  "round": 3,
+  "head": "de7dcd7",
+  "date": "2026-07-23",
+  "ronde": "VERTE",
+  "juges": [
+    {
+      "agent": "ml-architect",
+      "chantier": "R6",
+      "round": 3,
+      "scores": {
+        "spec": 5,
+        "pipeline": 5,
+        "calibration": 5,
+        "robustesse": 4,
+        "extensibilite": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "eval-scientist",
+      "chantier": "R6",
+      "round": 3,
+      "scores": {
+        "evaluation": 5,
+        "gate": 5,
+        "honnetete": 4,
+        "repro": 5,
+        "budgets": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "ES-R6r3-m1",
+          "quoi": "La réparation consignée au ledger (« pyc empoisonné purgé (+ 3 pyc orphelins api/tests) ») est contredite sur un détail par l'état observable : il reste EXACTEMENT UN pyc orphelin de la classe annoncée purgée — api/tests/__pycache__/test_zzz_audit_temp.cpython-312-pytest-9.1.1.pyc (mtime 2026-07-18 13:58, source test_zzz_audit_temp.py ABSENTE, seul orphelin du repo hors .venv par scan exhaustif). Fichier prouvé INERTE (suffixe -pytest- : introuvable par l'import machinery standard, et pytest ne charge un pyc réécrit que via une source présente ; les deux rejeux 662+4 le confirment) — l'essentiel de la réparation est, lui, vérifié vrai : embed.cpython-312.pyc régénéré marshal-identique à la compilation fraîche (int64, zéro int32), 33 pyc servables de production scannés, zéro divergent. Constat d'exactitude de consignation, pas de fonctionnement ; rien supprimé par moi (règle du panel).",
+          "ou": "api/tests/__pycache__/test_zzz_audit_temp.cpython-312-pytest-9.1.1.pyc (orphelin résiduel) vs router/CONVERGENCE_LEDGER.md, entrée « R6 — round 2 », paragraphe Réparation (« + 3 pyc orphelins api/tests »)",
+          "correction": "Geste orchestrateur, hors arbre versionné : purger ce dernier pyc orphelin, puis (au prochain toucher légitime du ledger, p.ex. la consignation de cette ronde) préciser la parenthèse de la réparation — soit « orphelins purgés, un survivant test_zzz_audit_temp évacué en r3 », soit corriger le décompte. Aucun rejeu de suite requis (fichier inerte prouvé)."
+        },
+        {
+          "id": "ES-R6r3-m2",
+          "quoi": "Dans le tableau de l'entrée « R6 — round 2 » du ledger, la colonne major de qa-auditor porte « ~ » alors que l'archive R6-r2.json consigne exactement 1 major (QA-R6r2-M1) + 1 minor (QA-R6r2-m1) ; toutes les autres lignes du tableau utilisent des chiffres et sont bit-fidèles à l'archive (vérifié ligne à ligne). Imprécision de notation isolée, sans incidence sur le verdict ni sur la lecture de l'incident.",
+          "ou": "router/CONVERGENCE_LEDGER.md, tableau « R6 — round 2 », ligne qa-auditor, colonne major",
+          "correction": "Au prochain toucher légitime du ledger, remplacer « ~ » par « 1 » sur la ligne qa-auditor du tableau r2 (aucun autre champ à changer — le reste du tableau est vérifié conforme à router/panels/R6-r2.json)."
+        }
+      ],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "data-quality",
+      "chantier": "R6",
+      "round": 3,
+      "scores": {
+        "etancheite": 5,
+        "integrite_donnees": 5,
+        "robustesse_pipeline": 5,
+        "tracabilite": 4,
+        "global": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "DQ-R6r3-m1",
+          "quoi": "Purge des orphelins incomplète ou compte inexact dans l'entrée de réparation « R6 — round 2 » : le ledger revendique « pyc empoisonné purgé (+ 3 pyc orphelins api/tests) », mais il subsiste AUJOURD'HUI 1 pyc orphelin de cette classe exacte — api/tests/__pycache__/test_zzz_audit_temp.cpython-312-pytest-9.1.1.pyc (mtime 1784375880, ANTÉRIEUR au panel r2 : il existait au moment de la réparation ; source test_zzz_audit_temp.py absente de api/tests/ et absente de l'arbre git). INERTE prouvé : sans source adjacente, un pyc de __pycache__ n'est jamais importable (PEP 3147) ni collecté par pytest — aucun risque d'exécution ; c'est la revendication de purge qui est imprécise (soit 4 orphelins dont 3 purgés, soit compte « 3 » inexact). Zéro impact sur la suite (662 passed + 4 skipped vérifiés en nu ET en cache frais).",
+          "ou": "api/tests/__pycache__/test_zzz_audit_temp.cpython-312-pytest-9.1.1.pyc (orphelin résiduel, gitignoré) vs router/CONVERGENCE_LEDGER.md:1664-1666 (« Réparation … + 3 pyc orphelins api/tests »)",
+          "correction": "Geste orchestrateur (je ne supprime rien, règle du panel) : purger ce dernier orphelin au prochain geste opérateur et rectifier/annoter le compte de l'entrée de réparation au ledger (p. ex. « 4e orphelin résiduel purgé en r3 »). Aucun fichier versionné à changer."
+        },
+        {
+          "id": "DQ-R6r3-m2",
+          "quoi": "Compteur inexact dans le tableau de la ronde 2 du ledger : la colonne « major » de qa-auditor porte « ~ » alors que l'archive faisant foi router/panels/R6-r2.json consigne EXACTEMENT 1 major (QA-R6r2-M1) + 1 minor (QA-R6r2-m1). Toutes les autres cellules des trois tableaux r0/r1/r2 sont bit-exactes vs les archives (heads 8de5152/fbb79d8/77a6df0, verdicts, blocking/major re-comptés depuis les JSON) ; un tableau de traçabilité ne doit porter que des nombres exacts — un symbole non défini casse la chaîne revendication→preuve pour ce compteur.",
+          "ou": "router/CONVERGENCE_LEDGER.md:1638 (ligne qa-auditor du tableau « R6 — round 2 », colonne major = « ~ ») vs router/panels/R6-r2.json (1 major QA-R6r2-M1)",
+          "correction": "Remplacer « ~ » par « 1 » à la ligne 1638 du ledger (édition documentaire d'une cellule, à faire dans le prochain lot de consignation)."
+        },
+        {
+          "id": "DQ-R6r3-m3",
+          "quoi": "Hygiène résiduelle du poste de référence (aucun défaut du chantier, tout est inerte et prouvé tel) : 7 pyc .opt-1 PÉRIMÉS (en-têtes mtime/taille ≠ stat des sources — CPython les ignorerait et recompilerait sous -O ; ex. router/eval/__pycache__/gate.cpython-312.opt-1.pyc en-tête 1784390842/15243 vs stat 1784821202/21744) et 38 pyc cpython-313/314 d'interpréteurs jamais servis par le .venv 3.12. Le scan sémantique complet des 105 pyc 3.12 FRAIS (en-tête valide) donne zéro divergent : 97 bit-conformes à la recompilation (y compris embed.cpython-312.pyc régénéré post-incident, mtime 1784828636, et la réécriture pytest reproduite pour les caches -pytest-) + 8 écarts d'ordre de frozenset (non-déterminisme marshal, classe déjà consignée en r2 pour logging_conf) prouvés identiques après normalisation triée.",
+          "ou": "router/eval/__pycache__/*.opt-1.pyc, router/sobrio_router/__pycache__/*.opt-1.pyc (7 périmés inertes) ; pyc cpython-313/314 répartis dans api/, router/ (38, jamais servis)",
+          "correction": "Aucune action requise sur l'arbre versionné ; à l'occasion du prochain nettoyage opérateur, purger ces caches morts pour un poste de référence sans résidus (cohérent avec la règle durcie post-r2)."
+        }
+      ],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "qa-auditor",
+      "chantier": "R6",
+      "round": 3,
+      "scores": {
+        "couverture": 5,
+        "contrat": 5,
+        "erreurs": 5,
+        "clarte": 5,
+        "regressions": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "QA-R6r3-m1",
+          "quoi": "Le geste de réparation r2 consigné au ledger (« pyc empoisonné purgé (+ 3 pyc orphelins api/tests) ») est incomplet d'une unité : un 4e pyc orphelin subsiste, api/tests/__pycache__/test_zzz_audit_temp.cpython-312-pytest-9.1.1.pyc (horodaté 18/07 13:58, source supprimée — trace d'un fichier de test temporaire créé EN PLACE dans l'arbre lors d'un audit antérieur à la règle durcie). Résidu prouvé INERTE : un pyc de __pycache__ sans source adjacente n'est jamais importable par le système d'import et pytest ne collecte que des .py — aucune voie d'exécution ; mais la revendication de purge complète du ledger est factuellement inexacte d'un fichier.",
+          "ou": "api/tests/__pycache__/test_zzz_audit_temp.cpython-312-pytest-9.1.1.pyc (vs ledger, entrée « R6 — round 2 », paragraphe Réparation)",
+          "correction": "Geste opérateur autorisé hors panel : purger ce pyc orphelin et compléter d'une ligne l'entrée de réparation r2 au ledger (4 orphelins purgés, pas 3)."
+        },
+        {
+          "id": "QA-R6r3-m2",
+          "quoi": "Audit bytecode exhaustif lecture-seule (150 pyc hors .venv, comparaison structurelle récursive des code objects contre compilation/rewrite pytest frais) : les 103 pyc CPython-3.12 sont TOUS conformes aux sources actuelles (0 divergent — la classe du poison r2 est éradiquée), mais 47 pyc inertes d'interpréteurs étrangers à la machine de référence traînent (cpython-313, cpython-314, .opt-1 ; ex. router/sobrio_router/__pycache__/types.cpython-314.pyc). Inoffensifs pour le venv 3.12 sans -O (jamais chargés), mais c'est exactement la classe de caches dérivés dont l'incident r2 a montré la traîtrise, et ils allongent/brouillent tout futur audit de bytecode.",
+          "ou": "__pycache__ de router/, api/, connector/, warehouse/, report/ (inventaire : 54 pyc 3.12 production + 49 pyc 3.12 pytest conformes, 47 inertes, 1 orphelin cf. m1)",
+          "correction": "Au même geste opérateur : purger les pyc non-3.12/.opt-1 ; pour les runs de référence futurs, adopter PYTHONPYCACHEPREFIX vers le scratchpad (patron déjà employé par qa r2) afin qu'aucun cache dérivé ne s'écrive dans l'arbre."
+        }
+      ],
+      "verdict": "GREEN"
+    }
+  ],
+  "sentinelles": [
+    {
+      "agent": "privacy-sentinel",
+      "chantier": "R6",
+      "round": 3,
+      "verdict": "PASS",
+      "violations": [],
+      "preuves": [
+        "CADRE GELÉ vérifié en entrée ET en sortie : HEAD de7dcd7 == origin/main, git status --porcelain VIDE avant/après tous mes rejeux ; git diff --stat 77a6df0..de7dcd7 = 2 fichiers SEULEMENT (router/CONVERGENCE_LEDGER.md +46, router/panels/R6-r2.json +159) — AUCUN fichier de code versionné n'a changé depuis la ronde 1 verte, donc tous les verrous audités en r2 sur source gelée restent bit-identiques ; entrée ledger « R6 — round 2 » relue : incident d'orchestrateur consigné sans fard (mécanisme même-seconde/même-taille exact), réparation et RÈGLE DURCIE consignées.",
+        "RÉPARATION DE MON FAIL r2 VÉRIFIÉE AU BIT PRÈS : router/sobrio_router/__pycache__/embed.cpython-312.pyc (recompilé sain par le run de contrôle post-réparation, sha256 tronqué 0694f576a28e125a) vs compilation fraîche de embed.py (source sha256 e592cbe3ef9a272f == état jugé) — en-tête VALIDE pour CPython (flags=0, mtime=1784827288, size=19029 == stat source), code objets récursivement IDENTIQUES sur tous les champs (co_code, co_names, co_consts, linetable, exceptiontable), marshal BIT-IDENTIQUE ; EmbedRouter._embed du bytecode SERVI : co_names contient int64, int32 ABSENT. Le code que la machine exécute est EXACTEMENT le code jugé — chaîne source-auditée→code-exécuté restaurée.",
+        "SCAN COMPLET DES CACHES DÉRIVÉS (sonde scratchpad/r6r3-priv/pyc_scan.py, lecture seule, PYTHONDONTWRITEBYTECODE=1) : 151 pyc hors .venv. cpython-312 (interpréteur .venv 3.12.13, magic cb0d0d0a) : 56 pyc plain à en-tête valide = 0 DIVERGENT (54 marshal-bit-identiques ; api/app/catalog et schemas : marshal!= mais code récursivement == — résidu co_filename Docker déjà classé en r2) ; 49 pyc pytest-9.1.1 à en-tête valide TOUS équivalents au re-rewrite pytest de leur source (0 PYTEST-DIFF) ; 7 pyc .opt-1 STALE (en-tête invalide → recompilés d'office si jamais servis en -O, inoffensifs).",
+        "SCAN ÉTENDU AUX AUTRES INTERPRÉTEURS PRÉSENTS SUR LA MACHINE (vigilance max, au-delà du classement r2 « jamais servis par .venv ») : les 38 pyc cpython-313/314 vérifiés SÉMANTIQUEMENT avec leurs interpréteurs réels (/opt/anaconda3/bin/python3.13 3.13.5 avec pytest 8.3.4 == tag exact des pyc ; /opt/homebrew/bin/python3.14 3.14.3) : 3.13 → 13 valides/0 DIVERGENT/15 stale ; 3.14 → 3 valides/0 DIVERGENT/7 stale. BILAN REPO ENTIER : ZÉRO cache dérivé divergent de sa source, sous LES TROIS interpréteurs capables de les servir.",
+        "RUN DE CONTRÔLE « machine en l'état » : .venv/bin/pytest router/tests api/tests sous PYTHONDONTWRITEBYTECODE=1 (lit et EXÉCUTE les caches existants du repo — ceux vérifiés ci-dessus — sans rien écrire) + basetemp scratchpad + no:cacheprovider = 662 passed + 4 skipped en 26.8 s, BIT-EXACT à la claim de réparation du ledger. Inventaire pyc (151) et sha du pyc embed inchangés après le run — preuve que le run a servi les caches en place.",
+        "ÉCHANTILLON NO-LEAK E2E INDÉPENDANT à contexte neuf (sonde test_zz_r6r3_probe.py en COPIE TMP rsync api/+contracts/ au scratchpad — règle durcie respectée, la sonde n'existe pas dans l'arbre ; jeton ALÉATOIRE frais par cas via secrets.token_hex, jamais de texte type prompt) sur Postgres réel : 3/3 PASS. (a) 200 nominal verrous ouverts, spy étage 2 : CONTRÔLE POSITIF le jeton ATTEINT l'étage 2 (rule embed:v0 servie) puis ABSENT de la réponse, de caplog (records + vars récursifs), de capsys, et de TOUTES les tables du schéma public sérialisées ; (b) 422 champ extra interdit porteur du jeton : input == <redacted> dans chaque détail, jeton absent réponse/logs/DB ; (c) 500 OperationalError SQLAlchemy levée sur l'INSERT events_reco pendant que le texte est en variables locales : 500 générique, jeton absent réponse/logs/DB.",
+        "VERROUS RE-VÉRIFIÉS SUR SOURCE GELÉE (spot-check, complétant l'audit r2 intégralement transposable puisque zéro diff de code) : routes.py:67-76 (extraction gardée _stage2_unlocked, del body.prompt_text immédiat, del prompt_text post-decide), api/app/main.py:63-107 (handler RequestValidationError, input/ctx remplacés par <redacted>), types.py:41-55 (__reduce__ conditionnel TypeError sans contenu). État D4 : router/artifacts/embed/heads/promoted/ INEXISTANT ; candidate/ (résidu staging local gitignoré) scanné : head/calibrator = nombres purs, metadata = 3 chaînes multi-mots qui sont la constante de statut v0 et des sha hex — aucun texte ; artifacts/eval = 3 rapports R5 seuls, aucun embed-*.",
+        "OBSERVATION NON BLOQUANTE (consignée, pas une violation) : 1 pyc orphelin subsiste — api/tests/__pycache__/test_zzz_audit_temp.cpython-312-pytest-9.1.1.pyc (écrit 2026-07-18 13:58, ANTÉRIEUR aux panels, source absente) ; INERTE par construction (un pyc sous __pycache__ sans source n'est jamais importable) et contenu inspecté : uniquement du code de test technique (aide _RogueRuleRouter, vocabulaire système), zéro texte type prompt. La purge du ledger (« + 3 pyc orphelins api/tests ») en a laissé un quatrième — purge à la discrétion de l'orchestrateur, je ne supprime rien (règle du panel).",
+        "HYGIÈNE D'AUDIT : aucun fichier versionné modifié, RIEN supprimé (même gitignoré), toutes les sondes et la copie E2E sous scratchpad/r6r3-priv (basetemp compris), tous les runs sur le repo en PYTHONDONTWRITEBYTECODE=1, aucun téléchargement/installation, frugalité disque (copie tmp limitée à api/+contracts/, ~1 Mo hors DB) ; choix consignés des rondes 0-2 respectés sans recyclage (geste fondateur différé, D4, REFUS exit 2, lru_cache→R7, except OSError, D14 resserré, incidents rm -rf et bytecode avec leurs réparations) ; AUCUN texte type prompt dans ce rapport. La règle durcie du ledger a été appliquée par cette sentinelle et VÉRIFIÉE EFFICACE : le défaut r2 est réparé, non reproduit, et aucun autre cache divergent n'existe — PASS."
+      ]
+    },
+    {
+      "agent": "cost-guard",
+      "chantier": "R6",
+      "round": 3,
+      "verdict": "PASS",
+      "violations": [
+        {
+          "id": "CG-R6r3-m1",
+          "quoi": "HORS PÉRIMÈTRE COÛT (0,00 $ inchangé, impact exécution NUL) — la question du mandat « pyc orphelins api/tests : purgés ? » reçoit un NON partiel : api/tests/__pycache__/test_zzz_audit_temp.cpython-312-pytest-9.1.1.pyc (2 507 octets, birth ET mtime 2026-07-18 13:58:00 — jamais supprimé puis recréé) est TOUJOURS présent avec source absente (api/tests/test_zzz_audit_temp.py inexistant sur disque, jamais versionné : git log --all vide, 0 dans git ls-files). Le répertoire a pourtant bien été touché par la purge de la réparation r2 (mtime api/tests/__pycache__ = 2026-07-23 19:43, cohérent avec le geste consigné) et le ledger affirme « pyc empoisonné purgé (+ 3 pyc orphelins api/tests) » — or il reste aujourd'hui exactement 1 orphelin dans ce répertoire (scan exhaustif des 151 pyc hors .venv) : la purge est incomplète, ou le décompte « 3 » consigné est inexact (mon libellé r2 « test_zz_* » ne matche d'ailleurs pas « test_zzz_ » — un glob de purge copié tel quel l'aurait raté). Résidu INERTE prouvé : un pyc de __pycache__ dont la source est absente n'est pas chargeable par l'import CPython — aucun risque d'exécution, aucun coût ; défaut d'hygiène et d'exactitude de consignation uniquement, ne bloque pas le PASS.",
+          "ou": "/Users/nicollerem/Projects/sobrio-outil/api/tests/__pycache__/test_zzz_audit_temp.cpython-312-pytest-9.1.1.pyc (orphelin résiduel, birth 2026-07-18 13:58) vs router/CONVERGENCE_LEDGER.md, entrée « R6 — round 2 », bloc « Réparation » (« + 3 pyc orphelins api/tests » purgés)",
+          "correction": "Geste orchestrateur (je ne supprime rien, règle du panel) : supprimer ce pyc orphelin résiduel et consigner une ligne d'exactitude au ledger (purge r2 incomplète — 1 orphelin test_zzz_* résiduel évacué en r3, cause probable : glob test_zz_* ne matchant pas test_zzz_) ; en profiter pour rappeler la consigne « pas de fichiers de test temporaires de juges dans l'arbre » qui a produit ces orphelins. Aucun fichier versionné à modifier hors ledger."
+        }
+      ],
+      "preuves": [
+        "CADRE GELÉ vérifié : HEAD de7dcd7 == origin/main, git status --porcelain VIDE avant et après TOUS mes rejeux (0 ligne), rien supprimé nulle part, toutes mutations en copie tmp au scratchpad r6r3-cg (règle durcie respectée). git diff --stat 77a6df0..de7dcd7 : router/CONVERGENCE_LEDGER.md (+46) et router/panels/R6-r2.json (+159) SEULS — aucun module exécutable, aucun workflow, aucun manifest modifié depuis la ronde 1 verte ; l'entrée ledger « R6 — round 2 » (incident bytecode, réparation, règle durcie, reset 0/2) relue en entier.",
+        "GARDES ANTI-RÉSEAU VERTES : 33 passed / 0 failed en 0,46 s à bytecode FRAIS (PYTHONPYCACHEPREFIX scratchpad + -p no:cacheprovider — leçon r2 appliquée, cache du poste ignoré, repo intouché) : 5 globs (router/data/*.py, racine router/*.py, router/train/*.py via test_router_data_distill.py ; router/eval/*.py et router/sobrio_router/*.py via test_router_embed_gate_promote.py:757-805) + métatests de couverture et d'anti-inertie.",
+        "GARDES PROUVÉES VIVANTES par 3 kill-de-mutants en COPIE TMP EXCLUSIVEMENT (rsync router/ hors artifacts/__pycache__ → scratchpad/r6r3-cg/mut, 1,3 Mo ; repo jamais touché) : (1) import urllib.request appendu à sobrio_router/twostage.py → FAIL ; (2) MODULE FUTUR train/module_futur.py (import requests) → ramassé D'OFFICE par le glob, FAIL ; (3) MODULE FUTUR racine bench_futur.py (from socket import) → FAIL. Bilan 3 failed / 32 passed sur la copie ; repo réel resté propre (status vide re-vérifié après).",
+        "FETCH INERTE — 3 refus rejoués sur le module RÉEL (lecture seule, cwd scratchpad, socket.socket empoisonné avec compteur, sys.modules audité) : (a) SANS FLAG → exit 2, message renvoyant à router/data/LICENSES.md (fetch_embed_model.py:75-88, garde de flag AVANT toute lecture de manifest — ordre normatif run_fetch:260-262) ; (b) SOBRIO_ALLOW_MODEL_DOWNLOAD='1' + MANIFEST COMMITTÉ → exit 2 « source non approuvée : geste fondateur requis — champ source_repo non renseigné » (:130-136), destination JAMAIS créée (mkdir postérieur à l'approbation) ; (c) étalonnage flag='true' → exit 2 (égalité stricte '1'). 0 socket instancié, urllib.request JAMAIS dans sys.modules. Manifest re-vérifié champ par champ : variantes int8 ET fp32, source_repo/url/sha256/size_bytes TOUS null → chemin réseau _download INEXÉCUTABLE par construction ; geste fondateur toujours différé (décision datée, non recyclée).",
+        "CI VERROUILLÉE : .github/workflows/ci.yml bit-identique à HEAD (git diff vide) ; garde R6 EXÉCUTABLE intacte — step dédié échouant si un env SOBRIO_* est posé ou si onnxruntime/tokenizers sont importables ; env du job limité à DATABASE_URL ; installation sans requirements-embed ni requirements-ml ; schemes https/file seuls (fetch_embed_model.py:66 : http:// refusé). Les 6 tests de conformité router/tests/test_router_ci_workflow.py rejoués à cache frais : 6 passed.",
+        "REQUIREMENTS-EMBED NON INSTALLÉ : .venv/bin/pip list — ZÉRO onnxruntime/tokenizers/torch/transformers/sentence*/anthropic/openai/boto/google-cloud ; seuls numpy 2.5.1 + lightgbm 4.6.0 (requirements-ml, R5) + httpx 0.28.1 (stack connecteur imposée, pas un SDK payant). router/requirements-embed.txt : statut « NON INSTALLÉ à ce jour », pins onnxruntime/tokenizers toujours EN COMMENTAIRE, numpy==2.5.1 seul actif — la première installation accompagne le geste fondateur. Env machine sans aucun SOBRIO_*. Grep router/ + api/app (hors tests) : zéro api.anthropic.com, zéro Anthropic(/OpenAI(.",
+        "DÉPENSE MISSION : 0,00 $. Zéro connexion sortante sur l'ensemble de mes rejeux (compteurs socket à 0 partout), zéro téléchargement, zéro installation, chemin de dépense du fetch inexécutable par construction (triple refus + manifest null). Encodeur ONNX ABSENT (nominal, D4) : router/artifacts/embed = 32 Ko de JSON seulement — tête v0 heads/candidate écrite le 23/07 18:58-19:08 (AVANT le gel de7dcd7 à 19:45:24), metadata vérifiée : train_source=synthetic_embed_fixtures, seed 4242, git_sha f714a92, encoder_sha256/tokenizer_sha256 null, numpy pur → coût nul, chemin gitignoré (.gitignore:38), aucun impact sur l'arbre gelé. router/artifacts/eval = les 3 rapports R5 seuls (aucun embed-*, D14 resserré respecté).",
+        "CONSTAT r2 SUIVI — PURGE VÉRIFIÉE PARTIELLE : le pyc EMPOISONNÉ router/sobrio_router/__pycache__/embed.cpython-312.pyc a bien été purgé et régénéré SAIN le 23/07 19:43 (décodage marshal : co_names contient int64, int32 ABSENT ; source embed.py = 2×int64, 0×int32). Scan exhaustif read-only des 151 pyc hors .venv (compilation fraîche en mémoire, co_filename ignoré, PYTHONDONTWRITEBYTECODE=1) : 0 divergence de code réelle (6 .opt-1 = strip -O attendu, classement r2 ; 64 pyc pytest-réécrits attendus ; 23 pyc cpython-313/314 jamais servis par .venv — résidu bénin déjà consigné r2) ; MAIS 1 pyc ORPHELIN subsiste dans api/tests/__pycache__ → violation CG-R6r3-m1 (minor hygiène, hors périmètre coût, inerte prouvé)."
+      ]
+    }
+  ]
+}
