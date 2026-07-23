@@ -11,6 +11,11 @@ d'étanchéité, refus sans numpy exit 2, garde anti-dégénérescence
 dont le REFUS avant geste fondateur sur le manifest RÉEL —, contamination,
 rollback, exit codes 0/1/2).
 
+Ronde 1 : évals fraîches de la promotion en répertoire TEMPORAIRE, dépôt
+sous router/artifacts/eval/ après gate PASS + gardes uniquement (run refusé
+=> git status inchangé, DQ-R6-m3 = QA-R6-m1) ; garde anti-réseau GLOB
+étendue à `router/sobrio_router/*.py` (constat cost-guard ronde 0).
+
 Les tests exigeant numpy font `pytest.importorskip` (patron DQ-R3) : la
 suite reste verte sur clone frais sans dépendances embed. AUCUN texte type
 prompt nulle part (les fixtures sont des vecteurs seedés, D6).
@@ -496,8 +501,10 @@ def sandbox(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict[str, Path]:
         promote_embed, "BENCH_REPORT_PATH", _ecrire_bench_factice(tmp_path / "bench.json")
     )
     _ecrire_tete(dirs["candidate"])
+    # `_evals_fraiches(tmp_dir)` écrit en répertoire temporaire (ronde 1) —
+    # les substituts respectent la signature sans rien écrire.
     monkeypatch.setattr(
-        promote_embed, "_evals_fraiches", lambda: (_baseline_prior(), _rapport_embed())
+        promote_embed, "_evals_fraiches", lambda _tmp: (_baseline_prior(), _rapport_embed())
     )
     return dirs
 
@@ -507,7 +514,7 @@ def test_promote_gate_fail_refuse_rien_touche(sandbox, monkeypatch, capsys):
     monkeypatch.setattr(
         promote_embed,
         "_evals_fraiches",
-        lambda: (_baseline_prior(), _rapport_embed(exactitude_ponderee=0.40)),
+        lambda _tmp: (_baseline_prior(), _rapport_embed(exactitude_ponderee=0.40)),
     )
     avant = sorted(p.name for p in sandbox["candidate"].iterdir())
     assert promote_embed.main([]) == 1
@@ -536,7 +543,7 @@ def test_promote_rotation_trois_temps(sandbox, monkeypatch, capsys):
     monkeypatch.setattr(
         promote_embed,
         "_evals_fraiches",
-        lambda: (_baseline_prior(), _rapport_embed(exactitude_ponderee=0.78)),
+        lambda _tmp: (_baseline_prior(), _rapport_embed(exactitude_ponderee=0.78)),
     )
     assert promote_embed.main([]) == 0
     assert (sandbox["previous"] / "head.json").read_bytes() == premier_head
@@ -552,7 +559,7 @@ def test_promote_refuse_contamination(sandbox, monkeypatch, capsys):
     """La moindre règle étrangère dans repartition_rules : REFUS exit 2 (§9.3.3)."""
     contamine = _rapport_embed(repartition_rules={"embed:v0": 239, "fallback:heuristic": 1})
     monkeypatch.setattr(
-        promote_embed, "_evals_fraiches", lambda: (_baseline_prior(), contamine)
+        promote_embed, "_evals_fraiches", lambda _tmp: (_baseline_prior(), contamine)
     )
     assert promote_embed.main([]) == 2
     err = capsys.readouterr().err
@@ -612,6 +619,42 @@ def test_promote_refuse_avant_geste_fondateur(sandbox, monkeypatch, capsys):
     assert not sandbox["promoted"].exists()
 
 
+def test_promote_refuse_ne_laisse_rien_sous_artifacts_eval(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys
+):
+    """DQ-R6-m3 = QA-R6-m1 (ronde 1) : un run REFUSÉ avec les évals RÉELLES
+    (tête candidate absente — le cas nominal reproduit en ronde 0, qui
+    laissait embed-prior-latest.json non suivi dans l'arbre) n'écrit plus
+    RIEN sous router/artifacts/eval/ : les évals fraîches vivent en
+    répertoire temporaire, le dépôt n'a lieu qu'après gate PASS + gardes
+    D8 — git status bit-inchangé."""
+    eval_dir = harness_embed._ARTIFACTS_DIR  # chemin RÉEL à contenu versionné
+    monkeypatch.setattr(harness_embed, "CANDIDATE_DIR", tmp_path / "vide")
+    repo = Path(__file__).resolve().parents[2]
+    avant_fichiers = {p.name: p.read_bytes() for p in eval_dir.iterdir() if p.is_file()}
+    statut_avant = subprocess.run(
+        ["git", "status", "--porcelain", "--", "router/artifacts/eval"],
+        capture_output=True,
+        text=True,
+        cwd=repo,
+        check=False,
+    ).stdout
+    assert promote_embed.main([]) == 2
+    err = capsys.readouterr().err
+    assert "REFUS" in err
+    assert "head_candidate" in err
+    apres_fichiers = {p.name: p.read_bytes() for p in eval_dir.iterdir() if p.is_file()}
+    assert apres_fichiers == avant_fichiers  # rien créé, rien modifié, rien détruit
+    statut_apres = subprocess.run(
+        ["git", "status", "--porcelain", "--", "router/artifacts/eval"],
+        capture_output=True,
+        text=True,
+        cwd=repo,
+        check=False,
+    ).stdout
+    assert statut_apres == statut_avant
+
+
 def test_promote_refuse_integrite_candidate(sandbox, monkeypatch, capsys):
     """Sha head.json divergent du metadata : REFUS exit 2 après gate PASS."""
     (sandbox["candidate"] / "head.json").write_text('{"w": [], "b": []}', encoding="utf-8")
@@ -623,7 +666,7 @@ def test_promote_refuse_integrite_candidate(sandbox, monkeypatch, capsys):
 def test_promote_refuse_candidat_absent(sandbox, monkeypatch, capsys):
     """Évals fraîches impossibles (tête candidate invalide) : REFUS exit 2."""
 
-    def _explose():
+    def _explose(_tmp):
         raise promote_embed.RefusError("tête head_candidate absente ou invalide")
 
     monkeypatch.setattr(promote_embed, "_evals_fraiches", _explose)
@@ -694,12 +737,14 @@ def test_promote_e2e_train_reel_gate_reel(tmp_path: Path, monkeypatch: pytest.Mo
 
 
 # ---------------------------------------------------------------------------
-# Garde anti-réseau en GLOB sur `router/eval/*.py` (§1.3/§10.7 — les
-# nouveaux modules du lot, embed_fixtures et harness_embed, y vivent :
-# couverture d'office, même patron M6 que router/data et router/train).
+# Gardes anti-réseau en GLOB sur `router/eval/*.py` ET
+# `router/sobrio_router/*.py` (§1.3/§10.7 — même patron M6 que router/data
+# et router/train ; le volet sobrio_router solde le constat cost-guard de la
+# ronde 0 : tout module futur du paquet est couvert d'office).
 # ---------------------------------------------------------------------------
 
 _EVAL_DIR = Path(__file__).resolve().parents[1] / "eval"
+_SOBRIO_ROUTER_DIR = Path(__file__).resolve().parents[1] / "sobrio_router"
 # Regex M6 (miroir de test_router_data_distill) : ancrée début de ligne,
 # formes `import X` ET `from X import Y`, jamais une mention en prose.
 _MOTIF_IMPORT_RESEAU = re.compile(
@@ -724,3 +769,37 @@ def test_router_eval_dir_couvert_par_la_garde():
     nouveaux modules du lot (dossier déplacé => garde inerte détectée)."""
     noms = {p.name for p in _EVAL_DIR.glob("*.py")}
     assert {"harness.py", "gate.py", "loader.py", "embed_fixtures.py", "harness_embed.py"} <= noms
+
+
+@pytest.mark.parametrize(
+    "module_path", sorted(_SOBRIO_ROUTER_DIR.glob("*.py")), ids=lambda p: p.name
+)
+def test_no_network_imports_in_sobrio_router_modules(module_path: Path):
+    """Constat cost-guard ronde 0 (spec §1.3/§10.7) : AUCUN motif réseau dans
+    `router/sobrio_router/*.py` — miroir exact de la garde eval ci-dessus
+    (regex M6 ancrée début de ligne + asserts urlopen/Anthropic)."""
+    source = module_path.read_text(encoding="utf-8")
+    match = _MOTIF_IMPORT_RESEAU.search(source)
+    assert match is None, (
+        f"import réseau interdit détecté dans {module_path.name} : {match.group(0)!r}"
+    )
+    assert "urlopen" not in source
+    assert "Anthropic(" not in source
+
+
+def test_sobrio_router_dir_couvert_par_la_garde():
+    """Garde-fou du garde-fou : le glob voit bien les 10 modules du paquet
+    (dossier déplacé/vidé => garde silencieusement inerte détectée)."""
+    noms = {p.name for p in _SOBRIO_ROUTER_DIR.glob("*.py")}
+    assert {
+        "__init__.py",
+        "adapter.py",
+        "embed.py",
+        "features.py",
+        "heuristic.py",
+        "interface.py",
+        "ml.py",
+        "safe.py",
+        "twostage.py",
+        "types.py",
+    } <= noms

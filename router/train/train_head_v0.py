@@ -8,10 +8,12 @@ descente de gradient FULL-BATCH numpy, seedée (`DEFAULT_SEED=4242`, parité
 corpus R4), L2 faible, itérations FIXES — DÉTERMINISTE à l'octet entre runs
 (patron train R5, test de double-run bit-identique) -> calibration
 isotonique CONSERVATRICE `min(brut, iso(brut))` sur la val (RÉUTILISE
-`fit_isotonic` de train_v05 et `interp_conf` de ml.py — zéro
-réimplémentation, mêmes bornes, même interpolation servie) -> artefacts
-`heads/candidate/` (head.json -> calibrator.json -> metadata.json EN
-DERNIER, sha256 consignés, schéma §6.3 exigé par `EmbedHead.load`).
+`fit_isotonic` de train_v05 — zéro réimplémentation) -> val_metrics dérivées
+d'une `EmbedHead` construite EN MÉMOIRE via `predict` ligne à ligne (la
+SEULE porte de sortie d'une confiance de tête, §5.2bis — zéro miroir de la
+chaîne, correction ronde 1 : ML-R6r0-m1 = ES-R6r0-m1 = DQ-R6-m2) ->
+artefacts `heads/candidate/` (head.json -> calibrator.json -> metadata.json
+EN DERNIER, sha256 consignés, schéma §6.3 exigé par `EmbedHead.load`).
 
 STATUT v0 CONSIGNÉ DANS L'ARTEFACT (D4) : cette tête prouve la MÉCANIQUE
 (train -> calibration -> gate -> promotion -> service) sur fixtures
@@ -58,8 +60,8 @@ from embed_fixtures import (  # noqa: E402
 from harness import _auto_band_calibration, _git_sha, compute_ece, weighted_accuracy  # noqa: E402
 from train_v05 import RefusError, fit_isotonic  # noqa: E402
 
-from sobrio_router.embed import CANDIDATE_HEAD_DIR, expected_embed_spec  # noqa: E402
-from sobrio_router.ml import LABEL_ORDER, interp_conf  # noqa: E402
+from sobrio_router.embed import CANDIDATE_HEAD_DIR, EmbedHead, expected_embed_spec  # noqa: E402
+from sobrio_router.ml import LABEL_ORDER  # noqa: E402
 
 DEFAULT_SEED = 4242
 # Plafond D3 écrit dans metadata.json (`confidence_cap`) — SEULE source du
@@ -128,21 +130,6 @@ def _verifier_stratification(
             f"split déséquilibré : écart de classe max {pire:.4f} > {_STRATIFICATION_TOL} "
             f"({ {k: round(v, 4) for k, v in ecarts.items()} })"
         )
-
-
-def _confiances_servies(
-    conf_brutes: list[float], calib_x: list[float], calib_y: list[float]
-) -> list[float]:
-    """Chaîne §5.2bis complète — min(brut, iso), clamp [0, 1], plafond D3.
-
-    Miroir EXACT de `EmbedHead.predict` (val_metrics = confiances telles
-    qu'elles seront SERVIES ; indicatif seulement — l'éval qui fait foi est
-    `harness_embed` sur le set canonique, règle héritée minor dq R5-r0).
-    """
-    return [
-        min(CONFIDENCE_CAP_V0, min(max(min(raw, interp_conf(raw, calib_x, calib_y)), 0.0), 1.0))
-        for raw in conf_brutes
-    ]
 
 
 def _metrics_val(y_val: list[int], pred_idx: list[int], conf_emises: list[float]) -> dict:
@@ -228,12 +215,33 @@ def run_training(out_dir: Path, seed: int = DEFAULT_SEED) -> dict:
         )
 
     # Calibration isotonique CONSERVATRICE sur la val (§8) — brique R5
-    # réutilisée (`fit_isotonic`) ; émission servie = chaîne §5.2bis complète.
+    # réutilisée (`fit_isotonic`, ajustée sur les confiances BRUTES du train
+    # numpy : les octets de calibrator.json restent bit-identiques).
     pred_val, conf_brutes = _predire(x_val)
     corrects_val = [p == y for p, y in zip(pred_val, y_val, strict=True)]
     calib_x, calib_y = fit_isotonic(conf_brutes, corrects_val)
-    conf_emises = _confiances_servies(conf_brutes, calib_x, calib_y)
-    val_metrics = _metrics_val(y_val, pred_val, conf_emises)
+
+    # val_metrics = confiances telles qu'elles seront SERVIES : la tête
+    # candidate est construite EN MÉMOIRE et évaluée via `EmbedHead.predict`
+    # ligne à ligne — la SEULE porte de sortie d'une confiance de tête
+    # (§5.2bis) ; AUCUN miroir de la chaîne dans ce module (correction
+    # ronde 1 : ML-R6r0-m1 = ES-R6r0-m1 = DQ-R6-m2). Indicatif seulement —
+    # l'éval qui fait foi est `harness_embed` sur le set canonique (règle
+    # héritée minor dq R5-r0).
+    tete = EmbedHead(
+        [[float(v) for v in ligne] for ligne in poids],
+        [float(v) for v in biais],
+        calib_x,
+        calib_y,
+        CONFIDENCE_CAP_V0,
+    )
+    pred_servies: list[int] = []
+    conf_emises: list[float] = []
+    for row in val_rows:
+        label, conf = tete.predict(list(row.embedding))
+        pred_servies.append(label_index[label])
+        conf_emises.append(conf)
+    val_metrics = _metrics_val(y_val, pred_servies, conf_emises)
 
     out_dir.mkdir(parents=True, exist_ok=True)
     head_path = out_dir / "head.json"

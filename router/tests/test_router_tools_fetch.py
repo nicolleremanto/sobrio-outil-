@@ -253,6 +253,9 @@ def test_refus_source_incomplete_champ_par_champ(
     [
         ("url", None),
         ("url", "ftp://exemple/model.onnx"),
+        # http:// refusé (QA-R6-m2, ronde 1) : transport en clair exclu de
+        # `_SCHEMES_AUTORISES` — seuls https:// et file:// sont admis.
+        ("url", "http://exemple/model.onnx"),
         ("sha256", None),
         ("sha256", "abc123"),
         ("sha256", "Z" * 64),
@@ -372,6 +375,47 @@ def test_fichier_local_identique_est_saute_sans_telechargement(monkeypatch, caps
     assert capsys.readouterr().out.count("deja_present") == 2
 
 
+@pytest.mark.parametrize(
+    "exception_cls, nom_classe",
+    [
+        ("URLError", "URLError"),
+        ("FileNotFoundError", "FileNotFoundError"),
+    ],
+    ids=str,
+)
+def test_echec_de_telechargement_refus_exit2_sans_traceback(
+    monkeypatch, capsys, tmp_path, socket_ouverture_interdite, exception_cls, nom_classe
+):
+    """QA-R6-M2 (ronde 0) : un échec du téléchargement lui-même — panne réseau
+    transitoire (URLError) ou chemin inexistant (FileNotFoundError), le
+    scénario RÉALISTE du premier fetch du geste fondateur — produit un REFUS
+    « téléchargement échoué : <nom> (<classe>) » exit 2, ZÉRO traceback,
+    fichier temporaire supprimé. Prouvé HORS RÉSEAU : `_download`
+    monkeypatché pour lever."""
+    monkeypatch.setenv(_FLAG, "1")
+    manifest = _manifest_complet(tmp_path)
+
+    def _panne(url, dest):
+        if exception_cls == "URLError":
+            import urllib.error
+
+            raise urllib.error.URLError("connexion interrompue (simulation hors réseau)")
+        raise FileNotFoundError(2, "chemin source inexistant (simulation)")
+
+    monkeypatch.setattr(fetch, "_download", _panne)
+    dest = tmp_path / "dest"
+    rc = fetch.main(["--manifest", str(manifest), "--dest", str(dest)])
+    assert rc == 2
+    err = capsys.readouterr().err
+    assert err.startswith("REFUS")
+    assert "téléchargement échoué" in err
+    assert "model.onnx" in err  # le nom du fichier en échec
+    assert nom_classe in err  # la classe d'exception, jamais son contenu
+    assert "Traceback" not in err
+    assert not list(dest.glob("*.part"))  # le finally a supprimé le temporaire
+    assert not (dest / "model.onnx").exists()
+
+
 def test_refus_espace_disque_insuffisant_avant_telechargement(
     monkeypatch, capsys, tmp_path, reseau_interdit
 ):
@@ -478,6 +522,22 @@ def test_manifest_committe_sources_null_en_attente_du_geste(variant):
         assert entree["url"] is None
         assert entree["sha256"] is None
         assert entree["size_bytes"] is None
+
+
+def test_croise_litteraux_embed_spec_egaux_au_manifest_int8():
+    """ML-R6r0-m2 / DQ-R6-m1 (ronde 0) : les littéraux sha d'`embed.py` (via
+    `expected_embed_spec()`) sont ÉGAUX aux sha256 int8 du manifest committé
+    (spec §6.1 « littéral, = manifest int8 ») — vrai aujourd'hui (None ==
+    null, geste fondateur non advenu) et VERROU automatique le jour J :
+    renseigner UN SEUL des deux côtés fait échouer la suite immédiatement,
+    au lieu d'une EmbedLoadError tardive découverte au runtime. Stdlib,
+    toujours exécuté."""
+    from sobrio_router.embed import expected_embed_spec
+
+    fichiers = _manifest_committe()["variants"]["int8"]["files"]
+    spec = expected_embed_spec()
+    assert spec["encoder_sha256"] == fichiers["model.onnx"]["sha256"]
+    assert spec["tokenizer_sha256"] == fichiers["tokenizer.json"]["sha256"]
 
 
 def test_manifest_committe_mention_d_approbation_et_candidats_sans_choix():

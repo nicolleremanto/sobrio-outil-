@@ -28,8 +28,10 @@ Contrat CLI (fail-closed, style `train_v05.py`) :
    200 Mo — contrainte machine, MEMORY « disk near full »).
 4. Téléchargement dans un fichier TEMPORAIRE, sha256 calculé PUIS comparé au
    manifest : écart → suppression du fichier + REFUS exit 2 (message =
-   hash/chemins uniquement). Jamais d'écrasement silencieux d'un fichier
-   local existant.
+   hash/chemins uniquement). Échec du téléchargement lui-même (panne réseau,
+   chemin file:// inexistant) → REFUS « téléchargement échoué : <nom>
+   (<classe>) » exit 2, temporaire supprimé, jamais un traceback nu
+   (QA-R6-M2). Jamais d'écrasement silencieux d'un fichier local existant.
 5. Destination : `router/artifacts/embed/encoder/` (gitignoré via
    `router/artifacts/*`, spec §4.2). Sortie : nombres/chemins/hash
    uniquement. JAMAIS appelé en CI, JAMAIS à l'import.
@@ -58,7 +60,11 @@ VARIANTES = ("int8", "fp32")
 _FICHIERS_ATTENDUS = ("model.onnx", "tokenizer.json")
 # Marge disque au-delà de la taille annoncée par le manifest (spec §4.4).
 _MARGE_DISQUE_OCTETS = 200 * 1024 * 1024
-_SCHEMES_AUTORISES = ("https://", "http://", "file://")
+# https (transport chiffré) et file (fixtures locales des tests) SEULS —
+# http:// refusé (QA-R6-m2, ronde 0) : même si l'intégrité est couverte par
+# le sha256 normatif du manifest, un transport en clair serait un écart
+# silencieux avec la posture fail-closed du reste du CLI.
+_SCHEMES_AUTORISES = ("https://", "file://")
 
 _REFUS_SOURCE_NON_APPROUVEE = "source non approuvée : geste fondateur requis"
 
@@ -222,7 +228,17 @@ def _fetch_fichier(nom: str, entree: dict, dest_dir: Path) -> tuple[Path, str, s
     os.close(descripteur)
     tmp = Path(tmp_nom)
     try:
-        _download(entree["url"], tmp)
+        try:
+            _download(entree["url"], tmp)
+        except OSError as exc:
+            # QA-R6-M2 (ronde 0) : panne réseau/fichier au PREMIER fetch réel
+            # (scénario réaliste du geste fondateur) => REFUS propre exit 2,
+            # jamais un traceback nu. `urllib.error.URLError` (et HTTPError)
+            # SONT des sous-classes d'OSError depuis Python 3.3 : ce seul
+            # except couvre URLError, FileNotFoundError, timeouts socket…
+            # sans importer urllib.error hors de `_download` (garde AST
+            # §10.7 : imports réseau uniquement dans son corps).
+            raise RefusError(f"téléchargement échoué : {nom} ({exc.__class__.__name__})") from exc
         obtenu = _sha256_fichier(tmp)
         if obtenu != attendu:
             raise RefusError(

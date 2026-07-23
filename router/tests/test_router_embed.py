@@ -3,13 +3,17 @@
 Couvre : pin littéral INTÉGRAL du embed_spec (patron QA-R5-m1), chargement
 fail-closed champ par champ (patron feature_spec/label_mapping R5),
 `confidence_cap` NORMATIF §6.3, chaîne de confiance §5.2bis maillon par
-maillon, ISO-CONFIANCE harnais/service (correction MAJOR-1), refus sans
-texte (défense en profondeur), hygiène des exceptions (jamais de contenu).
+maillon, ISO-CONFIANCE harnais/service (correction MAJOR-1), le segment
+NORMATIF encode→poole→normalise de `_embed` à session/tokenizer FACTICES
+(QA-R6-M1, ronde 0), refus sans texte (défense en profondeur), hygiène des
+exceptions (jamais de contenu).
 
-100 % stdlib : `EmbedHead` est pur et l'encodeur est monkeypatché — aucune
-dépendance embed requise (le modèle réel attend le geste fondateur,
-recadrage ledger 2026-07-23). Textes de test = soupe de mots-vides +
-sentinelle aléatoire (convention chantier, JAMAIS de texte type prompt).
+Stdlib partout SAUF les tests de `_embed` (QA-R6-M1) : ils exécutent
+RÉELLEMENT le pooling masqué + L2 et n'exigent que numpy (importorskip —
+installé via requirements-ml) ; ailleurs `EmbedHead` est pur et l'encodeur
+est monkeypatché (le modèle réel attend le geste fondateur, recadrage ledger
+2026-07-23). Textes de test = soupe de mots-vides + sentinelle aléatoire
+(convention chantier, JAMAIS de texte type prompt).
 """
 
 from __future__ import annotations
@@ -629,6 +633,149 @@ def test_integrite_encodeur_sha_divergent_fail_closed(tmp_path: Path):
     _ecrire_tete(tmp_path / "tete")
     with pytest.raises(EmbedLoadError, match="integrite"):
         EmbedRouter(encoder_dir=encodeur, head_dir=tmp_path / "tete")
+
+
+# ---------------------------------------------------------------------------
+# Segment NORMATIF encode→poole→normalise (§5.2.4-6) — QA-R6-M1 (ronde 0) :
+# `_embed` exécuté RÉELLEMENT à session/tokenizer FACTICES (instance via
+# `EmbedRouter.__new__` + attributs `_np`/`_tokenizer`/`_session`/
+# `_noms_entrees` injectés — numpy seul requis, exécutable dès aujourd'hui
+# comme en local post-geste). Les valeurs attendues sont calculées À LA MAIN
+# dans chaque test : un mutant « masque ignoré » ou « L2 supprimée » échoue
+# sur des nombres exacts.
+# ---------------------------------------------------------------------------
+
+
+class _EncodageFactice:
+    """Sortie minimale d'un tokenizer HF : `ids` + `attention_mask`."""
+
+    def __init__(self, ids: list[int], attention_mask: list[int]) -> None:
+        self.ids = ids
+        self.attention_mask = attention_mask
+
+
+class _TokenizerFactice:
+    def __init__(self, encodage: _EncodageFactice) -> None:
+        self._encodage = encodage
+
+    def encode(self, texte: str) -> _EncodageFactice:
+        return self._encodage
+
+
+class _SessionFactice:
+    """Restitue un hidden_state ARTISANAL et enregistre les entrées reçues."""
+
+    def __init__(self, hidden: object) -> None:
+        self._hidden = hidden
+        self.entrees_recues: dict | None = None
+
+    def run(self, sorties: object, entrees: dict) -> list[object]:
+        self.entrees_recues = entrees
+        return [self._hidden]
+
+
+def _routeur_embed_factice(
+    hidden: list, ids: list[int], masque: list[int], noms_entrees: set[str]
+) -> tuple[EmbedRouter, _SessionFactice]:
+    numpy = pytest.importorskip("numpy")
+    routeur = EmbedRouter.__new__(EmbedRouter)
+    routeur._np = numpy
+    routeur._tokenizer = _TokenizerFactice(_EncodageFactice(ids, masque))
+    session = _SessionFactice(numpy.asarray(hidden, dtype=numpy.float32))
+    routeur._session = session
+    routeur._noms_entrees = noms_entrees
+    return routeur, session
+
+
+def test_embed_mean_pooling_masque_ignore_le_padding():
+    """§5.2.6 NORMATIF : les positions de PADDING (masque 0) ne pèsent PAS
+    dans la moyenne. À la main : positions actives h0 = 3·e0 et h1 = 4·e1,
+    position de padding h2 = 100 PARTOUT (empoisonnée) ; moyenne masquée =
+    (h0 + h1) / 2 = [1.5, 2.0, 0, …], norme = √(1.5² + 2²) = 2.5, embedding
+    = [0.6, 0.8, 0, …]. Un mutant « masque retiré » embarquerait les 100 du
+    padding sur TOUTES les coordonnées (aucune ne resterait nulle)."""
+    h0 = [0.0] * _DIM
+    h0[0] = 3.0
+    h1 = [0.0] * _DIM
+    h1[1] = 4.0
+    h2 = [100.0] * _DIM  # padding empoisonné : détecte tout maillon muté
+    routeur, session = _routeur_embed_factice(
+        [[h0, h1, h2]],
+        ids=[5, 7, 0],
+        masque=[1, 1, 0],
+        noms_entrees={"input_ids", "attention_mask"},
+    )
+    embedding = routeur._embed(_SOUPE)
+    assert len(embedding) == _DIM
+    assert embedding[0] == pytest.approx(0.6)  # 1.5 / 2.5 — calcul à la main
+    assert embedding[1] == pytest.approx(0.8)  # 2.0 / 2.5 — calcul à la main
+    assert all(v == 0.0 for v in embedding[2:])  # le padding n'a PAS fui
+    assert sum(v * v for v in embedding) == pytest.approx(1.0)  # norme L2 == 1
+    # La session a reçu les tenseurs attendus (batch 1, int64, pas de
+    # token_type_ids quand l'export ne les exige pas).
+    entrees = session.entrees_recues
+    assert set(entrees) == {"input_ids", "attention_mask"}
+    assert entrees["input_ids"].tolist() == [[5, 7, 0]]
+    assert entrees["attention_mask"].tolist() == [[1, 1, 0]]
+
+
+def test_embed_normalisation_l2_norme_1_valeurs_a_la_main():
+    """§5.2.6 : normalisation L2 finale. À la main : h0 = [1, 2, 2, 0, …] et
+    h1 = [3, 0, 2, 0, …] actifs tous deux ; moyenne = [2, 1, 2, 0, …],
+    norme = √(4 + 1 + 4) = 3 ; embedding = [2/3, 1/3, 2/3, 0, …]. Un mutant
+    « L2 supprimée » émettrait [2, 1, 2, …] (norme 3 ≠ 1)."""
+    h0 = [0.0] * _DIM
+    h0[0], h0[1], h0[2] = 1.0, 2.0, 2.0
+    h1 = [0.0] * _DIM
+    h1[0], h1[2] = 3.0, 2.0
+    routeur, _ = _routeur_embed_factice(
+        [[h0, h1]],
+        ids=[5, 7],
+        masque=[1, 1],
+        noms_entrees={"input_ids", "attention_mask"},
+    )
+    embedding = routeur._embed(_SOUPE)
+    assert embedding[0] == pytest.approx(2.0 / 3.0)
+    assert embedding[1] == pytest.approx(1.0 / 3.0)
+    assert embedding[2] == pytest.approx(2.0 / 3.0)
+    assert all(v == 0.0 for v in embedding[3:])
+    assert sum(v * v for v in embedding) == pytest.approx(1.0)
+
+
+def test_embed_masque_tout_zero_comportement_defini_sans_division_par_zero():
+    """Cas DÉGÉNÉRÉ : masque tout-zéro (aucune position active). Comportement
+    défini : somme masquée nulle, dénominateur `max(compte, 1.0)` = 1 (pas de
+    0/0), norme 0 ⇒ la normalisation est SAUTÉE — embedding [0.0] * 384,
+    aucune division par zéro, aucun NaN/inf."""
+    hidden = [[[7.0] * _DIM, [-3.0] * _DIM]]
+    routeur, _ = _routeur_embed_factice(
+        hidden, ids=[0, 0], masque=[0, 0], noms_entrees={"input_ids", "attention_mask"}
+    )
+    embedding = routeur._embed(_SOUPE)
+    assert embedding == [0.0] * _DIM
+    assert all(math.isfinite(v) for v in embedding)
+
+
+def test_embed_branche_token_type_ids_zeros_si_exiges():
+    """§5.2.5 : si l'export exige `token_type_ids`, `_embed` fournit des
+    ZÉROS de la forme (et du dtype) d'input_ids — XLM-R n'utilise pas de
+    segments. À la main : une seule position active de valeur 5 sur e0 ⇒
+    moyenne = 5·e0, norme 5, embedding = e0 exactement."""
+    h0 = [0.0] * _DIM
+    h0[0] = 5.0
+    routeur, session = _routeur_embed_factice(
+        [[h0]],
+        ids=[9],
+        masque=[1],
+        noms_entrees={"input_ids", "attention_mask", "token_type_ids"},
+    )
+    embedding = routeur._embed(_SOUPE)
+    entrees = session.entrees_recues
+    assert set(entrees) == {"input_ids", "attention_mask", "token_type_ids"}
+    assert entrees["token_type_ids"].tolist() == [[0]]
+    assert entrees["token_type_ids"].dtype == entrees["input_ids"].dtype
+    assert embedding[0] == pytest.approx(1.0)
+    assert all(v == 0.0 for v in embedding[1:])
 
 
 # ---------------------------------------------------------------------------

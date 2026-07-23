@@ -25,6 +25,13 @@ Rotation : candidate/ -> promoted/ (l'ancien promoted/ devient previous/) ;
 (sert de `--previous` au prochain gate). Rollback : échange trois-temps
 promoted/previous, un niveau d'historique (parité R5).
 
+Hygiène des rapports (ronde 1, DQ-R6-m3 = QA-R6-m1) : les évals fraîches
+sont écrites en répertoire TEMPORAIRE et déposées sous
+`router/artifacts/eval/` (contenu versionné) UNIQUEMENT après gate PASS +
+gardes D8 + intégrité — un run refusé ne laisse RIEN au git status (les
+rapports embed ne sont régénérés/commités qu'aux promotions, convention de
+clôture R5).
+
 Exit codes : 0 OK · 1 gate FAIL (le code du gate) · 2 refus de garde.
 """
 
@@ -35,6 +42,7 @@ import hashlib
 import json
 import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 _ROUTER_DIR = Path(__file__).resolve().parents[1]
@@ -82,8 +90,13 @@ def _sha_canonique_embed() -> str:
         raise RefusError(str(exc)) from exc
 
 
-def _evals_fraiches() -> tuple[dict, dict]:
-    """Rejoue les évals FRAÎCHES (prior + candidat) et écrit les rapports habituels.
+def _evals_fraiches(tmp_dir: Path) -> tuple[dict, dict]:
+    """Rejoue les évals FRAÎCHES (prior + candidat), écrites en RÉPERTOIRE
+    TEMPORAIRE uniquement (DQ-R6-m3 = QA-R6-m1, ronde 1) : le dépôt sous
+    `router/artifacts/eval/` (répertoire à contenu VERSIONNÉ) n'a lieu
+    qu'après gate PASS + gardes D8 (`_deposer_evals`) — un run refusé ne
+    laisse RIEN dans l'arbre (convention de clôture R5 : rapports
+    régénérés/commités aux promotions uniquement).
 
     Échec de chargement du candidat => REFUS (exit 2) : rien à évaluer,
     même posture bruyante que la CLI du harnais (leçon R4 — jamais d'éval
@@ -95,13 +108,20 @@ def _evals_fraiches() -> tuple[dict, dict]:
             report = harness_embed.run(name)
         except EmbedLoadError as exc:
             raise RefusError(f"tête {name} absente ou invalide — rien à évaluer ({exc})") from exc
-        harness_embed._ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
-        out_path = harness_embed._ARTIFACTS_DIR / f"embed-{name}-latest.json"
+        out_path = tmp_dir / f"embed-{name}-latest.json"
         out_path.write_text(
             json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
         )
         reports[name] = report
     return reports["prior"], reports["head_candidate"]
+
+
+def _deposer_evals(tmp_dir: Path) -> None:
+    """Dépose les rapports d'éval frais au chemin canonique versionné —
+    appelé UNIQUEMENT après gate PASS + gardes D8 + intégrité (ronde 1)."""
+    harness_embed._ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
+    for fichier in sorted(tmp_dir.glob("embed-*-latest.json")):
+        shutil.move(str(fichier), str(harness_embed._ARTIFACTS_DIR / fichier.name))
 
 
 def _verifier_non_contamine(candidate_report: dict) -> None:
@@ -214,33 +234,45 @@ def _verifier_integrite(directory: Path) -> dict:
 
 
 def promouvoir() -> int:
-    """Gate frais (+ gardes D8) puis rotation candidate -> promoted (-> previous)."""
-    baseline, candidate = _evals_fraiches()
+    """Gate frais (+ gardes D8) puis rotation candidate -> promoted (-> previous).
 
-    previous_path = PROMOTED_DIR / "eval-report.json"
-    previous: dict | None = None
-    if previous_path.is_file():
-        try:
-            previous = json.loads(previous_path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError) as exc:
-            raise RefusError(f"rapport previous illisible : {previous_path} ({exc})") from exc
+    Les évals fraîches vivent en répertoire TEMPORAIRE (nettoyé sur tout
+    chemin de sortie) ; leur dépôt sous `router/artifacts/eval/` n'intervient
+    qu'après le passage de TOUTES les gardes (ronde 1 : un refus — gate FAIL,
+    contamination, bench, intégrité — ne laisse plus rien au git status).
+    """
+    with tempfile.TemporaryDirectory(prefix="promote-embed-evals.") as tmp:
+        tmp_dir = Path(tmp)
+        baseline, candidate = _evals_fraiches(tmp_dir)
 
-    result = evaluate_gate(
-        candidate,
-        baseline,
-        previous,
-        budget_ms=BUDGET_MS,
-        expected_golden_sha=_sha_canonique_embed(),
-    )
-    for reason in result.reasons:
-        print(reason)
-    if not result.passed:
-        print("REFUS : gate FAIL — promotion interdite (§9.3)", file=sys.stderr)
-        return 1
+        previous_path = PROMOTED_DIR / "eval-report.json"
+        previous: dict | None = None
+        if previous_path.is_file():
+            try:
+                previous = json.loads(previous_path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError) as exc:
+                raise RefusError(f"rapport previous illisible : {previous_path} ({exc})") from exc
 
-    _verifier_non_contamine(candidate)
-    _verifier_preuve_bench()
-    metadata = _verifier_integrite(CANDIDATE_DIR)
+        result = evaluate_gate(
+            candidate,
+            baseline,
+            previous,
+            budget_ms=BUDGET_MS,
+            expected_golden_sha=_sha_canonique_embed(),
+        )
+        for reason in result.reasons:
+            print(reason)
+        if not result.passed:
+            print("REFUS : gate FAIL — promotion interdite (§9.3)", file=sys.stderr)
+            return 1
+
+        _verifier_non_contamine(candidate)
+        _verifier_preuve_bench()
+        metadata = _verifier_integrite(CANDIDATE_DIR)
+
+        # TOUTES les gardes sont passées : dépôt des évals fraîches au chemin
+        # canonique versionné, PUIS rotation.
+        _deposer_evals(tmp_dir)
 
     if PROMOTED_DIR.exists():
         if PREVIOUS_DIR.exists():

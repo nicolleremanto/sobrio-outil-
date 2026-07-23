@@ -69,4 +69,7 @@ docker compose -f docker-compose.dev.yml up api
 - [x] Routeur v0 heuristique branché via `sobrio_router` (repli câblé, chantier R1)
 - [ ] TODO(LotB) : budgets d'équipe (`budget` reste `null`)
 - [ ] TODO(LotB) : vraie source de taux EUR/USD
-- [ ] TODO(LotB) : exploitation en mémoire de `prompt_text` quand l'org l'autorise
+- [x] Exploitation en mémoire de `prompt_text` quand l'org l'autorise — livrée au
+  Lot 4 du chantier R6 : triple verrou opt-in (env `SOBRIO_EMBED_STAGE2="1"` +
+  policy `send_prompt_text` + texte présent), texte transmis en mémoire seule à
+  l'étage 2 et détruit dès `routes.py` sinon (jamais stocké ni loggé)
