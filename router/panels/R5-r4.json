@@ -1,0 +1,178 @@
+{
+  "chantier": "R5",
+  "round": 4,
+  "head": "648e2fa",
+  "date": "2026-07-23",
+  "ronde": "VERTE",
+  "juges": [
+    {
+      "agent": "ml-architect",
+      "chantier": "R5",
+      "round": 4,
+      "scores": {
+        "spec": 5,
+        "features": 5,
+        "calibration": 5,
+        "fuites_ml": 5,
+        "extensibilite": 4
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "ML-R4-m1",
+          "quoi": "Harmonisation de borne r4 incomplète pour l'étage 2 : le doc normatif dit « p95 < 30 ms » (lignes 17 et 158) alors que la section seuils dit « ≤ 30 ms étage 2 » (ligne 85) et que la nouvelle convention r4 (lignes 160-162) déclare TOUS les budgets de latence du gate inclusifs — contradiction interne introduite par le lot r4 ; gate.py applique bien ≤ quel que soit le budget (réutilisation R6 documentée gate.py:45,71).",
+          "ou": "docs/decisions/ROUTEUR_CLASSIFIEUR.md:17 et :158 (vs :85 et :160-162)",
+          "correction": "Harmoniser les deux occurrences étage 2 sur « p95 ≤ 30 ms » (ou restreindre explicitement la phrase de convention à l'étage 1 jusqu'à R6) — édition doc d'une ligne, à glisser dans le prochain commit doc ou la clôture R5."
+        },
+        {
+          "id": "ML-R4-m2",
+          "quoi": "La construction du feature_spec attendu est dupliquée entre le chargeur (ml.py:156-165) et le train (train_v05.py:390-401) : convention clé None→\"null\" et littéral version \"1\" maintenus en deux exemplaires, l'identité n'étant garantie que par commentaire croisé + tests d'intégration (une dérive future resterait fail-closed — artefact refusé au chargement — mais bruyante et coûteuse à diagnostiquer).",
+          "ou": "router/sobrio_router/ml.py:156-165 et router/train/train_v05.py:390-401",
+          "correction": "Extraire un helper unique (ex. feature_spec_courant() dans features.py, stdlib seule) consommé par les deux sites ; utile avant R6 qui ajoutera l'étage 2 et sa propre version de spec."
+        }
+      ],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "eval-scientist",
+      "chantier": "R5",
+      "round": 4,
+      "scores": {
+        "evaluation": 5,
+        "gate": 5,
+        "plafond": 5,
+        "honnetete": 5,
+        "repro": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "ES-R5r4-m1",
+          "quoi": "Harmonisation de borne INCOMPLÈTE pour l'étage 2 : la doc normative garde « p95 < 30 ms » (l.17 et §7 l.158) alors que la section seuils dit « ≤ 30 ms étage 2 » (l.85) et que la convention ajoutée en r4 (l.160-162) déclare TOUS les budgets de latence du gate inclusifs — gate.py consommera bien 30.0 inclusivement via --budget-ms (<=, gate.py:259). Même classe exacte que ES-R5r3-m1, corrigée pour le seul budget 5 ms ; la revendication du commit (« doc harmonisée sur p95 ≤ 5 ms ») reste, elle, exacte à la lettre.",
+          "ou": "docs/decisions/ROUTEUR_CLASSIFIEUR.md:17,158 vs :85 et :160-162 ; router/eval/gate.py:259",
+          "correction": "Remplacer « < 30 ms » par « ≤ 30 ms » aux lignes 17 et 158 (ou restreindre explicitement la convention l.160-162 à l'étage 1 tant que R6 n'existe pas) ; aucun changement de code."
+        },
+        {
+          "id": "ES-R5r4-m2",
+          "quoi": "Miroir de commentaire périmé : gate.py cite « Budgets §7 : p95 < 5 ms CPU » (et « budget p95 < 30 ms » pour R6) alors que le §7 cité dit désormais ≤ 5 ms avec convention inclusive consignée — commentaire seul, zéro impact d'exécution (la constante 5.0 et le <= sont corrects).",
+          "ou": "router/eval/gate.py:43-46",
+          "correction": "Aligner le commentaire sur ≤ au prochain commit touchant gate.py (même traitement que l'étiquette TODO de heuristic.py consignée à la reprise)."
+        }
+      ],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "data-quality",
+      "chantier": "R5",
+      "round": 4,
+      "scores": {
+        "etancheite_split": 5,
+        "traitement_desequilibre": 5,
+        "integrite_donnees": 5,
+        "robustesse_pipeline": 5,
+        "tracabilite": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "DQ-R4-m1",
+          "quoi": "Harmonisation de borne incomplète pour l'étage 2 : la doc normative dit désormais « p95 ≤ 5 ms » partout pour l'étage 1 (conforme au lot) et consigne une convention de borne INCLUSIVE générale pour les budgets de latence du gate (l.160-162), mais l'étage 2 reste écrit « p95 < 30 ms » en deux endroits (l.17 et l.158) contre « ≤ 30 ms » l.85 — même classe d'incohérence que ES-R5r3-m1, résiduelle côté étage 2 (chantier R6, aucun gate étage 2 n'existe encore ; la revendication du commit — étage 1 — est, elle, exacte).",
+          "ou": "docs/decisions/ROUTEUR_CLASSIFIEUR.md:17,158 vs :85 et :160-162",
+          "correction": "Aligner les deux mentions étage 2 sur ≤ (ou renvoyer explicitement à la convention inclusive du §7) — à faire à l'ouverture R6 ou au bilan de clôture R5, aucun changement de code."
+        },
+        {
+          "id": "DQ-R4-m2",
+          "quoi": "La construction du feature_spec attendu est DUPLIQUÉE verbatim entre l'écriture du metadata au train et la garde de dérive du chargeur (mêmes 5 clés, même comprehension null-clé, même littéral \"version\": \"1\" en dur des deux côtés). Toute dérive unilatérale est fail-closed (le chargeur refuse — sens sûr, prouvé par les 4 tests de mutation), donc aucun invariant cassé ; c'est un coût de double maintenance : un bump de version ou un champ ajouté exige d'éditer deux fichiers en miroir.",
+          "ou": "router/train/train_v05.py:390-401 vs router/sobrio_router/ml.py:156-165",
+          "correction": "Extraire un constructeur unique (ex. features.expected_feature_spec()) consommé par le train (écriture §8.1) et par MLRouter (garde), avec la version du spec en constante unique — poli, sans urgence."
+        }
+      ],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "qa-auditor",
+      "chantier": "R5",
+      "round": 4,
+      "scores": {
+        "couverture": 4,
+        "contrat": 5,
+        "erreurs": 4,
+        "clarte": 5,
+        "regressions": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "QA-R4-m1",
+          "quoi": "Mutant survivant dans la NOUVELLE garde des confiances : la clause « not isinstance(confidence, (int, float)) » n'est exercée par aucun des 3 cas paramétrés (nan couvre la finitude, bool la clause bool, 1.5 les bornes) — un mutant qui supprime cette clause passe toute la suite ; avec elle supprimée, une confiance None ferait crasher float(None) en TypeError non structurée.",
+          "ou": "router/eval/harness.py:296 ; router/tests/test_router_eval_harness.py:224-227",
+          "correction": "Ajouter un 4e paramètre au test (ex. None, id « non-nombre ») attendant la même ValueError « confiance invalide » — tue le mutant de clause."
+        },
+        {
+          "id": "QA-R4-m2",
+          "quoi": "Aide CLI incohérente avec la garde testée cette ronde : --val-pct annonce « (0-99) » alors que la garde refuse hors [1, 99] et que le message de refus (et le nouveau test) disent « [1, 99] » — un opérateur lisant --help croit 0 valide.",
+          "ou": "router/train/train_v05.py:457 (help) vs :461-462 (garde) et router/tests/test_router_train.py:172",
+          "correction": "Aligner le help sur « [1, 99] »."
+        },
+        {
+          "id": "QA-R4-m3",
+          "quoi": "Branche de refus « corpus introuvable ou illisible » jamais assertée directement : les jumeaux clone-frais la contournent par skip (c'est leur rôle) et test_corpus_epingle ne couvre que la branche sha dérivé — un mutant retirant le try/except OSError de _charger_corpus_epingle (traceback FileNotFoundError au lieu du REFUS exit 2) survivrait.",
+          "ou": "router/train/train_v05.py:116-118 ; router/tests/test_router_train.py (aucune assertion « introuvable »)",
+          "correction": "Test bon marché : importorskip lightgbm puis main([\"--corpus\", chemin-inexistant]) == 2 avec « REFUS » et « introuvable » sur stderr, zéro traceback."
+        },
+        {
+          "id": "QA-R4-m4",
+          "quoi": "Harmonisation « p95 ≤ 5 ms » (minor es r3) complète dans la doc normative (2 sites + convention consignée) mais des commentaires gardent la borne stricte « p95 < 5 ms », dont celui qui cite justement la doc harmonisée — dérive cosmétique doc/commentaires.",
+          "ou": "router/eval/gate.py:44 ; router/bench.py:3 ; router/README.md:6 et :52 ; router/tests/test_router_ml.py:5 et :66",
+          "correction": "Aligner ces commentaires sur ≤ au prochain commit touchant chaque fichier (même régime que le TODO de heuristic.py consigné à la reprise)."
+        }
+      ],
+      "verdict": "GREEN"
+    }
+  ],
+  "sentinelles": [
+    {
+      "agent": "privacy-sentinel",
+      "chantier": "R5",
+      "round": 4,
+      "verdict": "PASS",
+      "violations": [],
+      "preuves": [
+        "git show 648e2fa relu intégralement (9 fichiers, 347 insertions) : l'entrée ledger « Reprise 2026-07-23 + ronde 4 » (router/CONVERGENCE_LEDGER.md:1281-1311) ne cite que des empreintes sha256 (6120df28, 43a61267, be96b691), des compteurs de tests (319/276/275/332), des noms de fichiers et des ids d'items — aucune citation ni paraphrase de texte utilisateur ; le diff doc (docs/decisions/ROUTEUR_CLASSIFIEUR.md:14,157-161) ne porte que la convention de borne p95.",
+        "Littéraux des 7 fichiers code/tests touchés par 648e2fa scannés par AST (harness.py, ml.py, train_v05.py, test_router_eval_gate_hardening.py, test_router_eval_harness.py, test_router_ml.py, test_router_train.py) contre un motif de formulation utilisateur (impératifs/questions FR+EN) : zéro occurrence — vocabulaire système seul (FLAG_VOCAB, ids catalogue, messages REFUS/VERDICT, chemins), conforme à la jurisprudence R3-r3.",
+        "router/sobrio_router/features.py:96-115 : signals_to_vector ne référence jamais prompt_text (aucune occurrence du nom dans le corps) ; types.py:39 le champ reste repr=False ; invariants rejoués : .venv/bin/pytest test_router_features + test_router_corrections_r1 + test_router_golden_frozen + test_router_data_corpus + test_router_train = 81 passed (dont test_prompt_text_ignore, test_prompt_text_never_in_repr_or_str, test_no_prompt_text_anywhere, test_zero_texte_artefacts).",
+        "Nouvelles gardes de la ronde 4 auditées ligne à ligne : harness.py:287-301 (garde confiances) formate uniquement le repr d'un scalaire de confiance + vocabulaire système, jamais un champ texte ; ml.py:146-167 (garde feature_spec étendue) ne cite que metadata_path ; train_v05.py:291-302 (RefusError sans-lightgbm) ne cite que le nom de classe d'exception et requirements-ml.",
+        "Golden set (router/eval/golden/golden.jsonl) scanné EN MÉMOIRE : 181 entrées, prompt_text absent de chaque ligne sérialisée, 0 chaîne > 60 caractères dans clés et valeurs — la purge R2-r0 tient.",
+        "Corpus de référence (router/data/artifacts/corpus-v1.jsonl.gz, sha be96b691) décompressé EN MÉMOIRE et scanné programmatiquement : 30 000 lignes, prompt_text absent, 0 chaîne > 40 caractères ou > 4 mots — signaux numériques et vocabulaire clos uniquement.",
+        "Tous les artefacts locaux scannés programmatiquement (router/artifacts/eval/{ml_v05,heuristic,ml_v05_candidate}-latest.json, bench/latest.json, models/{promoted,candidate,previous}/{metadata,calibrator,eval-report}.json) : uniquement ids catalogue, empreintes sha256, dates ISO, git_sha courts et métriques ; metadata = 47 chaînes toutes < 70 caractères ; calibrator = 7 clés système (method/fit_on/x/y…).",
+        "router/panels/R5-r3.json relu intégralement (4 juges + 2 sentinelles) : constats cités exclusivement par fichier:ligne, ids d'items et fragments de messages système (REFUS/VERDICT) — aucun texte ressemblant à un prompt.",
+        "Sites de sortie du périmètre R5 re-vérifiés (gate.py:403-448, harness.py:394-405, promote.py:125-186, train_v05.py:462-489) : compteurs, class_weights, sha256, chemins et verdicts seuls — aucun chemin de code ne sérialise ni ne logge de contenu de prompt.",
+        "Aucun fichier modifié pendant l'audit : git status propre avant/après, HEAD 648e2fa inchangé ; tous les scans exécutés en mémoire (gzip/json), aucune écriture hors scratchpad."
+      ]
+    },
+    {
+      "agent": "cost-guard",
+      "chantier": "R5",
+      "round": 4,
+      "verdict": "PASS",
+      "violations": [],
+      "preuves": [
+        "HEAD 648e2fa, arbre propre (git status vide) — lot ronde 4 examiné fichier par fichier via git show ; aucun affaiblissement cost-guard : ml.py (garde de dérive feature_spec ÉTENDUE, fail-closed), harness.py (validation des confiances, refus bruyant), train_v05.py (ImportError -> RefusError), tests/doc (durcissements uniquement, zéro motif coût/réseau dans le diff docs+gate_hardening)",
+        "Dry-run par défaut : router/data/distill.py:272-307 — main() sans --real n'écrit qu'un rapport local ; chemin payant gated router/data/distill.py:237-269 : (1) SOBRIO_ALLOW_PAID_CALLS=='1' exigé (l.250), (2) cap SOBRIO_MAX_SPEND_USD validé (l.255), (3) coût<=cap (l.258), puis ARRÊT AVANT TOUT APPEL (l.264-269, compteur get_stop_counter)",
+        "Cap fail-closed : router/data/distill.py:84 (_DEFAULT_MAX_SPEND_USD=20.0) et :112-139 (_parse_spend_cap — math.isfinite exclut nan/inf, bool rejeté, <=0 rejeté, non-numérique -> SpendCapError) ; testé router/tests/test_router_data_distill.py:217-353 (flag absent/!='1', cap minuscule, nan/inf message propre exit 2, bool, cap énorme -> arrêt fondateurs quand même)",
+        "Garde anti-réseau REJOUÉE : .venv/bin/pytest test_router_data_distill.py -k 'network or train_dir' = 11 passed ; fichier complet = 42 passed ; suite router entière = 303 passed en 18.7 s",
+        "La garde couvre le train_v05.py MODIFIÉ : côté train elle est en GLOB (router/tests/test_router_data_distill.py:365 parametrize sorted(_TRAIN_DIR.glob('*.py'))) — collect-only montre les ids [promote.py] et [train_v05.py] ; garde-du-garde :376-379 asserte que les deux modules existent ; regex :33-36 ancrée ^\\s*(import|from), MULTILINE, détecte import nu ET from-import",
+        "L'except ImportError n'introduit AUCUN chemin réseau : router/train/train_v05.py:295-301 — ImportError -> RefusError('dépendances d'entraînement absentes… requirements-ml'), attrapé par main() :470-472 (exit 2, REFUS, zéro traceback), AVANT _lire_golden_sha/_charger_corpus_epingle ; testé par subprocess meta-path bloquant lightgbm (test_router_train.py::test_cli_sans_lightgbm_refus_propre : rc==2, 'Traceback' absent, out-dir jamais écrit)",
+        "Vérification indépendante par injection (scratchpad/injection_check.py, lecture seule sur le repo) : regex de la garde propre sur les 6 fichiers réels de router/data/ + router/train/ (urlopen et Anthropic( absents aussi) ; mutant 'from httpx import Client' appendu au train_v05.py POST-lot DÉTECTÉ ; mutant 'import socket' inséré DANS le bloc try du nouvel import paresseux (indentation 8 espaces) DÉTECTÉ",
+        "CI ne dépense jamais : .github/workflows/ci.yml:48-52 — ruff + pytest uniquement, aucun SOBRIO_ALLOW_PAID_CALLS, aucun secret/clé API, seul env = DATABASE_URL Postgres de service ; requirements-ml non installés en CI et le chemin sans-lightgbm est fail-closed (RefusError) sans repli réseau",
+        "subprocess dans router/eval/harness.py:347 = git rev-parse local uniquement (timeout 5 s) ; aucun subprocess/Popen dans router/train/ ni router/data/ ; SOBRIO_ALLOW_PAID_CALLS/SOBRIO_MAX_SPEND_USD n'apparaissent que dans distill.py, ses tests et la doc (grep repo)",
+        "Item consigné respecté : garde router/data/ en liste figée [distill, public_datasets, quality_report, generate_corpus] (test_router_data_distill.py:65-66) = entrée R6 du ledger, non recyclé ; la consignation est exacte (le glob n'existe que côté train)",
+        "Dépense de la mission = 0,00 $ : aucun appel réseau ni API effectué par ce juge — uniquement pytest/ruff-scope local, git show, grep, et un script d'injection en scratchpad ; aucun fichier du repo modifié, aucun artefact écrit"
+      ]
+    }
+  ]
+}

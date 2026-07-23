@@ -1309,3 +1309,49 @@ de 3 vérificateurs Fable à contexte neuf (exec, bilan, stash) → **GO**.
   (d) vigilance R3-r6 (le garde-fou du test paramétré des bornes choisit
   sa référence par heuristique) → transmise au builder ronde 4 qui ajoute
   des cas de bornes.
+
+## R5 — round 4 (commit 648e2fa, panel 6 juges Fable — archivé router/panels/R5-r4.json)
+
+| agent            | modèle | scores (dims)                                        | blocking | major | verdict |
+|------------------|--------|------------------------------------------------------|----------|-------|---------|
+| ml-architect (P) | fable  | spec5 features5 calibration5 fuites-ml5 extens4      | 0        | 0     | GREEN   |
+| eval-scientist   | fable  | éval5 gate5 plafond5 honnêteté5 repro5               | 0        | 0     | GREEN   |
+| data-quality     | fable  | étanchéité5 déséquilibre5 intégrité5 robust5 traça5  | 0        | 0     | GREEN   |
+| qa-auditor       | fable  | couverture4 contrat5 erreurs4 clarté5 régressions5   | 0        | 0     | GREEN   |
+| privacy-sentinel | fable  | —                                                    | PASS     | —     | PASS    |
+| cost-guard       | fable  | —                                                    | PASS     | —     | PASS    |
+
+→ **Ronde VERTE — streak 1/2** (rondes 0-4 consommées, 3 restantes).
+Le major DQ-R3-M1 est clos : data-quality a REJOUÉ lui-même les trois
+simulations (corpus introuvable, lightgbm bloqué, clone-frais total) —
+0 échec/0 erreur partout — et note la traçabilité 5/5 (le libellé du
+commit 648e2fa correspond exactement au périmètre livré).
+
+**Minors consolidés → lot de poli ronde 5** (recoupements fusionnés ;
+appliqués AVANT le panel de confirmation, qui les jugera — patron des
+convergences R3/R4) :
+- [ml+es+dq] Borne étage 2 : « p95 < 30 ms » aux l.17 et 158 de la doc vs
+  « ≤ » l.85 et convention inclusive l.160-162 — harmoniser sur ≤
+  (ML-R4-m1 = ES-R5r4-m1 = DQ-R4-m1).
+- [ml+dq] feature_spec attendu DUPLIQUÉ entre train_v05.py (écriture) et
+  ml.py (garde) — extraire un constructeur unique stdlib dans features.py,
+  version du spec en constante unique (ML-R4-m2 = DQ-R4-m2).
+- [es] Commentaire gate.py:43-46 cite encore « < 5 ms »/« < 30 ms » —
+  aligner (ES-R5r4-m2, recoupe QA-R4-m4).
+- [qa] Mutant survivant : clause non-nombre de la garde des confiances
+  jamais exercée — 4e cas paramétré None attendu « confiance invalide »
+  (QA-R4-m1).
+- [qa] Help CLI --val-pct « (0-99) » vs garde et message « [1, 99] » —
+  aligner le help (QA-R4-m2).
+- [qa] Branche « corpus introuvable » de train jamais assertée — test
+  main() chemin inexistant → exit 2 + REFUS + « introuvable », zéro
+  traceback (QA-R4-m3).
+- [qa] Commentaires « < 5 ms » périmés : bench.py, README.md ×2,
+  test_router_ml.py ×2 (QA-R4-m4).
+- [reprise] Étiquette « TODO R5 » de heuristic.py → « TODO R7/V1 »
+  (consigné à la reprise « au prochain commit touchant ce fichier » —
+  intégré délibérément à ce lot de poli).
+
+NB : le push vers origin est en retard (réseau GitHub injoignable depuis
+le commit 648e2fa) — à rattraper dès le retour du réseau ; tout est
+committé localement.
