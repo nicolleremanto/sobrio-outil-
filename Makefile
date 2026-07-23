@@ -16,10 +16,14 @@ RUFF    := .venv/bin/ruff
 ALEMBIC := .venv/bin/alembic
 
 .PHONY: dev test lint demo report sync-fixtures migrate seed router-bench router-eval \
-	router-corpus router-corpus-check router-train router-gate router-promote router-rollback
+	router-corpus router-corpus-check router-train router-gate router-promote router-rollback \
+	router-embed-model router-embed-train router-embed-eval router-embed-gate \
+	router-embed-promote router-embed-rollback
 
 # Routeur évalué par `router-eval` (registre : heuristic ; extensible R5 : ml_v05).
 ROUTER ?= heuristic
+# Tête évaluée par `router-embed-eval` (registre R6 : prior, head_candidate, head_promoted).
+TETE ?= prior
 
 ## dev : environnement complet (Postgres + Adminer + API --reload) + migrations + seed
 dev:
@@ -97,6 +101,42 @@ router-promote:
 
 router-rollback:
 	$(PY) router/train/promote.py --rollback
+
+## router-embed-model : récupère le modèle e5 pré-exporté (R6 §4.4). Le flag
+## SOBRIO_ALLOW_MODEL_DOWNLOAD=1 est posé EXPLICITEMENT sur cette seule ligne
+## (jamais en CI, jamais à l'import — patron SOBRIO_ALLOW_DATASET_DOWNLOAD).
+## AVANT le geste fondateur (manifest à sources null), la CLI REFUSE exit 2.
+router-embed-model:
+	SOBRIO_ALLOW_MODEL_DOWNLOAD=1 $(PY) router/tools/fetch_embed_model.py
+
+## router-embed-train : entraîne la tête v0 SYNTHÉTIQUE (D4 — mécanique, pas
+## qualité) -> router/artifacts/embed/heads/candidate/
+router-embed-train:
+	$(PY) router/train/train_head_v0.py
+
+## router-embed-eval : évalue TETE (défaut prior) sur les fixtures embed figées ;
+## écrit router/artifacts/eval/embed-<TETE>-latest.json
+router-embed-eval:
+	$(PY) router/eval/harness_embed.py --router $(TETE)
+
+## router-embed-gate : évals fraîches (prior + candidat) puis gate R3 réutilisé
+## pur, --suite embed --budget-ms 30 (previous injecté s'il existe)
+router-embed-gate:
+	$(PY) router/eval/harness_embed.py --router prior
+	$(PY) router/eval/harness_embed.py --router head_candidate
+	$(PY) router/eval/gate.py --suite embed --budget-ms 30 \
+	  --candidate router/artifacts/eval/embed-head_candidate-latest.json \
+	  --baseline router/artifacts/eval/embed-prior-latest.json \
+	  $$( [ -f router/artifacts/embed/heads/promoted/eval-report.json ] && \
+	      echo "--previous router/artifacts/embed/heads/promoted/eval-report.json" )
+
+## router-embed-promote : promotion 1 commande de la tête (gate frais + garde
+## bench D8 — REFUS avant geste fondateur : heads/promoted/ reste vide en prod, D4)
+router-embed-promote:
+	$(PY) router/train/promote_embed.py
+
+router-embed-rollback:
+	$(PY) router/train/promote_embed.py --rollback
 
 ## test : tests Python (tous les lots) puis tests de l'extension
 test:

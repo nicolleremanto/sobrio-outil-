@@ -1489,3 +1489,22 @@ télémétrie v1).
   tuées (caviardage, is True→==, verrou env), 552 router+api verts + 3
   skips. Limite assumée : lru_cache ⇒ redémarrage API sur changement
   d'env/artefact (TODO R7).
+- **Lot 5** : tête v0 et son évaluation — embed_fixtures.py (générateur
+  synthétique stdlib seedé, centroïdes partagés train/éval, seeds train ≠
+  éval par construction, manifest committé < 5 Ko avec pin sha 63647355…,
+  zéro texte), train_head_v0.py (softmax numpy paresseux refus exit 2,
+  isotonique via fit_isotonic/interp_conf réutilisés, metadata honnête D4
+  mot pour mot « tête v0 fixtures synthétiques — non représentative,
+  attend télémétrie v1 », confidence_cap 0.74 = SEULE source du plafond),
+  harness_embed.py (confiances SERVIES via EmbedHead.predict, MAJOR-1 ;
+  evaluate_router réutilisé tel quel), gate.py --suite {golden,embed}
+  (seule la source du sha change, evaluate_gate 100 % pur inchangé),
+  promote_embed.py (garde bench D8 : REFUS exit 2 explicite avant geste
+  fondateur — heads/promoted/ reste VIDE en prod), 6 cibles Makefile.
+  GATE EMBED PASS rejoué par le vérificateur (candidat 0,7562 > prior
+  0,5000 ; ECE 0,0745 ; bande auto vide par construction, 7-bis « rien à
+  dégrader » testé). Vérifié OK 0 écart, déterminisme bit-exact prouvé,
+  612 router+api verts + 3 skips. Écart de spec notable consigné : la
+  cible indicative d'exactitude §7.1 (~0,85-0,95) était mathématiquement
+  incompatible avec ECE ≤ 0,10 sous cap 0,74 — résolue en faveur du gate
+  (exactitude tête v0 : 0,6833, sans signification sémantique — D4).

@@ -394,6 +394,16 @@ def main(argv: list[str] | None = None) -> int:
             f"{_DEFAULT_BANDE_ECART_MAX}, R5 — critère 7-bis, borne <= inclusive)"
         ),
     )
+    parser.add_argument(
+        "--suite",
+        choices=("golden", "embed"),
+        default="golden",
+        help=(
+            "source du hash canonique injecté (R6 §9.2) : golden (défaut, "
+            "loader.golden_sha256) ou embed (EMBED_GOLDEN_SHA256 du manifest "
+            "embed_golden) — AUCUN autre critère ne change"
+        ),
+    )
     args = parser.parse_args(argv)
 
     # Bornes des paramètres opérateur (minors eval R5 r0/r1) : plafonds
@@ -430,16 +440,31 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     # Épinglage au set figé CANONIQUE : la CLI injecte TOUJOURS le hash
-    # committé (GOLDEN_SHA256) — voir docstring de module (durcissement r0).
+    # committé — voir docstring de module (durcissement r0). `--suite` (R6
+    # §9.2) ne choisit QUE la source de ce hash : GOLDEN_SHA256 (étage 1) ou
+    # EMBED_GOLDEN_SHA256 du manifest embed_golden (étage 2) ; pin
+    # absent/malformé => refus fail-closed, comme un rapport illisible.
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from loader import golden_sha256  # import local : module autonome
+    try:
+        if args.suite == "embed":
+            from embed_fixtures import embed_golden_sha256  # import local : module autonome
+
+            expected_sha = embed_golden_sha256()
+        else:
+            from loader import golden_sha256  # import local : module autonome
+
+            expected_sha = golden_sha256()
+    except (OSError, ValueError) as exc:
+        print(f"FAIL : hash canonique de la suite {args.suite} illisible — {exc}", file=sys.stderr)
+        print("VERDICT : FAIL", file=sys.stderr)
+        return 2
 
     result = evaluate_gate(
         candidate,
         baseline,
         previous,
         budget_ms=args.budget_ms,
-        expected_golden_sha=golden_sha256(),
+        expected_golden_sha=expected_sha,
         bande_ecart_max=args.bande_ecart_max,
     )
 

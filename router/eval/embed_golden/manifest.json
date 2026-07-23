@@ -1,0 +1,22 @@
+{
+  "suite": "embed",
+  "statut": "Fixtures SYNTHÉTIQUES d'embeddings seedées (D4/D6, spec R6 §7) — AUCUN texte : chaque entrée est un vecteur 384-d tiré autour d'un centroïde seedé, jamais l'encodage d'un prompt. Ce set mesure la MÉCANIQUE de la tête (train → calibration → gate → promotion → service), il ne prédit RIEN de la qualité sémantique réelle : interdiction d'en citer les scores comme performance produit. La tête réelle attend la télémétrie v1 (chantier R7/V1).",
+  "generateur": "router/eval/embed_fixtures.py",
+  "n": 240,
+  "seed": 20260724,
+  "train_seed": 20260723,
+  "train_n": 3000,
+  "centroid_seed": 20260722,
+  "k_motifs": 4,
+  "sigma": 0.35,
+  "dim": 384,
+  "float_decimales": 6,
+  "labels_distribution": {
+    "claude-haiku-4-5": 80,
+    "claude-sonnet-5": 80,
+    "claude-opus-4-8": 80
+  },
+  "serialisation_canonique": "JSON trié (sort_keys, separators compacts), floats arrondis à 6 décimales, sha256 de l'UTF-8",
+  "embed_golden_sha256": "6364735561d5266243362288dabab99d9c22fcdcabc40c68891ed035e3e980b3",
+  "manifest_version": "1"
+}
