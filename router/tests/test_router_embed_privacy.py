@@ -41,8 +41,8 @@ _SENTINELLE = "SECRET_LEAK_TEST_R6_LOT1_c9f2"
 
 # ---------------------------------------------------------------------------
 # Scan statique (spec §10.1) : périmètre en GLOB — tout module futur des
-# répertoires de production est couvert D'OFFICE (`router/tools/` n'existe
-# pas encore, Lot 2 : le glob le couvrira dès sa création, sans édition ici).
+# répertoires de production est couvert D'OFFICE (`router/tools/` créé au
+# Lot 2 est entré dans le périmètre par le seul effet du glob, comme prévu).
 # ---------------------------------------------------------------------------
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -88,6 +88,7 @@ def test_scan_couvre_les_modules_attendus():
         "router/eval/gate.py",
         "router/train/promote.py",
         "router/train/train_v05.py",
+        "router/tools/fetch_embed_model.py",
         "api/app/routes.py",
         "api/app/main.py",
         "api/app/router_bridge.py",

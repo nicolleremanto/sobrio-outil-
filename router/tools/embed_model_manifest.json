@@ -1,0 +1,38 @@
+{
+  "model": "multilingual-e5-small",
+  "license": "MIT",
+  "dim": 384,
+  "upstream_repo": "intfloat/multilingual-e5-small",
+  "upstream_license": "MIT",
+  "statut": "SOURCE NON APPROUVÉE — champs source_repo/url/sha256 volontairement null : À APPROUVER PAR LE FONDATEUR (geste §8). Décision datée 2026-07-23 : le premier fetch du modèle est un geste fondateur — le choix et l'approbation du dépôt source de l'export ONNX appartiennent au fondateur, pas à un agent. Tant que ce geste n'a pas eu lieu, le modèle est ABSENT et router/tools/fetch_embed_model.py REFUSE toute exécution (exit 2, « source non approuvée : geste fondateur requis »).",
+  "documentation_candidats": {
+    "note": "Candidats possibles listés À TITRE INFORMATIF uniquement — AUCUN n'est choisi ici. Le choix, la lecture de la licence propre de l'export et le calcul des sha256 appartiennent au fondateur (premier téléchargement manuel vérifié, spec §4.5). Une fois approuvés, les champs source_repo/source_license/source_verified_date et url/sha256/size_bytes de la variante sont renseignés et deviennent NORMATIFS (tout octet divergent refusé, spec §4.4).",
+    "candidats": [
+      "Export officiel éventuel : sous-dossier onnx/ du dépôt amont intfloat/multilingual-e5-small sur Hugging Face — existence et contenu (variante quantifiée int8 ?) à VÉRIFIER, non présumés.",
+      "Export communautaire connu : Xenova/multilingual-e5-small (écosystème transformers.js) — publie historiquement model.onnx et des variantes quantifiées ; licence de l'export et fraîcheur à vérifier.",
+      "Export communautaire connu : organisation onnx-community sur Hugging Face — republie des exports ONNX de modèles amont ; à vérifier au même titre."
+    ],
+    "regle_fallback": "Un export communautaire est ACCEPTABLE (spec §4.5) à condition d'être figé par sha256 dans ce manifest et que la licence MIT du modèle amont soit documentée à ses côtés — verdict définitif consigné dans router/data/LICENSES.md AVANT tout usage au-delà du fetch de vérification."
+  },
+  "variants": {
+    "int8": {
+      "source_repo": null,
+      "source_license": null,
+      "source_verified_date": null,
+      "files": {
+        "model.onnx": {"url": null, "sha256": null, "size_bytes": null},
+        "tokenizer.json": {"url": null, "sha256": null, "size_bytes": null}
+      }
+    },
+    "fp32": {
+      "source_repo": null,
+      "source_license": null,
+      "source_verified_date": null,
+      "files": {
+        "model.onnx": {"url": null, "sha256": null, "size_bytes": null},
+        "tokenizer.json": {"url": null, "sha256": null, "size_bytes": null}
+      }
+    }
+  },
+  "manifest_version": "1"
+}

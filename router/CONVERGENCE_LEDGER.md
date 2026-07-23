@@ -1419,3 +1419,43 @@ régime que test_router_ml.py:76 et les commentaires README:7/harness:109).
   d'arbitrage du golden (champs note/review hérités du gel R2, max 272
   car.) sont vérifiées descriptives (zéro formulation directe) — toute
   évolution future du golden doit préserver cette propriété.
+
+## Chantier R6 — journal de build (avant panels)
+
+- **Lot 0** (e43479d) : transferts R5 — pin littéral feature_spec intégral
+  (kill-de-mutant stdlib), garde anti-réseau en glob étendue à router/*.py,
+  licence e5 consignée AVANT usage. Vérifié 0 écart, 337 verts.
+- **Lot 1** (315092a) : verrous privacy — __reduce__ conditionnel sur
+  PromptSignals (pickle/deepcopy interdits porteurs de texte, message fixe
+  sans contenu), scan statique anti-sérialisation en glob + contrôle
+  négatif, SECRET_LEAK étendu, adaptateur prompt_text keyword-only
+  iso-comportement. Vérifié 0 écart, 388 verts, 3 mutations tuées.
+
+**Décision d'orchestration (datée 2026-07-23) — PREMIER FETCH DU MODÈLE =
+GESTE FONDATEUR (§8).** Le build du Lot 2 initial a été bloqué par le
+classificateur de sécurité de la plateforme : un agent s'apprêtait à
+choisir lui-même le dépôt externe hébergeant l'export ONNX int8 de
+multilingual-e5-small et à le télécharger — source jamais nommée ni
+approuvée par le fondateur. Ce blocage est ENTÉRINÉ comme la bonne
+politique (cohérente avec la discipline licence « non vérifié = NON
+UTILISÉ ») : aucun agent ne choisit ni ne télécharge la source du modèle ;
+le choix et l'approbation du dépôt exportateur, le premier fetch vérifié
+(shas consignés au manifest), le spike max_tokens et le bench réel
+p95/RSS sont DIFFÉRÉS à un geste fondateur, ajouté à la liste du §8.
+Conséquences : max_tokens=256 reste « valeur candidate non mesurée » ;
+les critères de sortie R6 « bench réel » deviennent conditionnels (harnais
+livré, mesure différée) ; R6 converge sur l'INFRASTRUCTURE VERROUILLÉE —
+ce qui rejoint la décision D4 de la spec (la tête réelle attendait déjà la
+télémétrie v1).
+
+- **Lot 2 recadré** : outillage modèle SANS aucun accès réseau — CLI
+  fetch_embed_model.py fail-closed (flag avant tout, manifest complet
+  exigé sinon « source non approuvée : geste fondateur requis », sha256
+  vérifié + suppression sur mismatch, dépôt atomique), manifest §4.3 à
+  sources null avec candidats documentés sans choix, requirements-embed
+  pins candidats non installés, LICENSES.md mis à jour, .gitignore prouvé
+  couvrant. Vérifié 0 écart : suite entière rejouée sous socket-interdit
+  (403 verts), hook d'audit CPython = zéro événement réseau, 432 verts au
+  total. Précision de traçabilité : le builder a revendiqué « +29/-5 » sur
+  LICENSES.md, le diff réel est +24/-5 (contenu intégralement conforme) —
+  métadonnée de preuve inexacte, consignée.

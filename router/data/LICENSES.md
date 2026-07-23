@@ -90,12 +90,31 @@ certitude = **NON UTILISÉ**. Aucune exception.
   prompt stocké ni loggé ; le poids du modèle est un artefact local).
 - **Restrictions pressenties** : aucune restriction d'usage connue au-delà
   des termes MIT ; le TÉLÉCHARGEMENT initial des poids (HuggingFace) reste
-  soumis aux gardes réseau du chantier (`SOBRIO_ALLOW_DATASET_DOWNLOAD` et
+  soumis aux gardes réseau du chantier (`SOBRIO_ALLOW_MODEL_DOWNLOAD` et
   revue préalable) — cette entrée consigne la licence AVANT tout usage,
   conformément à la règle mission.
-- **Verdict : NON UTILISÉ — préparé pour R6, activation après revue
-  humaine** (relecture de la fiche licence à jour + confirmation
-  fondateurs), quelle que soit la formulation ci-dessus.
+- **Variante servie (export ONNX int8) — Lot 2 recadré, 2026-07-23** : la
+  licence MIT ci-dessus est celle du modèle AMONT (`intfloat/…`) ; la
+  variante réellement servie est un export ONNX quantifié int8 dont le dépôt
+  EXPORTATEUR (possiblement communautaire, spec §4.3/§4.5) a sa provenance
+  et sa licence PROPRES. **Source : À APPROUVER PAR LE FONDATEUR** — le
+  PREMIER FETCH du modèle est un **geste fondateur** (décision datée
+  2026-07-23) : le choix du dépôt source, la lecture de sa licence, le
+  calcul et la consignation des sha256 appartiennent au fondateur, pas à un
+  agent. Le manifest committé
+  (`router/tools/embed_model_manifest.json`) porte des champs
+  `source_repo`/`url`/`sha256` à `null` et
+  `router/tools/fetch_embed_model.py` REFUSE toute exécution (« source non
+  approuvée : geste fondateur requis », exit 2) tant que ce geste n'a pas eu
+  lieu. Après le geste : consigner ici le dépôt exportateur réel + sa
+  licence + la date de vérification (miroir du manifest), et poser le
+  verdict définitif — UTILISABLE seulement si licence amont (MIT) ET licence
+  de l'export toutes deux compatibles usage commercial + redistribution du
+  dérivé avec attribution.
+- **Verdict : NON UTILISÉ — source de l'export À APPROUVER PAR LE FONDATEUR
+  (geste fondateur)**, quelle que soit la formulation ci-dessus. Aucun
+  entraînement/bench/promotion tant que le verdict n'est pas UTILISABLE
+  (spec §4.5).
 
 ---
 
@@ -106,7 +125,7 @@ certitude = **NON UTILISÉ**. Aucune exception.
 | LMSYS-Chat-1M | Accord d'usage spécifique, pas de licence ouverte standard | **NON UTILISÉ** |
 | Chatbot Arena conversations | Accord d'usage spécifique, pas de licence ouverte standard | **NON UTILISÉ** |
 | RouteLLM / GPT-4 judge data | Code probablement Apache 2.0 ; données héritant des restrictions Chatbot Arena ; CGU du juge tiers non vérifiées | **NON UTILISÉ** |
-| multilingual-e5-small (intfloat) | MIT (permissive, à confirmer sur fiche à jour) | **NON UTILISÉ — préparé pour R6, activation après revue humaine** |
+| multilingual-e5-small (intfloat) | MIT amont documenté ; licence de l'export ONNX int8 servie : à vérifier au geste fondateur | **NON UTILISÉ — source de l'export À APPROUVER PAR LE FONDATEUR (geste fondateur)** |
 
 Toute activation future exige : (1) une relecture des conditions exactes en
 vigueur au moment de l'activation (les accords HuggingFace évoluent), (2) une

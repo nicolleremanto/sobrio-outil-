@@ -1,0 +1,16 @@
+# Dépendances d'EXÉCUTION de l'étage 2 embeddings (chantier R6) — OPTIONNELLES
+# au runtime : les dépendances du paquet `sobrio_router` (pyproject.toml)
+# restent VIDES, les imports d'onnxruntime/tokenizers/numpy sont PARESSEUX
+# (spec §1.1 — le paquet s'importe sans elles, patron requirements-ml).
+#
+# RECADRAGE 2026-07-23 : fichier NON INSTALLÉ à ce jour — la première
+# installation accompagne le GESTE FONDATEUR (premier fetch approuvé du
+# modèle, cf. router/tools/embed_model_manifest.json et
+# router/data/LICENSES.md). Pins CANDIDATS ci-dessous, en commentaire,
+# à confirmer à la première installation (geste fondateur) :
+#
+# onnxruntime==1.22.0
+# tokenizers==0.21.1
+#
+# numpy : pin déjà CONNU et aligné sur router/requirements-ml.txt (spec §1.2).
+numpy==2.5.1

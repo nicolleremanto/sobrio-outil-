@@ -30,6 +30,11 @@ out/
 # artefacts, best_iteration) et l'artefact est régénérable (train déterministe
 # bit-exact, corpus épinglé). Couvert par le motif ci-dessous (aucune
 # exception ajoutée pour models/).
+# R6 (spec §1.2/§4.2) : router/artifacts/embed/ — encodeur ONNX téléchargé
+# (encoder/model.onnx ~110-130 Mo + tokenizer.json) et têtes
+# (heads/{candidate,promoted,previous}) — est COUVERT par le motif
+# router/artifacts/* ci-dessous (seuls bench/ et eval/ sont exceptés) :
+# le modèle n'est JAMAIS commité, aucune exception ajoutée pour embed/.
 router/artifacts/*
 !router/artifacts/bench/
 !router/artifacts/bench/*
