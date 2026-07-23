@@ -1756,3 +1756,10 @@ repris par resume sans fabriquer de verdict).
   dangereuse) ; recalibration mensuelle par org sur télémétrie v1
   (outillage + runbook — les données réelles n'existent pas encore) ;
   TODO(V1) chiffrer l'impact du bruit 3 % ; compose ops + RUNBOOK.
+
+**PAUSE UTILISATEUR (2026-07-23 soir)** : « arrête-toi avant le build de
+R7 » — boucle stoppée et build R7 (wf_a03d6c15) tué EN VOL AVANT toute
+édition : arbre propre à HEAD 0ffc73a, rien à stasher, rien de partiel.
+État exact à la reprise : R1-R6 CONVERGÉS, R7 non commencé (la liste des
+transferts ci-dessus est le normatif du chantier), puis panels R7
+(2 vertes, plafond 8) et §8 (rapport final + 4 gestes fondateurs).
