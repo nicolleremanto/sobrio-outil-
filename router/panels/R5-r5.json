@@ -1,0 +1,125 @@
+{
+  "chantier": "R5",
+  "round": 5,
+  "head": "4ac9343",
+  "date": "2026-07-23",
+  "ronde": "VERTE — R5 CONVERGE (2/2)",
+  "juges": [
+    {
+      "agent": "ml-architect",
+      "chantier": "R5",
+      "round": 5,
+      "scores": {
+        "spec": 5,
+        "features": 5,
+        "calibration": 5,
+        "fuites_ml": 5,
+        "extensibilite": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "eval-scientist",
+      "chantier": "R5",
+      "round": 5,
+      "scores": {
+        "evaluation": 5,
+        "gate": 5,
+        "plafond": 5,
+        "honnetete": 5,
+        "repro": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "data-quality",
+      "chantier": "R5",
+      "round": 5,
+      "scores": {
+        "etancheite_split": 5,
+        "traitement_desequilibre": 5,
+        "integrite_donnees": 5,
+        "robustesse_pipeline": 5,
+        "tracabilite": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "DQ-R5-m1",
+          "quoi": "La consignation des résidus de borne stricte (ledger l.1363-1369) est incomplète d'une ligne : elle cite test_router_ml.py:76 comme assert « volontairement plus exigeant » et test_router_eval_harness.py:109 comme commentaire, mais omet l'assert jumeau de même classe `assert report[\"p95_ms\"] < 5.0` à test_router_eval_harness.py:110 (condition suffisante du budget inclusif, aucun risque de faux vert — pur défaut de complétude de la consignation, pas du code).",
+          "ou": "router/CONVERGENCE_LEDGER.md:1367-1369 vs router/tests/test_router_eval_harness.py:110",
+          "correction": "Ajouter test_router_eval_harness.py:110 à la même consignation (même régime « au prochain commit touchant le fichier » ou bilan de clôture R5) — une ligne de ledger, aucun changement de code."
+        }
+      ],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "qa-auditor",
+      "chantier": "R5",
+      "round": 5,
+      "scores": {
+        "couverture": 4,
+        "contrat": 5,
+        "erreurs": 5,
+        "clarte": 5,
+        "regressions": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "QA-R5-m1",
+          "quoi": "Le constructeur unique expected_feature_spec() a supprimé la duplication croisée qui tuait ses propres mutants en clone frais : un mutant interne (ex. FEATURE_SPEC_VERSION -> \"3\", ou une langue retirée) rend train et garde de chargement auto-cohérents ; seuls le champ names (pinné littéralement test_router_train.py:294), les coïncidences avec les littéraux déviants de _DERIVES_FEATURE_SPEC (test_router_ml.py:210-228) et le test de l'artefact promu (test_router_ml.py:242-251, SKIP en clone frais — artefacts gitignorés, donc CI) le tuent — vérifié : aucun test hors test_router_ml.py ne pinne version/langs/flag_vocab/current_model_rank ; sens de panne sûr (vieil artefact refusé au chargement, repli SafeRouter) mais dérive silencieuse en CI.",
+          "ou": "router/sobrio_router/features.py:88-114 ; router/tests/test_router_train.py:294 ; router/tests/test_router_ml.py:246-247 (skip clone frais)",
+          "correction": "Pinner le spec INTÉGRAL en littéral dans un test stdlib toujours exécuté (ex. test_router_features.py : assert expected_feature_spec() == {littéral complet 5 clés, version \"1\"}) — restaure le kill de mutant du constructeur indépendamment des artefacts locaux ; poli sans urgence, à glisser au bilan de clôture R5 ou à l'ouverture R6 (qui bumpe le spec)."
+        }
+      ],
+      "verdict": "GREEN"
+    }
+  ],
+  "sentinelles": [
+    {
+      "agent": "privacy-sentinel",
+      "chantier": "R5",
+      "round": 5,
+      "verdict": "PASS",
+      "violations": [],
+      "preuves": [
+        "git show d99bdaa relu integralement (2 fichiers, 224 insertions) : l'entree ledger router/CONVERGENCE_LEDGER.md:1312-1357 et l'archive router/panels/R5-r4.json ne citent que des fichier:ligne, ids d'items (ML-R4-m1..QA-R4-m4), fragments de messages systeme (REFUS/VERDICT/introuvable), empreintes sha courtes et compteurs — aucune citation ni paraphrase de texte utilisateur, aucun texte ressemblant a un prompt (jurisprudence R3-r3).",
+        "git show 4ac9343 relu integralement (12 fichiers, 90 insertions) : bornes <= (doc:14,157 ; README:6,52 ; bench.py:3 ; gate.py:43-46 ; test_router_ml.py:5,66), nouveau constructeur features.py:83-107, 4e cas None (test_router_eval_harness.py:225-238), test corpus introuvable (test_router_train.py:164-179, n'assemble que REFUS/introuvable/Traceback et un chemin tmp_path), help val-pct (train_v05.py:447), TODO R7/V1 (heuristic.py:172) — zero litteral de type prompt, vocabulaire systeme seul ; l'entree ledger ajoutee (router/CONVERGENCE_LEDGER.md:1359-1369) ne cite que sha256, compteurs et fichier:ligne.",
+        "expected_feature_spec() (router/sobrio_router/features.py:88-107) audite : vocabulaire systeme exclusivement — FEATURE_NAMES (22 noms de signaux, l.58-81), LANGS fr/en/other (l.30), FLAG_VOCAB 6 flags clos (l.35-42), CURRENT_MODEL_RANK ids catalogue (l.48-54), FEATURE_SPEC_VERSION '1' (l.85) ; consomme par ml.py:24,157 et train_v05.py:44-48,388-391 en remplacement des deux litteraux dupliques — aucun canal texte nouveau ; les messages d'erreur de la garde (ml.py:145,158) ne citent que metadata_path.",
+        "features.py : signals_to_vector (l.110-141) ne reference jamais prompt_text dans son corps (grep : le nom n'apparait qu'en docstrings l.5 et l.120) ; types.py:39 le champ reste repr=False default=None ; adapter.py:57 ne l'alimente jamais ; grep -rE '(print|logg|warn|debug|info)\\(.*prompt' sur router/sobrio_router+train+eval+data = 0 occurrence ; tests dedies rejoues : test_router_features + test_router_corrections_r1 + test_router_golden_frozen + test_router_data_corpus + test_router_train = 82 passed (dont prompt_text ignore, jamais dans repr/str, zero texte artefacts).",
+        "router/panels/R5-r4.json relu integralement (4 juges + 2 sentinelles, 178 lignes) : constats cites par fichier:ligne, ids et fragments systeme uniquement — rien qui ressemble a un prompt. Precision d'audit : la preuve golden du sentinel r4 (« 0 chaine > 60 caracteres ») n'est exacte que lue sur le bloc signals ; sur les lignes entieres, 208 chaines d'ANNOTATION d'arbitrage (champs note/review herites du gel R2, hors signals, max 272 car. a golden.jsonl:77) depassent 60 — verifiees une a une : descriptions taxonomiques en 3e personne avec rationnel de label, zero formulation imperative/interrogative (regex FR+EN : 0 occurrence), prompt_text absent des 181 lignes serialisees — l'invariant tient, l'imprecision de comptage du r4 ne cree aucune violation et le delta r5 ne touche pas le golden (git diff 648e2fa..4ac9343 sur router/eval/golden/ vide ; dernier commit du fichier : 9a493b5, ere R2).",
+        "Corpus router/data/artifacts/corpus-v1.jsonl.gz decompresse EN MEMOIRE : 30 000 lignes, prompt_text absent, 0 chaine > 40 caracteres — signaux numeriques et vocabulaire clos uniquement.",
+        "Tous les artefacts locaux scannes programmatiquement (21 JSON : router/artifacts/{eval,bench,models}/**, router/data/artifacts/** dont check/) + 3 dumps model.txt LightGBM : cles prompt-like a valeur non vide = 0, motifs de formulation utilisateur = 0 ; model.txt = noms de features et nombres seuls ; seules chaines longues = 8 champs systeme connus (avertissement/note_cgu/invariants de corpus-v1.bruit.json, corpus-v1.metadata.json, distill-dry-run-latest.json) decrivant simulation/CGU/seeds — aucun contenu de prompt.",
+        "Motifs de formulation utilisateur (imperatifs/questions FR+EN) balayes sur router/panels/*.json, router/CONVERGENCE_LEDGER.md complet et router/data/artifacts/check/ : 0 occurrence.",
+        "Aucun fichier du repo modifie : git status vide avant/apres, HEAD 4ac9343 inchange ; scans executes en memoire depuis un script en scratchpad, aucune ecriture d'artefact, gate non rejoue (sans objet privacy)."
+      ]
+    },
+    {
+      "agent": "cost-guard",
+      "chantier": "R5",
+      "round": 5,
+      "verdict": "PASS",
+      "violations": [],
+      "preuves": [
+        "HEAD 4ac9343 = origin/main, arbre propre ; delta r4->r5 verifie : git show d99bdaa (ledger + router/panels/R5-r4.json uniquement, 224 insertions docs) et git show 4ac9343 (12 fichiers, aucun ne touche router/data/distill.py — dernier commit sur distill.py : 60ae8f7, R4).",
+        "Dry-run par defaut : router/data/distill.py:302-307 (main sans --real -> dry_run, etiquettes stub deterministes, aucun appel reseau) ; run_real leve TOUJOURS avant tout appel (distill.py:264-269) avec compteur d'arret d'audit (distill.py:107-109).",
+        "Gates du chemin payant fail-closed : SOBRIO_ALLOW_PAID_CALLS=='1' exige (distill.py:250-254) ; cap _parse_spend_cap (distill.py:112-139) rejette nan/inf/-inf/negatif/zero/bool/non-nombre via SpendCapError AVANT toute estimation, defaut 20.0 $ (distill.py:84) ; CLI --real = exit 2 propre sans traceback (distill.py:286-299).",
+        "Garde anti-reseau REJOUEE : .venv/bin/pytest router/tests/test_router_data_distill.py -q -> 42 passed en 0.10 s, incluant la regex M6 ancree debut de ligne (test_router_data_distill.py:33-36), les 4 modules router/data/ (l.65-75), l'extension R5 glob dynamique router/train/*.py (l.362-373) et le garde-fou d'existence train_v05.py+promote.py (l.376-379), plus les 6 valeurs malformees du cap (l.266-281) et l'exclusion bool (l.347-353).",
+        "Scan independant hors test : la meme regex durcie appliquee a TOUT router/**/*.py (hors __pycache__/egg-info) -> 0 hit ; l'invariant « zero motif reseau dans router/ » tient sur l'arbre entier, plus large que le mandat data+train.",
+        "Lot 4ac9343 sur les 2 fichiers sensibles : diff d'imports de router/train/train_v05.py = retrait CURRENT_MODEL_RANK/FLAG_VOCAB/LANGS, ajout expected_feature_spec (stdlib, router/sobrio_router/features.py:87-112) — aucun module reseau introduit, seuls lightgbm/numpy locaux subsistent (train_v05.py:294-295) ; rien d'affaibli dans la garde (elle est dans les tests, non touchee par le lot sauf ajouts).",
+        "CI ne depense jamais : .github/workflows/ci.yml = ruff + pytest + build extension, aucun SOBRIO_ALLOW_PAID_CALLS, aucun SOBRIO_MAX_SPEND_USD, aucune cle API ; grep sur .github/, Makefile, ops/ -> 0 occurrence des deux variables ; dans le repo elles n'apparaissent que dans distill.py, ses tests (monkeypatch, auto-nettoye) et la doc.",
+        "Residu consigne verifie non recycle : la liste figee des modules data (test_router_data_distill.py:66) couvre exactement les 4 .py presents dans router/data/ a HEAD (distill, generate_corpus, public_datasets, quality_report) — complete aujourd'hui, generalisation consignee R6 au ledger (consignation exacte).",
+        "Depense mission = 0,00 $ : uniquement git/grep/pytest/python locaux en lecture, aucun appel payant, aucun fichier du repo modifie, aucun artefact ecrit, aucune cible make executee."
+      ]
+    }
+  ]
+}

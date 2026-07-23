@@ -40,7 +40,7 @@ RAM < 1 Go · artefacts : étage 1 < 20 Mo, étage 2 < 500 Mo · dépense API : 
 | R2       | Golden set (juge de paix)                          | 2/2 (r2 & r3) | **CONVERGÉ** |
 | R3       | Protocole d'évaluation & harnais + gate            | 2/2 (r5 & r6) | **CONVERGÉ** |
 | R4       | Corpus de démarrage à froid                        | 2/2 (r4 & r5) | **CONVERGÉ** |
-| R5       | Pipeline d'entraînement & classifieur v0.5         | 0/2           | en cours |
+| R5       | Pipeline d'entraînement & classifieur v0.5         | 2/2 (r4 & r5) | **CONVERGÉ** |
 | R6       | Étage 2 embeddings (à construire, ÉTEINT par défaut) | 0/2         | à venir |
 | R7       | Recalibration, monitoring & déploiement VPS        | 0/2           | à venir |
 
@@ -1367,3 +1367,55 @@ touchant le fichier » ou bilan de clôture R5) : router/README.md:7
 router/tests/test_router_eval_harness.py:109 (commentaire) ; l'assert
 strict p95 < 5.0 de test_router_ml.py:76 reste volontairement plus
 exigeant que le budget inclusif (condition suffisante).
+
+## R5 — round 5 (commit 4ac9343, panel de confirmation — archivé router/panels/R5-r5.json)
+
+| agent            | modèle | scores (dims)                                        | blocking | major | verdict |
+|------------------|--------|------------------------------------------------------|----------|-------|---------|
+| ml-architect (P) | fable  | spec5 features5 calibration5 fuites-ml5 extens5      | 0        | 0     | GREEN   |
+| eval-scientist   | fable  | éval5 gate5 plafond5 honnêteté5 repro5               | 0        | 0     | GREEN   |
+| data-quality     | fable  | étanchéité5 déséquilibre5 intégrité5 robust5 traça5  | 0        | 0     | GREEN   |
+| qa-auditor       | fable  | couverture4 contrat5 erreurs5 clarté5 régressions5   | 0        | 0     | GREEN   |
+| privacy-sentinel | fable  | —                                                    | PASS     | —     | PASS    |
+| cost-guard       | fable  | —                                                    | PASS     | —     | PASS    |
+
+→ **Ronde VERTE — 2/2 consécutives (r4 & r5) : CHANTIER R5 CONVERGÉ**
+(rondes 0-5 consommées sur 8 ; dépense mission toujours 0,00 $).
+
+## Clôture R5 (2026-07-23) — bilan, décisions datées, transferts
+
+**Livré convergé** : ml_v05 (LightGBM 22 features de signaux, stdlib à
+l'inférence hors lightgbm, split par signature, calibration isotonique
+conservatrice, gate fail-closed 9 critères à effet cliquet, rotation
+candidate/promoted/previous, MLRouter derrière SafeRouter à repli
+inconditionnel, gardes de dérive feature_spec/label_mapping intégrales,
+robustesse clone-frais prouvée par simulations). Gate PASS 9/9 : pondérée
+0,8978 vs 0,732 (baseline), sous-dim 0,0331, ECE 0,0417, bande 0,0093.
+334 tests router+api verts. Deux sentinelles PASS à chaque ronde.
+
+**Décision datée (2026-07-23) — rapports d'éval versionnés à champs
+volatils** (inscrite à l'ordre du jour de cette clôture) : les rapports
+`-latest` RESTENT versionnés (ils fondent les références MESURÉES du
+cliquet du gate) avec la CONVENTION suivante : ils ne sont régénérés et
+commités qu'aux promotions (ou changements de harnais jugés) ; tout rejeu
+d'audit/panel se fait EN LECTURE SEULE (pratique effective depuis l'audit
+de reprise) ; un diff limité aux champs volatils (date/p50/p95/git_sha)
+n'est jamais commité seul. Aucun changement de code.
+
+**Consignation complétée (DQ-R5-m1)** : l'assert jumeau
+test_router_eval_harness.py:110 (p95 < 5.0 strict, condition suffisante du
+budget inclusif) rejoint la liste des résidus de borne consignés (même
+régime que test_router_ml.py:76 et les commentaires README:7/harness:109).
+
+**Transferts à R6 (ouverture)** :
+- QA-R5-m1 : pinner le feature_spec INTÉGRAL en littéral dans un test
+  stdlib toujours exécuté (le refactor du constructeur unique a supprimé
+  le kill-de-mutant croisé ; R6 bumpe le spec — le faire à ce moment-là).
+- Garde anti-réseau de router/data/ en liste figée → passer en glob comme
+  côté train (consigné à la reprise).
+- EXIGENCE R6 du ledger (l.154-159) : aucun chemin asdict/astuple/pickle
+  sur PromptSignals/Signals — vigilance privacy MAXIMALE de l'étage 2.
+- Précision d'audit du privacy-sentinel r5 : les 208 chaînes d'annotation
+  d'arbitrage du golden (champs note/review hérités du gel R2, max 272
+  car.) sont vérifiées descriptives (zéro formulation directe) — toute
+  évolution future du golden doit préserver cette propriété.
