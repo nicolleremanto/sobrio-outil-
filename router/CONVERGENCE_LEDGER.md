@@ -1459,3 +1459,17 @@ télémétrie v1).
   total. Précision de traçabilité : le builder a revendiqué « +29/-5 » sur
   LICENSES.md, le diff réel est +24/-5 (contenu intégralement conforme) —
   métadonnée de preuve inexacte, consignée.
+- **Lot 3** : cœur étage 2 — embed.py (EmbedHead stdlib pure, chaîne de
+  confiance UNIQUE §5.2bis, confidence_cap normatif fail-closed, gardes
+  clé par clé patron R5, _validate_calibrator/interp_conf réutilisés de
+  ml.py, encodeur ONNX paresseux refusé fail-closed tant que le geste
+  fondateur n'a pas eu lieu, rule "embed:v0"), twostage.py (arbitrage D3
+  seuil 0.75, override si conf2>conf1, toute exception étage 2 → d1,
+  AUCUN re-plafonnage — cap porté par predict seul), pin littéral intégral
+  du embed_spec (max_tokens 256 « valeur candidate non mesurée »),
+  96 tests (iso-confiance harnais/service bit-identique sur 25 embeddings,
+  privacy sentinelle absente des exceptions/logs/repr, monde sans-deps en
+  subprocess empoisonné). Vérifié OK : 4 mutations tuées restauration
+  sha256, 530 router+api verts + 3 skips légitimes (importorskip encodeur).
+  Traçabilité : comptes par fichier SOUS-revendiqués par le builder (71+3
+  réels vs 63+3 ; 20 vs 17) — total global 530 exact, livré ⊇ revendiqué.
