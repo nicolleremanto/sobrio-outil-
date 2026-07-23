@@ -18,7 +18,7 @@ ALEMBIC := .venv/bin/alembic
 .PHONY: dev test lint demo report sync-fixtures migrate seed router-bench router-eval \
 	router-corpus router-corpus-check router-train router-gate router-promote router-rollback \
 	router-embed-model router-embed-train router-embed-eval router-embed-gate \
-	router-embed-promote router-embed-rollback
+	router-embed-promote router-embed-rollback router-embed-bench
 
 # Routeur évalué par `router-eval` (registre : heuristic ; extensible R5 : ml_v05).
 ROUTER ?= heuristic
@@ -129,6 +129,14 @@ router-embed-gate:
 	  --baseline router/artifacts/eval/embed-prior-latest.json \
 	  $$( [ -f router/artifacts/embed/heads/promoted/eval-report.json ] && \
 	      echo "--previous router/artifacts/embed/heads/promoted/eval-report.json" )
+
+## router-embed-bench : preuve budget étage 2 (p95 ≤ 30 ms INCLUSIF, RSS < 1 Go)
+## du pipeline COMPLET tokenise→encode→tête (§11) ; écrit
+## router/artifacts/bench/embed-latest.json (exigé par la garde D8 de la
+## promotion). AVANT le geste fondateur (deps/modèle absents, recadrage
+## ledger 2026-07-23) : REFUS exit 2 propre — jamais un défaut ni un acte de CI.
+router-embed-bench:
+	$(PY) router/bench_embed.py
 
 ## router-embed-promote : promotion 1 commande de la tête (gate frais + garde
 ## bench D8 — REFUS avant geste fondateur : heads/promoted/ reste vide en prod, D4)

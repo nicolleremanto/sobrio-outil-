@@ -45,6 +45,21 @@ jobs:
                       -r warehouse/requirements.txt -r report/requirements.txt
           pip install -e ./warehouse -e ./router
 
+      # Garde R6 (spec §10.7, cost-guard) : la CI ne pose JAMAIS de flag
+      # SOBRIO_* (ni SOBRIO_EMBED_STAGE2, ni SOBRIO_ALLOW_MODEL_DOWNLOAD, ni
+      # aucun autre) et n'installe JAMAIS les dépendances embed
+      # (router/requirements-embed.txt) — la suite complète ci-dessous passe
+      # sans réseau, sans modèle, avec des skips propres (les simulations
+      # clone-frais/sans-deps §10.6 sont DES TESTS de la suite). Vérification
+      # EXÉCUTABLE, pas seulement par inspection du fichier.
+      - name: Garde R6 — aucun flag SOBRIO_*, aucune dépendance embed
+        run: |
+          if env | grep '^SOBRIO_'; then
+            echo "ERREUR : un flag SOBRIO_* est posé dans l'environnement CI (interdit, R6 §10.7)"
+            exit 1
+          fi
+          python -c 'import importlib.util, sys; presents = [m for m in ("onnxruntime", "tokenizers") if importlib.util.find_spec(m) is not None]; sys.exit("ERREUR : dependances embed presentes en CI (interdit, R6 §10.7) : " + ", ".join(presents) if presents else 0)'
+
       - name: Lint (ruff)
         run: ruff check router api connector warehouse report
 

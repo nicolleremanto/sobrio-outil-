@@ -1508,3 +1508,19 @@ télémétrie v1).
   cible indicative d'exactitude §7.1 (~0,85-0,95) était mathématiquement
   incompatible avec ECE ≤ 0,10 sous cap 0,74 — résolue en faveur du gate
   (exactitude tête v0 : 0,6833, sans signification sémantique — D4).
+- **Lots 6-7** (derniers lots de build) : bench_embed.py (pipeline complet
+  sur 500 soupes seedées en mémoire, conversion ru_maxrss par plateforme
+  §11/MINOR-4 testée dans les deux branches, p95 ≤ 30,0 inclusif / RSS
+  < 1024 strict, rapport JSON pur au chemin exact de la garde D8, REFUS
+  exit 2 avant geste fondateur — écart de spec consigné : la spec disait
+  skip exit 0, le recadrage impose la parité avec promote/fetch), cible
+  router-embed-bench, CI : déjà conforme par inspection (aucun flag,
+  aucun téléchargement, requirements-embed jamais installé) + garde
+  exécutable R6 ajoutée (échec si flag SOBRIO_* posé ou deps embed
+  importables) + 6 tests figeant la conformité CI dans la suite. Vérifié
+  OK 0 écart, 642 router+api verts + 4 skips (dont taille encodeur,
+  modèle absent). Différés structurels au geste fondateur : bench réel,
+  ajustement max_tokens, embed-latest.json — la garde D8 refuse donc
+  toute promotion effective (voulu, heads/promoted vide).
+
+**BUILD R6 COMPLET (Lots 0-7)** — place aux panels (ronde 0).
