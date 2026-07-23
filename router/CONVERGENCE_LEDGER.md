@@ -41,7 +41,7 @@ RAM < 1 Go · artefacts : étage 1 < 20 Mo, étage 2 < 500 Mo · dépense API : 
 | R3       | Protocole d'évaluation & harnais + gate            | 2/2 (r5 & r6) | **CONVERGÉ** |
 | R4       | Corpus de démarrage à froid                        | 2/2 (r4 & r5) | **CONVERGÉ** |
 | R5       | Pipeline d'entraînement & classifieur v0.5         | 2/2 (r4 & r5) | **CONVERGÉ** |
-| R6       | Étage 2 embeddings (construit, ÉTEINT ; geste fondateur différé) | 1/2 (r3) | en panels |
+| R6       | Étage 2 embeddings (construit, ÉTEINT ; geste fondateur différé) | 2/2 (r3 & r4) | **CONVERGÉ** |
 | R7       | Recalibration, monitoring & déploiement VPS        | 0/2           | à venir |
 
 ---
@@ -1695,3 +1695,64 @@ immédiatement) : 4e orphelin inerte purgé + rectification du compte de
 réparation (ci-dessus), cellule « ~ » → « 1 » au tableau r2, caches
 morts d'interpréteurs étrangers purgés (hygiène). Suite re-vérifiée
 après purges : 662 verts + 4 skips.
+
+## R6 — round 4 (HEAD 81d8816, panel de confirmation — archivé router/panels/R6-r4.json)
+
+| agent            | modèle | scores (dims)                                        | blocking | major | verdict |
+|------------------|--------|------------------------------------------------------|----------|-------|---------|
+| ml-architect (P) | fable  | spec5 pipeline5 calibration5 robustesse4 extens5     | 0        | 0     | GREEN   |
+| eval-scientist   | fable  | éval5 gate5 honnêteté5 repro5 budgets5               | 0        | 0     | GREEN   |
+| data-quality     | fable  | étanchéité5 intégrité5 robustesse5 traça4 global5    | 0        | 0     | GREEN   |
+| qa-auditor       | fable  | couverture5 contrat5 erreurs5 clarté5 régressions5   | 0        | 0     | GREEN   |
+| privacy-sentinel | fable  | — (bytecode servi == code jugé, sha bit-inchangés)   | PASS     | —     | PASS    |
+| cost-guard       | fable  | — (0,00 $, 0 violation)                              | PASS     | —     | PASS    |
+
+→ **Ronde VERTE — 2/2 consécutives (r3 & r4) : CHANTIER R6 CONVERGÉ**
+(rondes 0-4 consommées sur 8 ; dépense mission toujours 0,00 $).
+Note de procédure : les 2 sentinelles avaient été bloquées par une erreur
+TRANSITOIRE du classificateur de la plateforme au premier passage — le
+panel a été repris via resume (verdicts des 4 juges servis du cache,
+repo gelé tout du long), les sentinelles réexécutées ont rendu PASS avec
+preuves exhaustives. Aucun verdict n'a été fabriqué.
+
+## Clôture R6 (2026-07-23) — bilan, transferts R7
+
+**Livré convergé** : étage 2 embeddings OPT-IN, infrastructure complète
+et VERROUILLÉE — verrous privacy structurels (__reduce__, scans glob,
+SECRET_LEAK étendu), EmbedHead à chaîne de confiance unique (cap 0,74
+normatif fail-closed), TwoStageRouter (arbitrage 0,75, jamais de
+re-plafonnage), intégration API à triple verrou (texte détruit dès la
+route sinon ; handler 422 caviardé ; no-leak prouvé sur les chemins
+d'erreur ; cascade fail-soft : API 200 même sans modèle), tête v0
+synthétique HONNÊTE (D4), gate embed PASS, promote/bench en REFUS
+fail-closed avant le geste fondateur, outillage modèle zéro-réseau
+(manifest à sources null), CI verrouillée, annexe R6 normative.
+662 tests verts + 4 skips légitimes. Le PREMIER FETCH du modèle (choix
+du dépôt source, shas, spike max_tokens, bench réel p95/RSS, verdict
+licence final) = GESTE FONDATEUR §8, décision datée.
+
+**Incidents du chantier, tous consignés et soldés** : rm -rf d'un juge
+(r0, restauré bit-identique) ; bytecode mutant résiduel de
+l'orchestrateur (r2, ROUGE mérité, purgé + règle durcie
+mutations-en-copie-tmp) ; blocage transitoire du classificateur (r4,
+repris par resume sans fabriquer de verdict).
+
+**Transferts à R7 (ouverture)** :
+- [dq r4] ruff format sur les 7 fichiers R6 non normalisés + ajouter
+  ruff format --check à make lint (re-verrouiller l'acquis R2-r1).
+- [dq r4] PYTHONDONTWRITEBYTECODE=1 dans l'environnement du service API
+  de docker-compose.dev.yml (le conteneur écrit des pyc dans l'arbre
+  monté — même classe que l'incident r2, hors de portée de la règle
+  durcie actuelle).
+- [dq r4] Annotation off-by-one du total d'audit bytecode r3 : « 150 »
+  → itemisations des juges = 151, total exact invérifiable post-purge ;
+  le compte OPÉRANT (103 conformes, zéro divergent) re-prouvé en r4.
+- [ml r4] Flake infra 1/3 runs (test_api_router_bridge, classe
+  sqlalchemy, non reproduit — conteneur Postgres up 5 jours, disque
+  91 %) : surveiller ; recycler le conteneur au lot ops ; si re-flake
+  sur poste sain → constat dédié.
+- Hérités R5/R6 : rechargement à chaud du bridge + PROMOTED_DIR par env
+  (TODO R7 doc) ; monitoring sous-dim en bande (0,8 %, direction
+  dangereuse) ; recalibration mensuelle par org sur télémétrie v1
+  (outillage + runbook — les données réelles n'existent pas encore) ;
+  TODO(V1) chiffrer l'impact du bruit 3 % ; compose ops + RUNBOOK.

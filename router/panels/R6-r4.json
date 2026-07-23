@@ -1,0 +1,138 @@
+{
+  "chantier": "R6",
+  "round": 4,
+  "head": "81d8816",
+  "date": "2026-07-23",
+  "ronde": "VERTE — R6 CONVERGE (2/2)",
+  "note": "sentinelles re-exécutées via resume après blocage transitoire du classificateur (verdicts des 4 juges servis du cache, repo gelé tout du long)",
+  "juges": [
+    {
+      "agent": "ml-architect",
+      "chantier": "R6",
+      "round": 4,
+      "scores": {
+        "spec": 5,
+        "pipeline": 5,
+        "calibration": 5,
+        "robustesse": 4,
+        "extensibilite": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "ML-R6r4-m1",
+          "quoi": "Transitoire d'infrastructure du poste de référence, constaté et écarté par triple rejeu : sur 3 exécutions complètes de la suite router+api (PYTHONDONTWRITEBYTECODE=1, basetemp scratchpad, no:cacheprovider), le run 1 a donné 661 passed / 1 failed / 4 skipped — échec de test_api_router_bridge.py::test_ml_v05_artefact_present avec une erreur de classe sqlalchemy (résumé court tronqué « sqlal… ») ; NON REPRODUIT en isolation (fichier rejoué : 7/7 verts) ni aux runs 2 et 3 (662 passed + 4 skipped, bit-exacts à la claim du ledger, 26,3 s / 25,6 s). Test DB-dépendant (UPDATE policy + POST /v1/recommend sur Postgres réel, conteneur sobrio-outil-postgres-1 up 5 jours healthy) sur un poste à 91 % de disque (1,8 Gi libres — contrainte machine connue). Aucun fichier:ligne du chantier n'est imputable : arbre gelé, bytecode conforme (audit r3 + zéro cache étranger résiduel vérifié cette ronde), échec de nature infra (connexion/DB), pas de code. Distinct du flake r1 (expliqué depuis par l'incident bytecode, éradiqué) : ici la classe bytecode est exclue par l'état vérifié des caches.",
+          "ou": "api/tests/test_api_router_bridge.py:179 (test_ml_v05_artefact_present) — run 1 de la ronde 4 uniquement ; preuves : scratchpad/r6r4-full-run2.txt et r6r4-full-run3.txt (662+4)",
+          "correction": "Geste opérateur, aucun fichier versionné à changer : consigner ce transitoire (1/3 runs, non reproduit) dans l'entrée ronde 4 du ledger au prochain toucher légitime ; recycler/surveiller le conteneur Postgres de référence (up 5 jours) et libérer du disque avant les prochains runs lourds (contrainte « disk near full » documentée). Si le même test re-flake sur un poste sain, ouvrir alors un constat dédié avec traceback complet conservé."
+        }
+      ],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "eval-scientist",
+      "chantier": "R6",
+      "round": 4,
+      "scores": {
+        "evaluation": 5,
+        "gate": 5,
+        "honnetete": 5,
+        "repro": 5,
+        "budgets": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "data-quality",
+      "chantier": "R6",
+      "round": 4,
+      "scores": {
+        "etancheite": 5,
+        "integrite_donnees": 5,
+        "robustesse_pipeline": 5,
+        "tracabilite": 4,
+        "global": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "DQ-R6r4-m1",
+          "quoi": "Off-by-one dans le total de l'audit bytecode consigné : le ledger (« 150 pyc hors venv ») et l'archive R6-r3.json (qa-auditor, m2) portent 150, alors que les itemisations internes des DEUX juges de r3 somment à 151 (qa : 54 prod + 49 pytest conformes + 47 inertes + 1 orphelin = 151 ; dq m3 : 105 frais + 7 opt-1 périmés + 38 étrangers + 1 orphelin = 151). La revendication OPÉRANTE est, elle, vérifiée exacte aujourd'hui par mon audit indépendant : 103 pyc hors venv (54 production + 49 pytest — bit-exact avec l'inventaire qa), tous CPython-3.12, tous frais, tous sémantiquement conformes aux sources (comparaison structurelle récursive, réécriture pytest 9.1.1 reproduite), zéro divergent — le message du commit 81d8816 (« 103 pyc conformes, zéro divergent ») est fidèle. Écart d'une unité sur un compteur de caches détruits, invérifiable post-purge, zéro impact fonctionnel — même classe que le « 3 vs 4 orphelins » rectifié en r3.",
+          "ou": "router/CONVERGENCE_LEDGER.md:1691 (« 150 pyc hors venv ») vs router/panels/R6-r3.json (qa-auditor m2 : quoi « 150 pyc » contredit par son propre champ ou « 54+49+47+1 » ; data-quality m3 : 105+7+38+1)",
+          "correction": "Au prochain toucher légitime du ledger (consignation de cette ronde), annoter le total : « 150 » → « ~150-151 (itemisations des juges : 151 ; total exact invérifiable post-purge ; le compte opérant 103 conformes/zéro divergent re-prouvé en r4) » — patron des rectifications de compte déjà employé en r3/r5."
+        },
+        {
+          "id": "DQ-R6r4-m2",
+          "quoi": "Sept fichiers du chantier R6 ne sont pas normalisés ruff format sous la config du repo (line-length 100, ruff 0.15.21 du .venv) : ruff format --check signale bench_embed.py, eval/embed_fixtures.py, tests/test_router_ci_workflow.py, tests/test_router_embed_gate_promote.py, tests/test_router_tools_fetch.py, train/promote_embed.py, train/train_head_v0.py (écarts purement cosmétiques de re-largeur de lignes, vérifié par --diff en lecture seule). Aucune revendication contredite : les entrées R6 r0-r3 du ledger ne mentionnent jamais ruff format (grep vérifié) et make lint = ruff check seul, qui est VERT (« All checks passed », re-exécuté) — mais l'acquis « repo format-clean intégral » consigné en R2-r1 s'est érodé silencieusement avec les fichiers R6.",
+          "ou": "router/bench_embed.py, router/eval/embed_fixtures.py, router/tests/test_router_ci_workflow.py, router/tests/test_router_embed_gate_promote.py, router/tests/test_router_tools_fetch.py, router/train/promote_embed.py, router/train/train_head_v0.py (ruff format --check depuis la racine ; Makefile:155-156 pour le périmètre lint)",
+          "correction": "Dans un prochain lot builder (jamais un geste de juge, arbre gelé) : .venv/bin/ruff format sur les 7 fichiers + rejeu suite complète ; optionnellement ajouter ruff format --check à make lint pour re-verrouiller l'acquis R2-r1."
+        },
+        {
+          "id": "DQ-R6r4-m3",
+          "quoi": "Observation informative (aucun défaut — tout est prouvé conforme) : 2 pyc du __pycache__ de l'arbre portent un co_filename /repo/... (api/app/catalog.py, api/app/schemas.py) — écrits par le conteneur API dev qui monte ./api sur /repo (docker-compose.dev.yml:38). Les deux sont FRAIS (en-tête mtime/taille = stat source) et BYTECODE-IDENTIQUES aux sources courantes hors chemin (comparaison structurelle récursive) — aucun risque aujourd'hui. Mais c'est exactement la classe « caches dérivés écrits dans l'arbre par un tiers » dont l'incident r2 a montré la traîtrise : le conteneur qui tourne peut re-déposer des pyc dans l'arbre monté à tout moment, hors de portée de la règle durcie (qui ne couvre que les mutations d'agents).",
+          "ou": "api/app/__pycache__/catalog.cpython-312.pyc et api/app/__pycache__/schemas.cpython-312.pyc (co_filename /repo/api/app/…) ; docker-compose.dev.yml:37-41 (montage ./api:/repo/api)",
+          "correction": "Hors gel, lot ops futur : poser PYTHONDONTWRITEBYTECODE=1 dans l'environnement du service API de docker-compose.dev.yml pour que le conteneur n'écrive plus aucun cache dérivé dans l'arbre monté — prolongement naturel de la règle durcie post-r2 ; aucun geste requis pour cette ronde."
+        }
+      ],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "qa-auditor",
+      "chantier": "R6",
+      "round": 4,
+      "scores": {
+        "couverture": 5,
+        "contrat": 5,
+        "erreurs": 5,
+        "clarte": 5,
+        "regressions": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [],
+      "verdict": "GREEN"
+    }
+  ],
+  "sentinelles": [
+    {
+      "agent": "privacy-sentinel",
+      "chantier": "R6",
+      "round": 4,
+      "verdict": "PASS",
+      "violations": [],
+      "preuves": [
+        "CADRE GELÉ vérifié en entrée ET en sortie : HEAD 81d8816 == origin/main, git status --porcelain VIDE (0 ligne) avant et après tous mes rejeux ; git diff --name-only de7dcd7..81d8816 = router/CONVERGENCE_LEDGER.md + router/panels/R6-r3.json SEULEMENT — zéro code changé depuis la ronde 3 verte, donc l'intégralité de l'audit r3 sur source gelée reste transposable ; entrée ledger « R6 — round 3 » relue (rectification du compte d'orphelins et purges consignées).",
+        "(1) BYTECODE SERVI == CODE JUGÉ, re-vérifié par audit exhaustif lecture-seule (sonde scratchpad/r6r4-priv/pyc_audit.py, PYTHONDONTWRITEBYTECODE=1) : 103 pyc hors .venv = 54 plain cpython-312 TOUS conformes (en-tête flags/mtime/size valide vs stat source + code objects RÉCURSIVEMENT identiques à la compilation fraîche — co_code, co_consts, co_names, linetable, exceptiontable ; frozensets triés, co_filename ignoré : classes d'écarts déjà consignées r2/r3) + 49 pytest-réécrits ; 0 DIVERGENT, 0 stale, 0 orphelin. Modules critiques épinglés : embed.cpython-312.pyc sha256[:16]=0694f576a28e125a == sha consigné par la sentinelle r3 (bit-inchangé), source embed.py sha256[:16]=e592cbe3ef9a272f == état jugé r3 ; types/twostage/routes/main/fetch_embed_model/harness_embed/promote_embed/bench_embed tous conformes.",
+        "GESTES OPÉRATEUR r3 VÉRIFIÉS EFFECTIFS SUR DISQUE (les minors r3 sont bien soldés) : 0 pyc orphelin sur les 103 (le 4e orphelin test_zzz_* est purgé), 0 pyc .opt-1, 0 pyc cpython-313/314 (caches morts d'interpréteurs étrangers purgés) — l'inventaire est réduit aux seuls caches légitimes de l'interpréteur .venv 3.12, et le ledger r3 (rectification « 4e orphelin purgé », hygiène caches) dit VRAI.",
+        "(2) INVARIANTS STRUCTURELS RE-BALAYÉS SUR SOURCE GELÉE : texte mémoire seule — embed.py:391-406 (texte/prefixe/embedding variables LOCALES, del texte:400 et del prefixe:402 avant retour, jamais affectés à self) et embed.py messages d'erreur = chemins/hash/comptes uniquement (l.126, 173, 190-192, 208, 266-272) ; verrou sérialisation — types.py:41-55 (__reduce__ conditionnel, TypeError SANS contenu, branche sans-texte inchangée) + repr=False types.py:39 ; triple verrou — router_bridge.py:52-65 (_stage2_unlocked : env exactement \"1\" ET router_version==embed_v0 ET send_prompt_text is True — strict, policy non-dict → fermé) et routes.py:67-68 (extraction gardée puis del body.prompt_text immédiat) + routes.py:76 (del prompt_text) ; caviardage 422 — main.py handler RequestValidationError en LISTE BLANCHE (loc/msg/type conservés, input/ctx → <redacted>, toute autre clé omise).",
+        "ÉCHANTILLON REJOUÉ (rien écrit dans l'arbre : PYTHONDONTWRITEBYTECODE=1, -p no:cacheprovider, basetemp scratchpad) : router/tests/test_router_embed_privacy.py + test_router_twostage.py + test_router_embed.py = 154 passed + 3 skipped (scan statique asdict/astuple/pickle/vars avec contrôle négatif, __reduce__ deux branches + mutation, protocole SECRET_LEAK, dérives artefact clé par clé) ; api/tests/test_api_no_leak.py + test_api_embed_stage2.py sur Postgres RÉEL (conteneur sobrio-outil-postgres-1 healthy, base jetable sobrio_test_api) = 24 passed (chemin 200, 422 champ invalide, 422 champ extra caviardé, 500 DB avec traceback SQLAlchemy scruté, mutation du handler, matrice triple verrou 8/8, cascade fail-soft avec le VRAI EmbedRouter refusant fail-closed — geste fondateur toujours différé, sha None).",
+        "(3) DERNIÈRE TENTATIVE DE CONTOURNEMENT — ANGLE INÉDIT (jamais couvert par les rondes 0-3, vérifié : zéro test gc/f_locals/__traceback__ dans les deux suites) : RÉTENTION MÉMOIRE POST-REQUÊTE au niveau du graphe d'objets COMPLET de l'interpréteur. Sonde test_zz_r6r4_gc_probe.py en COPIE TMP exclusivement (rsync api/+contracts/ → scratchpad/r6r4-priv/e2e, 216 Ko — règle durcie respectée, la sonde n'existe pas dans l'arbre) : après le cycle complet d'une requête /v1/recommend triple verrou ouvert avec jeton sentinelle ALÉATOIRE frais (secrets.token_hex, jamais de texte type prompt), scan de TOUS les objets vivants gc (frames HORS pile active — tracebacks conservés —, exceptions, dicts/listes/tuples/sets Y COMPRIS conteneurs NON traqués par gc imbriqués à profondeur 3, __dict__ d'instances arbitraires — attrape un PromptSignals retenu).",
+        "RÉSULTAT DE LA TENTATIVE : 6/6 PASS, ZÉRO rétention. Trois contrôles POSITIFS prouvent d'abord que le scanner DÉTECTE (dict {str:str} non traqué gc imbriqué — gc.is_tracked False vérifié —, attribut d'instance, frame de traceback conservé hors pile) puis redevient vide après libération ; puis trois cas réels : (a) PIRE CAS DU REPLI — étage 2 qui LÈVE avec le texte dans les locals de son frame levant, attrapé par TwoStageRouter except Exception (twostage.py:56-57) → 200 rule ml:v05, jeton absent du graphe post-requête (l'exception et ses frames ne sont retenus NULLE PART : ni LogRecord exc_info, ni cache) ; (b) nominal embed:v0 servi (contrôle positif : le jeton ATTEINT l'étage 2) → zéro rétention, jeton absent de la DB entière sérialisée ; (c) 500 DB — OperationalError SQLAlchemy levée pendant que les signaux PORTEURS du texte vivent dans les locals de recommend, traceback traversant les middlewares → 500 générique, zéro rétention post-réponse, DB propre. La règle « texte en mémoire le temps de l'inférence seulement » tient au niveau du graphe d'objets, pas seulement des sorties.",
+        "HYGIÈNE D'AUDIT : aucun fichier versionné modifié (porcelain 0 avant/après), RIEN supprimé (même gitignoré), inventaire pyc bit-stable après tous mes runs (103 pyc, embed.pyc sha 0694f576a28e125a inchangé), toutes sondes/copies/basetemp sous scratchpad/r6r4-priv, aucun téléchargement/installation, frugalité disque (copie tmp 216 Ko, disque à 96 % respecté) ; choix consignés des rondes 0-3 respectés sans recyclage (geste fondateur différé, D4 promoted/ vide, incidents r0/r2 réparés-vérifiés, règle durcie mutations-en-copie-tmp APPLIQUÉE) ; AUCUN texte type prompt dans ce rapport. Ronde 4 : le chantier privacy-critique est confirmé propre sous un angle neuf — PASS."
+      ]
+    },
+    {
+      "agent": "cost-guard",
+      "chantier": "R6",
+      "round": 4,
+      "verdict": "PASS",
+      "violations": [],
+      "preuves": [
+        "HEAD gelé confirmé : 81d88160bcd0a7b651ef3dbff767f3a5c9d828f0 = origin/main, git status --porcelain vide ; delta de7dcd7..81d8816 = router/CONVERGENCE_LEDGER.md (M) + router/panels/R6-r3.json (A) UNIQUEMENT — zéro code, conforme à l'énoncé de ronde",
+        "Gardes anti-réseau — les 5 globs identifiés et rejoués en isolation, 25 tests paramétrés PASS en 0,05 s : router/data/*.py (router/tests/test_router_data_distill.py:69), router/*.py racine dont bench.py+bench_embed.py (test_router_data_distill.py:80), router/train/*.py (test_router_data_distill.py:392), router/eval/*.py (router/tests/test_router_embed_gate_promote.py:757), router/sobrio_router/*.py — 10 modules dont embed.py/twostage.py (test_router_embed_gate_promote.py:777) ; regex M6 ancrée début de ligne, formes import X ET from X import Y (test_router_embed_gate_promote.py:750-753)",
+        "Gardes-fous des gardes-fous verts : couverture des globs prouvée non-inerte (test_router_data_distill.py:90-101, :404 ; test_router_embed_gate_promote.py:767-771, :790-805) + contrôles négatifs par injection (test_router_data_distill.py:120-166, injection en COPIE tmp_path — conforme à la règle durcie r2) ; lot complet gardes+workflow : 33 passed",
+        "Fetch inerte — rejeu indépendant à contexte neuf (scratchpad/rejeu_fetch_inerte.py, python -B, --dest jetable au scratchpad) : refus flag absent = exit 2, refus flag='0' = exit 2, AUCUN module réseau entré dans sys.modules (racines urllib/http/socket/ssl/httpx/requests/anthropic/openai), aucun fichier dest créé, message = renvoi LICENSES.md + « geste fondateur, jamais un défaut ni un acte de CI » (aucun texte type prompt) ; suite dédiée router/tests/test_router_tools_fetch.py + test_router_ci_workflow.py : 52 passed (garde AST _download incluse, test_router_tools_fetch.py:440-469)",
+        "CI verrouillée — .github/workflows/ci.yml : aucune affectation SOBRIO_* (vérifié grep : seules occurrences = commentaires et la garde elle-même) ; étape EXÉCUTABLE lignes 55-61 : fail si env ^SOBRIO_ posé OU si onnxruntime/tokenizers importables ; pip install lignes 44-46 sans requirements-embed ni requirements-ml ; verrous testés côté repo par router/tests/test_router_ci_workflow.py:38-72 (anti-régression regex SOBRIO_[A-Z0-9_]+[:=], jamais de téléchargement de modèle, garde exécutable exigée)",
+        "requirements-embed NON installé — .venv : importlib.util.find_spec = ABSENT pour onnxruntime ET tokenizers ; pip list : aucun paquet onnx*/tokenizers/anthropic/openai ; router/requirements-embed.txt consigne « fichier NON INSTALLÉ à ce jour — la première installation accompagne le GESTE FONDATEUR », pins onnxruntime==1.22.0 / tokenizers==0.21.1 en COMMENTAIRE, seul numpy==2.5.1 actif (pin ml déjà couvert par requirements-ml, spec §1.2) — cohérent avec le différé fondateur consigné (D4/rondes 0-3, non recyclé)",
+        "Flags jamais posés hors geste explicite — env de la machine de référence : aucun SOBRIO_* ; Makefile:106-110 : SOBRIO_ALLOW_MODEL_DOWNLOAD=1 posé sur la SEULE ligne de la cible router-embed-model (documenté, patron spec §4.4) ; .env.example:15 : SOBRIO_EMBED_STAGE2 en commentaire « défaut : DÉSACTIVÉ » uniquement",
+        "Dépense mission 0,00 $ — aucun SDK payant dans .venv, gardes réseau vertes sur tout le périmètre code, gates de dépense distill testés (test_router_data_distill.py:242-275 : refus sans flag, refus flag≠1, cap), delta depuis r3 = docs seuls, ledger consigne 0,00 $ en continu (router/CONVERGENCE_LEDGER.md:1640,1687) ; la présente ronde n'a exécuté AUCUN appel réseau ni téléchargement (rejeux 100 % locaux)",
+        "Hygiène bytecode maintenue post-r3 (classe de l'incident r2 non réapparue) : audit rejoué sur l'arbre repo hors venv = 103 pyc, 0 orphelin réel (suffixes pytest-9.1.1 correctement mappés), compte identique à l'audit exhaustif consigné au ledger r3 (« 103 pyc 3.12 TOUS conformes ») ; mes propres rejeux mutants exclusivement en copie scratchpad, run fetch sous python -B, arbre versionné intact (git status vide en fin de ronde)",
+        "Choix consignés respectés : geste fondateur différé (fetch/install) NON recyclé en constat — vérifié toujours vrai et toujours verrouillé (refus exit 2 avant tout import réseau) ; bench REFUS exit 2 et gardes eval/gate hors périmètre cost-guard inchangés depuis r3 (zéro code au delta). Étalonnage : 0 blocking, 0 major → mandat cost-guard PASS, jamais waivé — 2e ronde verte candidate pour la convergence 2/2"
+      ]
+    }
+  ]
+}
