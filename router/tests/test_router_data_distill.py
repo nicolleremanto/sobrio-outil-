@@ -17,9 +17,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "data"))
 
 import distill  # noqa: E402
-import generate_corpus  # noqa: E402
 import public_datasets  # noqa: E402
-import quality_report  # noqa: E402
 from generate_corpus import generate  # noqa: E402
 
 from sobrio_router import VISIBLE_MODELS  # noqa: E402
@@ -54,25 +52,53 @@ def _reset_stop_counter():
 
 
 # ---------------------------------------------------------------------------
-# Aucun motif réseau dans les modules de router/data/ (invariant cost-guard,
-# M6 : garde renforcée regex `import X` ET `from X import Y`, appliquée aux
-# QUATRE modules de router/data/ — distill/public_datasets/quality_report
-# (les trois modules existants) + generate_corpus (devenu golden-aware, M1 :
-# importe `loader`, doit rester lui aussi exempt de tout motif réseau).
+# Aucun motif réseau dans les modules de router/data/ NI de router/ racine
+# (invariant cost-guard, M6 : garde renforcée regex `import X` ET `from X
+# import Y`). Transfert de clôture R5 : la liste figée de modules est
+# remplacée par un GLOB (même patron que le côté train ci-dessous) — tout
+# futur module de router/data/ ou de router/*.py racine (bench.py
+# aujourd'hui, bench_embed.py demain) est couvert D'OFFICE, sans édition de
+# ce test.
 # ---------------------------------------------------------------------------
 
+_ROUTER_ROOT = Path(__file__).resolve().parents[1]
+_DATA_DIR = _ROUTER_ROOT / "data"
 
-@pytest.mark.parametrize(
-    "module", [distill, public_datasets, quality_report, generate_corpus], ids=lambda m: m.__name__
-)
-def test_no_network_imports_in_router_data_modules(module):
-    source = Path(module.__file__).read_text(encoding="utf-8")
+
+@pytest.mark.parametrize("module_path", sorted(_DATA_DIR.glob("*.py")), ids=lambda p: p.name)
+def test_no_network_imports_in_router_data_modules(module_path):
+    source = module_path.read_text(encoding="utf-8")
     match = _NETWORK_IMPORT_RE.search(source)
     assert match is None, (
-        f"import réseau interdit détecté dans {module.__name__} : {match.group(0)!r}"
+        f"import réseau interdit détecté dans {module_path.name} : {match.group(0)!r}"
     )
     assert "urlopen" not in source
     assert "Anthropic(" not in source
+
+
+@pytest.mark.parametrize("module_path", sorted(_ROUTER_ROOT.glob("*.py")), ids=lambda p: p.name)
+def test_no_network_imports_in_router_root_modules(module_path):
+    source = module_path.read_text(encoding="utf-8")
+    match = _NETWORK_IMPORT_RE.search(source)
+    assert match is None, (
+        f"import réseau interdit détecté dans {module_path.name} : {match.group(0)!r}"
+    )
+    assert "urlopen" not in source
+    assert "Anthropic(" not in source
+
+
+def test_router_data_et_racine_couverts_par_la_garde():
+    """Garde-fou du garde-fou : les globs voient bien les modules attendus
+    (un dossier déplacé ou vidé rendrait la garde silencieusement inerte)."""
+    noms_data = {p.name for p in _DATA_DIR.glob("*.py")}
+    assert {
+        "distill.py",
+        "generate_corpus.py",
+        "public_datasets.py",
+        "quality_report.py",
+    } <= noms_data
+    noms_racine = {p.name for p in _ROUTER_ROOT.glob("*.py")}
+    assert "bench.py" in noms_racine
 
 
 def test_no_network_imports_in_distill_module():

@@ -75,6 +75,28 @@ certitude = **NON UTILISÉ**. Aucune exception.
   certitude sans lecture à jour des conditions exactes ; question CGU du
   juge GPT-4 non vérifiée. À confirmer avant toute activation.
 
+## multilingual-e5-small (`intfloat/multilingual-e5-small`)
+
+- **Description** : encodeur de texte multilingue compact (famille E5,
+  travaux Microsoft Research, publié par intfloat sur HuggingFace) ;
+  produit des embeddings denses (384 dimensions) pour ~100 langues.
+- **Licence connue (à confirmer)** : MIT (permissive — usage commercial,
+  modification et redistribution permis avec conservation de la notice),
+  d'après la fiche modèle HuggingFace telle que connue au moment de cette
+  entrée — à confirmer par lecture de la fiche à jour avant activation.
+- **Usage prévu** : encodeur de l'étage 2 du routeur (chantier R6) —
+  embeddings calculés LOCALEMENT (aucun appel réseau à l'inférence), sous
+  les mêmes invariants privacy que l'étage 1 (règle n°1 : aucun texte de
+  prompt stocké ni loggé ; le poids du modèle est un artefact local).
+- **Restrictions pressenties** : aucune restriction d'usage connue au-delà
+  des termes MIT ; le TÉLÉCHARGEMENT initial des poids (HuggingFace) reste
+  soumis aux gardes réseau du chantier (`SOBRIO_ALLOW_DATASET_DOWNLOAD` et
+  revue préalable) — cette entrée consigne la licence AVANT tout usage,
+  conformément à la règle mission.
+- **Verdict : NON UTILISÉ — préparé pour R6, activation après revue
+  humaine** (relecture de la fiche licence à jour + confirmation
+  fondateurs), quelle que soit la formulation ci-dessus.
+
 ---
 
 ## Récapitulatif
@@ -84,6 +106,7 @@ certitude = **NON UTILISÉ**. Aucune exception.
 | LMSYS-Chat-1M | Accord d'usage spécifique, pas de licence ouverte standard | **NON UTILISÉ** |
 | Chatbot Arena conversations | Accord d'usage spécifique, pas de licence ouverte standard | **NON UTILISÉ** |
 | RouteLLM / GPT-4 judge data | Code probablement Apache 2.0 ; données héritant des restrictions Chatbot Arena ; CGU du juge tiers non vérifiées | **NON UTILISÉ** |
+| multilingual-e5-small (intfloat) | MIT (permissive, à confirmer sur fiche à jour) | **NON UTILISÉ — préparé pour R6, activation après revue humaine** |
 
 Toute activation future exige : (1) une relecture des conditions exactes en
 vigueur au moment de l'activation (les accords HuggingFace évoluent), (2) une

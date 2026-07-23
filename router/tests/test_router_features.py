@@ -1,9 +1,10 @@
 """Tests du vecteur de features (`sobrio_router/features.py`, chantier R5 §1).
 
 Couvre : encodage EXACT (liste littérale), constantes FIGÉES (couplage au
-vocabulaire du corpus), neutralité totale hors vocabulaire (jamais
-d'exception), et l'invariant §5.1 — `prompt_text` inconditionnellement
-ignoré.
+vocabulaire du corpus), le feature_spec INTÉGRAL pinné en littéral
+([QA-R5-m1], transfert de clôture R5), neutralité totale hors vocabulaire
+(jamais d'exception), et l'invariant §5.1 — `prompt_text`
+inconditionnellement ignoré.
 """
 
 from __future__ import annotations
@@ -22,6 +23,7 @@ from sobrio_router.features import (  # noqa: E402
     FEATURE_NAMES,
     FLAG_VOCAB,
     LANGS,
+    expected_feature_spec,
     signals_to_vector,
 )
 
@@ -106,6 +108,67 @@ def test_feature_names_figes():
     # Garde de couplage : le vocabulaire de flags est EXACTEMENT celui du
     # corpus (_ALLOWED_FLAGS de generate_corpus.py), trié alphabétiquement.
     assert FLAG_VOCAB == tuple(sorted(generate_corpus._ALLOWED_FLAGS))
+
+
+def test_feature_spec_integral_pinne():
+    """[QA-R5-m1] Le feature_spec ml_v05 INTÉGRAL, pinné en littéral dur.
+
+    Rôle kill-de-mutant : le constructeur unique `expected_feature_spec()`
+    (lot ronde 5) a supprimé la duplication croisée train/garde-de-chargement
+    qui tuait ses mutants en clone frais — un mutant interne (version bumpée,
+    langue retirée, rang altéré...) rend train et garde AUTO-COHÉRENTS, et
+    seuls des tests dépendant d'artefacts locaux (SKIP en clone frais, donc
+    en CI) le détectaient. Ce littéral complet — stdlib, TOUJOURS exécuté —
+    restaure le kill indépendamment des artefacts. Copié depuis la sortie
+    RÉELLE du constructeur, vérifiée champ à champ contre `features.py`
+    (FEATURE_NAMES, LANGS, FLAG_VOCAB, CURRENT_MODEL_RANK avec la convention
+    clé None -> "null", FEATURE_SPEC_VERSION). Un bump volontaire du spec
+    (R6) ÉDITE ce littéral en même temps que le constructeur — c'est le prix,
+    voulu, du pin.
+    """
+    assert expected_feature_spec() == {
+        "names": [
+            "char_len",
+            "token_est",
+            "has_code",
+            "has_math",
+            "lang_fr",
+            "lang_en",
+            "lang_other",
+            "flag_analyse",
+            "flag_code",
+            "flag_contrat",
+            "flag_demonstration",
+            "flag_resume",
+            "flag_traduction",
+            "msg_count",
+            "context_token_est",
+            "seen_code",
+            "seen_math",
+            "seen_reasoning",
+            "current_model_rank",
+            "recos_shown",
+            "recos_followed",
+            "derogations_up",
+        ],
+        "langs": ["fr", "en", "other"],
+        "flag_vocab": [
+            "analyse",
+            "code",
+            "contrat",
+            "demonstration",
+            "resume",
+            "traduction",
+        ],
+        "current_model_rank": {
+            "null": 0.0,
+            "claude-haiku-4-5": 1.0,
+            "claude-sonnet-5": 2.0,
+            "claude-opus-4-8": 3.0,
+            "claude-fable-5": 4.0,
+        },
+        "version": "1",
+    }
 
 
 def test_valeurs_hors_vocabulaire_neutres():
