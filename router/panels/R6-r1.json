@@ -1,0 +1,152 @@
+{
+  "chantier": "R6",
+  "round": 1,
+  "head": "fbb79d8",
+  "date": "2026-07-23",
+  "ronde": "VERTE",
+  "juges": [
+    {
+      "agent": "ml-architect",
+      "chantier": "R6",
+      "round": 1,
+      "scores": {
+        "spec": 5,
+        "pipeline": 5,
+        "calibration": 5,
+        "robustesse": 5,
+        "extensibilite": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "ML-R6r1-m1",
+          "quoi": "Le lot de corrections de la ronde 1 (commit fbb79d8, 9 fichiers, 3 majors + 5 minors soldés) n'est consigné NULLE PART dans le ledger : l'entrée R6 round 0 s'arrête à la liste PLANIFIÉE du lot (« Majors (3) → lot ronde 1 », fin de fichier l.1581) sans bloc d'exécution, alors que le précédent R5 consigne chaque lot correctif en bloc « Corrections ronde N » daté avec preuves (l.1037-1067 et l.1092+ : verts, sha stables, gate rejoué). La chaîne revendication→preuve du lot vit uniquement dans le message de commit — hors du document qui « fait foi ». Impact borné : toutes les corrections sont RÉELLES et complètes (vérifiées une à une par exécution : 611 router + 51 api verts + 4 skips = claim du commit ; artefacts train bit-identiques cd6b1ed2…/3bf2b624… reproduits au scratchpad ; mutants masque/L2 tués hors-repo ; verrou croisé prouvé sur divergence simulée en mémoire).",
+          "ou": "router/CONVERGENCE_LEDGER.md:1555-1581 (liste planifiée sans bloc d'exécution, fin de fichier) vs git fbb79d8 ; précédent : router/CONVERGENCE_LEDGER.md:1037-1067 (« Corrections ronde 0 » R5 avec preuves)",
+          "correction": "Ajouter au ledger le bloc « Corrections ronde 0 (lot fbb79d8) » — correspondance constat→correction→preuve (662 verts + 4 skips, artefacts bit-identiques, mutations tuées) — ou l'intégrer explicitement à l'entrée « R6 — round 1 » à la clôture de cette ronde."
+        },
+        {
+          "id": "ML-R6r1-m2",
+          "quoi": "Le dtype int64 des tenseurs d'entrée de _embed (comportement normatif spec §5.2.4 « numpy int64, batch 1 ») n'est asserté par aucun test : le commentaire du test de pooling revendique « batch 1, int64 » mais les asserts ne portent que sur set(entrees), tolist() et l'égalité de dtype token_type_ids==input_ids — un mutant dtype=int32 sur input_ids/attention_mask survit à TOUTE la suite (vérifié : grep int64 dans router/tests → une seule occurrence, en commentaire). Impact borné : l'export ONNX réel refuserait bruyamment un int32 à la première exécution post-geste fondateur (échec de type ORT, fail-closed découvert au spike/bench) — même structure de détection tardive-mais-bruyante que l'ex-ML-R6r0-m2, en beaucoup plus petit. Les quatre tests _embed sont par ailleurs substantiels : pooling masqué, L2, masque tout-zéro et token_type_ids prouvés sur valeurs à la main ; mutants « masque ignoré » et « L2 supprimée » TUÉS (rejoués hors-repo) ; le mutant « dénominateur non masqué » est un mutant ÉQUIVALENT (tout scalaire positif est absorbé par la normalisation L2 — aucun effet observable, pas un trou de couverture).",
+          "ou": "router/sobrio_router/embed.py:374-375 (dtype=np.int64 normatif) ; router/tests/test_router_embed.py:714-719 (commentaire « int64 » sans assert de dtype)",
+          "correction": "Dans test_embed_mean_pooling_masque_ignore_le_padding, ajouter assert entrees[\"input_ids\"].dtype == numpy.int64 (idem attention_mask) — l'assert existant token_type_ids.dtype == input_ids.dtype propage alors la contrainte à la 3e entrée."
+        }
+      ],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "eval-scientist",
+      "chantier": "R6",
+      "round": 1,
+      "scores": {
+        "evaluation": 5,
+        "gate": 5,
+        "honnetete": 4,
+        "repro": 5,
+        "budgets": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "ES-R6r1-m1",
+          "quoi": "Lettre de l'annexe R6 trop large sur D14 : « déposés sous router/artifacts/eval/ APRÈS gate PASS + gardes seulement (un refus ne laisse rien) » n'est vrai que pour le chemin promote_embed (corrigé ronde 1, vérifié : test_promote_refuse_ne_laisse_rien_sous_artifacts_eval PASS). Le CLI harness_embed dépose embed-<nom>-latest.json dans le répertoire versionné à CHAQUE invocation explicite (make router-embed-eval, et make router-embed-gate l'invoque DEUX FOIS AVANT le verdict) : un gate FAIL via cette cible laisse les deux rapports frais non suivis — le Makefile le documente d'ailleurs (« écrit router/artifacts/eval/embed-<TETE>-latest.json »), en contradiction de lettre avec le « seulement » de D14. Impact borné : geste opérateur explicite, convention R5 « commités aux promotions uniquement » intacte, promote conforme.",
+          "ou": "docs/decisions/ROUTEUR_CLASSIFIEUR.md:239-241 (D14) vs router/eval/harness_embed.py:175-177 (dépôt inconditionnel du main CLI) et Makefile:119-131 (router-embed-eval / router-embed-gate)",
+          "correction": "Resserrer la phrase D14 au flux de PROMOTION (« les évals fraîches de promote_embed ne sont déposées qu'après gate PASS + gardes ») et mentionner que router-embed-eval/gate sont des gestes opérateur explicites dont les rapports ne se committent qu'aux promotions — aucune modification de code requise."
+        },
+        {
+          "id": "ES-R6r1-m2",
+          "quoi": "Tableau « État des chantiers » du ledger périmé pour R6 : la ligne porte encore « (à construire, ÉTEINT par défaut) » et Statut « à venir » alors que le build est COMPLET (Lots 0-7, journal l.1423-1526) et que la ronde 0 est consommée (JAUNE, streak 0/2 — la colonne Rondes vertes 0/2 est, elle, exacte). C'est l'inverse du défaut corrigé jadis (« construit » → « à construire », l.1197) : sous-revendication cette fois, sans impact de fond, mais le tableau de tête est la première chose lue du ledger.",
+          "ou": "router/CONVERGENCE_LEDGER.md:44 (ligne R6 du tableau) vs l.1526 (BUILD R6 COMPLET) et l.1532-1543 (ronde 0 consommée)",
+          "correction": "Mettre la ligne R6 à jour à la prochaine écriture du ledger (entrée ronde 1) : sujet « Étage 2 embeddings (construit, ÉTEINT par défaut ; geste fondateur différé) », statut « en panels » — et la passer à CONVERGÉ seulement à la clôture."
+        },
+        {
+          "id": "ES-R6r1-m3",
+          "quoi": "Borne de latence étage 2 écrite « < 30 ms » (stricte) dans l'en-tête du README router et dans le bandeau budgets du ledger, alors que la convention harmonisée R5 est INCLUSIVE — l'annexe R6 dit correctement « p95 ≤ 30 ms (borne INCLUSIVE) » et le gate PASSE à 30.0 exact (cas de borne testé). Écart de lettre uniquement, texte antérieur à R6 jamais réaligné ; à p95 == 30.0 exactement, ces deux phrases seraient fausses.",
+          "ou": "router/README.md:6 (« < 30 ms ») et router/CONVERGENCE_LEDGER.md:30 (« Étage 2 p95 < 30 ms CPU ») vs docs/decisions/ROUTEUR_CLASSIFIEUR.md:252-253 (borne INCLUSIVE) et test de borne 30.0 PASS",
+          "correction": "Remplacer « < 30 ms » par « ≤ 30 ms » aux deux endroits lors de la prochaine édition de ces fichiers (aligne la lettre sur la convention inclusive déjà normative)."
+        }
+      ],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "data-quality",
+      "chantier": "R6",
+      "round": 1,
+      "scores": {
+        "etancheite": 5,
+        "integrite_donnees": 5,
+        "robustesse_pipeline": 5,
+        "tracabilite": 4,
+        "global": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "DQ-R6r1-m1",
+          "quoi": "Le message du commit fbb79d8 revendique « 3 écarts de métadonnées non substantiels consignés » (patch-verifier), mais cette consignation est INTROUVABLE à HEAD : ni le ledger (aucune entrée de lot ronde 1 — le fichier s'arrête à l'entrée round 0, l.1532-1581), ni l'annexe R6, ni le diff, ni git notes ne détaillent ces 3 écarts. Chaîne revendication→preuve pendante pour cette seule revendication — toutes les autres revendications du commit ont été vérifiées VRAIES par rejeu : 662+4 bit-exact, artefacts bit-identiques prouvés (train f714a92 vs fbb79d8 rejoués au scratchpad : head.json/calibrator.json identiques à l'octet, sha cd6b1ed2…/3bf2b624… = Lot 5, metadata identique hors date_train/git_sha), promote refusé sans trace, annexe R6 + READMEs livrés, 6 nouveaux tests rejoués PASS. Précédent du chantier : les écarts de métadonnées des Lots 2 et 3 sont détaillés nommément au ledger (l.1459-1461 et l.1474-1475).",
+          "ou": "git show fbb79d8 (corps du message) vs router/CONVERGENCE_LEDGER.md (aucune entrée de lot ronde 1, fichier terminé l.1581) ; docs/decisions/ROUTEUR_CLASSIFIEUR.md (annexe R6 sans mention) ; git notes vides",
+          "correction": "Détailler les 3 écarts de métadonnées dans l'entrée « R6 — round 1 » du ledger au moment de sa rédaction (patron des consignations Lots 2-3), ou rectifier la mention « consignés » si la consignation n'a jamais été matérialisée."
+        }
+      ],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "qa-auditor",
+      "chantier": "R6",
+      "round": 1,
+      "scores": {
+        "couverture": 5,
+        "contrat": 5,
+        "erreurs": 5,
+        "clarte": 5,
+        "regressions": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [],
+      "verdict": "GREEN"
+    }
+  ],
+  "sentinelles": [
+    {
+      "agent": "privacy-sentinel",
+      "chantier": "R6",
+      "round": 1,
+      "verdict": "PASS",
+      "violations": [],
+      "preuves": [
+        "Ronde 0 : mon verdict privacy-sentinel etait PASS 0 violation (router/panels/R6-r0.json, bloc sentinelles) — aucune correction propre a re-verifier ; mandat ronde 1 = non-regression privacy du delta fbb79d8. Perimetre verifie par git show --stat : 9 fichiers doc/tests/tools/train UNIQUEMENT, aucun module runtime porteur de texte touche (embed.py, types.py, twostage.py, routes.py, main.py hors delta) — la surface privacy de service est bit-inchangee.",
+        "Volet doc (mandat 1) : annexe R6 lue integralement (docs/decisions/ROUTEUR_CLASSIFIEUR.md:176-256), router/README.md:14 + :21-22 + :31-39, api/README.md:72-75 — vocabulaire systeme/architecture seul (verrous, plafond 0.74, geste fondateur, cascade) ; unique fragment de contenu pipeline = le prefixe e5 fixe de D11 (7 caracteres) ; ZERO texte type prompt, ZERO exemple de requete utilisateur.",
+        "Nouveaux tests _embed (mandat 2a, router/tests/test_router_embed.py:638-780) : tenseurs FACTICES purement numeriques (listes de floats artisanales, padding empoisonne a 100.0), session/tokenizer factices sans etat textuel ; le SEUL texte passe a _embed est _SOUPE (test_router_embed.py:47 — soupe fermee de mots-vides francais, convention chantier) ; rejoues verts en environnement jetable (134 passed + 3 skipped avec test_router_embed_privacy.py).",
+        "Message « telechargement echoue » (mandat 2b) — preuve sur code : router/tools/fetch_embed_model.py:241 n'interpole QUE {nom} + {exc.__class__.__name__}, jamais str(exc) ; nom borne au tuple ferme _FICHIERS_ATTENDUS (l.60, cles filtrees l.143-167 — une cle injectee au manifest est IGNOREE) ; main l.302-304 imprime str(RefusError) seul, le __cause__ chaine n'est jamais rendu (exception attrapee, zero traceback).",
+        "Message « telechargement echoue » — preuve par execution (sonde adversariale scratchpad/r6r1-priv/fetch_msg_probe.py) : 5 exceptions au MESSAGE empoisonne d'une sentinelle aleatoire (URLError raison serveur, HTTPError url+body, OSError errno 13→PermissionError, FileNotFoundError, TimeoutError) + 1 manifest a cle de fichier injectee → 6/6 zero fuite : stderr strictement « REFUS : telechargement echoue : model.onnx (<classe>) », exit 2, sentinelle absente de stdout/stderr, zero traceback, zero fichier .part restant, destination vide. Le message ne PEUT porter que nom (tuple ferme) + classe d'exception. Tests fetch versionnes rejoues : 46 passed (dont les 2 cas QA-R6-M2 et le refus http:// QA-R6-m2).",
+        "Train modifie (zero miroir §5.2bis, EmbedHead.predict en memoire — train_head_v0.py:218-244) : run_training rejoue vers repertoire JETABLE au scratchpad (artefacts_probe_r1.py), scan recursif de TOUTES les chaines des 3 JSON produits (head/calibrator/metadata) : 0 chaine libre multi-mots — seule hors motifs fermes : embed_spec.prefix (7 caracteres, constante D11), statut D4 = constante fixe du code consignee. Aucun champ texte entre dans les artefacts.",
+        "promote_embed durci (DQ-R6-m3/QA-R6-m1) : evals fraiches en TemporaryDirectory (promote_embed.py:93-116), depot _deposer_evals (l.119-125) apres gate PASS + gardes + integrite seulement ; test dedie contre le repertoire REEL versionne (test_router_embed_gate_promote.py:622-656 — byte-compare de router/artifacts/eval/ + git status porcelain avant/apres) rejoue vert ; apres tous mes rejeux, router/artifacts/eval/ ne contient que les 3 rapports R5 pre-existants, aucun embed-*. Le run CLI direct de promote a ete bloque par le classifieur de permissions — couvert par le test dedie ci-dessus, aucun contournement tente.",
+        "Invariants chantier re-balayes par rejeu (mandat 3) : test_api_no_leak.py + test_api_embed_stage2.py sur Postgres REEL = 24 passed (matrice triple verrou 8/8 avec spy textes_transmis, 422 caviarde liste blanche, 500 traceback scrute, DB entiere serialisee) ; test_router_embed_privacy.py (scan statique glob asdict/astuple/pickle/vars sur sobrio_router+eval+train+tools+api/app, fetch_embed_model.py modifie inclus d'office) vert ; twostage + gate-promote + gardes anti-reseau glob etendues a sobrio_router/*.py : 73 passed.",
+        "Suite complete router+api rejouee 7 fois au scratchpad : 6 runs a 662 passed + 4 skipped (= claim exacte du commit fbb79d8), 1 run avec 3 echecs NON REPRODUITS des nouveaux tests _embed (test_router_embed.py : mean_pooling/normalisation_l2/token_type_ids — asserts numeriques pytest.approx sur tenseurs factices, aucun plugin d'ordre aleatoire installe, cause non identifiee). OBSERVATION hors perimetre privacy (tests purement numeriques, zero surface texte) — a signaler au qa-auditor pour la flakiness.",
+        "Scan systematique des 513 lignes ajoutees du delta (mandat 4) : 13 litteraux multi-mots releves, tous messages techniques (simulation hors reseau, refus, garde) ; 0 motif type prompt (imperatifs/questions/1re-2e personne, patrons FR+EN) ; sentinelles de tests = jetons aleatoires ; docstrings/commentaires = prose technique francaise (jurisprudence R3-r3 respectee).",
+        "Hygiene d'audit : HEAD fbb79d8 = origin/main constate en entree ET en sortie, git status --porcelain VIDE apres tous les rejeux, aucun fichier versionne modifie, rien supprime (regle incident ronde 0 respectee), tous les rejeux/sondes en environnement jetable sous scratchpad/r6r1-priv (basetemp pytest inclus), PYTHONDONTWRITEBYTECODE=1 partout, aucun telechargement, aucune installation.",
+        "Choix consignes respectes sans recyclage : except OSError couvrant URLError (fetch_embed_model.py:233-241, ecart de lettre declare — verifie fonctionnel sur les 5 classes sondees), signature _evals_fraiches(tmp_dir), sha None / geste fondateur et ses differes, tete v0 D4, lru_cache→R7 — aucun constat souleve sur ces points."
+      ]
+    },
+    {
+      "agent": "cost-guard",
+      "chantier": "R6",
+      "round": 1,
+      "verdict": "PASS",
+      "violations": [],
+      "preuves": [
+        "CONSTAT r0 (CG-R0-m1) CORRIGÉ ET VÉRIFIÉ : garde anti-réseau en GLOB sur router/sobrio_router/*.py livrée — router/tests/test_router_embed_gate_promote.py:774-788 (test paramétré miroir exact de la garde eval : regex M6 _MOTIF_IMPORT_RESEAU :750-753 ancrée début de ligne + asserts urlopen/Anthropic) + métatest garde-fou :790-805 (les 10 noms de modules exigés : __init__, adapter, embed, features, heuristic, interface, ml, safe, twostage, types). Rejoué dans le repo : 17 passed (10 params sobrio_router + métatest + 5 params eval + métatest eval), 0.03 s.",
+        "Kill-de-mutant en COPIE TMP (rsync router/ hors artifacts vers scratchpad/r6cg, 1.2 Mo — repo jamais touché) : (1) 'import urllib.request' injecté dans la copie de sobrio_router/twostage.py → param twostage.py FAIL avec le message attendu ; (2) MODULE FUTUR module_futur.py créé avec 'import requests' → ramassé D'OFFICE par le glob comme nouveau param et FAIL — exactement le trou de couverture du constat r0, désormais fermé par construction. Bilan : 2 failed / 10 passed sur la copie mutée ; le repo reste vert et propre.",
+        "Fetch REFUSE sans flag/manifest — 8 rejeux subprocess sur le module RÉEL avec socket.socket remplacé par un compteur levant OSError (scratchpad/r6cg/replay_fetch.py) : (a) sans flag → exit 2, message LICENSES.md, urllib.request JAMAIS importé (sys.modules vérifié avant/après) ; (b) flag='1' + manifest committé (sources null vérifiées : router/tools/embed_model_manifest.json:19-25 et :28-34) → exit 2 'source non approuvée : geste fondateur requis' ; (c) flag='true' → exit 2 (égalité stricte '1', fetch_embed_model.py:82). Ordre normatif flag-avant-manifest : run_fetch fetch_embed_model.py:260-262.",
+        "Échec réseau → REFUS SANS retry infini (QA-R6-M2 corrigé) : fetch_embed_model.py:230-241 enveloppe l'échec de _download en RefusError 'téléchargement échoué : <nom> (<classe>)' — un seul except, aucune boucle de retry (un appel par fichier, run_fetch :266). Rejoué : https vers hôte .invalid (NXDOMAIN garanti RFC 2606) → exit 2 en 273 ms, UN passage, 0 socket instancié (refus dès getaddrinfo, gaierror⊂OSError), zéro traceback ; file:// inexistant → exit 2 en 1 ms ; sha divergent → exit 2, temporaire .part supprimé ; répertoire dest VIDE après les 8 refus. Transparence : ce rejeu a émis une unique résolution DNS d'un nom réservé .invalid (requête métadonnées, zéro octet téléchargé, zéro dépense). Test repo correspondant vert : test_router_tools_fetch.py:386-411 (subprocess, sans réseau).",
+        "Schemes https/file SEULS : _SCHEMES_AUTORISES = ('https://', 'file://') fetch_embed_model.py:63-67 (http:// refusé, QA-R6-m2) ; validation AVANT tout réseau dans _fichiers_approuves :150-155. Rejoué : manifests tmp http:// et ftp:// → exit 2 'url manquante ou invalide', 0 socket. Cas http couvert dans la suite : test_router_tools_fetch.py:256-258. Doc alignée : ROUTEUR_CLASSIFIEUR.md annexe R6, D9 (« schémas d'URL restreints à https/file (durci ronde 1) »).",
+        "CI toujours verrouillée : .github/workflows/ci.yml — env limité à DATABASE_URL (l.27-28), installation l.41-46 = api/connector/warehouse/report + editable warehouse/router (JAMAIS requirements-embed ni requirements-ml), garde R6 EXÉCUTABLE l.55-61 (échec si env SOBRIO_* posé ou onnxruntime/tokenizers importables). Les 6 tests de conformité router/tests/test_router_ci_workflow.py:30-66 rejoués VERTS (dans les 60 passed avec test_router_tools_fetch.py + test_router_corrections_r1.py, 0.26 s).",
+        "Suite router COMPLÈTE sous socket-interdit (plugin -p PYTHONPATH scratchpad : socket.socket.connect → AssertionError + hook d'audit CPython, zéro fichier repo modifié) : 611 passed / 4 skipped en 23.7 s, 0 événement socket.connect, seuls 3 urllib.Request TOUS en schéma file:// vers des tmp pytest (fixtures locales voulues du fetch). Cohérent avec les 662 router+api du message de commit fbb79d8 (le commit ne touche côté api que api/README.md). Arbre git PROPRE et HEAD fbb79d8 inchangé après TOUS les rejeux ; rien supprimé nulle part (scratchpad conservé).",
+        "requirements-embed NON installé : .venv/bin/pip list — aucun onnxruntime/tokenizers/torch/transformers/anthropic/openai ; seuls numpy 2.5.1 + lightgbm 4.6.0 (requirements-ml, R5) ; httpx 0.28.1 = stack imposée du connecteur Lot C (CLAUDE.md), pas une dépendance embed ni un SDK payant. router/requirements-embed.txt:6-16 : statut « NON INSTALLÉ à ce jour », pins onnxruntime/tokenizers EN COMMENTAIRE, numpy seul actif. Flags : env machine sans SOBRIO_* ; Makefile:110 = seule ligne posant SOBRIO_ALLOW_MODEL_DOWNLOAD=1 (cible router-embed-model, commentaire l.104-108 « jamais en CI, jamais à l'import »). Dépense mission constatée : 0,00 $ (aucun SDK payant installé, chemin réseau du fetch inexécutable sur le manifest committé, zéro connexion sortante pendant les rejeux)."
+      ]
+    }
+  ]
+}

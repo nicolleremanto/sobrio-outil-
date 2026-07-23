@@ -27,7 +27,7 @@ Escalade ponctuelle : un agent léger qui échoue 2 fois monte d'un cran (noté 
 
 ## Budgets (§7)
 
-Étage 1 p95 < 5 ms CPU · Étage 2 p95 < 30 ms CPU · `/v1/recommend` p95 < 150 ms ·
+Étage 1 p95 ≤ 5 ms CPU · Étage 2 p95 ≤ 30 ms CPU · `/v1/recommend` p95 < 150 ms ·
 RAM < 1 Go · artefacts : étage 1 < 20 Mo, étage 2 < 500 Mo · dépense API : 0,00 $.
 
 ---
@@ -41,7 +41,7 @@ RAM < 1 Go · artefacts : étage 1 < 20 Mo, étage 2 < 500 Mo · dépense API : 
 | R3       | Protocole d'évaluation & harnais + gate            | 2/2 (r5 & r6) | **CONVERGÉ** |
 | R4       | Corpus de démarrage à froid                        | 2/2 (r4 & r5) | **CONVERGÉ** |
 | R5       | Pipeline d'entraînement & classifieur v0.5         | 2/2 (r4 & r5) | **CONVERGÉ** |
-| R6       | Étage 2 embeddings (à construire, ÉTEINT par défaut) | 0/2         | à venir |
+| R6       | Étage 2 embeddings (construit, ÉTEINT ; geste fondateur différé) | 1/2 (r1) | en panels |
 | R7       | Recalibration, monitoring & déploiement VPS        | 0/2           | à venir |
 
 ---
@@ -1579,3 +1579,51 @@ soit, gitignoré compris.
   http (QA-R6-m2).
 - [cost] Garde anti-réseau en glob MANQUANTE sur router/sobrio_router/
   *.py — l'ajouter (constat cost-guard, spec §1.3/§10.7).
+
+**Corrections ronde 0 (lot fbb79d8) — exécuté et vérifié** (consignation
+exigée par ML-R6r1-m1/DQ-R6r1-m1) : les 3 majors + 5 minors appliqués en
+un lot, patch-verifier à contexte neuf OK — annexe R6 (+82 l., D1-D14 +
+D4 mot pour mot + recadrage), READMEs router/api à jour, 4 tests _embed
+(pooling masqué/L2/dégénéré/token_type_ids, calculs à la main, mutants
+masque et L2 TUÉS), REFUS exit 2 sur échec de téléchargement (except
+OSError — couvre URLError, sous-classe depuis Python 3.3 ; écart de
+lettre déclaré, garde AST oblige), zéro miroir §5.2bis au train
+(artefacts BIT-IDENTIQUES : head cd6b1ed2…, calibrator 3bf2b624… = Lot
+5 ; val_metrics identiques champ par champ — le miroir était fidèle),
+verrou croisé manifest↔littéraux (None == null), évals promote en tmp
+déposées après gardes (refus → git status bit-inchangé), schemes
+https/file + refus http, garde glob sobrio_router (10 modules +
+métatest). 662 router+api verts + 4 skips. Les « 3 écarts de métadonnées »
+du message de commit, détaillés ici (DQ-R6r1-m1) : (1) diff router/README
+réel +12/-1 vs « +13/-2 » revendiqué ; (2) libellé de preuve api/README
+« livraison datée » alors que la case [x] date par lot, pas par
+calendrier ; (3) mutant « L2 supprimée » : 2 failed revendiqués, la
+variante du vérificateur en tue 3 — mutation tuée dans les deux cas.
+
+## R6 — round 1 (commit fbb79d8, panel 6 juges Fable — archivé router/panels/R6-r1.json)
+
+| agent            | modèle | scores (dims)                                        | blocking | major | verdict |
+|------------------|--------|------------------------------------------------------|----------|-------|---------|
+| ml-architect (P) | fable  | spec5 pipeline5 calibration5 robustesse5 extens5     | 0        | 0     | GREEN   |
+| eval-scientist   | fable  | éval5 gate5 honnêteté4 repro5 budgets5               | 0        | 0     | GREEN   |
+| data-quality     | fable  | étanchéité5 intégrité5 robustesse5 traça4 global5    | 0        | 0     | GREEN   |
+| qa-auditor       | fable  | couverture5 contrat5 erreurs5 clarté5 régressions5   | 0        | 0     | GREEN   |
+| privacy-sentinel | fable  | — (0 violation)                                      | PASS     | —     | PASS    |
+| cost-guard       | fable  | — (0 violation, constat r0 corrigé)                  | PASS     | —     | PASS    |
+
+→ **Ronde VERTE — streak 1/2** (rondes 0-1 consommées, 6 restantes).
+Les 3 majors r0 vérifiés corrigés par les juges mêmes qui les avaient
+levés ; artefacts train re-prouvés bit-identiques par rejeu indépendant.
+
+**Minors r1 (6, tous documentaires ou minuscules) — appliqués par
+l'orchestrateur AVANT la ronde 2, vérifiés inline, jugés par elle :**
+- [ml+dq] Consignation du lot fbb79d8 + détail des 3 écarts : FAIT
+  ci-dessus (ML-R6r1-m1 = DQ-R6r1-m1).
+- [ml] Assert dtype int64 sur input_ids/attention_mask dans le test de
+  pooling (ML-R6r1-m2) : FAIT (test_router_embed.py, vérifié vert).
+- [es] D14 de l'annexe resserré au flux de promotion + mention des gestes
+  opérateur router-embed-eval/gate (ES-R6r1-m1) : FAIT.
+- [es] Tableau d'état R6 mis à jour (« construit, ÉTEINT ; geste
+  fondateur différé », 1/2, en panels) (ES-R6r1-m2) : FAIT.
+- [es] « < 30 ms » → « ≤ 30 ms » dans router/README.md:6 et le bandeau
+  budgets du ledger (ES-R6r1-m3) : FAIT.

@@ -238,7 +238,11 @@ dans `router/CONVERGENCE_LEDGER.md`) :
   plancher mesurable, pas de baseline sémantique fictive.
 - **D14 — Rapports embed** versionnés sous la convention de clôture R5 :
   régénérés aux promotions uniquement, déposés sous `router/artifacts/eval/`
-  APRÈS gate PASS + gardes seulement (un refus ne laisse rien — durci ronde 1).
+  APRÈS gate PASS + gardes seulement pour le flux de PROMOTION
+  (promote_embed : un refus ne laisse rien — durci ronde 1) ; les cibles
+  router-embed-eval/gate restent des gestes opérateur explicites qui
+  déposent leurs rapports à chaque invocation — ces rapports ne se
+  committent qu'aux promotions (convention R5).
 
 **Recadrage GESTE FONDATEUR (décision d'orchestration datée 2026-07-23,
 ledger)** : AUCUN agent ne choisit ni ne télécharge la source de l'export ONNX

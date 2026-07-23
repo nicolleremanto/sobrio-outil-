@@ -717,6 +717,10 @@ def test_embed_mean_pooling_masque_ignore_le_padding():
     assert set(entrees) == {"input_ids", "attention_mask"}
     assert entrees["input_ids"].tolist() == [[5, 7, 0]]
     assert entrees["attention_mask"].tolist() == [[1, 1, 0]]
+    # ML-R6r1-m2 : dtype NORMATIF (§5.2.4) asserté — un export ONNX réel
+    # refuse int32 ; le test doit l'attraper avant le runtime.
+    assert str(entrees["input_ids"].dtype) == "int64"
+    assert str(entrees["attention_mask"].dtype) == "int64"
 
 
 def test_embed_normalisation_l2_norme_1_valeurs_a_la_main():

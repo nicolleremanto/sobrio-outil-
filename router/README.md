@@ -4,7 +4,7 @@ Le moteur qui répond « quel modèle Claude suffit pour cette tâche ? » à pa
 de **signaux sans contenu** (règle n°1 : aucun texte de prompt stocké ni
 loggé). Architecture actée : `docs/decisions/ROUTEUR_CLASSIFIEUR.md` —
 classifieur à deux étages (LightGBM ≤ 5 ms, puis embeddings ONNX opt-in
-< 30 ms), séquence **v0 heuristique → v0.5 classifieur pré-entraîné → v1
+≤ 30 ms), séquence **v0 heuristique → v0.5 classifieur pré-entraîné → v1
 recalibré mensuellement par organisation**.
 
 ## Le package `sobrio_router` (stdlib seule — lightgbm PARESSEUX)
