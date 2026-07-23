@@ -41,8 +41,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 # Budget étage 1 (docs/decisions/ROUTEUR_CLASSIFIEUR.md « Budgets §7 ») :
-# p95 < 5 ms CPU. Paramètre `budget_ms` de `evaluate_gate` pour permettre à
-# R6 (étage 2 embeddings, budget p95 < 30 ms) de réutiliser cette même
+# p95 ≤ 5 ms CPU. Paramètre `budget_ms` de `evaluate_gate` pour permettre à
+# R6 (étage 2 embeddings, budget p95 ≤ 30 ms) de réutiliser cette même
 # fonction sans dupliquer la logique.
 _DEFAULT_BUDGET_MS = 5.0
 # Plafond ABSOLU de calibration — rationnel documenté dans

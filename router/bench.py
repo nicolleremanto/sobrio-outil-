@@ -1,6 +1,6 @@
 """Bench de l'étage 1 (SafeRouter + HeuristicRouter) — preuve du budget §7.
 
-Budget : p95 < 5 ms CPU (docs/decisions/ROUTEUR_CLASSIFIEUR.md). AUCUN texte
+Budget : p95 ≤ 5 ms CPU (docs/decisions/ROUTEUR_CLASSIFIEUR.md). AUCUN texte
 de prompt généré ni manipulé : uniquement des nombres, booléens et flags de
 vocabulaire fermé (règle n°1). Seed fixée (42) pour la reproductibilité
 (invariant « reproductibilité », même doc). Écrit un petit rapport JSON

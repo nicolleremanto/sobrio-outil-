@@ -43,10 +43,8 @@ from harness import _auto_band_calibration, compute_ece, weighted_accuracy  # no
 from loader import signal_signature  # noqa: E402
 
 from sobrio_router.features import (  # noqa: E402
-    CURRENT_MODEL_RANK,
     FEATURE_NAMES,
-    FLAG_VOCAB,
-    LANGS,
+    expected_feature_spec,
     signals_to_vector,
 )
 from sobrio_router.ml import CANDIDATE_DIR, LABEL_ORDER, interp_conf  # noqa: E402
@@ -387,18 +385,10 @@ def run_training(
             "numpy": numpy.__version__,
         },
         "label_mapping": {label: index for index, label in enumerate(LABEL_ORDER)},
-        "feature_spec": {
-            "names": list(FEATURE_NAMES),
-            "langs": list(LANGS),
-            "flag_vocab": list(FLAG_VOCAB),
-            # clé JSON : None (fil vierge) est sérialisé "null" (vocabulaire
-            # système — une clé JSON ne peut pas être nulle).
-            "current_model_rank": {
-                ("null" if model is None else model): rank
-                for model, rank in CURRENT_MODEL_RANK.items()
-            },
-            "version": "1",
-        },
+        # Constructeur UNIQUE (minors ml+dq r4) : le MÊME dict que la garde
+        # de dérive du chargeur (ml.py §7.1) — identique par construction
+        # (convention clé None -> "null" incluse, cf. features.py).
+        "feature_spec": expected_feature_spec(),
         "split": {
             "method": "signature_sha256_mod100",
             "val_pct": val_pct,
@@ -454,7 +444,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--seed", type=int, default=DEFAULT_SEED, help="graine LightGBM")
     parser.add_argument(
-        "--val-pct", type=int, default=DEFAULT_VAL_PCT, help="pourcent de buckets en val (0-99)"
+        "--val-pct", type=int, default=DEFAULT_VAL_PCT, help="pourcent de buckets en val [1, 99]"
     )
     args = parser.parse_args(argv)
 

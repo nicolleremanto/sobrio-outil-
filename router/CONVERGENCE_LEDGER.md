@@ -1355,3 +1355,15 @@ convergences R3/R4) :
 NB : le push vers origin est en retard (réseau GitHub injoignable depuis
 le commit 648e2fa) — à rattraper dès le retour du réseau ; tout est
 committé localement.
+
+**Lot de poli appliqué (avant panel ronde 5)** : les 8 items, vérifiés par
+patch-verifier à contexte neuf (OK, 0 écart) — iso-comportement du
+constructeur unique feature_spec prouvé par sha256 identique (littéral
+d'avant == expected_feature_spec() == metadata promu), mutants None et
+OSError tués par mutation rejouée, 334 router+api verts. Résidus de borne
+stricte consignés HORS lot (même régime que QA-R4-m4, « au prochain commit
+touchant le fichier » ou bilan de clôture R5) : router/README.md:7
+(« < 30 ms » étage 2, phrase enjambant la ligne corrigée) et
+router/tests/test_router_eval_harness.py:109 (commentaire) ; l'assert
+strict p95 < 5.0 de test_router_ml.py:76 reste volontairement plus
+exigeant que le budget inclusif (condition suffisante).

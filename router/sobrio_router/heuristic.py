@@ -169,7 +169,7 @@ def _always(_: Signals) -> bool:
 # bascule auto si confiance >= seuil). C'est VOULU : maths/raisonnement sur un
 # prompt long et explicite est un signal solide — la bascule automatique y est
 # légitime. Les confiances restent non calibrées statistiquement en v0
-# (TODO R5 : calibration Platt/isotonique sur données réelles).
+# (TODO R7/V1 : calibration Platt/isotonique sur données réelles).
 _RULES: tuple[_Rule, ...] = (
     _Rule("heuristic:code_context", _code_context, lambda _s: ("claude-sonnet-5", 0.70)),
     _Rule(

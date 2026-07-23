@@ -225,13 +225,14 @@ class _ConfianceInvalideRouter(Router):
 
 @pytest.mark.parametrize(
     "confiance",
-    [float("nan"), True, 1.5],
-    ids=["nan", "bool", "hors-bornes"],
+    [float("nan"), True, 1.5, None],
+    ids=["nan", "bool", "hors-bornes", "non-nombre"],
 )
 def test_evaluate_router_confiance_invalide_refus_structure(confiance: object):
-    """Minor es r3 : une confiance NaN, bool ou hors [0, 1] émise par un
+    """Minor es r3 : une confiance NaN, bool, hors [0, 1] ou non-nombre
+    (None, minor qa r4 — exerce la clause `not isinstance`) émise par un
     routeur NON enveloppé par SafeRouter -> ValueError STRUCTURÉE (même
     famille que le refus « modèle hors catalogue »), jamais le crash
-    `int(NaN)` illisible de `compute_ece`."""
+    `int(NaN)` illisible de `compute_ece` ni le `float(None)` TypeError."""
     with pytest.raises(ValueError, match="confiance invalide"):
         evaluate_router(_ConfianceInvalideRouter(confiance), load_golden()[:3])

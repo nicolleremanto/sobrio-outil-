@@ -2,7 +2,7 @@
 
 La fixture session `artefact_v05` (conftest.py) entraîne UNE fois via les
 fonctions réelles de `train_v05` sur le corpus de référence. Couvre : contrat
-de sortie, budgets MESURÉS (p95 < 5 ms, artefact < 20 Mo), déterminisme
+de sortie, budgets MESURÉS (p95 ≤ 5 ms, artefact < 20 Mo), déterminisme
 bit-exact de l'entraînement, propriété conservatrice de la calibration (§6)
 et chargement fail-closed (chaque corruption -> `MLRouterLoadError`, jamais
 une autre exception).
@@ -63,7 +63,7 @@ def test_decide_contrat(artefact_v05: Path):
 
 
 def test_latence_p95_unitaire(artefact_v05: Path):
-    """Budget §7 MESURÉ : p95 de 200 `decide()` unitaires < 5 ms."""
+    """Budget §7 MESURÉ : p95 de 200 `decide()` unitaires ≤ 5 ms."""
     router = MLRouter(artefact_v05)
     signals = _signals_varies(50)
     latences = []

@@ -3,7 +3,7 @@
 Le moteur qui répond « quel modèle Claude suffit pour cette tâche ? » à partir
 de **signaux sans contenu** (règle n°1 : aucun texte de prompt stocké ni
 loggé). Architecture actée : `docs/decisions/ROUTEUR_CLASSIFIEUR.md` —
-classifieur à deux étages (LightGBM < 5 ms, puis embeddings ONNX opt-in
+classifieur à deux étages (LightGBM ≤ 5 ms, puis embeddings ONNX opt-in
 < 30 ms), séquence **v0 heuristique → v0.5 classifieur pré-entraîné → v1
 recalibré mensuellement par organisation**.
 
@@ -49,7 +49,7 @@ JAMAIS commités : l'identité versionnée vit dans `metadata.json` (sha corpus
 ```bash
 .venv/bin/pip install -e router      # installation editable (une fois)
 .venv/bin/pytest router/tests -q     # tests du lot
-make router-bench                    # bench p95 (budget < 5 ms) → artifacts/bench/latest.json
+make router-bench                    # bench p95 (budget ≤ 5 ms) → artifacts/bench/latest.json
 make router-eval ROUTER=ml_v05       # éval du promu sur le golden figé (aussi : heuristic, ml_v05_candidate)
 ```
 

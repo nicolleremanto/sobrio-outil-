@@ -3,8 +3,9 @@
 Couvre : split par signature SANS fuite (recalcul indépendant), déterminisme
 du split, garde de stratification (REFUS exit 2), preuve que le train ne lit
 JAMAIS le set golden (exécution avec le fichier ABSENT), épinglage du corpus
-(octet muté -> REFUS), zéro texte dans les artefacts (jurisprudence R4) et
-metadata complet §8.1.
+(octet muté -> REFUS ; chemin inexistant -> REFUS « introuvable » sans
+traceback), zéro texte dans les artefacts (jurisprudence R4) et metadata
+complet §8.1.
 """
 
 from __future__ import annotations
@@ -157,6 +158,23 @@ def test_corpus_epingle(tmp_path: Path, capsys: pytest.CaptureFixture):
     assert code == 2
     err = capsys.readouterr().err
     assert "REFUS" in err and "sha256" in err
+    assert not (tmp_path / "out").exists()
+
+
+def test_corpus_introuvable_refuse(tmp_path: Path, capsys: pytest.CaptureFixture):
+    """Minor qa r4 : chemin --corpus INEXISTANT -> REFUS exit 2 « introuvable »,
+    ZÉRO traceback — le try/except OSError de `_charger_corpus_epingle`
+    convertit le FileNotFoundError en RefusError structurée (un mutant qui
+    retire cette conversion laisserait fuir un traceback non structuré)."""
+    # Même import paresseux traversé par main() (patron test_corpus_epingle) :
+    # sans lightgbm, le REFUS observé serait celui des dépendances — skip.
+    pytest.importorskip("lightgbm")
+    inexistant = tmp_path / "corpus-inexistant.jsonl.gz"
+    code = train_v05.main(["--corpus", str(inexistant), "--out-dir", str(tmp_path / "out")])
+    assert code == 2
+    err = capsys.readouterr().err
+    assert "REFUS" in err and "introuvable" in err
+    assert "Traceback" not in err
     assert not (tmp_path / "out").exists()
 
 

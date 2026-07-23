@@ -80,6 +80,32 @@ FEATURE_NAMES: tuple[str, ...] = (
     "derogations_up",
 )
 
+# Version du feature_spec ml_v05 (train §8.1) — littéral UNIQUE, consommé
+# exclusivement via `expected_feature_spec()`.
+FEATURE_SPEC_VERSION: str = "1"
+
+
+def expected_feature_spec() -> dict[str, object]:
+    """Feature_spec ml_v05 COURANT — constructeur UNIQUE (stdlib seule).
+
+    Consommé par les DEUX côtés du contrat artefact/code (minors ml+dq r4) :
+    l'écriture de `metadata["feature_spec"]` au train (train_v05 §8.1) ET la
+    garde de dérive fail-closed du chargeur (ml.py §7.1). Un bump de version
+    ou un champ ajouté s'édite désormais ICI, une seule fois.
+
+    Convention de sérialisation : la clé None de `CURRENT_MODEL_RANK` (fil
+    vierge) devient "null" — une clé JSON n'est jamais nulle.
+    """
+    return {
+        "names": list(FEATURE_NAMES),
+        "langs": list(LANGS),
+        "flag_vocab": list(FLAG_VOCAB),
+        "current_model_rank": {
+            ("null" if model is None else model): rank for model, rank in CURRENT_MODEL_RANK.items()
+        },
+        "version": FEATURE_SPEC_VERSION,
+    }
+
 
 def signals_to_vector(signals: Signals) -> list[float]:
     """Encode `signals` en vecteur de 22 flottants (ordre `FEATURE_NAMES`, §1).

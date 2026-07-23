@@ -22,7 +22,7 @@ import math
 from bisect import bisect_right
 from pathlib import Path
 
-from .features import CURRENT_MODEL_RANK, FEATURE_NAMES, FLAG_VOCAB, LANGS, signals_to_vector
+from .features import FEATURE_NAMES, expected_feature_spec, signals_to_vector
 from .interface import Router
 from .types import Decision, Signals
 
@@ -145,25 +145,16 @@ class MLRouter(Router):
             raise MLRouterLoadError(f"label_mapping deviant : {metadata_path}")
         # Garde de dérive ÉTENDUE à l'INTÉGRALITÉ du feature_spec (minor ml
         # r3) : names + langs + flag_vocab + current_model_rank + version,
-        # comparés aux constantes COURANTES de features.py — même patron
-        # fail-closed que label_mapping. Sans elle, un changement des VALEURS
-        # de rang de CURRENT_MODEL_RANK entre l'entraînement d'un artefact et
-        # son service chargerait l'ancien artefact avec une sémantique de
-        # feature décalée. Sérialisation identique au train (train_v05 §8.1) :
-        # la clé None (fil vierge) devient "null" (une clé JSON n'est jamais
-        # nulle) ; l'égalité de dict refuse TOUT écart (clé absente, valeur
-        # modifiée, clé en trop, non-dict).
-        expected_spec = {
-            "names": list(FEATURE_NAMES),
-            "langs": list(LANGS),
-            "flag_vocab": list(FLAG_VOCAB),
-            "current_model_rank": {
-                ("null" if model is None else model): rank
-                for model, rank in CURRENT_MODEL_RANK.items()
-            },
-            "version": "1",
-        }
-        if metadata.get("feature_spec") != expected_spec:
+        # comparés au spec COURANT de features.py — même patron fail-closed
+        # que label_mapping. Sans elle, un changement des VALEURS de rang de
+        # CURRENT_MODEL_RANK entre l'entraînement d'un artefact et son
+        # service chargerait l'ancien artefact avec une sémantique de feature
+        # décalée. Le spec attendu vient du constructeur UNIQUE
+        # `expected_feature_spec()` (minors ml+dq r4), le MÊME que celui
+        # écrit par le train (§8.1) — identique par construction ; l'égalité
+        # de dict refuse TOUT écart (clé absente, valeur modifiée, clé en
+        # trop, non-dict).
+        if metadata.get("feature_spec") != expected_feature_spec():
             raise MLRouterLoadError(f"feature_spec deviant : {metadata_path}")
 
         try:
