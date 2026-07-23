@@ -702,3 +702,69 @@ def test_gate_cli_rejects_huge_budget_and_accepts_valid_bounds(tmp_path):
     )
     assert at_bound.returncode == 0
     assert "VERDICT : PASS" in at_bound.stderr
+
+    # Borne haute SYMÉTRIQUE (minors ml+eval ronde 3) : --bande-ecart-max 0.5
+    # exact est dans ]0, 0.5] — accepté (l'écart du rapport, 0.02, passe) ;
+    # tue la mutation <= vers < sur _BANDE_ECART_MAX_BOUND comme le cas
+    # ci-dessus la tue sur _BUDGET_MS_MAX.
+    at_bande_bound = subprocess.run(
+        base_cmd + ["--bande-ecart-max", "0.5"], capture_output=True, text=True, timeout=30
+    )
+    assert at_bande_bound.returncode == 0
+    assert "VERDICT : PASS" in at_bande_bound.stderr
+
+
+def test_gate_cli_flags_operateur_font_basculer_le_verdict(tmp_path):
+    """Minor qa r3 (mutation de câblage) : chaque flag opérateur doit être
+    TRANSMIS à evaluate_gate() — un mutant qui retire budget_ms=args.budget_ms
+    ou bande_ecart_max=args.bande_ecart_max de l'appel dans main() échoue ici.
+    Chaque paire (sans flag -> FAIL exit 1, avec flag -> PASS exit 0) prouve
+    que la valeur OPÉRATEUR, pas le défaut, décide du verdict ; le chemin
+    exit 1 (gate FAIL normal) et sa ligne « VERDICT : FAIL » sont couverts."""
+    import json
+
+    gate_py = str(Path(__file__).resolve().parents[1] / "eval" / "gate.py")
+    canonical = golden_sha256()
+
+    def _run_gate(candidate: dict, baseline: dict, *flags: str) -> subprocess.CompletedProcess:
+        candidate_path = tmp_path / "candidate.json"
+        baseline_path = tmp_path / "baseline.json"
+        candidate_path.write_text(json.dumps(candidate))
+        baseline_path.write_text(json.dumps(baseline))
+        cmd = [sys.executable, gate_py, "--candidate", str(candidate_path)]
+        cmd += ["--baseline", str(baseline_path), *flags]
+        return subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+
+    # Budget : p95 20.0 ms > défaut 5.0 -> FAIL latence ; --budget-ms 30 -> PASS.
+    lent = _report(exactitude_ponderee=0.95, p95_ms=20.0, golden_sha=canonical)
+    base = _report(golden_sha=canonical)
+    sans_flag = _run_gate(lent, base)
+    assert sans_flag.returncode == 1
+    assert "FAIL latence" in sans_flag.stdout
+    assert "VERDICT : FAIL" in sans_flag.stderr and "Traceback" not in sans_flag.stderr
+    avec_flag = _run_gate(lent, base, "--budget-ms", "30")
+    assert avec_flag.returncode == 0, avec_flag.stdout
+    assert "VERDICT : PASS" in avec_flag.stderr
+
+    # Bande : écart 0.12 > défaut 0.10 (critère 7-bis) -> FAIL ;
+    # --bande-ecart-max 0.15 -> PASS. La baseline porte le MÊME écart 0.12 :
+    # le critère RELATIF (borne 0.12 + 0.02) reste PASS des deux côtés — seul
+    # le plafond ABSOLU, donc le flag, fait basculer le verdict.
+    bande = {
+        "seuil": 0.75,
+        "n": 40,
+        "taux_justesse": 0.66,
+        "confiance_moyenne": 0.78,
+        "ecart": 0.12,
+    }
+    large = _report(
+        exactitude_ponderee=0.95, golden_sha=canonical, calibration_bande_auto=dict(bande)
+    )
+    base_bande = _report(golden_sha=canonical, calibration_bande_auto=dict(bande))
+    sans_flag = _run_gate(large, base_bande)
+    assert sans_flag.returncode == 1
+    assert "FAIL bande-auto-absolu" in sans_flag.stdout
+    assert "VERDICT : FAIL" in sans_flag.stderr and "Traceback" not in sans_flag.stderr
+    avec_flag = _run_gate(large, base_bande, "--bande-ecart-max", "0.15")
+    assert avec_flag.returncode == 0, avec_flag.stdout
+    assert "VERDICT : PASS" in avec_flag.stderr

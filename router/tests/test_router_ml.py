@@ -19,8 +19,8 @@ from pathlib import Path
 import pytest
 from conftest_helpers import make_signals
 
-from sobrio_router import VISIBLE_MODELS
-from sobrio_router.ml import MLRouter, MLRouterLoadError
+from sobrio_router import VISIBLE_MODELS, SafeRouter
+from sobrio_router.ml import PROMOTED_DIR, MLRouter, MLRouterLoadError
 
 pytest.importorskip("lightgbm")
 
@@ -85,6 +85,11 @@ def test_taille_artefact(artefact_v05: Path):
 def test_determinisme_train(tmp_path: Path):
     """DEUX entraînements complets même seed -> model.txt et calibrator.json IDENTIQUES."""
     import train_v05
+
+    # Garde clone-frais (major dq r3) : le corpus de référence est gitignoré —
+    # sans lui, run_training lèverait RefusError (ERROR au lieu de skip).
+    if not train_v05.DEFAULT_CORPUS_PATH.is_file():
+        pytest.skip("corpus de référence absent — régénérer via make router-corpus")
 
     out_a = tmp_path / "run-a"
     out_b = tmp_path / "run-b"
@@ -182,3 +187,84 @@ def test_chargement_fail_closed(artefact_v05: Path, tmp_path: Path, cas: str):
     _CORRUPTIONS[cas](directory)
     with pytest.raises(MLRouterLoadError):
         MLRouter(directory)
+
+
+# ---------------------------------------------------------------------------
+# Garde de dérive ÉTENDUE du feature_spec (minor ml r3) : names + langs +
+# flag_vocab + current_model_rank + version comparés aux constantes COURANTES
+# de features.py au chargement (names était déjà couvert par _CORRUPTIONS).
+# ---------------------------------------------------------------------------
+
+
+def _muter_feature_spec(directory: Path, cle: str, valeur: object) -> None:
+    """Mute UNE clé du feature_spec de metadata.json (dérive artefact/code)."""
+    metadata_path = directory / "metadata.json"
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    metadata["feature_spec"][cle] = valeur
+    metadata_path.write_text(json.dumps(metadata), encoding="utf-8")
+
+
+# Une dérive par champ ÉTENDU ; current_model_rank vise EXACTEMENT le scénario
+# du constat : la VALEUR d'un rang change entre l'entraînement et le service
+# (clés et longueur inchangées — seule l'égalité des VALEURS refuse).
+_DERIVES_FEATURE_SPEC: dict[str, tuple[str, object]] = {
+    "langs_ordre_deviant": ("langs", ["en", "fr", "other"]),
+    "flag_vocab_ampute": (
+        "flag_vocab",
+        ["analyse", "code", "contrat", "demonstration", "resume"],
+    ),
+    "current_model_rank_valeur_deviante": (
+        "current_model_rank",
+        {
+            "null": 0.0,
+            "claude-haiku-4-5": 1.0,
+            "claude-sonnet-5": 2.0,
+            "claude-opus-4-8": 9.0,
+            "claude-fable-5": 4.0,
+        },
+    ),
+    "version_deviante": ("version", "2"),
+}
+
+
+@pytest.mark.parametrize("cas", sorted(_DERIVES_FEATURE_SPEC), ids=str)
+def test_feature_spec_etendu_derive_fail_closed(artefact_v05: Path, tmp_path: Path, cas: str):
+    """Chaque champ étendu trafiqué -> `MLRouterLoadError` à la CONSTRUCTION."""
+    directory = tmp_path / cas
+    shutil.copytree(artefact_v05, directory)
+    cle, valeur = _DERIVES_FEATURE_SPEC[cas]
+    _muter_feature_spec(directory, cle, valeur)
+    with pytest.raises(MLRouterLoadError, match="feature_spec"):
+        MLRouter(directory)
+
+
+def test_artefact_promu_actuel_charge_toujours():
+    """Non-régression de la garde étendue : l'artefact PROMU du poste charge
+    (son metadata.json consigne déjà le feature_spec INTÉGRAL, train §8.1)."""
+    fichiers = ("model.txt", "calibrator.json", "metadata.json")
+    if not all((PROMOTED_DIR / nom).is_file() for nom in fichiers):
+        pytest.skip("artefact promu absent (gitignoré) — clone frais")
+    router = MLRouter(PROMOTED_DIR)
+    decision = router.decide(_signals_varies(1)[0])
+    assert decision.model in VISIBLE_MODELS
+    assert decision.rule == "ml:v05"
+
+
+def test_derive_feature_spec_derriere_saferouter_replie(artefact_v05: Path, tmp_path: Path):
+    """Invariant §5.2 : la dérive étendue refusée au chargement ne rend JAMAIS
+    l'API indisponible — même chemin que le bridge (`MLRouterLoadError` à la
+    construction -> `SafeRouter(primary=None)`) : chaque décision part du
+    repli heuristique, marquée `fallback:heuristic`."""
+    directory = tmp_path / "derive-derriere-safe"
+    shutil.copytree(artefact_v05, directory)
+    _muter_feature_spec(directory, "version", "2")
+    try:
+        primary = MLRouter(directory)
+    except MLRouterLoadError:
+        primary = None
+    assert primary is None, "la garde étendue aurait dû refuser l'artefact dérivé"
+    safe = SafeRouter(primary=primary)
+    for signals in _signals_varies(10):
+        decision = safe.decide(signals)
+        assert decision.model in VISIBLE_MODELS
+        assert decision.rule == "fallback:heuristic"

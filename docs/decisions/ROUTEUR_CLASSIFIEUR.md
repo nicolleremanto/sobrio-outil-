@@ -11,7 +11,7 @@ PAS un LLM** :
 
 - **Étage 1 — gradient boosting (LightGBM)** sur les signaux structurés du contrat
   (`signals.prompt` + `signals.conversation`, RFC-0001) : multiclasse sur les ids du
-  catalogue, **p95 < 5 ms CPU**, artefact < 20 Mo.
+  catalogue, **p95 ≤ 5 ms CPU**, artefact < 20 Mo.
 - **Étage 2 — embeddings multilingues (optionnel, opt-in par organisation)** :
   `multilingual-e5-small` exporté **ONNX** (int8 si la qualité est préservée) + tête
   calibrée. **p95 < 30 ms CPU.** Le texte est traité **en mémoire uniquement, jamais
@@ -155,9 +155,11 @@ tout se branche derrière ; rien ne change côté extension ni côté contrat `/
 
 ## §7 — Budgets (miroir du ledger)
 
-Étage 1 p95 < 5 ms CPU · Étage 2 p95 < 30 ms CPU · `/v1/recommend` p95
+Étage 1 p95 ≤ 5 ms CPU · Étage 2 p95 < 30 ms CPU · `/v1/recommend` p95
 < 150 ms · RAM < 1 Go · artefacts : étage 1 < 20 Mo, étage 2 < 500 Mo ·
-dépense API : 0,00 $.
+dépense API : 0,00 $. Convention de borne (harmonisée r4) : les budgets de
+latence du gate s'entendent INCLUSIFS — un p95 exactement égal au budget
+passe (`p95 ≤ budget`, `gate.py`, conforme à la section « seuils chiffrés »).
 
 ## Alternatives rejetées
 

@@ -13,6 +13,8 @@ import gzip
 import hashlib
 import json
 import re
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -75,6 +77,10 @@ def test_garde_stratification(
 ):
     """Split artificiellement déséquilibré (> 3 points) -> REFUS exit 2 (CLI)."""
     pytest.importorskip("lightgbm")
+    # Garde clone-frais (major dq r3) : sans corpus, main() refuse « corpus
+    # introuvable » AVANT la garde de stratification — l'assertion serait fausse.
+    if not train_v05.DEFAULT_CORPUS_PATH.is_file():
+        pytest.skip("corpus de référence absent — régénérer via make router-corpus")
 
     def _split_desequilibre(rows: list[dict], val_pct: int = 15):
         # Toutes les lignes opus en val : la part de classe dévie largement.
@@ -97,6 +103,9 @@ def test_train_ne_lit_jamais_golden(tmp_path: Path, monkeypatch: pytest.MonkeyPa
     """Sandbox où le set golden est ABSENT (seul le fichier de hash présent) :
     l'entraînement ABOUTIT — le train ne lit que la provenance, jamais le set."""
     pytest.importorskip("lightgbm")
+    # Garde clone-frais (major dq r3) : run_training lit le corpus de référence.
+    if not train_v05.DEFAULT_CORPUS_PATH.is_file():
+        pytest.skip("corpus de référence absent — régénérer via make router-corpus")
     sandbox = tmp_path / "golden-sandbox"
     sandbox.mkdir()
     (sandbox / "GOLDEN_SHA256").write_bytes((_GOLDEN_DIR / "GOLDEN_SHA256").read_bytes())
@@ -119,6 +128,10 @@ def test_train_ne_lit_jamais_golden(tmp_path: Path, monkeypatch: pytest.MonkeyPa
 
 def test_golden_sha_malforme_refuse(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys):
     """Fichier de hash absent ou malformé (1er champ != 64 hex) -> REFUS exit 2."""
+    # Le chemin main() traverse l'import paresseux de run_training (major dq
+    # r3) : sans lightgbm, le refus observé serait celui des dépendances, pas
+    # celui du hash golden — skip pour rester un témoin honnête de SA garde.
+    pytest.importorskip("lightgbm")
     mauvais = tmp_path / "GOLDEN_SHA256"
     mauvais.write_text("pasunhash\n", encoding="utf-8")
     monkeypatch.setattr(train_v05, "GOLDEN_SHA_PATH", mauvais)
@@ -131,6 +144,9 @@ def test_golden_sha_malforme_refuse(tmp_path: Path, monkeypatch: pytest.MonkeyPa
 
 def test_corpus_epingle(tmp_path: Path, capsys: pytest.CaptureFixture):
     """Corpus muté d'UN octet -> sha != référence -> REFUS exit 2 (aucun contournement)."""
+    # Même import paresseux traversé par main() (major dq r3) : sans lightgbm,
+    # le REFUS observé ne serait pas celui de l'épinglage sha256 — skip.
+    pytest.importorskip("lightgbm")
     if not train_v05.DEFAULT_CORPUS_PATH.is_file():
         pytest.skip("corpus de référence absent — régénérer via make router-corpus")
     octets = bytearray(train_v05.DEFAULT_CORPUS_PATH.read_bytes())
@@ -142,6 +158,59 @@ def test_corpus_epingle(tmp_path: Path, capsys: pytest.CaptureFixture):
     err = capsys.readouterr().err
     assert "REFUS" in err and "sha256" in err
     assert not (tmp_path / "out").exists()
+
+
+@pytest.mark.parametrize("valeur", ["0", "100"])
+def test_val_pct_hors_bornes_refuse(valeur: str, capsys: pytest.CaptureFixture):
+    """Minor qa r3 : la garde CLI DÉDIÉE --val-pct hors [1, 99] refuse exit 2
+    avec SON message (« [1, 99] ») — distinct du refus « partition vide » de
+    verifier_stratification (un mutant qui supprime la garde est ainsi tué).
+    La garde précède toute dépendance et toute lecture : aucun corpus ni
+    lightgbm requis (clone frais compris)."""
+    assert train_v05.main(["--val-pct", valeur]) == 2
+    err = capsys.readouterr().err
+    assert "REFUS" in err and "[1, 99]" in err
+
+
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+
+# Patron _SCRIPT_HEURISTIC_SANS_LIGHTGBM (test_router_eval_gate_hardening) :
+# meta-path finder qui BLOQUE lightgbm dans un interpréteur frais.
+_SCRIPT_TRAIN_SANS_LIGHTGBM = """
+import sys
+
+
+class _BloqueurLightgbm:
+    def find_spec(self, name, path=None, target=None):
+        if name == "lightgbm" or name.startswith("lightgbm."):
+            raise ImportError("lightgbm bloque (simulation absence)")
+        return None
+
+
+sys.meta_path.insert(0, _BloqueurLightgbm())
+sys.path.insert(0, "router/train")
+import train_v05
+
+raise SystemExit(train_v05.main(["--out-dir", sys.argv[1]]))
+"""
+
+
+def test_cli_sans_lightgbm_refus_propre(tmp_path: Path):
+    """Minors dq+qa r3 : CLI train SANS lightgbm -> exit 2, « REFUS :
+    dépendances d'entraînement absentes … requirements-ml », ZÉRO traceback
+    (l'import paresseux de run_training est converti en RefusError — même
+    patron que MLRouter). Le refus précède toute lecture et toute écriture."""
+    proc = subprocess.run(
+        [sys.executable, "-c", _SCRIPT_TRAIN_SANS_LIGHTGBM, str(tmp_path / "jamais-ecrit")],
+        capture_output=True,
+        text=True,
+        cwd=_REPO_ROOT,
+        timeout=120,
+    )
+    assert proc.returncode == 2, proc.stderr
+    assert "REFUS" in proc.stderr and "requirements-ml" in proc.stderr
+    assert "Traceback" not in proc.stderr
+    assert not (tmp_path / "jamais-ecrit").exists()
 
 
 def _chaines(node: object):

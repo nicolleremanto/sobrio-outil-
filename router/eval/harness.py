@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import subprocess
 import sys
 import time
@@ -280,6 +281,24 @@ def evaluate_router(router: Router, entries: list[GoldenEntry]) -> dict:
             raise ValueError(
                 f"modèle hors catalogue visible rencontré dans l'éval : {model!r} — "
                 "le routeur évalué doit garantir une sortie dans VISIBLE_MODELS "
+                "(l'envelopper dans SafeRouter, invariant §5.2)"
+            )
+
+    # Garde défensive SYMÉTRIQUE (minor es r3) : chaque confiance doit être un
+    # réel FINI dans [0, 1], bool exclu (patron `_is_finite_number` de
+    # gate.py). Un routeur NON enveloppé par SafeRouter qui émettrait NaN
+    # ferait sinon crasher `compute_ece` (int(NaN)) en ValueError illisible —
+    # refus bruyant structuré, analogue au modèle hors catalogue ci-dessus.
+    for confidence in confidences:
+        if (
+            isinstance(confidence, bool)
+            or not isinstance(confidence, (int, float))
+            or not math.isfinite(float(confidence))
+            or not (0.0 <= float(confidence) <= 1.0)
+        ):
+            raise ValueError(
+                f"confiance invalide rencontrée dans l'éval : {confidence!r} — "
+                "le routeur évalué doit garantir un réel fini dans [0, 1] "
                 "(l'envelopper dans SafeRouter, invariant §5.2)"
             )
 

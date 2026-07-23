@@ -22,7 +22,7 @@ import math
 from bisect import bisect_right
 from pathlib import Path
 
-from .features import FEATURE_NAMES, signals_to_vector
+from .features import CURRENT_MODEL_RANK, FEATURE_NAMES, FLAG_VOCAB, LANGS, signals_to_vector
 from .interface import Router
 from .types import Decision, Signals
 
@@ -143,9 +143,28 @@ class MLRouter(Router):
         expected_mapping = {label: index for index, label in enumerate(LABEL_ORDER)}
         if metadata.get("label_mapping") != expected_mapping:
             raise MLRouterLoadError(f"label_mapping deviant : {metadata_path}")
-        feature_spec = metadata.get("feature_spec")
-        if not isinstance(feature_spec, dict) or feature_spec.get("names") != list(FEATURE_NAMES):
-            raise MLRouterLoadError(f"feature_spec.names deviant : {metadata_path}")
+        # Garde de dérive ÉTENDUE à l'INTÉGRALITÉ du feature_spec (minor ml
+        # r3) : names + langs + flag_vocab + current_model_rank + version,
+        # comparés aux constantes COURANTES de features.py — même patron
+        # fail-closed que label_mapping. Sans elle, un changement des VALEURS
+        # de rang de CURRENT_MODEL_RANK entre l'entraînement d'un artefact et
+        # son service chargerait l'ancien artefact avec une sémantique de
+        # feature décalée. Sérialisation identique au train (train_v05 §8.1) :
+        # la clé None (fil vierge) devient "null" (une clé JSON n'est jamais
+        # nulle) ; l'égalité de dict refuse TOUT écart (clé absente, valeur
+        # modifiée, clé en trop, non-dict).
+        expected_spec = {
+            "names": list(FEATURE_NAMES),
+            "langs": list(LANGS),
+            "flag_vocab": list(FLAG_VOCAB),
+            "current_model_rank": {
+                ("null" if model is None else model): rank
+                for model, rank in CURRENT_MODEL_RANK.items()
+            },
+            "version": "1",
+        }
+        if metadata.get("feature_spec") != expected_spec:
+            raise MLRouterLoadError(f"feature_spec deviant : {metadata_path}")
 
         try:
             booster = lgb.Booster(model_file=str(model_path))

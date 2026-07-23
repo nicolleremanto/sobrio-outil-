@@ -19,6 +19,8 @@ import math
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "eval"))
 
 from harness import (  # noqa: E402
@@ -29,6 +31,8 @@ from harness import (  # noqa: E402
     weighted_accuracy,
 )
 from loader import load_golden  # noqa: E402
+
+from sobrio_router import Decision, Router, Signals  # noqa: E402
 
 # Clés EXACTES attendues du rapport complet (métriques + métadonnées).
 _EXPECTED_KEYS = {
@@ -202,3 +206,32 @@ def test_compute_ece_bounded_in_unit_interval():
     confidences = [0.05, 0.15, 0.55, 0.95, 0.42]
     corrects = [True, False, True, False, True]
     assert 0.0 <= compute_ece(confidences, corrects) <= 1.0
+
+
+# ---------------------------------------------------------------------------
+# Garde des confiances d'`evaluate_router` (minor es r3) : refus STRUCTURÉ.
+# ---------------------------------------------------------------------------
+
+
+class _ConfianceInvalideRouter(Router):
+    """Routeur factice NON enveloppé : modèle du catalogue, confiance invalide."""
+
+    def __init__(self, confidence: object) -> None:
+        self._confidence = confidence
+
+    def decide(self, signals: Signals) -> Decision:
+        return Decision(model="claude-sonnet-5", confidence=self._confidence, rule="factice")
+
+
+@pytest.mark.parametrize(
+    "confiance",
+    [float("nan"), True, 1.5],
+    ids=["nan", "bool", "hors-bornes"],
+)
+def test_evaluate_router_confiance_invalide_refus_structure(confiance: object):
+    """Minor es r3 : une confiance NaN, bool ou hors [0, 1] émise par un
+    routeur NON enveloppé par SafeRouter -> ValueError STRUCTURÉE (même
+    famille que le refus « modèle hors catalogue »), jamais le crash
+    `int(NaN)` illisible de `compute_ece`."""
+    with pytest.raises(ValueError, match="confiance invalide"):
+        evaluate_router(_ConfianceInvalideRouter(confiance), load_golden()[:3])

@@ -288,9 +288,18 @@ def run_training(
     """
     # Dépendances d'ENTRAÎNEMENT (router/requirements-ml.txt), importées ici
     # PARESSEUSEMENT : le module reste importable sans elles (les fonctions
-    # pures — split, PAV, gardes — se testent sans lightgbm).
-    import lightgbm as lgb
-    import numpy
+    # pures — split, PAV, gardes — se testent sans lightgbm). ImportError ->
+    # RefusError (minors dq+qa r3) : le contrat CLI fail-closed (exit 2,
+    # « REFUS », zéro traceback) tient AUSSI sans requirements-ml — même
+    # patron que le chargeur (ml.py : ImportError -> MLRouterLoadError).
+    try:
+        import lightgbm as lgb
+        import numpy
+    except ImportError as exc:
+        raise RefusError(
+            f"dépendances d'entraînement absentes ({exc.__class__.__name__}) — "
+            "installer router/requirements-ml.txt"
+        ) from exc
 
     golden_sha = _lire_golden_sha()
     rows, corpus_sha = _charger_corpus_epingle(corpus_path)

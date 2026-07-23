@@ -1277,3 +1277,35 @@ router/panels/R5-r3.json + la liste ci-dessus), soit dépiler le stash et le
 faire re-vérifier intégralement (patch-verifier + simulations clone-frais)
 avant tout commit. Puis panel ronde 4. Compteur inchangé : rondes 0-3
 consommées, 4 restantes, streak 0/2.
+
+## Reprise après pause longue (2026-07-23) — grande vérification puis ronde 4
+
+Directive fondateur : reprise autorisée avec « une grande phase de
+vérification pour voir ce qui a été fait et ce qui reste à faire ». Panel
+de 3 vérificateurs Fable à contexte neuf (exec, bilan, stash) → **GO**.
+
+- **Acquis intact après 4 jours** : 319 router+api verts, ruff vert,
+  empreintes recalculées conformes (golden 6120df28, modèle 43a61267,
+  corpus be96b691), gate rejoué en lecture seule = PASS 9/9 bit-identique.
+- **Bilan fait/reste** : R1-R4 re-vérifiés convergés pièce par pièce ;
+  chaîne des 8 commits R5 intacte ; archive R5-r3.json cohérente avec le
+  ledger, aucun constat de panel perdu dans la consolidation.
+- **Stash ronde 4 audité en lecture seule** : ~70 % du lot présent et
+  statiquement cohérent (major 5/5 jumeaux ; minors 1, 4, 6 complets ;
+  5 et 7 code-complets SANS leurs tests) ; items 2-3 ABSENTS
+  (test_router_eval_gate_hardening.py jamais touché). Décision
+  d'orchestration : `git stash apply` (stash conservé en filet jusqu'au
+  vert), complétion des 4 trous (items 2, 3, tests de 5, test de 7 ;
+  couverture de 4 à confirmer), puis re-vérification INTÉGRALE
+  (patch-verifier + simulations clone-frais/sans-lightgbm) avant commit.
+- **Items orphelins repêchés par le bilan, dotés d'un propriétaire** :
+  (a) rapports d'éval versionnés à champs volatils → inscrit à l'ordre du
+  jour de la CLÔTURE R5 (décision : les exclure du versionnage ou les
+  régénérer à chaque promotion — trancher au bilan de convergence R5) ;
+  (b) garde anti-réseau de router/data/ en liste figée (vs glob côté
+  train) → entrée du chantier R6, qui ajoutera des modules ;
+  (c) étiquette « TODO R5 » périmée dans heuristic.py (calibration données
+  réelles = R7/V1) → à renommer au prochain commit touchant ce fichier ;
+  (d) vigilance R3-r6 (le garde-fou du test paramétré des bornes choisit
+  sa référence par heuristique) → transmise au builder ronde 4 qui ajoute
+  des cas de bornes.
