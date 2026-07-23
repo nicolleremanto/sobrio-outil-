@@ -1473,3 +1473,19 @@ télémétrie v1).
   sha256, 530 router+api verts + 3 skips légitimes (importorskip encodeur).
   Traçabilité : comptes par fichier SOUS-revendiqués par le builder (71+3
   réels vs 63+3 ; 20 vs 17) — total global 530 exact, livré ⊇ revendiqué.
+- **Lot 4** : intégration API — bridge embed_v0 en cascade fail-soft
+  (étage 2 jamais instancié si env OFF ; EmbedLoadError → stage2=None →
+  ml:v05 servi ; étage 1 KO → fallback:heuristic ; API 200 dans tous les
+  cas, prouvé avec le modèle réellement absent), triple verrou opt-in
+  (env SOBRIO_EMBED_STAGE2="1" strict + policy send_prompt_text is True
+  strict + texte présent ; sinon texte détruit dès routes.py — spy : le
+  kwarg n'est jamais passé dans les 7 cas non tout-ouverts), handler 422
+  RequestValidationError en liste blanche (input/ctx caviardés, clés
+  inconnues OMISES — durcissement au-delà de la spec, consigné), 3 cas
+  E2E no-leak d'erreur (422 ×2, 500 OperationalError réelle avec texte en
+  locals — sentinelle absente des logs/DB entière/réponse/traceback),
+  télémétrie et contrat INTOUCHÉS (prompt_text/send_prompt_text étaient
+  déjà au contrat v1.x — zéro RFC). Vérifié OK 0 écart : 3 mutations
+  tuées (caviardage, is True→==, verrou env), 552 router+api verts + 3
+  skips. Limite assumée : lru_cache ⇒ redémarrage API sur changement
+  d'env/artefact (TODO R7).

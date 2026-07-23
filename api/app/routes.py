@@ -23,7 +23,7 @@ from .auth import Org, get_current_org
 from .catalog import visible_model_ids
 from .db import get_session
 from .router import build_alternatives, build_impact_estimate
-from .router_bridge import router_for_org
+from .router_bridge import _stage2_unlocked, router_for_org
 from .schemas import (
     ExtensionConfig,
     RecoEvent,
@@ -50,20 +50,30 @@ def recommend(
     org: Annotated[Org, Depends(get_current_org)],
     session: Annotated[Session, Depends(get_session)],
 ) -> RecommendResponse:
-    """Recommande un modèle à partir des features — jamais du texte.
+    """Recommande un modèle à partir des features — le texte n'est traité
+    qu'EN MÉMOIRE, et seulement triple verrou ouvert (R6, spec §3).
 
-    RÈGLE n°1 : `prompt_text`, s'il est fourni (opt-in de l'org, v1), est
-    traité EN MÉMOIRE uniquement — jamais stocké, jamais loggé. En v0 il est
-    volontairement IGNORÉ : la décision ne repose que sur les features.
-    TODO(LotB) : exploitation en mémoire du texte quand l'org l'autorise.
+    RÈGLE n°1 : `prompt_text`, s'il est fourni, n'est JAMAIS stocké ni loggé.
+    TRIPLE VERROU (§3) : il n'atteint le routeur que si l'environnement
+    (`SOBRIO_EMBED_STAGE2="1"`), la politique de l'org (`router_version ==
+    "embed_v0"` ET `send_prompt_text == true`) ET la requête (texte présent)
+    l'ouvrent SIMULTANÉMENT. Sinon, il est DÉTRUIT dès la première ligne —
+    « REFUS de traiter le texte » silencieux : l'étage 1 seul répond,
+    réponse 200 contractuelle normale.
     """
-    # Ne pas relire body.prompt_text au-delà de cette ligne : ignoré en v0.
+    # TRIPLE VERROU (§3.3) : extraction gardée, puis destruction immédiate —
+    # `body.prompt_text` n'est plus JAMAIS relu ensuite (chemin « verrous
+    # fermés » = le `del` inconditionnel historique).
+    prompt_text = body.prompt_text if _stage2_unlocked(org.policy_json) else None
     del body.prompt_text
 
     # Adaptateur transitoire features -> signals (RFC-0001) ; routeur
     # effectif résolu par org (policy_json.router_version — chantier R1).
-    signals = features_to_signals(body.features)
+    # Le texte, s'il subsiste, transite par les signaux EN MÉMOIRE SEULEMENT
+    # (verrou de sérialisation `PromptSignals.__reduce__`, R6 Lot 1).
+    signals = features_to_signals(body.features, prompt_text=prompt_text)
     decision = router_for_org(org.policy_json).decide(signals)
+    del prompt_text
     alternatives = build_alternatives(decision.model, body.features)
     impact = build_impact_estimate(decision.model, body.features)
     reco_id = uuid4()
