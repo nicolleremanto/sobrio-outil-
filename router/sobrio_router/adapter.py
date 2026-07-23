@@ -35,7 +35,7 @@ class _FeaturesLike(Protocol):
     keyword_flags: list[str]
 
 
-def features_to_signals(features: _FeaturesLike) -> Signals:
+def features_to_signals(features: _FeaturesLike, *, prompt_text: str | None = None) -> Signals:
     """Mappe le bloc `features` v1.x vers `Signals`, conversation NEUTRE.
 
     - `has_math` : absent de `features` v1.0 (signal introduit par
@@ -54,8 +54,12 @@ def features_to_signals(features: _FeaturesLike) -> Signals:
     - `conversation` : tous les champs à leur valeur neutre (zéro / False /
       None) — pas de mémoire de conversation tant que le contrat ne la
       transporte pas.
-    - `prompt_text` : JAMAIS alimenté par cet adaptateur (v0 l'ignore ; le
-      contrat d'usage strict est documenté sur `PromptSignals`).
+    - `prompt_text` (keyword-only, R6 Lot 1) : `None` par défaut — l'appel
+      SANS kwarg reste bit-identique à R5. Fourni (triple verrou §3 ouvert,
+      câblé au Lot 4), il est ATTACHÉ tel quel à `PromptSignals` : aucune
+      validation, transformation ni journalisation — le texte ne fait que
+      transiter EN MÉMOIRE vers l'étage 2 (contrat d'usage strict documenté
+      sur `PromptSignals`, verrou de sérialisation compris).
     """
     keyword_flags = tuple(features.keyword_flags)
     if features.has_attachment_hint and "analyse" not in keyword_flags:
@@ -67,6 +71,7 @@ def features_to_signals(features: _FeaturesLike) -> Signals:
         has_code=features.has_code,
         has_math=False,
         keyword_flags=keyword_flags,
+        prompt_text=prompt_text,
     )
     conversation = ConversationSignals()
     return Signals(prompt=prompt, conversation=conversation)

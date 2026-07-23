@@ -38,6 +38,22 @@ class PromptSignals:
     # l'étage 2 alimentera ce champ. Testé (test_router_corrections_r1).
     prompt_text: str | None = field(default=None, repr=False)
 
+    def __reduce__(self) -> str | tuple[object, ...]:
+        """Verrou de sérialisation conditionnel (EXIGENCE R6 du ledger, D7, spec §6.2).
+
+        Porteur de texte, ce signal ne se sérialise JAMAIS : pickle — et
+        `copy.deepcopy`, qui passe par `__reduce_ex__` — lèvent TypeError,
+        message SANS le contenu. Sans texte, comportement d'origine
+        strictement inchangé (les signaux « features seules » restent
+        sérialisables : compat tests et usages antérieurs à R6).
+        Testé deux branches + mutation (test_router_embed_privacy).
+        """
+        if self.prompt_text is not None:
+            raise TypeError(
+                "PromptSignals porteur de texte : sérialisation interdite (règle n°1, R6)"
+            )
+        return super().__reduce__()
+
 
 @dataclass(frozen=True)
 class ConversationSignals:
