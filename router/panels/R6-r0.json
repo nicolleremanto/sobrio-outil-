@@ -1,0 +1,193 @@
+{
+  "chantier": "R6",
+  "round": 0,
+  "head": "8de5152",
+  "date": "2026-07-23",
+  "ronde": "JAUNE",
+  "incident": "juge qa-auditor : rm -rf router/artifacts/embed (artefacts gitignorés régénérables) — état restauré bit-identique par make router-embed-train (sha cd6b1ed2/3bf2b624 = Lot 5)",
+  "juges": [
+    {
+      "agent": "ml-architect",
+      "chantier": "R6",
+      "round": 0,
+      "scores": {
+        "spec": 5,
+        "pipeline": 5,
+        "calibration": 5,
+        "robustesse": 5,
+        "extensibilite": 4
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "ML-R6r0-m1",
+          "quoi": "La chaîne §5.2bis est DUPLIQUÉE dans train_head_v0._confiances_servies (appel interp_conf + littéral CONFIDENCE_CAP_V0 + clamp), en contradiction avec la lettre de §5.2bis (« aucun autre code du repo n'appelle interp_conf ni ne lit confidence_cap pour l'étage 2 » — predict = seule porte de sortie). Ce miroir n'est verrouillé par aucun test d'égalité : il peut dériver silencieusement de EmbedHead.predict. Impact borné : il n'alimente que val_metrics du metadata (indicatif — l'éval qui fait foi est harness_embed, qui passe bien par predict), le gate et le service sont intacts (vérifié par exécution : gate rejoué PASS bit-identique au ledger).",
+          "ou": "router/train/train_head_v0.py:133-145 (vs router/sobrio_router/embed.py:252-278 et spec SPEC_R6.md §5.2bis)",
+          "correction": "Dans run_training, construire EmbedHead(w, b, calib_x, calib_y, CONFIDENCE_CAP_V0) et dériver conf_emises via predict ligne à ligne (supprime _confiances_servies) ; à défaut, ajouter un test d'égalité bit-identique miroir↔predict sur un panel seedé (patron iso-confiance §10.4)."
+        },
+        {
+          "id": "ML-R6r0-m2",
+          "quoi": "Aucun test ne prouve l'égalité croisée littéraux embed.py == sha du manifest int8, exigée par §6.1 (« encoder_sha256 : littéral, = manifest int8 »). Aujourd'hui les deux côtés sont prouvés séparément (pin littéral None : test_router_embed.py:150-163 ; sources null : test_router_tools_fetch.py:471) donc cohérents de fait ; mais le jour du geste fondateur, 4 sites doivent être édités de façon coordonnée (manifest, littéraux embed.py:55-56, pin test, tests sources-null) et une divergence littéral≠manifest ne serait détectée qu'au runtime (EmbedLoadError sur tout chargement — fail-closed mais tardif, découvert au bench), pas par la suite de tests.",
+          "ou": "router/sobrio_router/embed.py:55-56 vs router/tools/embed_model_manifest.json (variants.int8.files) ; spec SPEC_R6.md §6.1",
+          "correction": "Ajouter un test stdlib toujours exécuté comparant expected_embed_spec()[\"encoder_sha256\"]/[\"tokenizer_sha256\"] aux sha256 int8 du manifest (égalité y compris sur None/null aujourd'hui) — le jour J, remplir un côté sans l'autre fait échouer la suite immédiatement."
+        }
+      ],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "eval-scientist",
+      "chantier": "R6",
+      "round": 0,
+      "scores": {
+        "evaluation": 5,
+        "gate": 5,
+        "honnetete": 4,
+        "repro": 5,
+        "budgets": 5
+      },
+      "blocking": [],
+      "major": [
+        {
+          "id": "ES-R6r0-M1",
+          "quoi": "Critère de sortie §12.10 non tenu et revendication « BUILD R6 COMPLET (Lots 0-7) » partiellement inexacte : l'annexe R6 de ROUTEUR_CLASSIFIEUR.md (D1-D14 résumées + statut « tête réelle attend télémétrie v1 », exigée §12.10 et §13/Lot 7) n'existe pas, et ni router/README.md ni api/README.md n'ont été modifiés sur tout le range R6 (preuve : git log 8b28f64..8de5152, dernier commit touchant ces fichiers = 4ac9343, R5). router/README.md:14 affirme encore que prompt_text est un « point d'extension RÉSERVÉ (étage 2, R6) — None partout », désormais faux depuis le Lot 4 ; api/README.md:72 porte un TODO(LotB) « exploitation en mémoire de prompt_text » pourtant livré. L'omission n'est consignée nulle part (le journal Lots 6-7 du ledger ne mentionne ni annexe ni README) — l'honnêteté de fond D4 est intacte partout ailleurs (metadata, manifest, harnais, Makefile vérifiés), c'est le livrable doc qui manque.",
+          "ou": "docs/decisions/ROUTEUR_CLASSIFIEUR.md (annexe R6 absente, 174 lignes inchangées depuis R5) ; router/README.md:14 ; api/README.md:72 ; router/CONVERGENCE_LEDGER.md:1526 (« BUILD R6 COMPLET (Lots 0-7) »)",
+          "correction": "Écrire l'annexe R6 (D1-D14 + statut D4 + recadrage geste fondateur du 2026-07-23) et mettre à jour router/README.md (étage 2 livré, triple verrou, plafond 0.74) et api/README.md (TODO LotB soldé), OU consigner au ledger une décision datée différant explicitement ce volet — puis rectifier la ligne « BUILD R6 COMPLET » pour rétablir la chaîne revendication→preuve (précédent : DQ-R3-m2)."
+        }
+      ],
+      "minor": [
+        {
+          "id": "ES-R6r0-m1",
+          "quoi": "train_head_v0._confiances_servies duplique la chaîne de confiance §5.2bis (appel interp_conf + application de CONFIDENCE_CAP_V0) pour calculer les val_metrics du metadata, au lieu de réutiliser EmbedHead.predict — contre la lettre de §5.2bis (« aucun autre code du repo n'appelle interp_conf … pour l'étage 2 », anti-patron ML-R4-m2/DQ-R4-m2). Impact limité : chemin indicatif seulement (l'éval qui fait foi est harness_embed, qui passe bien par predict — vérifié), mais aucun test ne lie ce miroir à predict : une évolution future de la chaîne ferait diverger silencieusement les val_metrics des confiances réellement servies.",
+          "ou": "router/train/train_head_v0.py:133-145 (docstring « Miroir EXACT de EmbedHead.predict » non prouvé par test)",
+          "correction": "Instancier EmbedHead(poids, biais, calib_x, calib_y, CONFIDENCE_CAP_V0) et obtenir les confiances émises via predict (zéro duplication, constructeur public déjà adapté), ou à défaut ajouter un test d'iso-confiance train/predict qui tue toute mutation du miroir."
+        }
+      ],
+      "verdict": "YELLOW"
+    },
+    {
+      "agent": "data-quality",
+      "chantier": "R6",
+      "round": 0,
+      "scores": {
+        "etancheite": 5,
+        "integrite_donnees": 4,
+        "robustesse_pipeline": 5,
+        "tracabilite": 5,
+        "global": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "DQ-R6-m1",
+          "quoi": "Aucun test ne lie le sha256 int8 du manifest modèle aux littéraux _ENCODER_SHA256/_TOKENIZER_SHA256 d'embed.py : la cohérence « littéral = manifest int8 » (spec §6.1) n'est prouvée aujourd'hui que par deux tests séparés (pin littéral à None + manifest à null). Après le geste fondateur, renseigner un seul des deux côtés produirait une incohérence fail-closed mais silencieuse (fetch accepte / routeur refuse, ou l'inverse).",
+          "ou": "router/sobrio_router/embed.py:55-56 vs router/tools/embed_model_manifest.json (variants.int8.files) ; tests : router/tests/test_router_embed.py:150-153 et router/tests/test_router_tools_fetch.py:470-481",
+          "correction": "Ajouter un test stdlib toujours exécuté assertant expected_embed_spec()[\"encoder_sha256\"] == manifest.variants.int8.files[\"model.onnx\"].sha256 (idem tokenizer) — vrai aujourd'hui (None == null), et verrou automatique de cohérence au geste fondateur."
+        },
+        {
+          "id": "DQ-R6-m2",
+          "quoi": "train_head_v0._confiances_servies duplique la chaîne §5.2bis (appelle interp_conf et applique CONFIDENCE_CAP_V0) pour les val_metrics du metadata, alors que la spec dit « aucun autre code du repo n'appelle interp_conf ni ne lit confidence_cap pour l'étage 2 ». Aucun test d'iso-confiance ne lie ce miroir à EmbedHead.predict (une dérive fausserait les val_metrics consignées dans l'artefact — indicatives seulement, gate et service passent bien par predict). Le ledger déclare « interp_conf réutilisés » sans flaguer l'écart à la lettre de §5.2bis.",
+          "ou": "router/train/train_head_v0.py:133-145 (miroir) vs spec §5.2bis ; ledger Lot 5 (router/CONVERGENCE_LEDGER.md:1495-1496)",
+          "correction": "Calculer les val_metrics via EmbedHead(poids, biais, calib_x, calib_y, cap).predict en mémoire (supprime le miroir), ou a minima ajouter un test d'iso-confiance train/predict et consigner l'écart explicitement au ledger."
+        },
+        {
+          "id": "DQ-R6-m3",
+          "quoi": "promote_embed écrit les rapports d'éval frais (embed-prior-latest.json, embed-head_candidate-latest.json) dans router/artifacts/eval/ AVANT les gardes : une promotion REFUSÉE (exit 2, cas nominal avant geste fondateur — reproduit en direct) laisse des fichiers non versionnés dans un répertoire à contenu versionné (bruit git status, risque de commit accidentel de rapports issus d'une promotion refusée).",
+          "ou": "router/train/promote_embed.py:85-104 (_evals_fraiches écrit inconditionnellement) ; reproduit : exit 2 avec 2 fichiers ?? au git status",
+          "correction": "N'écrire les rapports au chemin canonique qu'après passage de toutes les gardes (écriture temporaire puis dépôt), ou documenter dans le message de refus que les rapports laissés ne doivent pas être commités."
+        }
+      ],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "qa-auditor",
+      "chantier": "R6",
+      "round": 0,
+      "scores": {
+        "couverture": 4,
+        "contrat": 5,
+        "erreurs": 4,
+        "clarte": 5,
+        "regressions": 5
+      },
+      "blocking": [],
+      "major": [
+        {
+          "id": "QA-R6-M1",
+          "quoi": "Le segment encode→poole→normalise (§5.2.4-6, comportement NORMATIF « mean pooling MASQUÉ + L2 ») n'est exécuté par AUCUN test nulle part : `EmbedRouter._embed` est monkeypatché dans tous les tests actifs (test_router_embed.py:126 et :299), les tests à encodeur sont skippés (onnxruntime absent — 3 des 4 skips) et la CI interdit les deps embed par garde exécutable. Un mutant « masque ignoré » ou « L2 supprimée » survivrait à TOUTE la suite, aujourd'hui comme après le geste fondateur (le harnais évalue des embeddings pré-calculés, le bench ne mesure que la latence) : c'est le seul maillon de la revendication « infrastructure prouvée par tests » sans aucune preuve exécutée, et rien de planifié ne le rattrapera.",
+          "ou": "router/sobrio_router/embed.py:366-389 (_embed) ; router/tests/test_router_embed.py:126,299 (monkeypatch) ; router/tests/test_router_embed.py:596-631 (tests réels skippés)",
+          "correction": "Test unitaire de `_embed` à session/tokenizer FACTICES (instance via EmbedRouter.__new__ + attributs _np/_tokenizer/_session/_noms_entrees injectés — n'exige que numpy, déjà installé : exécutable dès aujourd'hui et en local post-geste) : hidden_state artisanal + attention_mask avec padding → asserts « les positions masquées ne pèsent pas dans la moyenne », norme L2 == 1.0, branche token_type_ids exercée ; mutation « masque retiré » rejouée et tuée."
+        },
+        {
+          "id": "QA-R6-M2",
+          "quoi": "Contrat d'erreurs CLI violé sur le chemin exact du geste fondateur : un échec de téléchargement (URLError/FileNotFoundError levé dans `_download`) n'est attrapé nulle part — traceback brut + exit 1 au lieu de « REFUS … » exit 2. Prouvé HORS RÉSEAU : manifest complet à URL file:// vers un chemin inexistant + flag posé → Traceback FileNotFoundError, EXIT=1. Inatteignable avec le manifest committé (sources null → refus amont, consigné), mais c'est la PREMIÈRE exécution réelle du CLI par le fondateur (panne réseau transitoire = scénario réaliste) ; partout ailleurs les 6 CLIs R6 tiennent « refus propre exit 2, jamais un traceback nu » (échantillonné sur pièces).",
+          "ou": "router/tools/fetch_embed_model.py:198 (_download non gardé) ; :225 (_fetch_fichier appelle sans garde) ; :284-288 (main n'attrape que RefusError)",
+          "correction": "Dans `_fetch_fichier`, envelopper l'appel `_download` d'un except (OSError, urllib.error.URLError) → RefusError « téléchargement échoué : <nom> (<classe d'exception>) » (le finally supprime déjà le temporaire — comportement conservé) ; test au téléchargeur monkeypatché levant URLError → exit 2, message REFUS, zéro traceback, fichier temporaire absent."
+        }
+      ],
+      "minor": [
+        {
+          "id": "QA-R6-m1",
+          "quoi": "`promote_embed._evals_fraiches` écrit embed-prior-latest.json et embed-head_candidate-latest.json dans le répertoire VERSIONNÉ router/artifacts/eval/ à chaque invocation, Y COMPRIS sur les chemins de refus (prouvé : un run refusé exit 2 « tête candidate absente » laisse embed-prior-latest.json non suivi dans l'arbre) — friction avec la convention de clôture R5 « régénérés/commités aux promotions uniquement » : un opérateur distrait peut les committer hors promotion.",
+          "ou": "router/train/promote_embed.py:85-104 (_evals_fraiches, écriture avant gate et gardes)",
+          "correction": "Écrire les évals fraîches en répertoire temporaire et ne les déposer sous router/artifacts/eval/ qu'après gate PASS + gardes D8, ou consigner explicitement (Makefile/message CLI) que les rapports d'un run non promu sont à nettoyer et ne jamais committer."
+        },
+        {
+          "id": "QA-R6-m2",
+          "quoi": "`_SCHEMES_AUTORISES` accepte http:// (transport non chiffré) pour la source du modèle au geste fondateur ; l'intégrité est bien couverte par le sha256 normatif du manifest, mais rien ne consigne pourquoi http serait toléré — écart silencieux avec la posture fail-closed du reste du CLI.",
+          "ou": "router/tools/fetch_embed_model.py:61",
+          "correction": "Restreindre à ('https://', 'file://') avec un cas de refus http:// ajouté aux tests existants, ou consigner en commentaire que la tolérance http est adossée au sha256 obligatoire du manifest."
+        }
+      ],
+      "verdict": "YELLOW"
+    }
+  ],
+  "sentinelles": [
+    {
+      "agent": "privacy-sentinel",
+      "chantier": "R6",
+      "round": 0,
+      "verdict": "PASS",
+      "violations": [],
+      "preuves": [
+        "Chemin unique du texte suivi de bout en bout : api/app/routes.py:67 (extraction gardée _stage2_unlocked), :68 (del body.prompt_text inconditionnel), :74 (transit mémoire vers signaux), :76 (del avant INSERT/log) ; INSERT features-only routes.py:103 ; unique site de log ids-only routes.py:116-119 — aucun autre puits (SafeRouter safe.py:116-121 avale sans logger, TwoStageRouter twostage.py:56-57 idem, bridge sans état porteur de texte : lru_cache ne mémorise que des routeurs).",
+        "Locals seulement dans l'étage 2 : router/sobrio_router/embed.py:393-406 (texte, prefixe, embedding jamais affectés à self, del explicites l.400/402, message EmbedRefusal FIXE l.397) ; messages de TOUS les sites de raise = chemins/hash/comptes (embed.py:126,173,189-191,198,201,208,266-272,304-306,311,325-327) — prouvé par test_messages_de_chargement_sans_recopie_de_contenu (metadata trafiqué porteur de sentinelle jamais recopié).",
+        "Suite complète rejouée : 642 passed + 4 skipped (claim du ledger bit-exacte) ; sous-ensembles privacy rejoués isolément : 155 passed router (test_router_embed_privacy + twostage + embed + optional_dep), 24 passed api (test_api_no_leak + test_api_embed_stage2) sur Postgres réel — chemin 200 + 422 champ invalide + 422 extra caviardé + 500 OperationalError avec traceback [parameters] scruté, DB entière sérialisée par row_to_json sur toutes les tables.",
+        "Protocole SECRET_LEAK re-déroulé + 28 sondes adversariales à contexte neuf (scratchpad/bypass_probe.py) : pickle protocoles 0-5 sur PromptSignals ET Signals imbriqué -> TypeError sans contenu ; copy.copy/deepcopy -> TypeError (copy.copy(bundle) passe par référence sans sérialisation, repr propre) ; json.dumps -> TypeError propre ; json.dumps(default=str) -> repr sans texte (repr=False) ; repr de conteneurs/f-strings/format/exception-args propres ; __reduce_ex__(2..5) direct lève — 0 fuite.",
+        "vars() expose bien le champ (fait Python inhérent) mais le scan statique en GLOB le bannit du code de production avec contrôle négatif par injection (test_router_embed_privacy.py:50-134, motifs pickle/asdict/astuple/vars, périmètre router/sobrio_router+eval+train+tools+api/app) — grep confirmé : zéro site d'appel en prod.",
+        "Caviardage 422 : handler global en LISTE BLANCHE (api/app/main.py:66-107, loc/msg/type conservés, input/ctx -> <redacted>, clés inconnues omises, branché prouvé test_handler_caviardage_enregistre_globalement) ; 5 sondes live supplémentaires hors suite (scratchpad/api_422_probe.py : sentinelle comme NOM de champ, extra imbriqué sous features, literal invalide surface, corps JSON cassé, prompt_text mal typé) -> 0 fuite logs/DB ; seul écho résiduel : le NOM d'un champ extra revient dans loc au seul expéditeur (baseline FastAPI, ni stocké ni loggé — invariant intact).",
+        "500 hors DB / timeout : aucun formateur de locals nulle part (JsonFormatter = formatException stdlib, logging_conf.py:60-62 ; FastAPI sans debug ; corps 500 générique starlette asserté) ; étage 2 qui pend -> SafeRouter timeout -> fallback silencieux (test_router_twostage.py:200-203) ; ContentScrubFilter en dernier recours sur les extras (logging_conf.py:30-44, testé).",
+        "Artefacts des CLIs embed générés en environnement JETABLE (scratchpad/artefacts_probe.py : train run_training + harness run candidate/prior) : scan récursif de TOUTES les chaînes des arbres JSON -> uniquement clés de schéma, ids catalogue, motif_N, hash, dates ISO, et 2 constantes fixes du code (STATUT_V0, NOTE_INTEGRITE) ; 0 chaîne libre multi-mots, 0 soupe embarquée.",
+        "bench_embed.py : soupes = vocabulaire grammatical FERMÉ (l.75-88), générées en mémoire (l.95-113), rapport nombres/hash/plateforme/date uniquement (l.245-255) ; exécuté réellement -> REFUS exit 2 avant toute écriture (geste fondateur non advenu) ; promote_embed exécuté -> REFUS exit 2 (seul effet : rapport prior numérique non versionné sous artifacts/eval, vérifié sans texte puis supprimé — git status redevenu propre).",
+        "État gelé conforme : HEAD 8de5152 = origin/main, arbre propre avant/après audit ; router/artifacts/embed/ INEXISTANT (heads/promoted vide, D4), sha normatifs None (embed.py:55-56), EmbedRouter() réel lève EmbedLoadError aujourd'hui (testé), manifest à sources null avec refus 'source non approuvée' (fetch_embed_model.py:110-162), CI avec garde exécutable anti-flags SOBRIO_* (.github/workflows/ci.yml:55-58), .env.example ne pose PAS le flag (commentaire seul l.15-17).",
+        "Triple verrou prouvé : matrice 8/8 E2E avec spy sur features_to_signals TEL QU'APPELÉ par la route (textes_transmis == [None] dans les 7 cas non tout-ouverts, test_api_embed_stage2.py:116-157) ; send_prompt_text is True strict (mutant 1==True tué) ; cascade réelle EmbedLoadError -> ml:v05 -> fallback:heuristic, API 200 partout, sentinelle absente réponse/logs/DB entière.",
+        "Diff intégral e43479d..8de5152 scanné (6529 insertions) : tous les littéraux >= 40 caractères ajoutés relèvent de docstrings/messages techniques français à vocabulaire système ; sentinelles de tests = jetons aléatoires (convention chantier) ; fixtures embed = vecteurs sans texte (manifest < 5 Ko, pin sha 63647355…) — rien qui ressemble à un prompt (jurisprudence R3-r3 respectée)."
+      ]
+    },
+    {
+      "agent": "cost-guard",
+      "chantier": "R6",
+      "round": 0,
+      "verdict": "PASS",
+      "violations": [
+        {
+          "id": "CG-R0-m1",
+          "quoi": "La garde anti-réseau en GLOB exigée par la spec (§1.3 et §10.7) sur router/sobrio_router/*.py n'existe pas dans la suite : seuls data/ (test_router_data_distill.py:68), racine router/*.py (:79), train/ (:391) et eval/ (test_router_embed_gate_promote.py:711) sont couverts par un test paramétré. L'invariant sous-jacent est VRAI (balayage manuel de la regex M6 + urlopen sur les 10 modules de router/sobrio_router/ : zéro motif réseau), mais un futur module de ce dossier ne serait pas couvert d'office — minor, pas d'invariant cassé.",
+          "ou": "router/tests/test_router_embed_gate_promote.py:696-727 (patron à étendre) ; scope non couvert : router/sobrio_router/*.py",
+          "correction": "Ajouter un test paramétré miroir de test_no_network_imports_in_router_eval_modules (glob _MOTIF_IMPORT_RESEAU + asserts urlopen/Anthropic() ) sur router/sobrio_router/*.py, avec son métatest « couvert par la garde » (noms attendus : embed.py, twostage.py, ml.py, types.py…)."
+        }
+      ],
+      "preuves": [
+        "Appels payants — état R5 intact : router/data/distill.py:249-268 — run_real refuse sans SOBRIO_ALLOW_PAID_CALLS=='1' (défaut dry-run), _parse_spend_cap fail-closed (distill.py:112-139 : nan/inf/<=0/bool rejetés, SpendCapError AVANT estimation), et même gates franchies lève TOUJOURS l'arrêt fondateurs avant tout appel ; tests dry-run/cap/arrêt tous verts dans la suite (test_router_data_distill.py:242-380).",
+        "Fetch — les deux refus REJOUÉS en subprocess avec socket.socket neutralisé : (a) sans flag → exit 2, message renvoyant à LICENSES.md, sys.modules sans urllib.request/http.client/ssl ; (b) flag=1 + manifest committé (sources null) → exit 2 « source non approuvée : geste fondateur requis — champ 'source_repo' non renseigné » ; (c) flag='true' → exit 2. Ordre normatif flag-avant-manifest : router/tools/fetch_embed_model.py:244-246 ; manifest committé à sources null : router/tools/embed_model_manifest.json:17-36.",
+        "Garde AST prouvée : router/tools/fetch_embed_model.py:196 est le SEUL import urllib du repo hors tests, dans le corps de _download uniquement — test_router_tools_fetch.py::test_garde_ast_imports_reseau_uniquement_dans_download + contrôle négatif (:411-433) PASS ; balayage regex M6 manuel de router/sobrio_router/, router/eval/, router/train/, router/data/, router/tools/, api/app/ et router/*.py racine : unique correspondance = fetch_embed_model.py:196 (voulu).",
+        "Audit zéro-réseau du Lot 2 rejoué : suite router COMPLÈTE sous socket-interdit (connect → AssertionError) + hook d'audit CPython → 591 passed / 4 skipped, 0 événement socket.connect, seuls 3 urllib.Request en file:// vers des tmp pytest (fixtures locales du fetch, schéma file:// autorisé fetch_embed_model.py:61) ; suite api sous audit loopback-only → 51 passed, 0 connexion non locale, 0 urllib. Total 642 verts + 4 skips = revendication du ledger, arbre git PROPRE après rejeu (HEAD 8de5152).",
+        "CI verrouillée : .github/workflows/ci.yml — env limité à DATABASE_URL (l.27-28), aucun flag SOBRIO_*, installation l.41-46 = api/connector/warehouse/report + editable warehouse/router (JAMAIS requirements-embed ni requirements-ml), garde R6 EXÉCUTABLE l.55-61 (échec si env SOBRIO_* posé ou onnxruntime/tokenizers importables) ; les 6 tests de conformité router/tests/test_router_ci_workflow.py:30-66 rejoués PASS (48 passed avec test_router_tools_fetch.py).",
+        "Gardes anti-réseau glob toutes vertes, rejouées explicitement : data + racine + train = 22 passed (test_router_data_distill.py:68,79,391 + métatests garde-fou :90,402), eval = 6 passed (test_router_embed_gate_promote.py:711-727) ; regex M6 ancrée début de ligne avec contrôles négatifs par injection (:120-166).",
+        "requirements-embed NON installé : .venv/bin/pip list — aucun onnxruntime/tokenizers/torch/transformers/anthropic/openai ; seuls numpy 2.5.1 et lightgbm 4.6.0 (requirements-ml, R5) ; router/requirements-embed.txt = pins candidats EN COMMENTAIRE + numpy seul actif, statut « NON INSTALLÉ à ce jour — première installation = geste fondateur » consigné dans le fichier.",
+        "Flags jamais posés hors geste explicite : env de la machine sans SOBRIO_* ; Makefile:110 = seule ligne posant SOBRIO_ALLOW_MODEL_DOWNLOAD=1 (cible router-embed-model, documentée jamais-en-CI) ; .env.example:15-17 documente SOBRIO_EMBED_STAGE2 sans le poser. Dépense mission constatée : 0,00 $ (aucun SDK payant installé, aucun site d'appel atteignable, chemin réseau du fetch inexécutable sur le manifest committé)."
+      ]
+    }
+  ]
+}

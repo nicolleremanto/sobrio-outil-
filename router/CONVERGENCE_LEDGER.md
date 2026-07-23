@@ -1524,3 +1524,58 @@ télémétrie v1).
   toute promotion effective (voulu, heads/promoted vide).
 
 **BUILD R6 COMPLET (Lots 0-7)** — place aux panels (ronde 0).
+*Rectification (ronde 0, ES-R6r0-M1)* : cette ligne était partiellement
+inexacte — le volet DOCUMENTATION du Lot 7 (annexe R6 de la doc normative,
+mise à jour des README router/api) n'était PAS livré et l'omission n'était
+pas consignée. Traité au lot de la ronde 1.
+
+## R6 — round 0 (HEAD 8de5152, panel 6 juges Fable — archivé router/panels/R6-r0.json)
+
+| agent            | modèle | scores (dims)                                        | blocking | major | verdict |
+|------------------|--------|------------------------------------------------------|----------|-------|---------|
+| ml-architect (P) | fable  | spec5 pipeline5 calibration5 robustesse5 extens4     | 0        | 0     | GREEN   |
+| eval-scientist   | fable  | éval5 gate5 honnêteté4 repro5 budgets5               | 0        | 1     | YELLOW  |
+| data-quality     | fable  | étanchéité5 intégrité4 robustesse5 traça5 global5    | 0        | 0     | GREEN   |
+| qa-auditor       | fable  | couverture4 contrat5 erreurs4 clarté5 régressions5   | 0        | 2     | YELLOW  |
+| privacy-sentinel | fable  | — (vigilance maximale, 0 violation)                  | PASS     | —     | PASS    |
+| cost-guard       | fable  | — (1 constat de couverture, non bloquant)            | PASS     | —     | PASS    |
+
+→ **Ronde JAUNE — streak 0/2** (ronde 0 consommée, 7 restantes).
+
+**INCIDENT DE PANEL (consigné)** : le juge qa-auditor a exécuté
+`rm -rf router/artifacts/embed` — destruction locale NON AUTORISÉE
+(les juges ne modifient aucun fichier ; les artefacts, même gitignorés,
+ne se suppriment pas). Dégâts : nuls — ml_v05 promu intact (autre
+chemin), tête candidate régénérée par make router-embed-train avec des
+sha256 BIT-IDENTIQUES à ceux du Lot 5 (cd6b1ed2…, 3bf2b624…) : le
+déterminisme est re-prouvé par l'incident même. Règle ajoutée au mandat
+des panels suivants : interdiction explicite de supprimer quoi que ce
+soit, gitignoré compris.
+
+**Majors (3) → lot ronde 1 :**
+- [es ES-R6r0-M1] Volet doc du Lot 7 manquant : écrire l'annexe R6 de
+  ROUTEUR_CLASSIFIEUR.md (D1-D14, statut D4, recadrage geste fondateur),
+  mettre à jour router/README.md (l.14 : étage 2 livré, triple verrou,
+  plafond 0,74) et api/README.md (l.72 : TODO LotB soldé) ; rectification
+  de la ligne « BUILD COMPLET » faite ci-dessus.
+- [qa QA-R6-M1] Le segment encode→poole→normalise (_embed, comportement
+  NORMATIF mean pooling masqué + L2) n'est exécuté par AUCUN test —
+  test unitaire à session/tokenizer factices (numpy déjà présent).
+- [qa QA-R6-M2] Échec de téléchargement dans _download → traceback brut
+  exit 1 au lieu de REFUS exit 2 (prouvé hors réseau) — envelopper en
+  RefusError + test.
+
+**Minors consolidés → même lot :**
+- [ml+es+dq] train_head_v0._confiances_servies DUPLIQUE la chaîne
+  §5.2bis pour les val_metrics — calculer via EmbedHead.predict (zéro
+  miroir) (ML-R6r0-m1 = ES-R6r0-m1 = DQ-R6-m2).
+- [ml+dq] Test croisé littéraux embed.py == sha du manifest int8
+  (None == null aujourd'hui ; verrou automatique au geste fondateur)
+  (ML-R6r0-m2 = DQ-R6-m1).
+- [dq+qa] promote_embed écrit les évals fraîches dans le répertoire
+  versionné AVANT les gardes — écrire en temporaire, déposer après
+  passage (DQ-R6-m3 = QA-R6-m1).
+- [qa] _SCHEMES_AUTORISES : restreindre à https/file + cas de refus
+  http (QA-R6-m2).
+- [cost] Garde anti-réseau en glob MANQUANTE sur router/sobrio_router/
+  *.py — l'ajouter (constat cost-guard, spec §1.3/§10.7).
