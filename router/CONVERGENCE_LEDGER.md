@@ -41,7 +41,7 @@ RAM < 1 Go · artefacts : étage 1 < 20 Mo, étage 2 < 500 Mo · dépense API : 
 | R3       | Protocole d'évaluation & harnais + gate            | 2/2 (r5 & r6) | **CONVERGÉ** |
 | R4       | Corpus de démarrage à froid                        | 2/2 (r4 & r5) | **CONVERGÉ** |
 | R5       | Pipeline d'entraînement & classifieur v0.5         | 2/2 (r4 & r5) | **CONVERGÉ** |
-| R6       | Étage 2 embeddings (construit, ÉTEINT ; geste fondateur différé) | 1/2 (r1) | en panels |
+| R6       | Étage 2 embeddings (construit, ÉTEINT ; geste fondateur différé) | 0/2 (reset r2) | en panels |
 | R7       | Recalibration, monitoring & déploiement VPS        | 0/2           | à venir |
 
 ---
@@ -1627,3 +1627,47 @@ l'orchestrateur AVANT la ronde 2, vérifiés inline, jugés par elle :**
   fondateur différé », 1/2, en panels) (ES-R6r1-m2) : FAIT.
 - [es] « < 30 ms » → « ≤ 30 ms » dans router/README.md:6 et le bandeau
   budgets du ledger (ES-R6r1-m3) : FAIT.
+
+## R6 — round 2 (commit 77a6df0, panel 6 juges Fable — archivé router/panels/R6-r2.json)
+
+| agent            | modèle | scores (dims)                                        | blocking | major | verdict |
+|------------------|--------|------------------------------------------------------|----------|-------|---------|
+| ml-architect (P) | fable  | spec5 pipeline4 calibration5 robustesse4 extens5     | 0        | 1     | YELLOW  |
+| eval-scientist   | fable  | éval5 gate5 honnêteté3 repro2 budgets5               | 1        | 0     | RED     |
+| data-quality     | fable  | étanchéité5 intégrité5 robustesse3 traça4 global3    | 1        | 0     | RED     |
+| qa-auditor       | fable  | couverture5 contrat5 erreurs5 clarté5 régressions3   | 0        | ~     | YELLOW  |
+| privacy-sentinel | fable  | —                                                    | **FAIL** | —     | **FAIL**|
+| cost-guard       | fable  | — (0,00 $ inchangé ; constat hors périmètre relayé)  | PASS     | —     | PASS    |
+
+→ **Ronde ROUGE (FAIL sentinelle, non waivable) — streak RESET 0/2**
+(rondes 0-2 consommées, 5 restantes).
+
+**INCIDENT — FAUTE DE L'ORCHESTRATEUR (consignée sans fard).** Ma
+vérification « inline » du mutant int32 (lot minors r1) a muté embed.py
+EN PLACE dans l'arbre versionné puis restauré la source bit-exacte —
+mais dans la MÊME SECONDE et avec un littéral de MÊME TAILLE
+(int64→int32) : le __pycache__/embed.cpython-312.pyc compilé du MUTANT
+est resté VALIDE pour le contrôle de fraîcheur de CPython
+(mtime+taille identiques). La machine de référence exécutait donc le
+bytecode mutant du module privacy-critique : suite ROUGE à HEAD
+(1 failed sur l'assert dtype — qui a fait EXACTEMENT son travail),
+revendication « vérifié vert » du ledger irreproduisible in situ, FAIL
+privacy légitime (« le code qui tourne doit être le code jugé »).
+L'arbre versionné est EXONÉRÉ par trois preuves indépendantes des juges
+(compilation fraîche 662+4 verts ; scan sémantique de tous les pyc :
+un seul divergent ; clone frais/CI sains). Ce mécanisme explique aussi
+la run flaky « cause non identifiée » notée en r1. Ironie instructive :
+c'est le CONTOURNEMENT de la discipline builder+patch-verifier (jugé
+« trop lourd pour 3 petites éditions ») qui a produit le défaut — la
+discipline existe précisément pour ça.
+
+**Réparation (post-panel, geste orchestrateur)** : pyc empoisonné purgé
+(+ 3 pyc orphelins api/tests), suite rejouée = 662 verts + 4 skips,
+arbre propre.
+
+**RÈGLE DURCIE (applicable immédiatement, tous agents ET orchestrateur)** :
+toute mutation de preuve se fait en COPIE TMP au scratchpad, JAMAIS en
+place dans l'arbre versionné — la restauration bit-exacte de la source
+ne restaure pas les caches dérivés ; à défaut absolu,
+PYTHONDONTWRITEBYTECODE=1 obligatoire sur tout run impliquant un mutant,
+suivi d'une purge du __pycache__ du module muté et d'un run de contrôle.

@@ -1,0 +1,159 @@
+{
+  "chantier": "R6",
+  "round": 2,
+  "head": "77a6df0",
+  "date": "2026-07-23",
+  "ronde": "ROUGE (FAIL privacy-sentinel — bytecode mutant résiduel exécuté sur la machine de référence)",
+  "juges": [
+    {
+      "agent": "ml-architect",
+      "chantier": "R6",
+      "round": 2,
+      "scores": {
+        "spec": 5,
+        "pipeline": 4,
+        "calibration": 5,
+        "robustesse": 4,
+        "extensibilite": 5
+      },
+      "blocking": [],
+      "major": [
+        {
+          "id": "ML-R6r2-M1",
+          "quoi": "La machine de référence sert le BYTECODE DU MUTANT int32 : le pyc résiduel de la preuve de mutation du lot r1 (compilé 94 ms avant la restauration de la source, dans la même seconde entière — mtime enregistré 1784827288 == int(mtime) de embed.py restauré, taille 19029 identique car « int64 »→« int32 » conserve la taille) passe le contrôle de fraîcheur timestamp+taille de CPython ; tout import de sobrio_router.embed exécute donc le mutant (dis de EmbedRouter._embed chargé : LOAD_ATTR int32 ×2 là où la source dit np.int64). Conséquence prouvée : « .venv/bin/pytest router/tests api/tests » à l'état livré = 1 failed / 661 passed / 4 skipped — échec de test_embed_mean_pooling_masque_ignore_le_padding sur l'assert même de ML-R6r1-m2 (AssertionError 'int32' == 'int64', test_router_embed.py:722). Le critère de sortie §12.1-1 (« suite complète VERTE sur la machine de référence ») est violé à HEAD gelé et le « vérifié vert » du ledger (l.1622-1624) n'a pas pu tenir après le run du mutant. Contre-preuves de santé : cache contourné (PYTHONPYCACHEPREFIX jetable) → 662 passed + 4 skipped = claim du ledger ; scan sémantique de TOUS les pyc cpython-312 des modules de production (sobrio_router, eval, train, tools, data, api/app, racine router) → UNE seule divergence, celle-ci ; clone frais et CI (sans pycache) verts ; zéro impact privacy (étage 2 OFF, modèle absent, promoted/ vide ; même exécuté, un export ONNX réel refuserait int32 → repli étage 1 fail-safe). Nota : cet échec en direct est simultanément la preuve VIVANTE que l'assert ML-R6r1-m2 tue le mutant int32 — le correctif jugé est bon ; le défaut est l'état de preuve laissé rouge et la mutation faite EN PLACE dans l'arbre versionné (la restauration bit-exacte de la source ne restaure pas les caches dérivés — cas pathologique même-seconde/même-taille), non consignée.",
+          "ou": "router/sobrio_router/__pycache__/embed.cpython-312.pyc (résidu SERVI, en-tête flags=0/mtime=1784827288/size=19029) vs router/sobrio_router/embed.py:374-375 (source saine, dtype=np.int64) ; échec : router/tests/test_router_embed.py:722 ; critère violé : SPEC_R6.md §12.1 ; revendication caduque : router/CONVERGENCE_LEDGER.md:1622-1624",
+          "correction": "Rafraîchir le cache dérivé (supprimer le seul pyc périmé router/sobrio_router/__pycache__/embed.cpython-312.pyc, ou toucher embed.py pour invalider le mtime), rejouer « .venv/bin/pytest router/tests api/tests » (attendu : 662 passed + 4 skipped) ; consigner l'incident au ledger (patron de l'incident rm -rf r0 : résidu de mutation, restauré/vérifié) et durcir la règle d'orchestration : mutations de preuve en COPIE TMP UNIQUEMENT — jamais en place dans l'arbre versionné, la restauration bit-exacte de la source ne suffisant pas pour les caches dérivés."
+        }
+      ],
+      "minor": [],
+      "verdict": "YELLOW"
+    },
+    {
+      "agent": "eval-scientist",
+      "chantier": "R6",
+      "round": 2,
+      "scores": {
+        "evaluation": 5,
+        "gate": 5,
+        "honnetete": 3,
+        "repro": 2,
+        "budgets": 5
+      },
+      "blocking": [
+        {
+          "id": "ES-R6r2-B1",
+          "quoi": "Suite router ROUGE à HEAD sur la machine de référence : pytest router/tests → 1 failed (test_embed_mean_pooling_masque_ignore_le_padding, assert 'int32' == 'int64'), 610 passed, 4 skipped — critère de convergence §12.1 violé et revendications « vérifié vert » / « 662 verts » du ledger non reproductibles in situ. Cause PROUVÉE : bytecode mutant résiduel dans __pycache__ — le .pyc contient int32 (int64 absent) alors que la source committée porte int64 (embed.py:374-375) ; son en-tête (source_mtime=1784827288, source_size=19029) est identique à embed.py car la mutation de preuve int64→int32 et la restauration bit-exacte ont eu lieu dans la même seconde (19:21:28) avec des littéraux de même longueur → Python valide le cache et EXÉCUTE le mutant. Le .pyc (mtime 19:21:28.665) précède le commit 77a6df0 (19:21:41) et toute ma session : c'est la vérification inline du « mutant int32 tué » de l'orchestrateur, faite EN REPO sans restaurer l'état dérivé (violation de la règle mutation-en-copie-tmp/restauration prouvée) — elle a empoisonné la preuve qu'elle établissait. Arbre versionné EXONÉRÉ : copie intégrale sans caches au scratchpad → 611 passed + 4 skipped (= claim exact), mutant int32 rejoué en copie → tué (1 failed) ; scan des 121 pyc valides : embed.cpython-312.pyc est le SEUL divergent sémantique pour l'interpréteur actif. Mécanisme qui explique aussi plausiblement la run flaky « cause non identifiée » consignée par privacy-sentinel en r1. Rien supprimé ni modifié par moi (règles du panel).",
+          "ou": "router/sobrio_router/__pycache__/embed.cpython-312.pyc (co_names: int32) vs router/sobrio_router/embed.py:374-375 (dtype=np.int64) ; échec : router/tests/test_router_embed.py:722 ; contredit router/CONVERGENCE_LEDGER.md l.1625 (« vérifié vert ») et §12.1 de SPEC_R6",
+          "correction": "Geste orchestrateur : invalider le cache empoisonné (supprimer router/sobrio_router/__pycache__/embed.cpython-312.pyc ou re-toucher embed.py pour changer son mtime), rejouer la suite complète sur la machine de référence (attendu : 611 passed + 4 skipped router, 662+4 avec api) ; consigner l'incident au ledger (mutation de preuve en repo sans restauration de l'état dérivé) et rectifier la portée de « vérifié vert » ; durcir la règle : toute mutation de preuve en copie tmp, ou PYTHONDONTWRITEBYTECODE=1 systématique sur les runs de mutation. Puis ronde de confirmation — aucun changement de fichier versionné requis (source, tests, docs et ledger sont par ailleurs exacts et prouvés)."
+        }
+      ],
+      "major": [],
+      "minor": [],
+      "verdict": "RED"
+    },
+    {
+      "agent": "data-quality",
+      "chantier": "R6",
+      "round": 2,
+      "scores": {
+        "etancheite": 5,
+        "integrite_donnees": 5,
+        "robustesse_pipeline": 3,
+        "tracabilite": 4,
+        "global": 3
+      },
+      "blocking": [
+        {
+          "id": "DQ-R6r2-B1",
+          "quoi": "Suite router au HEAD gelé 77a6df0 = 1 FAILED sur la machine de référence (610 passed / 4 skipped) : le cache d'octets gitignoré router/sobrio_router/__pycache__/embed.cpython-312.pyc contient encore le MUTANT int32 de l'exercice de kill-de-mutant ML-R6r1-m2 (désassemblage du pyc : LOAD_ATTR int32 aux deux sites de _embed, vs int64 dans la source) et CPython le considère FRAIS : la restauration bit-exacte int32→int64 (même taille, 19029 octets) faite dans la même seconde que la compilation du mutant (mtime source 1784827288 = 19:21:28, en-tête pyc identique ; commit à 19:21:41) laisse l'en-tête valide — le mutant est devenu COLLANT précisément parce que la restauration était bit-exacte et immédiate. Tout run de la suite exécute le bytecode mutant et le nouvel assert dtype (test_router_embed.py:722) échoue — l'assert fait exactement son travail, mais le critère de convergence §12.1 (« suite complète VERTE sur la machine de référence ») est factuellement rouge, et la mention « vérifié vert » du ledger (l.1622-1623) est irreproduisible à HEAD. Contre-preuves d'innocuité de l'arbre versionné : compilation fraîche (PYTHONPYCACHEPREFIX scratchpad) → router 611 passed + 4 skipped, api 51 passed sur Postgres réel (= 662+4 revendiqués) ; mutant int32 rejoué en copie tmp → tué (1 failed) ; scan des 56 pyc cpython-312 frais du repo → embed.cpython-312.pyc est le SEUL divergent (les 67 réécritures pytest exclues d'office). Corrobore l'observation r1 du privacy-sentinel (3 échecs _embed « non reproduits, cause non identifiée » : même mécanisme, transitoire). Simulation sans-deps : 571 passed / 25 skipped, 0 failed ; refus exit 2 : 5/5 (train sans numpy, fetch sans flag, fetch source non approuvée, bench avant geste fondateur, promote garde D8 sans rien laisser — git bit-inchangé).",
+          "ou": "router/sobrio_router/__pycache__/embed.cpython-312.pyc (bytecode mutant, gitignoré, en-tête frais mtime 1784827288/taille 19029) vs router/sobrio_router/embed.py:374-375 (source saine, dtype=np.int64) ; échec observé : router/tests/test_router_embed.py:722 ; revendication contredite : router/CONVERGENCE_LEDGER.md:1622-1623 (« vérifié vert »)",
+          "correction": "Geste orchestrateur, AUCUN fichier versionné à changer : invalider le cache (touch router/sobrio_router/embed.py, ou suppression du seul pyc mutant), rejouer la suite complète machine de référence (attendu : router 611+4, api 51 — prouvé atteignable en compilation fraîche), consigner l'incident au ledger (mécanisme : restauration bit-exacte même-seconde ⇒ en-tête pyc encore valide ⇒ mutant collant ; rectifier ou dater la mention « vérifié vert ») et durcir la règle d'hygiène des kills-de-mutants : mutation en COPIE tmp uniquement — plus jamais inline dans l'arbre du repo — ou, à défaut, invalidation de cache + rejeu complet OBLIGATOIRES après restauration."
+        }
+      ],
+      "major": [],
+      "minor": [],
+      "verdict": "RED"
+    },
+    {
+      "agent": "qa-auditor",
+      "chantier": "R6",
+      "round": 2,
+      "scores": {
+        "couverture": 5,
+        "contrat": 5,
+        "erreurs": 5,
+        "clarte": 5,
+        "regressions": 3
+      },
+      "blocking": [],
+      "major": [
+        {
+          "id": "QA-R6r2-M1",
+          "quoi": "Le rejeu normatif `.venv/bin/pytest router/tests api/tests -q` a HEAD 77a6df0 sur la machine de reference donne 1 failed / 661 passed / 4 skipped (echec DETERMINISTE de test_embed_mean_pooling_masque_ignore_le_padding : dtype observe int32 != int64), pas les « 662 verts + 4 skips » consignes « verifie vert » au ledger. Cause PROUVEE : router/sobrio_router/__pycache__/embed.cpython-312.pyc est un cache bytecode EMPOISONNE portant le MUTANT int32 de _embed (inspection marshal : nom `int32` dans le bytecode alors que embed.py:374-375 porte int64, source bit-exacte a HEAD, arbre propre). L'en-tete du pyc (source_mtime=1784827288, source_size=19029) coincide exactement avec le stat d'embed.py — int64→int32 ne change pas la taille du fichier et la restauration de l'experience de kill de ML-R6r1-m2 (faite EN PLACE dans le repo : co_filename du pyc = chemin repo ; pyc horodate 19:21, commit 19:21:41) est retombee dans la meme seconde de mtime : Python juge le cache valide et execute le mutant au lieu de recompiler la source. L'arbre COMMITTE est, lui, prouve sain : avec cache bytecode neuf (PYTHONPYCACHEPREFIX vers scratchpad, zero ecriture repo), la suite fait exactement 662 passed + 4 skipped (skips attendus : modele e5 absent x1, onnxruntime absent x3) et le mutant int32 rejoue en copie tmp est bien TUE par le nouvel assert. Retro-explique tres probablement le run flaky 1/7 « cause non identifiee » consigne par privacy-sentinel en ronde 1 (meme mecanique d'experiences de mutants en place). En l'etat, le critere de sortie §12.1 (« suite complete VERTE sur la machine de reference ») n'est PAS satisfait et la consignation « verifie vert » du ledger est fausse dans l'etat final laisse par l'orchestrateur — tout rejugeur du protocole obtient une suite rouge.",
+          "ou": "router/sobrio_router/__pycache__/embed.cpython-312.pyc (bytecode mutant int32, en-tete mtime/size identiques a la source) vs router/sobrio_router/embed.py:374-375 (source int64 correcte, bit-exacte a HEAD) ; echec a router/tests/test_router_embed.py:722 ; router/CONVERGENCE_LEDGER.md:1625-1627 (« FAIT (test_router_embed.py, verifie vert) »)",
+          "correction": "Invalider le cache empoisonne (supprimer router/sobrio_router/__pycache__/embed.cpython-312.pyc, ou re-sauver embed.py pour changer son mtime), rejouer `.venv/bin/pytest router/tests api/tests -q` et constater 662 verts + 4 skips ; consigner l'incident au ledger (patron de l'incident rm -rf de la ronde 0) ; regle de process a acter : toute experience de mutant se fait en copie tmp (regle deja imposee aux juges) ou, a defaut, se termine par purge du __pycache__ concerne + rejeu complet de la suite comme DERNIER acte avant commit."
+        }
+      ],
+      "minor": [
+        {
+          "id": "QA-R6r2-m1",
+          "quoi": "Deux autres caches bytecode « valides » divergents du poste, VERIFIES BENINS : api/app/__pycache__/schemas.cpython-312.pyc et catalog.cpython-312.pyc ont ete compiles sous un chemin conteneur (co_filename=/repo/api/app/...) mais leur bytecode est SEMANTIQUEMENT identique a la source (comparaison marshal normalisee hors filename/table de lignes) — aucun impact fonctionnel, seuls des chemins de traceback seraient trompeurs. Residu d'environnement, pas un defaut du chantier ; releve pour l'hygiene du poste de reference apres l'incident QA-R6r2-M1.",
+          "ou": "api/app/__pycache__/schemas.cpython-312.pyc et api/app/__pycache__/catalog.cpython-312.pyc (co_filename=/repo/api/app/…) vs sources api/app/schemas.py et api/app/catalog.py",
+          "correction": "Aucune action requise sur l'arbre versionne ; a l'occasion du nettoyage de l'incident M1, purger aussi ces deux caches pour des tracebacks fideles."
+        }
+      ],
+      "verdict": "YELLOW"
+    }
+  ],
+  "sentinelles": [
+    {
+      "agent": "privacy-sentinel",
+      "chantier": "R6",
+      "round": 2,
+      "verdict": "FAIL",
+      "violations": [
+        {
+          "id": "PS-R6r2-V1",
+          "quoi": "À HEAD gelé 77a6df0, la machine de référence exécute un BYTECODE MUTANT de embed.py — LE module privacy-critique qui touche le texte. Le cache router/sobrio_router/__pycache__/embed.cpython-312.pyc (mtime 2026-07-23 19:21:28, 13 s AVANT le commit 19:21:41) contient le mutant int32 de l'exercice ML-R6r1-m2 et reste VALIDE pour Python (en-tête décodé : flags=0 validation timestamp, source_mtime 1784827288 == stat mtime, source_size 19029 == stat size — restauration dans la même seconde, 'int32'/'int64' de même longueur → même taille de fichier) : co_names du bytecode SERVI = 'int32' quand la source gelée compile 'int64'. Conséquence : .venv/bin/pytest (l'outil sanctionné) est ROUGE de façon DÉTERMINISTE à HEAD — test_embed_mean_pooling_masque_ignore_le_padding FAILED « assert 'int32' == 'int64' » (6/6 runs), suite complète router+api : 1 failed / 661 passed / 4 skipped. La claim « vérifié vert » du commit 77a6df0 et du ledger (« ML-R6r1-m2 : FAIT ... vérifié vert ») est réfutée sur la machine de référence, et la chaîne source-auditée→code-exécuté — fondement de toutes les preuves privacy « prouvé par exécution » — est rompue. Ce mécanisme explique aussi l'observation non élucidée de la sentinelle r1 (« 1 run avec 3 échecs NON REPRODUITS ... cause non identifiée », R6-r1.json). Impact privacy BORNÉ et prouvé : scan exhaustif des 85 pyc hors .venv → seul embed.pyc diverge en code, et uniquement int64→int32 (schemas/catalog = co_filename Docker '/repo/...' seulement, code bit-identique après normalisation ; pycs -pytest- = réécriture d'assertions attendue ; cpython-313/314 = interpréteurs jamais servis par .venv) ; aucun verrou privacy exécuté ≠ source ; cache bytecode NEUF → 662 passed + 4 skipped bit-exact. Ironie consignée : le test rouge est l'assert du delta qui fait exactement son travail — il DÉTECTE le mutant réellement servi. Non-complaisance : défaut réel, prouvable, non consigné (le NameError consigné concerne le brouillon du test, pas cet état final) ; une confirmation 2/2 ne peut pas consacrer une suite rouge à HEAD.",
+          "ou": "router/sobrio_router/__pycache__/embed.cpython-312.pyc (bytecode servi, co_names 'int32') vs router/sobrio_router/embed.py:374-375 (dtype=np.int64, source gelée) ; router/tests/test_router_embed.py:720-723 (assert rouge) ; message de commit 77a6df0 + router/CONVERGENCE_LEDGER.md (bloc minors r1 : « vérifié vert »)",
+          "correction": "Geste orchestrateur AVANT re-ronde : purger le __pycache__ périmé du repo (au minimum embed.cpython-312.pyc — laissé EN PLACE par la sentinelle, preuve intacte), rejouer la suite complète (attendu : 662 passed + 4 skipped, déjà reproduit par la sentinelle sous PYTHONPYCACHEPREFIX neuf — la source à HEAD est saine, aucun changement de code requis), consigner l'incident au ledger (régime de l'incident rm -rf r0), et durcir la procédure d'exercice de mutants : mutation en COPIE tmp uniquement (règle déjà suivie par les juges) ou purge systématique des __pycache__ après toute restauration bit-exacte (la validation timestamp+taille de CPython ne voit pas une mutation de même longueur restaurée dans la même seconde)."
+        }
+      ],
+      "preuves": [
+        "Mandat 1 — delta 77a6df0 scanné intégralement (git show, 5 fichiers, +212/-4 : ledger, annexe D14, README, panel R6-r1.json, test) : uniquement prose technique française à vocabulaire système, ids de tokens numériques ([[5,7,0]]) et asserts dtype ; préuves des juges du panel archivé relues — zéro texte type prompt, zéro exemple de requête utilisateur. RIEN de textuel sensible dans le delta.",
+        "Mandat 2 — invariants relus sur source gelée : types.py:41-55 (__reduce__ conditionnel, TypeError sans contenu), routes.py:66-76 (extraction gardée _stage2_unlocked + del immédiat + del post-decide, INSERT features-only :82-96, log ids-only :117-120), main.py:63-107 (caviardage input/ctx en liste blanche), embed.py:366-407 (texte/ids/tenseurs/embedding en VARIABLES LOCALES, del texte puis del prefixe avant retour, message EmbedRefusal fixe), twostage.py:44-58 (court-circuits stage2 None/texte None/conf ≥ 0.75, except Exception silencieux sans stockage).",
+        "Mandat 2 — rejeu échantillon puis suite COMPLÈTE router+api sur Postgres réel avec cache bytecode NEUF (PYTHONPYCACHEPREFIX scratchpad, aucun fichier repo touché) : 662 passed + 4 skipped = claim du lot bit-exacte ; inclut test_api_no_leak.py + test_api_embed_stage2.py (24 passed : matrice triple verrou 8/8 avec spy, 422 caviardé ×2, 500 DB traceback scruté, DB entière sérialisée), test_router_embed_privacy.py + test_router_twostage.py (79 passed isolément), verrous sérialisation et scans statiques glob.",
+        "VIOLATION PS-R6r2-V1, chaîne de preuve : (1) suite par défaut 6/6 runs → test_embed_mean_pooling_masque_ignore_le_padding FAILED « 'int32' == 'int64' » ; (2) reproduction hors pytest sur EmbedRouter réel → dtype int32 servi malgré dtype=np.int64 en source ; (3) inspect du module chargé : co_names de _embed = ['int32'], __cached__ = __pycache__/embed.cpython-312.pyc ; (4) en-tête pyc décodé : flags=0, source_mtime/size IDENTIQUES au stat de la source restaurée → cache jugé frais à tort ; (5) compile frais de la source : co_names = ['int64'], marshal ≠ pyc ; (6) pyc daté 19:21:28 vs commit 19:21:41 (exercice mutant de l'orchestrateur, pas de cette session — tous mes runs en PYTHONDONTWRITEBYTECODE=1 ou cache redirigé).",
+        "Périmètre de la violation BORNÉ par scan exhaustif : 85 pyc hors .venv comparés à la compilation fraîche de leur source — unique divergence de CODE activement servie = embed.cpython-312.pyc (int32) ; api/app/schemas.pyc et catalog.pyc divergent par co_filename '/repo/...' (compilation Docker) UNIQUEMENT, code bit-identique après normalisation ; pycs '-pytest-' = réécriture d'assertions pytest (comportement attendu) ; pycs cpython-313/314 = autres interpréteurs, jamais servis par le .venv 3.12. AUCUN verrou privacy n'a exécuté un code ≠ source ; ce constat élucide au passage la flakiness non expliquée signalée par la sentinelle r1.",
+        "Mandat 3 — approche de contournement NOUVELLE (jamais tentée rondes 0-1) : balayage gc/RÉFÉRENCES du tas complet après decide() (sonde scratchpad/r6r2-priv/gc_sweep_probe.py, jeton hex aléatoire dans une soupe de mots-vides, composé uniquement dans des frames jetables). 4 scénarios sur le code RÉEL (bytecode frais) : (a) flux nominal complet SafeRouter(TwoStageRouter(HeuristicRouter, EmbedRouter réel à session factice SANS rétention)) via features_to_signals ; (b) session ORT levant EN PLEINE inférence (texte encore dans les frames de decide/_embed) ; (c) étage 2 levant avec le texte ET une copie distincte dans ses locals (pire cas de rétention par frame de traceback), avalé par except Exception ; (d) exception stockée par un APPELANT hostile avec traceback tenu. Résultat : 0 rétention — aucune str/bytes contenant la sentinelle atteignable depuis AUCUN conteneur du tas (dicts — y compris __dict__ de PromptSignals —, lists, tuples, sets, frames/f_locals, cells, args d'exceptions) après gc.collect() ×3, sys.last_exc/exc_info propres. CONTRÔLE POSITIF inclus et PASSÉ : la rétention volontairement construite en (d) EST détectée tant que l'appelant tient le traceback (le balayage voit ce qui existe), les args de l'exception ne portent jamais le texte, et la libération de la référence appelant ramène à zéro — rétention côté appelant = fait Python inhérent, hors périmètre lib, patron du constat vars() de la ronde 0.",
+        "État D4 re-vérifié : router/artifacts/embed/heads/candidate/ (gitignoré, résidu de staging local légitime) scanné récursivement — 1 seule chaîne multi-mots = la constante STATUT_V0 du code ; promoted/ INEXISTANT (D4 conforme) ; router/artifacts/eval/ = les 3 rapports R5 seuls, aucun embed-*.",
+        "Hygiène d'audit : HEAD 77a6df0 = origin/main constaté en entrée ET en sortie, git status --porcelain VIDE après tous les rejeux ; AUCUN fichier versionné modifié, RIEN supprimé (le pyc empoisonné est laissé EN PLACE — preuve intacte, taille/mtime re-vérifiés inchangés en sortie : 20803 octets, 19:21:28) ; tous rejeux/sondes en environnement jetable sous scratchpad/r6r2-priv (basetemp pytest et PYTHONPYCACHEPREFIX compris) ; aucun téléchargement, aucune installation ; frugalité disque respectée ; AUCUN texte type prompt dans ce rapport.",
+        "Choix consignés respectés sans recyclage : geste fondateur différé et sha None, D4 tête v0, REFUS exit 2, except OSError, signature _evals_fraiches(tmp_dir), lru_cache→R7, D14 resserré, gestes opérateur eval/gate, écarts de métadonnées détaillés au ledger, incident rm -rf r0, résidus R5 — aucun constat levé sur ces points. Le NameError consigné du commit couvre le brouillon du test, PAS l'état final du cache bytecode : la violation levée n'est consignée nulle part et contredit la consignation « vérifié vert » — d'où le FAIL, non waivable, à correction triviale et re-vérifiable en une ronde."
+      ]
+    },
+    {
+      "agent": "cost-guard",
+      "chantier": "R6",
+      "round": 2,
+      "verdict": "PASS",
+      "violations": [
+        {
+          "id": "CG-R6r2-m1",
+          "quoi": "HORS PÉRIMÈTRE COÛT (0,00 $ inchangé, arbre versionné SAIN) mais défaut réel prouvable sur la machine de référence : le bytecode caché router/sobrio_router/__pycache__/embed.cpython-312.pyc est un RÉSIDU EMPOISONNÉ de la vérification du mutant int32 (ML-R6r1-m2) — il contient encore dtype=np.int32 alors que la source embed.py:374-375 porte dtype=np.int64 (sha256 fichier travail == blob HEAD, e592cbe3…). Cause prouvée : en-tête pyc (invalidation timestamp) mtime=1784827288 / taille=19029 IDENTIQUES à embed.py actuel — la réversion int32→int64 (même longueur d'octets) a eu lieu dans la même seconde (2026-07-23 19:21:28) que l'écriture du pyc du mutant : le cache n'est JAMAIS invalidé. Conséquence : `pytest router/tests` nu sur le poste = 610 passed / 1 FAILED / 4 skipped — le test ajouté par le delta (test_router_embed.py:722, assert dtype int64) échoue en observant int32, car il attrape le mutant ENCORE VIVANT dans le cache (le test fait exactement son travail). Le critère de sortie §12.1 (« suite complète VERTE sur la machine de référence ») n'est pas satisfait EN L'ÉTAT DU POSTE, alors que le livrable versionné, lui, est correct : à cache d'octets frais (PYTHONPYCACHEPREFIX scratchpad, repo intouché) la MÊME suite fait 611 passed / 4 skipped, test int64 compris. Scan exhaustif des 126 pyc du repo (comparaison récursive des code objects, co_filename ignoré) : embed.cpython-312.pyc est le SEUL pyc 312 de production à divergence de comportement (logging_conf = faux positif d'ordre de frozenset ; .opt-1 = strip -O attendu ; 3 pyc orphelins de tests temporaires de juges sous api/tests/__pycache__, source absente, inertes).",
+          "ou": "router/sobrio_router/__pycache__/embed.cpython-312.pyc (bytecode vivant : dis de EmbedRouter._embed.__code__ → int32 présent, int64 absent) vs router/sobrio_router/embed.py:374-375 (source int64, == HEAD) ; échec observable : router/tests/test_router_embed.py:722 en run nu ; en-têtes/mtimes relevés le 2026-07-23 19:21:28 pour les deux fichiers",
+          "correction": "Geste orchestrateur AVANT clôture (je ne supprime rien, règle du panel) : purger les __pycache__ gitignorés du repo (au minimum router/sobrio_router/__pycache__/embed.cpython-312.pyc ; profiter pour évacuer les 3 pyc orphelins test_zz_* d'api/tests/__pycache__), rejouer `pytest router/tests` nu et consigner le 611 passed / 4 skipped au ledger avec une ligne sur l'incident (réversion même-seconde même-taille → cache non invalidé — le mutant int32 de la vérification ML-R6r1-m2 est resté vivant dans le bytecode du poste). Aucun fichier versionné à modifier : la source est déjà correcte."
+        }
+      ],
+      "preuves": [
+        "CADRE GELÉ vérifié : HEAD 77a6df0 == origin/main, git status --porcelain VIDE avant et après TOUS mes rejeux, rien supprimé nulle part (scratchpad r6r2-cg conservé). Delta r1→r2 relu en entier (git show --stat + diff) : 5 fichiers doc/panel/test uniquement (ledger +52, annexe D14, README ≤30 ms, R6-r1.json, 4 lignes d'assert dtype dans test_router_embed.py) — AUCUN module réseau/fetch/CI/bridge touché, aucun chemin de dépense introduit.",
+        "GARDES ANTI-RÉSEAU 5 GLOBS VERTES : router/data/*.py (test_router_data_distill.py:68), racine router/*.py (:79 — bench.py + bench_embed.py), router/train/*.py (:391), router/eval/*.py (test_router_embed_gate_promote.py:756), router/sobrio_router/*.py (:775, 10 modules) + les 4 métatests anti-inertie (:90-101, :402-405, :767-771, :790-805) — 31 passed en 0.05 s. Regex M6 ancrée début de ligne (test_router_embed_gate_promote.py:750-753) + asserts urlopen/Anthropic( partout.",
+        "GARDES PROUVÉES VIVANTES par kill-de-mutants en COPIE TMP (rsync router/ hors artifacts vers scratchpad/r6r2-cg/mut, 1.4 Mo — repo jamais touché) : (1) import urllib.request appendu à twostage.py → param FAIL ; (2) MODULE FUTUR train/module_futur.py avec import requests → ramassé D'OFFICE par le glob, FAIL ; (3) MODULE FUTUR racine bench_futur.py avec from socket import → FAIL. Bilan 3 failed / 30 passed sur la copie ; repo réel resté vert et propre.",
+        "FETCH INERTE — les 2 refus rejoués sur le module RÉEL, socket.socket empoisonné (compteur + AssertionError), sys.modules audité : (a) SANS FLAG → exit 2, message renvoyant à router/data/LICENSES.md (fetch_embed_model.py:82-88), urllib.request JAMAIS importé, 0 socket instancié, destination vide, stdout vide ; (b) FLAG='1' + MANIFEST COMMITTÉ (embed_model_manifest.json:19-25 et :28-34, sources/url/sha null) → exit 2 « source non approuvée : geste fondateur requis — champ source_repo non renseigné » (:130-136), toujours 0 réseau ; (c) étalonnage flag='true' → exit 2 (égalité stricte '1', :82). Ordre normatif flag-avant-manifest : run_fetch :260-262 ; schemes https/file seuls :67 ; chemin réseau _download (:194-205) INEXÉCUTABLE sur le manifest committé — geste fondateur différé respecté (décision datée, non recyclée).",
+        "CI VERROUILLÉE : .github/workflows/ci.yml — env limité à DATABASE_URL (:27-28), installation sans requirements-embed ni requirements-ml (:41-46), garde R6 EXÉCUTABLE (:55-61 : échec si un env SOBRIO_* est posé ou si onnxruntime/tokenizers sont importables). Les 6 tests de conformité router/tests/test_router_ci_workflow.py rejoués : 6 passed.",
+        "REQUIREMENTS-EMBED NON INSTALLÉ : .venv/bin/pip list — aucun onnxruntime/tokenizers/torch/transformers/anthropic/openai ; seuls numpy 2.5.1 + lightgbm 4.6.0 (requirements-ml, R5), httpx 0.28.1 = stack imposée du connecteur (CLAUDE.md), pas un SDK payant. router/requirements-embed.txt:6-16 : statut « NON INSTALLÉ à ce jour », pins onnxruntime/tokenizers EN COMMENTAIRE, numpy seul actif. Env machine sans SOBRIO_* ; Makefile:110 = SEULE ligne du repo posant SOBRIO_ALLOW_MODEL_DOWNLOAD=1 (cible router-embed-model, commentaire :106). Grep repo (router/ + api/app) : zéro api.anthropic.com, zéro Anthropic(/OpenAI( hors asserts des gardes.",
+        "SUITE COMPLÈTE SOUS SOCKET-INTERDIT (plugin scratchpad : socket.connect → AssertionError + hook d'audit CPython ; zéro fichier repo modifié) : à cache d'octets FRAIS (PYTHONPYCACHEPREFIX scratchpad) 611 passed / 4 skipped en 27 s — 0 socket.connect, 3 urllib.Request TOUS en file:// vers des tmp pytest (fixtures locales voulues des tests fetch). Le run préalable AU CACHE DU POSTE donnait 610/1/4 : écart intégralement expliqué et prouvé par la violation CG-R6r2-m1 (pyc empoisonné machine-local, source versionnée saine — sha fichier == blob HEAD).",
+        "DÉPENSE MISSION : 0,00 $. Zéro connexion sortante sur l'ensemble de mes rejeux (compteurs socket à 0, audit log sans socket.connect — contrairement à la ronde 1, pas même une résolution DNS .invalid : rejeux 100 % hors-ligne), zéro téléchargement, zéro installation, aucun SDK payant présent, chemin de dépense du fetch inexécutable par construction (manifest null + triple refus rejoué). Artifacts : router/artifacts/eval/ ne contient que les 3 rapports R5 (aucun embed-*, D14 respecté), encoder absent (nominal, D4)."
+      ]
+    }
+  ]
+}
