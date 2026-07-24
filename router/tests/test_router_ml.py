@@ -64,11 +64,32 @@ def test_decide_contrat(artefact_v05: Path):
 
 
 def test_sobrio_promoted_dir_surcharge_artefact_charge(
-    artefact_v05: Path, monkeypatch: pytest.MonkeyPatch
+    artefact_v05: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ):
     """La surcharge est lue à la construction et charge l'artefact indiqué."""
+    promoted_inexistant = tmp_path / "promoted-inexistant"
+    monkeypatch.setattr(ml_module, "PROMOTED_DIR", promoted_inexistant)
     monkeypatch.setenv("SOBRIO_PROMOTED_DIR", str(artefact_v05))
     router = MLRouter()
+    assert router.decide(_signals_varies(1)[0]).rule == "ml:v05"
+
+
+def test_sobrio_promoted_dir_vide_utilise_promoted_dir(
+    artefact_v05: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """Une surcharge blanche est absente et laisse agir le chemin par défaut."""
+    monkeypatch.setattr(ml_module, "PROMOTED_DIR", artefact_v05)
+    monkeypatch.setenv("SOBRIO_PROMOTED_DIR", " \t ")
+    router = MLRouter()
+    assert router.decide(_signals_varies(1)[0]).rule == "ml:v05"
+
+
+def test_artifact_dir_explicite_prioritaire_sur_surcharge_invalide(
+    artefact_v05: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """L'argument explicite l'emporte sur une surcharge invalide."""
+    monkeypatch.setenv("SOBRIO_PROMOTED_DIR", str(tmp_path / "surcharge-invalide"))
+    router = MLRouter(artifact_dir=artefact_v05)
     assert router.decide(_signals_varies(1)[0]).rule == "ml:v05"
 
 

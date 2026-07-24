@@ -134,11 +134,10 @@ def _routeur_service(tete: object, embedding: list[float] | None = None) -> Embe
     return routeur
 
 
-def test_sobrio_embed_artifacts_dir_charge_encodeur_et_tete(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-):
-    """La racine surchargée est lue à la construction pour l'encodeur et la tête."""
-    racine = tmp_path / "artefacts-embed"
+def _preparer_routeur_embed_chargeable(
+    racine: Path, monkeypatch: pytest.MonkeyPatch
+) -> tuple[Path, Path, dict[str, str]]:
+    """Prépare des artefacts et dépendances factices acceptés par le constructeur."""
     encodeur = racine / "encoder"
     encodeur.mkdir(parents=True)
     model_octets = b"modele-factice"
@@ -183,6 +182,15 @@ def test_sobrio_embed_artifacts_dir_charge_encodeur_et_tete(
         SimpleNamespace(SessionOptions=_OptionsFactices, InferenceSession=_SessionFactice),
     )
     monkeypatch.setitem(sys.modules, "tokenizers", SimpleNamespace(Tokenizer=_FabriqueTokeniseur))
+    return encodeur, racine / "heads" / "promoted", chemins_charges
+
+
+def test_sobrio_embed_artifacts_dir_charge_encodeur_et_tete(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """La racine surchargée est lue à la construction pour l'encodeur et la tête."""
+    racine = tmp_path / "artefacts-embed"
+    encodeur, _, chemins_charges = _preparer_routeur_embed_chargeable(racine, monkeypatch)
     monkeypatch.setenv("SOBRIO_EMBED_ARTIFACTS_DIR", str(racine))
 
     routeur = EmbedRouter()
@@ -194,6 +202,39 @@ def test_sobrio_embed_artifacts_dir_charge_encodeur_et_tete(
         "claude-haiku-4-5",
         0.74,
     )
+
+
+def test_sobrio_embed_artifacts_dir_vide_utilise_chemins_par_defaut(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """Une surcharge blanche est absente et laisse agir les chemins par défaut."""
+    encodeur, tete, chemins_charges = _preparer_routeur_embed_chargeable(
+        tmp_path / "artefacts-defaut", monkeypatch
+    )
+    monkeypatch.setattr(embed_module, "ENCODER_DIR", encodeur)
+    monkeypatch.setattr(embed_module, "PROMOTED_HEAD_DIR", tete)
+    monkeypatch.setenv("SOBRIO_EMBED_ARTIFACTS_DIR", " \t ")
+
+    routeur = EmbedRouter()
+    assert chemins_charges["modele"] == str(encodeur / "model.onnx")
+    assert routeur._head.predict([5.0] + [0.0] * (_DIM - 1))[1] == 0.74
+
+
+def test_repertoires_explicites_prioritaires_sur_surcharge_invalide(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """Les deux arguments explicites l'emportent sur une surcharge invalide."""
+    encodeur, tete, chemins_charges = _preparer_routeur_embed_chargeable(
+        tmp_path / "artefacts-explicites", monkeypatch
+    )
+    monkeypatch.setenv(
+        "SOBRIO_EMBED_ARTIFACTS_DIR",
+        str(tmp_path / "surcharge-invalide"),
+    )
+
+    routeur = EmbedRouter(encoder_dir=encodeur, head_dir=tete)
+    assert chemins_charges["modele"] == str(encodeur / "model.onnx")
+    assert routeur._head.predict([5.0] + [0.0] * (_DIM - 1))[1] == 0.74
 
 
 # ---------------------------------------------------------------------------

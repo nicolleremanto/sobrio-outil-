@@ -15,14 +15,18 @@ la racine du monorepo.
    vérifie l'absence de repli heuristique pendant l'évaluation ainsi que
    l'intégrité de l'artefact, puis copie le candidat vers `promoted/`. L'ancien
    `promoted/` devient `previous/`.
-4. Après une promotion, appeler
-   `api.app.router_bridge.reinitialiser_routeurs()` depuis le geste interne de
-   déploiement. Les requêtes en cours terminent avec leur instance ; les
-   résolutions suivantes rechargent les artefacts.
+4. Après une promotion, redémarrer le service API : c'est le mécanisme concret
+   de rechargement en v0, tant que le geste interne de déploiement n'est pas
+   câblé. `api.app.router_bridge.reinitialiser_routeurs()` ne peut le remplacer
+   que s'il est appelé dans le processus qui sert les requêtes : son
+   `lru_cache` est propre à chaque processus et un `python -c` séparé n'a aucun
+   effet. Les requêtes en cours terminent avec leur instance ; les résolutions
+   suivantes rechargent les artefacts.
 
 En cas de régression, `make router-rollback` échange `promoted/` et `previous/`
-après contrôle d'intégrité. Appeler ensuite la même fonction de
-réinitialisation du bridge. Un seul niveau d'historique est conservé.
+après contrôle d'intégrité. Redémarrer ensuite le service, ou réinitialiser le
+bridge dans chacun des processus qui servent les requêtes lorsque le geste
+interne sera câblé. Un seul niveau d'historique est conservé.
 
 ## Étage 2 — déploiement et rollback
 
@@ -52,7 +56,10 @@ promu en production.
   après contrôle d'intégrité.
 
 Après toute promotion ou tout rollback de l'étage 2, appeler
-`api.app.router_bridge.reinitialiser_routeurs()` comme pour l'étage 1.
+`api.app.router_bridge.reinitialiser_routeurs()` dans chaque processus qui sert
+les requêtes, comme pour l'étage 1. En v0, redémarrer concrètement le service
+tant que ce geste interne n'est pas câblé ; un appel depuis un `python -c`
+séparé ne purge aucun cache du service.
 
 ## Geste fondateur de l'encodeur int8
 
@@ -149,9 +156,12 @@ ni les seuils ni le code applicatif pour masquer ce flake.
 ### Artefact promu mais routeur inchangé
 
 Le bridge mémorise les routeurs. Après une promotion ou un rollback, appeler
-`api.app.router_bridge.reinitialiser_routeurs()` depuis le geste interne de
-déploiement. Sans cette purge, le processus peut continuer à servir l'instance
-construite avant la rotation des artefacts.
+`api.app.router_bridge.reinitialiser_routeurs()` dans le processus qui sert les
+requêtes. Le `lru_cache` est propre à chaque processus : un appel depuis un
+`python -c` séparé n'a aucun effet sur le service. En v0, redémarrer le service
+après la rotation des artefacts, tant que ce geste interne de déploiement n'est
+pas câblé. Sans cette purge ou ce redémarrage, le processus peut continuer à
+servir l'instance construite avant la rotation.
 
 ## Caps de dépense
 

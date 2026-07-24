@@ -1835,3 +1835,34 @@ somment à 151 ; total exact invérifiable post-purge ; le compte OPÉRANT
 (103 pyc 3.12 conformes, zéro divergent) a été re-prouvé en r4.
 
 Place aux panels R7 (TOUT OPUS — nouveau régime, ronde 0).
+
+## R7 — round 0 (commit fc39b7e, PREMIER PANEL TOUT OPUS — archivé router/panels/R7-r0.json)
+
+| agent            | modèle | scores (dims)                                        | blocking | major | verdict |
+|------------------|--------|------------------------------------------------------|----------|-------|---------|
+| ml-architect (P) | opus   | spec5 chemins-env5 rechargement5 opérabilité4 ext5   | 0        | 0     | GREEN   |
+| eval-scientist   | opus   | éval5 monitoring5 honnêteté5 repro4 budgets5         | 0        | 0     | GREEN   |
+| data-quality     | opus   | intégrité5 robustesse5 traça4 périmètre5 global5     | 0        | 0     | GREEN   |
+| qa-auditor       | opus   | couverture4 contrat5 erreurs5 clarté5 régressions5   | 0        | 0     | GREEN   |
+| privacy-sentinel | opus   | — (0 violation)                                      | PASS     | —     | PASS    |
+| cost-guard       | opus   | — (0 violation, dépense 0,00 $)                      | PASS     | —     | PASS    |
+
+→ **Ronde VERTE — streak 1/2** (ronde 0 consommée, 7 restantes). Le
+premier panel Opus a tenu le niveau des panels Fable : mutant survivant
+démontré en copie tmp (test surcharge dépendant de l'état machine),
+subtilité env-vide→Path('.'), précédence arg>env non épinglée, précisions
+RUNBOOK (cache par processus).
+
+**Rectification (eval/dq r0)** : le journal de build R7 disait « 104
+fichiers » — 104 = décompte dépôt entier de ruff format --check ; le
+périmètre exact de make lint donne 103. Les deux sont verts.
+
+**Poli ronde 0 appliqué par CODEX avant la ronde 1 (5 fichiers, +94/-16,
+vérifié par l'orchestrateur : périmètre strict, suite 673 verts + 4 skips,
+format/lint verts)** : env posée-mais-vide traitée comme absente
+(ml+embed, patron strip→None) ; test surcharge ML rendu indépendant de
+l'état machine (PROMOTED_DIR monkeypatché inexistant) ; 4 tests nouveaux
+(env vide ×2, précédence arg>env ×2) ; RUNBOOK précisé (purge DANS le
+processus servant, redémarrage = mécanisme concret v0). Le flake Postgres
+(1 run sur 2 chez eval-scientist, AdminShutdown) reste l'item de
+surveillance consigné — protocole RUNBOOK appliqué, run propre reproduit.

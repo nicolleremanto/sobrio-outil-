@@ -106,6 +106,9 @@ class MLRouter(Router):
         # puis purger le cache du bridge sans réimporter ce module.
         if artifact_dir is None:
             surcharge = os.environ.get(_PROMOTED_DIR_ENV)
+            if surcharge is not None and not surcharge.strip():
+                # Une surcharge vide équivaut à une absence.
+                surcharge = None
             directory = Path(surcharge) if surcharge is not None else PROMOTED_DIR
         else:
             directory = Path(artifact_dir)

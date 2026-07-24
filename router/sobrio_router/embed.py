@@ -297,6 +297,9 @@ class EmbedRouter(Router):
         # La racine est résolue À LA CONSTRUCTION, pas à l'import : après
         # déploiement d'un artefact, une purge du cache du bridge suffit.
         surcharge = os.environ.get(_EMBED_ARTIFACTS_DIR_ENV)
+        if surcharge is not None and not surcharge.strip():
+            # Une surcharge vide équivaut à une absence.
+            surcharge = None
         artifacts_directory = Path(surcharge) if surcharge is not None else None
         if encoder_dir is not None:
             encoder_directory = Path(encoder_dir)

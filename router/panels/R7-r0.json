@@ -1,0 +1,156 @@
+{
+  "chantier": "R7",
+  "round": 0,
+  "head": "fc39b7e",
+  "date": "2026-07-24",
+  "ronde": "VERTE",
+  "regime": "panel tout Opus (nouveau régime), lot écrit par codex",
+  "juges": [
+    {
+      "agent": "ml-architect",
+      "chantier": "R7",
+      "round": 0,
+      "scores": {
+        "spec": 5,
+        "chemins_env": 5,
+        "rechargement": 5,
+        "operabilite": 4,
+        "extensibilite": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "r7-min-runbook-reinit-in-process",
+          "quoi": "Le RUNBOOK prescrit d'appeler reinitialiser_routeurs() 'depuis le geste interne de deploiement' apres promotion/rollback, mais aucun declencheur in-process n'est livre dans ce lot (aucune route, aucun signal, aucun hook lifespan, aucune cible make/CLI ne l'invoque — verifie par grep sur api/app). Le lru_cache etant par processus, un appel depuis un processus separe (ex. python -c) purge un cache neuf et n'a AUCUN effet sur le serveur en vol ; le chemin concret v0 (redemarrage du service, qui reconstruit naturellement les routeurs) n'est pas mentionne. Un operateur qui deroule la procedure litteralement peut croire avoir recharge alors qu'il n'a rien fait. Invariant non casse, primitive correcte et testee : precision documentaire.",
+          "ou": "router/RUNBOOK.md:19 ; router/RUNBOOK.md:55 ; router/RUNBOOK.md:152",
+          "correction": "Preciser dans le RUNBOOK que l'appel doit s'executer DANS le processus qui sert les requetes (le cache est par processus), et documenter le redemarrage du service comme mecanisme de rechargement concret v0 tant que le geste de deploiement interne n'est pas cable (Lot F/ops)."
+        },
+        {
+          "id": "r7-min-env-empty-string",
+          "quoi": "Les surcharges d'env sont lues via os.environ.get(...) puis testees par 'is not None' : une valeur VIDE (variable posee mais chaine vide) est traitee comme une surcharge, donc Path('') == PosixPath('.'), pointant l'artefact sur le repertoire courant. Comportement fail-closed (chargement echoue -> repli heuristique via SafeRouter), donc sans danger, mais surprenant et divergent de l'intention 'absente => defaut'.",
+          "ou": "router/sobrio_router/ml.py:108 ; router/sobrio_router/embed.py:299",
+          "correction": "Traiter une valeur d'env vide/blanche comme non definie (ex. 'surcharge = os.environ.get(...) or None', ou strip()), afin qu'une surcharge vide retombe sur PROMOTED_DIR/EMBED_ARTIFACTS_DIR plutot que sur '.'."
+        }
+      ],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "eval-scientist",
+      "chantier": "R7",
+      "round": 0,
+      "scores": {
+        "evaluation": 5,
+        "monitoring": 5,
+        "honnetete": 5,
+        "repro": 4,
+        "budgets": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "R7-repro-min-1",
+          "quoi": "Flake infra Postgres reproduit sur machine de reference : test_ml_v05_artefact_present echoue au run 1/2 (psycopg AdminShutdown, 668 passed + 1 failed + 4 skipped), run 2 propre a exactement 669 passed + 4 skipped. C'est l'item de surveillance deja consigne [ml r4] / incident RUNBOOK Postgres, non introduit par R7 et sans defaut de code — mais la stabilite 2/2 stricte n'est pas atteinte sur ce poste.",
+          "ou": "api/tests/test_api_router_bridge.py:210",
+          "correction": "Aucune action code : appliquer le protocole RUNBOOK 'Postgres' (recycler le conteneur, attendre healthy, rejouer) ; le run propre reproduit le 669+4 revendique. Garder l'item en surveillance pour le lot ops."
+        },
+        {
+          "id": "R7-honn-min-1",
+          "quoi": "Le decompte 'ruff format/check verts sur 104 fichiers' du journal de build correspond a l'invocation depot-entier (ruff format --check sans arguments = 104 fichiers) ; le perimetre effectif de make lint (router api connector warehouse report) donne 103 fichiers. Les deux sont verts (verifie), mais un lecteur executant make lint voit 103, pas 104 — leger ecart de perimetre non explicite.",
+          "ou": "router/CONVERGENCE_LEDGER.md:1830",
+          "correction": "Preciser que 104 est le decompte depot-entier et 103 le perimetre exact de make lint, ou aligner le chiffre sur le perimetre de la cible lint."
+        }
+      ],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "data-quality",
+      "chantier": "R7",
+      "round": 0,
+      "scores": {
+        "integrite": 5,
+        "robustesse_pipeline": 5,
+        "tracabilite": 4,
+        "perimetre": 5,
+        "global": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "dq-r0-m1",
+          "quoi": "Off-by-one prouvable dans le journal de build R7 : la ligne affirme 'ruff format/check verts sur 104 fichiers', mais le decompte reel sur le perimetre lint (router api connector warehouse report) est 103 — 'ruff format --check' rapporte '103 files already formatted' et 'find' des .py hors venv/pycache/node_modules donne 103. Ironie assumee : ce meme journal reconsigne l'off-by-one bytecode '150 pyc'. Aucune incidence sur la substance (tous formates, checks verts), mais chiffre inexact dans une consignation.",
+          "ou": "router/CONVERGENCE_LEDGER.md:1830",
+          "correction": "Remplacer '104 fichiers' par '103 fichiers' (ou retirer le chiffre)."
+        }
+      ],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "qa-auditor",
+      "chantier": "R7",
+      "round": 0,
+      "scores": {
+        "couverture": 4,
+        "contrat": 5,
+        "erreurs": 5,
+        "clarte": 5,
+        "regressions": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "qa-min-1",
+          "quoi": "Le test positif de surcharge n'assere que rule=='ml:v05', valeur produite par TOUT artefact v0.5 valide, et ne rend pas le dossier promu par defaut illisible. Mutation en copie tmp prouvee : un MLRouter.__init__ qui IGNORE SOBRIO_PROMOTED_DIR (toujours PROMOTED_DIR) est TUE seulement quand le dossier promu par defaut est vide (etat CI/clone frais) mais SURVIT sur une machine ou router/artifacts/models/promoted est peuple (etat de ce poste). Les deux autres mutants echantillonnes (recalibrate return 2->0 et stderr->stdout) sont TUES sans ambiguite.",
+          "ou": "router/tests/test_router_ml.py:66",
+          "correction": "Dans ce test, monkeypatcher ml_module.PROMOTED_DIR vers un chemin inexistant avant de construire MLRouter(), pour que la surcharge env soit la SEULE source lisible ; le test tue alors le mutant independamment de l'etat de la machine (comme le fait deja le test embed voisin qui epingle les chemins exacts)."
+        },
+        {
+          "id": "qa-min-2",
+          "quoi": "La precedence argument explicite > env n'est epinglee par aucun test, ni pour MLRouter(artifact_dir=...) avec SOBRIO_PROMOTED_DIR pose, ni pour EmbedRouter(encoder_dir/head_dir=...) avec SOBRIO_EMBED_ARTIFACTS_DIR pose : aucun test ne pose simultanement l'arg ET l'env, donc un mutant inversant la precedence (env gagne sur l'arg) survivrait. Risque reel faible : le bridge ne pose jamais les deux a la fois.",
+          "ou": "router/tests/test_router_ml.py:66, router/tests/test_router_embed.py:137",
+          "correction": "Ajouter un cas ou l'arg explicite pointe un artefact valide ET l'env pointe un dossier invalide, en verifiant que la construction reussit (l'arg l'emporte)."
+        }
+      ],
+      "verdict": "GREEN"
+    }
+  ],
+  "sentinelles": [
+    {
+      "agent": "privacy-sentinel",
+      "chantier": "R7",
+      "round": 0,
+      "verdict": "PASS",
+      "violations": [],
+      "preuves": [
+        "git show fc39b7e integral (20 fichiers) : dans les lignes ajoutees, unique occurrence de 'prompt' = le nom de flag de config send_prompt_text a router/RUNBOOK.md:317 (verrou canary etage 2 consigne R6), jamais du contenu de prompt",
+        "Surcharges env SOBRIO_PROMOTED_DIR (router/sobrio_router/ml.py:35,110-118) et SOBRIO_EMBED_ARTIFACTS_DIR (router/sobrio_router/embed.py:56-58,291-316) resolvent des CHEMINS a la construction, aucun flux de donnees, aucun nouveau chemin de fuite",
+        "Messages d'erreur ajoutes ne portent que nombres/chemins/constantes : router/train/promote_embed.py:187-190 ({p95!r},{BUDGET_MS},{BENCH_REPORT_PATH}), router/train/train_head_v0.py:171-174 ({TRAIN_SEED}) ; router/train/recalibrate.py:20-22 message REFUS fixe sans interpolation",
+        "reinitialiser_routeurs api/app/router_bridge.py:115-122 = unique appel _router_for_version.cache_clear() ; le lru_cache memorise des instances Router (artefacts/modeles), jamais du texte ; cache_clear ne logge ni ne leve => aucune exposition par logs/exceptions",
+        "router/RUNBOOK.md (163 l., nouveau) : commandes make, chemins router/artifacts/*, sha256, seuils, noms d'env uniquement ; l'etape 6 (l.311-312) impose explicitement 'sans persistance de texte' ; aucune phrase ressemblant a un prompt (jurisprudence R3-r3)",
+        "Scan anti-serialisation (glob router/train,eval,sobrio_router,tools + api/app) couvre le nouveau router/train/recalibrate.py — pytest --co confirme sa presence dans le parametrize ; aucun motif pickle/asdict/astuple/vars introduit",
+        ".venv/bin/pytest api/tests/test_api_no_leak.py router/tests/test_router_embed_privacy.py router/tests/test_router_recalibrate.py = 68 passed (chemins 200/422x2/500-DB avec sentinelles, filtre scrub, verrous __reduce__, injection negative)",
+        ".venv/bin/pytest api/tests/test_api_router_bridge.py router/tests/test_router_ml.py router/tests/test_router_embed.py router/tests/test_router_embed_optional_dep.py = 111 passed, 3 skipped (surcharges env + reinitialiser_routeurs verts)"
+      ]
+    },
+    {
+      "agent": "cost-guard",
+      "chantier": "R7",
+      "round": 0,
+      "verdict": "PASS",
+      "violations": [],
+      "preuves": [
+        "Dry-run+cap fail-closed decrit EXACTEMENT par le RUNBOOK: router/RUNBOOK.md:388-395 (section Caps de depense) = router/data/distill.py — defaut dry-run (distill.py:302 main()), deux gates simultanes SOBRIO_ALLOW_PAID_CALLS==1 (distill.py:250) + SOBRIO_MAX_SPEND_USD fini strictement positif (distill.py:135 math.isfinite/cap<=0), defaut 20 USD (distill.py:84 _DEFAULT_MAX_SPEND_USD=20.0), refus AVANT tout appel (run_real leve toujours, n'ecrit rien => etat intact); claim RUNBOOK 'La CI ne pose jamais l'autorisation' verifie.",
+        "recalibrate.py lu EN ENTIER (router/train/recalibrate.py, 38 lignes): imports = uniquement __future__ + sys (verifie par ast.walk); main() imprime REFUS_MESSAGE sur stderr et retourne 2, sans aucune branche — fail-closed inconditionnel, ZERO orchestration, aucun appel payant possible. test_router_recalibrate.py vert (exit 2, stdout vide, message exact, aucun Traceback).",
+        "AUCUN import reseau nouveau: les 7 fichiers non-test modifies (router/bench_embed.py, router/eval/embed_fixtures.py, router/sobrio_router/embed.py, router/sobrio_router/ml.py, router/train/recalibrate.py, router/train/promote_embed.py, router/train/train_head_v0.py) sont clean via la regex M6 _NETWORK_IMPORT_RE (test_router_data_distill.py:31) et l'absence de urlopen/Anthropic(; embed.py et ml.py n'ajoutent que 'import os'.",
+        "Gardes glob REJOUEES toutes vertes: test_no_network_imports_in_router_{data,root,train}_modules + _in_router_eval_modules + _in_sobrio_router_modules couvrent par parametrize sorted(dir.glob('*.py')) chaque dossier touche; meta-gardes test_router_{data,train}_*_couvert_par_la_garde, test_router_eval_dir_couvert_par_la_garde, test_sobrio_router_dir_couvert_par_la_garde confirment que les globs voient bien les fichiers (recalibrate.py present dans le glob train; embed.py/ml.py presents dans le glob sobrio_router). 133 tests guard/cap/CI + 9 tests cibles verts.",
+        "CI verrouillee: .github/workflows/ci.yml ne pose AUCUN flag SOBRIO_* (test_ci_ne_pose_aucun_flag_sobrio, regex ligne 42), n'installe jamais requirements-embed/-ml (ci.yml:44-46, test_ci_n_installe_pas_les_requirements_optionnels), lance 'ruff check' (ci.yml:64) + pytest epingle (ci.yml:67) + etape 'Garde R6' executable (ci.yml:55-61 grep ^SOBRIO_ + find_spec onnxruntime/tokenizers). 5 tests test_router_ci_workflow.py verts.",
+        "make lint enrichi NE CASSE PAS la CI: le Makefile ajoute 'ruff format --check router api connector warehouse report' (Makefile:42) mais la CI appelle ruff DIRECTEMENT (ci.yml:64 'ruff check'), pas 'make lint' — impact nul; de plus ruff format --check passe (103 files already formatted, exit 0) et ruff check passe (All checks passed!, exit 0).",
+        "requirements-embed TOUJOURS non installe: onnxruntime et tokenizers absents du .venv (import echoue); router/requirements-embed.txt marque 'NON INSTALLE a ce jour — premiere installation = geste fondateur', seul numpy epingle, deps embed en commentaire; CI ne l'installe jamais (test_ci_n_installe_pas_les_requirements_optionnels).",
+        "Codex n'introduit AUCUN chemin de depense: les 20 fichiers du lot fc39b7e enumeres — surcharges env SOBRIO_PROMOTED_DIR/SOBRIO_EMBED_ARTIFACTS_DIR resolvent des chemins locaux (embed.py:561-574, ml.py:619-626, os.environ.get seulement), reinitialiser_routeurs()=cache_clear (router_bridge.py:113-120, sans route HTTP), PYTHONDONTWRITEBYTECODE=1 (docker-compose.dev.yml), reste = reformatage ruff iso-semantique. Depense mission = 0,00 $ (regime codex sous abonnement fondateur, zero API payante)."
+      ]
+    }
+  ]
+}
