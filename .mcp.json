@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "codex": {
+      "type": "stdio",
+      "command": "/Applications/ChatGPT.app/Contents/Resources/codex",
+      "args": [
+        "mcp-server"
+      ],
+      "env": {}
+    }
+  }
+}

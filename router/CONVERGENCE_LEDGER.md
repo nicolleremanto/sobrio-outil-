@@ -1763,3 +1763,36 @@ R7 » — boucle stoppée et build R7 (wf_a03d6c15) tué EN VOL AVANT toute
 État exact à la reprise : R1-R6 CONVERGÉS, R7 non commencé (la liste des
 transferts ci-dessus est le normatif du chantier), puis panels R7
 (2 vertes, plafond 8) et §8 (rapport final + 4 gestes fondateurs).
+
+## Décision fondateur (2026-07-24) — NOUVEAU RÉGIME D'ORCHESTRATION pour R7+
+
+Directive : les sous-agents QUI CODENT sont désormais des agents **codex**
+(GPT, abonnement fondateur) pilotés en terminal ; l'orchestrateur ne code
+plus (orchestration + vérification seulement) ; wrappers et panels sur
+**Opus** (« tout Opus », choix fondateur explicite — fin de la politique
+tout-Fable des chantiers R2-R6) ; le graphe de code **graphify** sert de
+contexte à bas coût.
+
+Mise en œuvre consignée :
+- codex-cli 0.145.0 (binaire de l'app ChatGPT :
+  /Applications/ChatGPT.app/Contents/Resources/codex), connecté à
+  l'abonnement fondateur, enregistré serveur MCP scope projet
+  (.mcp.json committé) ; cette session le pilote via `codex exec`
+  (sandbox workspace-write, repo courant), les suivantes via MCP.
+- Wrappers Opus : briefs stricts portant les règles durcies du projet
+  (français, ruff, privacy « rien qui ressemble à un prompt », mutations
+  en copie tmp, zéro réseau, jamais toucher ledger/panels/contracts) —
+  codex ne connaît pas nos leçons, les briefs les portent, la
+  vérification Claude les fait respecter.
+- RÈGLE D'INTÉGRITÉ graphify : le graphe (2655 nœuds, 4762 arêtes,
+  régénéré ce jour depuis HEAD via `graphify update .`, graphify-out/
+  gitignoré, .graphifyignore committé) sert à CHERCHER (briefs,
+  navigation) — JAMAIS à prouver : toute vérification normative lit les
+  fichiers. Le graphe est régénéré à chaque commit (sans coût API).
+- La revue croisée inter-modèles (builders GPT / vérifieurs-juges
+  Claude) renforce la règle d'or §0 : le constructeur ne juge jamais son
+  propre code — désormais même le MODÈLE change entre les deux.
+- Dépense API Anthropic/OpenAI hors abonnements : toujours 0,00 $ (codex
+  est couvert par l'abonnement fondateur, aucun appel payant à l'API).
+- Nettoyage machine effectué (2,4 → 5,1 Gi libres : caches conda/VSCode/
+  navigateur/pip/npm/brew + tmp d'anciennes sessions).

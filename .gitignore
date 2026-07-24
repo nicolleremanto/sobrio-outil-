@@ -56,3 +56,6 @@ router/data/artifacts/
 .DS_Store
 .idea/
 .vscode/
+
+# Graphe de code local (graphify) — régénéré à chaque commit, jamais versionné.
+graphify-out/

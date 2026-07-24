@@ -1,0 +1,28 @@
+# Graphify et sorties générées : ne pas indexer le graphe dans lui-même.
+graphify-out/
+report/out/
+out/
+
+# Skills Graphify vendoriés : utiles aux agents, pas à l'architecture de Sobrio.
+.claude/skills/graphify/
+.codex/skills/graphify/
+
+# Dépendances et artefacts de build.
+.venv/
+node_modules/
+extension/.output/
+extension/.wxt/
+extension/pnpm-lock.yaml
+
+# Payloads synthétiques volumineux : leur forme est décrite par fixtures/README.md.
+fixtures/anthropic/*.json
+
+# Secrets locaux, même s'ils sont déjà couverts par .gitignore.
+.env
+.env.*
+!.env.example
+
+# Ajout 2026-07-24 (reprise R7) : artefacts binaires/générés du routeur.
+router/artifacts/
+router/data/artifacts/
+router/panels/
