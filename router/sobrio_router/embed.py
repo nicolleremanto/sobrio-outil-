@@ -35,6 +35,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -55,8 +56,8 @@ _N_LABELS = len(LABEL_ORDER)  # 3
 _ENCODER_SHA256: str | None = None
 _TOKENIZER_SHA256: str | None = None
 
-# Chemins d'artefacts (§4.2, §6.3) — gitignorés via router/artifacts/*.
-# Valides en install editable (venv racine) ; surcharge env : TODO R7.
+# Chemins d'artefacts PAR DÉFAUT (§4.2, §6.3) — gitignorés via
+# router/artifacts/*. Valides en installation éditable (venv racine).
 EMBED_ARTIFACTS_DIR = Path(__file__).resolve().parents[1] / "artifacts" / "embed"
 ENCODER_DIR = EMBED_ARTIFACTS_DIR / "encoder"
 HEADS_DIR = EMBED_ARTIFACTS_DIR / "heads"
@@ -64,6 +65,7 @@ CANDIDATE_HEAD_DIR = HEADS_DIR / "candidate"
 PROMOTED_HEAD_DIR = HEADS_DIR / "promoted"
 PREVIOUS_HEAD_DIR = HEADS_DIR / "previous"
 
+_EMBED_ARTIFACTS_DIR_ENV = "SOBRIO_EMBED_ARTIFACTS_DIR"
 _HEAD_FILES = ("head.json", "calibrator.json", "metadata.json")
 _ENCODER_FILES = ("model.onnx", "tokenizer.json")
 
@@ -289,10 +291,25 @@ class EmbedRouter(Router):
 
     def __init__(
         self,
-        encoder_dir: Path | str = ENCODER_DIR,
-        head_dir: Path | str = PROMOTED_HEAD_DIR,
+        encoder_dir: Path | str | None = None,
+        head_dir: Path | str | None = None,
     ) -> None:
-        encoder_directory = Path(encoder_dir)
+        # La racine est résolue À LA CONSTRUCTION, pas à l'import : après
+        # déploiement d'un artefact, une purge du cache du bridge suffit.
+        surcharge = os.environ.get(_EMBED_ARTIFACTS_DIR_ENV)
+        artifacts_directory = Path(surcharge) if surcharge is not None else None
+        if encoder_dir is not None:
+            encoder_directory = Path(encoder_dir)
+        elif artifacts_directory is not None:
+            encoder_directory = artifacts_directory / "encoder"
+        else:
+            encoder_directory = ENCODER_DIR
+        if head_dir is not None:
+            head_directory = Path(head_dir)
+        elif artifacts_directory is not None:
+            head_directory = artifacts_directory / "heads" / "promoted"
+        else:
+            head_directory = PROMOTED_HEAD_DIR
 
         # 1. Imports PARESSEUX (§5.1.1) — absents => EmbedLoadError, jamais
         # un ImportError nu (le bridge et les tests s'y fient).
@@ -331,7 +348,7 @@ class EmbedRouter(Router):
         # dérive §5.1.4 (embed_spec, label_mapping, confidence_cap) — chargée
         # AVANT la session ORT : échouer sur une dérive ne paie jamais le
         # coût du chargement du modèle.
-        self._head = EmbedHead.load(head_dir)
+        self._head = EmbedHead.load(head_directory)
 
         # 5. Session ORT déterministe (§5.1.5) : CPU seul, 1 thread intra et
         # inter (parité num_threads=1 LightGBM — latence prévisible).

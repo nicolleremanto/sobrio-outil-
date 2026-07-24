@@ -58,8 +58,7 @@ def test_ci_execute_la_suite_complete():
     """§12.1 : la suite router+api (et tous les lots Python) tourne en CI —
     les simulations §10.6 et les gardes privacy/réseau en font partie."""
     assert (
-        "pytest router/tests api/tests connector/tests warehouse/tests report/tests"
-        in _ci_source()
+        "pytest router/tests api/tests connector/tests warehouse/tests report/tests" in _ci_source()
     )
 
 

@@ -1796,3 +1796,42 @@ Mise en œuvre consignée :
   est couvert par l'abonnement fondateur, aucun appel payant à l'API).
 - Nettoyage machine effectué (2,4 → 5,1 Gi libres : caches conda/VSCode/
   navigateur/pip/npm/brew + tmp d'anciennes sessions).
+
+## Chantier R7 — journal de build (PREMIER LOT DU RÉGIME CODEX, 2026-07-24)
+
+Build intégralement écrit par **codex** (GPT, 3 sous-lots séquentiels,
+mode d'exécution supervisé explicitement validé par le fondateur après
+blocage initial du classificateur — consigné), briefs de l'orchestrateur
+portant les règles durcies, supervision par diff après chaque sous-lot :
+- **A (hygiène)** : ruff format sur les 7 fichiers R6 — iso-sémantique
+  PROUVÉE par égalité d'AST 7/7 (orchestrateur PUIS re-prouvée par le
+  patch-verifier) ; `ruff format --check` ajouté à make lint ;
+  PYTHONDONTWRITEBYTECODE=1 au service api du compose dev.
+- **B (rechargement/chemins)** : SOBRIO_PROMOTED_DIR et
+  SOBRIO_EMBED_ARTIFACTS_DIR lus À LA CONSTRUCTION (défauts bit-inchangés
+  sans env, prouvé par tests) ; reinitialiser_routeurs() purge le
+  lru_cache du bridge SANS route HTTP ; rechargement d'un artefact
+  modifié sans redémarrage testé.
+- **C (recalibration/RUNBOOK)** : router/train/recalibrate.py fail-closed
+  (exit 2 « télémétrie v1 requise », zéro orchestration, règles
+  d'intégrité en docstring — jamais recalibrer sur le golden) + cible
+  make ; router/RUNBOOK.md (déploiement/rollback 2 étages, geste
+  fondateur pas à pas, recalibration, monitoring avec seuils vérifiés
+  ÉGAUX au code, incidents connus, caps de dépense).
+
+**Vérification (patch-verifier Opus, contexte neuf)** : verdict ECARTS →
+UN SEUL écart, documentaire (asymétrie de la note « refuse exit 2 avant
+le geste fondateur » sur la puce bench du RUNBOOK) — corrigé par CODEX
+sur re-brief (une phrase), tout le reste prouvé : périmètre strict
+(ledger/panels/contracts/doc normative intouchés), tests clés rejoués un
+à un, seuils RUNBOOK = constantes du code, 70 tests de gardes verts.
+Suite sur machine de référence (Postgres relancé — daemon zombie de
+6 jours tué, incident consigné au RUNBOOK) : **669 verts + 4 skips**,
+ruff format/check verts sur 104 fichiers.
+
+**Annotation transférée (dq r4, off-by-one)** : le total « 150 pyc hors
+venv » de l'audit bytecode r3 était inexact — les itemisations des juges
+somment à 151 ; total exact invérifiable post-purge ; le compte OPÉRANT
+(103 pyc 3.12 conformes, zéro divergent) a été re-prouvé en r4.
+
+Place aux panels R7 (TOUT OPUS — nouveau régime, ronde 0).

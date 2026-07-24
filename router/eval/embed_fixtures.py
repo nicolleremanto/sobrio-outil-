@@ -125,9 +125,7 @@ def generate(n: int, seed: int, sigma: float = DEFAULT_SIGMA) -> list[EmbedFixtu
         motif = rng.randrange(K_MOTIFS)
         centre = centroides[label][motif]
         point = _normaliser([c + rng.gauss(0.0, float(sigma)) for c in centre])
-        rows.append(
-            EmbedFixture(embedding=tuple(point), label=label, categorie=f"motif_{motif}")
-        )
+        rows.append(EmbedFixture(embedding=tuple(point), label=label, categorie=f"motif_{motif}"))
     return rows
 
 
@@ -176,11 +174,7 @@ def embed_golden_sha256(path: Path | None = None) -> str:
             f"manifest embed_golden illisible : {manifest_path} ({exc.__class__.__name__})"
         ) from exc
     sha = manifest.get("embed_golden_sha256") if isinstance(manifest, dict) else None
-    if (
-        not isinstance(sha, str)
-        or len(sha) != 64
-        or any(c not in "0123456789abcdef" for c in sha)
-    ):
+    if not isinstance(sha, str) or len(sha) != 64 or any(c not in "0123456789abcdef" for c in sha):
         raise ValueError(
             f"manifest embed_golden : embed_golden_sha256 absent ou non sha256-hex "
             f"({manifest_path})"

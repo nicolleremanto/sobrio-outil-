@@ -115,9 +115,7 @@ def _split_stratifie(
     return train_rows, val_rows
 
 
-def _verifier_stratification(
-    train_rows: list[EmbedFixture], val_rows: list[EmbedFixture]
-) -> None:
+def _verifier_stratification(train_rows: list[EmbedFixture], val_rows: list[EmbedFixture]) -> None:
     """Garde-fou a posteriori (patron §3.5 R5) : REFUS si une part de classe dévie."""
     ecarts: dict[str, float] = {}
     for label in LABEL_ORDER:
@@ -173,9 +171,7 @@ def run_training(out_dir: Path, seed: int = DEFAULT_SEED) -> dict:
     # d'éval — les seeds canoniques sont distincts par construction (§7.1),
     # cette garde refuse toute dérive future.
     if TRAIN_SEED == EVAL_SEED:
-        raise RefusError(
-            f"étanchéité train/éval rompue : train_seed == eval_seed ({TRAIN_SEED})"
-        )
+        raise RefusError(f"étanchéité train/éval rompue : train_seed == eval_seed ({TRAIN_SEED})")
 
     rows = canonical_train_set()
     rng = numpy.random.default_rng(seed)

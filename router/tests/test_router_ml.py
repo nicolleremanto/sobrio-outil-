@@ -20,6 +20,7 @@ import pytest
 from conftest_helpers import make_signals
 
 from sobrio_router import VISIBLE_MODELS, SafeRouter
+from sobrio_router import ml as ml_module
 from sobrio_router.ml import PROMOTED_DIR, MLRouter, MLRouterLoadError
 
 pytest.importorskip("lightgbm")
@@ -60,6 +61,25 @@ def test_decide_contrat(artefact_v05: Path):
         assert decision.model in VISIBLE_MODELS
         assert 0.0 <= decision.confidence <= 1.0
         assert decision.rule == "ml:v05"
+
+
+def test_sobrio_promoted_dir_surcharge_artefact_charge(
+    artefact_v05: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """La surcharge est lue à la construction et charge l'artefact indiqué."""
+    monkeypatch.setenv("SOBRIO_PROMOTED_DIR", str(artefact_v05))
+    router = MLRouter()
+    assert router.decide(_signals_varies(1)[0]).rule == "ml:v05"
+
+
+def test_sans_sobrio_promoted_dir_utilise_promoted_dir_inchange(
+    artefact_v05: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """Sans surcharge, le constructeur conserve strictement `PROMOTED_DIR`."""
+    monkeypatch.delenv("SOBRIO_PROMOTED_DIR", raising=False)
+    monkeypatch.setattr(ml_module, "PROMOTED_DIR", artefact_v05)
+    router = MLRouter()
+    assert router.decide(_signals_varies(1)[0]).rule == "ml:v05"
 
 
 def test_latence_p95_unitaire(artefact_v05: Path):

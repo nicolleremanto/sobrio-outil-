@@ -287,9 +287,21 @@ def test_gate_embed_bande_auto_vide_branche_rien_a_degrader(tmp_path: Path, caps
     """§9.2 : sous plafond 0.74, la bande candidate est vide PAR CONSTRUCTION
     — le critère 7 passe par « rien à dégrader », le 7-bis n'est PAS évalué."""
     cand, base = _ecrire_rapports(tmp_path, _rapport_embed(), _baseline_prior())
-    assert gate.main(
-        ["--candidate", str(cand), "--baseline", str(base), "--suite", "embed", "--budget-ms", "30"]
-    ) == 0
+    assert (
+        gate.main(
+            [
+                "--candidate",
+                str(cand),
+                "--baseline",
+                str(base),
+                "--suite",
+                "embed",
+                "--budget-ms",
+                "30",
+            ]
+        )
+        == 0
+    )
     sortie = capsys.readouterr().out
     assert "rien à dégrader" in sortie
     assert "bande-auto-absolu" not in sortie  # 7-bis non évalué (n == 0)
@@ -717,9 +729,7 @@ def test_promote_e2e_train_reel_gate_reel(tmp_path: Path, monkeypatch: pytest.Mo
     assert (tmp_path / "promoted" / "eval-report.json").is_file()
     assert (tmp_path / "eval" / "embed-prior-latest.json").is_file()
     assert (tmp_path / "eval" / "embed-head_candidate-latest.json").is_file()
-    rapport = json.loads(
-        (tmp_path / "promoted" / "eval-report.json").read_text(encoding="utf-8")
-    )
+    rapport = json.loads((tmp_path / "promoted" / "eval-report.json").read_text(encoding="utf-8"))
     assert rapport["golden_sha"] == _SHA_EMBED
     assert rapport["ece"] <= 0.10
     assert rapport["calibration_bande_auto"]["n"] == 0

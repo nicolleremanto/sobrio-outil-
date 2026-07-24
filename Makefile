@@ -18,7 +18,7 @@ ALEMBIC := .venv/bin/alembic
 .PHONY: dev test lint demo report sync-fixtures migrate seed router-bench router-eval \
 	router-corpus router-corpus-check router-train router-gate router-promote router-rollback \
 	router-embed-model router-embed-train router-embed-eval router-embed-gate \
-	router-embed-promote router-embed-rollback router-embed-bench
+	router-embed-promote router-embed-rollback router-embed-bench router-recalibrate
 
 # Routeur évalué par `router-eval` (registre : heuristic ; extensible R5 : ml_v05).
 ROUTER ?= heuristic
@@ -146,6 +146,11 @@ router-embed-promote:
 router-embed-rollback:
 	$(PY) router/train/promote_embed.py --rollback
 
+## router-recalibrate : flux mensuel v1 documenté ; REFUS exit 2 tant que la
+## télémétrie réelle requise n'est pas disponible (aucune orchestration).
+router-recalibrate:
+	$(PY) router/train/recalibrate.py
+
 ## test : tests Python (tous les lots) puis tests de l'extension
 test:
 	$(PYTEST) router/tests api/tests connector/tests warehouse/tests report/tests
@@ -154,6 +159,7 @@ test:
 ## lint : ruff (Python) puis eslint/prettier (extension)
 lint:
 	$(RUFF) check router api connector warehouse report
+	$(RUFF) format --check router api connector warehouse report
 	$(PNPM) -C extension lint
 
 ## report : génère le rapport mensuel PDF du mois de démo (2026-06)

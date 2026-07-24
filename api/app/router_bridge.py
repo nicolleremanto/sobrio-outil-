@@ -17,8 +17,8 @@ CANARY PER-ORG (patron R5) : le défaut RESTE `heuristic` — `ml_v05` et
 `embed_v0` s'activent org par org via `policy_json.router_version`
 (décision fondateurs, hors code). Artefact manquant/corrompu/deps absentes :
 la garde de construction sert `SafeRouter(primary=None)` — API verte,
-`rule="fallback:heuristic"` (invariant §5.2). Limite lru_cache inchangée :
-changement d'env/artefact => redémarrage API (TODO R7 : rechargement à chaud).
+`rule="fallback:heuristic"` (invariant §5.2). Après déploiement d'artefacts,
+`reinitialiser_routeurs()` invalide les singletons sans exposer de route HTTP.
 """
 
 from __future__ import annotations
@@ -73,8 +73,8 @@ def _build_primary(version: str) -> Router:
     l'artefact est manquant/corrompu : c'est précisément pourquoi l'appelant
     enveloppe cette construction d'un try/except (invariant §5.2, correction
     ronde 0 : un échec au CHARGEMENT contournerait sinon le SafeRouter).
-    `ml.PROMOTED_DIR` est lu À L'APPEL (attribut de module, pas une valeur
-    figée) : testable par monkeypatch, surcharge env TODO R7.
+    Le chemin promu est résolu par `MLRouter()` À LA CONSTRUCTION : la
+    surcharge `SOBRIO_PROMOTED_DIR` n'est jamais figée à l'import.
 
     `embed_v0` (R6, cascade fail-soft §2.2) :
     1. verrou d'env FERMÉ → construit comme `ml_v05` (l'étage 2 n'est JAMAIS
@@ -82,7 +82,7 @@ def _build_primary(version: str) -> Router:
     2. `EmbedRouter()` sous try/except Exception → `stage2=None` en cas
        d'échec — modèle absent (cas NOMINAL tant que le geste fondateur n'a
        pas eu lieu), artefact de tête absent, dérive, dépendances manquantes ;
-    3. `MLRouter(PROMOTED_DIR)` : un échec PROPAGE — le lru_cache de
+    3. `MLRouter()` : un échec PROPAGE — le lru_cache de
        l'appelant sert alors `SafeRouter(primary=None)` = repli heuristique
        intégral (patron R1 inchangé) ;
     4. `TwoStageRouter(stage1, stage2)` — arbitrage §5, replis fins compris.
@@ -98,12 +98,12 @@ def _build_primary(version: str) -> Router:
             stage2 = None  # échec de l'étage 2 : l'étage 1 seul répond (§2.2.2)
         from sobrio_router import ml  # import différé (§7.1)
 
-        stage1 = ml.MLRouter(ml.PROMOTED_DIR)  # un échec ICI propage (§2.2.3)
+        stage1 = ml.MLRouter()  # un échec ICI propage (§2.2.3)
         return TwoStageRouter(stage1, stage2)
     if version == "ml_v05":
         from sobrio_router import ml  # import différé (§7.1)
 
-        return ml.MLRouter(ml.PROMOTED_DIR)
+        return ml.MLRouter()
     return HeuristicRouter()
 
 
@@ -118,9 +118,9 @@ def _router_for_version(version: str) -> Router:
     lève (artefact ML manquant/corrompu au chargement — R5/R6), on sert un
     `SafeRouter(primary=None)` : chaque décision part du repli heuristique,
     marquée `fallback:heuristic`, sans jamais faire un 500. Le repli est
-    MÉMORISÉ par le lru_cache : un artefact réparé (ou un changement d'env
-    `SOBRIO_EMBED_STAGE2`) exige un redémarrage du service (assumé v0 —
-    TODO R7 : rechargement à chaud avec invalidation).
+    MÉMORISÉ par le lru_cache jusqu'à l'appel explicite de
+    `reinitialiser_routeurs()` après le déploiement d'un artefact ou un
+    changement d'environnement.
 
     `timeout_s=0.050` du SafeRouter INCHANGÉ (5 + 30 ms p95 < 50 ms) : un
     étage 2 qui PEND déclenche le timeout → heuristique — jamais
@@ -131,6 +131,16 @@ def _router_for_version(version: str) -> Router:
     except Exception:
         primary = None  # échec au chargement ⇒ repli permanent, API verte
     return SafeRouter(primary=primary, fallback=HeuristicRouter())
+
+
+def reinitialiser_routeurs() -> None:
+    """Purge les routeurs mémorisés après un déploiement d'artefacts.
+
+    À appeler depuis le geste de déploiement interne, jamais depuis une
+    route HTTP. Les requêtes déjà en cours terminent avec leur instance ;
+    la prochaine résolution de chaque version recharge ses artefacts.
+    """
+    _router_for_version.cache_clear()
 
 
 def router_for_org(policy_json: dict[str, Any] | None) -> Router:

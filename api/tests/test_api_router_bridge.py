@@ -123,6 +123,37 @@ def test_primary_construction_failure_serves_fallback(client, monkeypatch):
         router_bridge._router_for_version.cache_clear()
 
 
+def test_reinitialiser_routeurs_recharge_artefact_modifie(tmp_path, monkeypatch):
+    """La purge fait relire un artefact modifié sans redémarrer le processus."""
+    from sobrio_router import Router
+
+    artefact = tmp_path / "version.txt"
+    artefact.write_text("v1", encoding="utf-8")
+
+    class _RouteurArtefact(Router):
+        def __init__(self):
+            self.version_artefact = artefact.read_text(encoding="utf-8")
+
+        def decide(self, signals):
+            raise AssertionError("ce test vérifie uniquement le chargement")
+
+    monkeypatch.setattr(router_bridge, "_build_primary", lambda version: _RouteurArtefact())
+    router_bridge.reinitialiser_routeurs()
+    try:
+        premier = router_bridge._router_for_version("ml_v05")
+        assert premier._primary.version_artefact == "v1"
+        artefact.write_text("v2", encoding="utf-8")
+        assert router_bridge._router_for_version("ml_v05") is premier
+        assert premier._primary.version_artefact == "v1"
+
+        router_bridge.reinitialiser_routeurs()
+        second = router_bridge._router_for_version("ml_v05")
+        assert second is not premier
+        assert second._primary.version_artefact == "v2"
+    finally:
+        router_bridge.reinitialiser_routeurs()
+
+
 # ---------------------------------------------------------------------------
 # R5 — `router_version="ml_v05"` : canary per-org derrière le SafeRouter.
 # ---------------------------------------------------------------------------

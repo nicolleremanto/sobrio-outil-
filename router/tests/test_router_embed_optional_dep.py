@@ -139,12 +139,13 @@ def test_simulation_clone_frais_total(tmp_path: Path):
         EmbedRouter(encoder_dir=tmp_path / "encodeur", head_dir=tmp_path / "tete")
 
 
-def test_repertoires_artefacts_embed_du_poste_sont_gitignores():
+def test_repertoires_artefacts_embed_du_poste_sont_gitignores(monkeypatch):
     """Garde D4 : `heads/promoted/` du repo reste VIDE à la clôture R6 — si
     un artefact promu apparaissait ici, il vivrait sous `router/artifacts/*`
     (gitignoré, prouvé au Lot 2) ; on fige au moins l'invariant de chemin."""
     from sobrio_router.embed import ENCODER_DIR, PROMOTED_HEAD_DIR
 
+    monkeypatch.delenv("SOBRIO_EMBED_ARTIFACTS_DIR", raising=False)
     racine = Path(__file__).resolve().parents[1] / "artifacts"
     assert ENCODER_DIR == racine / "embed" / "encoder"
     assert PROMOTED_HEAD_DIR == racine / "embed" / "heads" / "promoted"

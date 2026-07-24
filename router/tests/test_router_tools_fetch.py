@@ -496,9 +496,7 @@ def test_aucun_import_module_niveau_module_du_paquet_tools():
 
 
 def _manifest_committe() -> dict:
-    return json.loads(
-        (_TOOLS_DIR / "embed_model_manifest.json").read_text(encoding="utf-8")
-    )
+    return json.loads((_TOOLS_DIR / "embed_model_manifest.json").read_text(encoding="utf-8"))
 
 
 def test_manifest_committe_structure_et_amont():

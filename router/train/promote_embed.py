@@ -161,11 +161,7 @@ def _sha_encodeur_manifest() -> str:
                     modele = fichiers.get("model.onnx", {})
                     if isinstance(modele, dict):
                         sha = modele.get("sha256")
-    if (
-        not isinstance(sha, str)
-        or len(sha) != 64
-        or any(c not in "0123456789abcdef" for c in sha)
-    ):
+    if not isinstance(sha, str) or len(sha) != 64 or any(c not in "0123456789abcdef" for c in sha):
         raise RefusError(
             "preuve bench impossible : sha256 de l'encodeur int8 non consigné dans le "
             f"manifest ({MANIFEST_PATH}) — geste fondateur §8 non advenu, promotion "
@@ -191,8 +187,7 @@ def _verifier_preuve_bench() -> None:
     p95 = rapport.get("p95_ms")
     if not _is_finite_number(p95) or float(p95) > BUDGET_MS:
         raise RefusError(
-            f"preuve bench : p95_ms {p95!r} absent ou > budget {BUDGET_MS} ms "
-            f"({BENCH_REPORT_PATH})"
+            f"preuve bench : p95_ms {p95!r} absent ou > budget {BUDGET_MS} ms ({BENCH_REPORT_PATH})"
         )
     rss = rapport.get("rss_peak_mb")
     if not _is_finite_number(rss) or float(rss) >= RSS_MAX_MB:

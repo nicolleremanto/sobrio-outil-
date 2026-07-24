@@ -34,6 +34,7 @@ services:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-sobrio}:${POSTGRES_PASSWORD:-sobrio_dev_password}@postgres:5432/${POSTGRES_DB:-sobrio}
       MODEL_CATALOG_PATH: /repo/contracts/model_catalog.yaml
       DEMO_ORG_TOKEN: ${DEMO_ORG_TOKEN:-demo-token-not-a-secret}
+      PYTHONDONTWRITEBYTECODE: "1"
     volumes:
       - ./api:/repo/api
       - ./contracts:/repo/contracts:ro

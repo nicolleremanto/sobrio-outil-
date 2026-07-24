@@ -24,13 +24,16 @@ import logging
 import math
 import random
 import re
+import sys
 from dataclasses import replace
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 from conftest_helpers import make_signals
 
 from sobrio_router import Signals
+from sobrio_router import embed as embed_module
 from sobrio_router.embed import (
     _DIM,
     _E5_PREFIX,
@@ -129,6 +132,68 @@ def _routeur_service(tete: object, embedding: list[float] | None = None) -> Embe
     if embedding is not None:
         routeur._embed = lambda prefixe: list(embedding)
     return routeur
+
+
+def test_sobrio_embed_artifacts_dir_charge_encodeur_et_tete(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """La racine surchargée est lue à la construction pour l'encodeur et la tête."""
+    racine = tmp_path / "artefacts-embed"
+    encodeur = racine / "encoder"
+    encodeur.mkdir(parents=True)
+    model_octets = b"modele-factice"
+    tokenizer_octets = b"{}"
+    (encodeur / "model.onnx").write_bytes(model_octets)
+    (encodeur / "tokenizer.json").write_bytes(tokenizer_octets)
+    monkeypatch.setattr(embed_module, "_ENCODER_SHA256", hashlib.sha256(model_octets).hexdigest())
+    monkeypatch.setattr(
+        embed_module,
+        "_TOKENIZER_SHA256",
+        hashlib.sha256(tokenizer_octets).hexdigest(),
+    )
+    _ecrire_tete(racine / "heads" / "promoted")
+
+    chemins_charges: dict[str, str] = {}
+
+    class _OptionsFactices:
+        intra_op_num_threads = 0
+        inter_op_num_threads = 0
+
+    class _SessionFactice:
+        def __init__(self, path, *, sess_options, providers):
+            chemins_charges["modele"] = path
+
+        def get_inputs(self):
+            return []
+
+    class _TokeniseurFactice:
+        def enable_truncation(self, *, max_length):
+            self.max_length = max_length
+
+    class _FabriqueTokeniseur:
+        @staticmethod
+        def from_file(path):
+            chemins_charges["tokenizer"] = path
+            return _TokeniseurFactice()
+
+    monkeypatch.setitem(sys.modules, "numpy", SimpleNamespace())
+    monkeypatch.setitem(
+        sys.modules,
+        "onnxruntime",
+        SimpleNamespace(SessionOptions=_OptionsFactices, InferenceSession=_SessionFactice),
+    )
+    monkeypatch.setitem(sys.modules, "tokenizers", SimpleNamespace(Tokenizer=_FabriqueTokeniseur))
+    monkeypatch.setenv("SOBRIO_EMBED_ARTIFACTS_DIR", str(racine))
+
+    routeur = EmbedRouter()
+    assert chemins_charges == {
+        "modele": str(encodeur / "model.onnx"),
+        "tokenizer": str(encodeur / "tokenizer.json"),
+    }
+    assert routeur._head.predict([5.0] + [0.0] * (_DIM - 1)) == (
+        "claude-haiku-4-5",
+        0.74,
+    )
 
 
 # ---------------------------------------------------------------------------

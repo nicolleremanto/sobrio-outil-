@@ -19,6 +19,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 from bisect import bisect_right
 from pathlib import Path
 
@@ -31,11 +32,11 @@ from .types import Decision, Signals
 # label_mapping diffère (garde de dérive, §2).
 LABEL_ORDER: tuple[str, ...] = ("claude-haiku-4-5", "claude-sonnet-5", "claude-opus-4-8")
 
-# Valide en install editable (venv racine). TODO R7 (déploiement VPS) :
-# surcharge par variable d'env, hors périmètre R5.
+# Valeur par défaut valide en installation éditable (venv racine).
 PROMOTED_DIR = Path(__file__).resolve().parents[1] / "artifacts" / "models" / "promoted"
 CANDIDATE_DIR = Path(__file__).resolve().parents[1] / "artifacts" / "models" / "candidate"
 
+_PROMOTED_DIR_ENV = "SOBRIO_PROMOTED_DIR"
 _N_FEATURES = len(FEATURE_NAMES)  # 22
 _ARTIFACT_FILES = ("model.txt", "calibrator.json", "metadata.json")
 
@@ -100,8 +101,14 @@ class MLRouter(Router):
     substitue `fallback:heuristic` comme aujourd'hui.
     """
 
-    def __init__(self, artifact_dir: Path | str = PROMOTED_DIR) -> None:
-        directory = Path(artifact_dir)
+    def __init__(self, artifact_dir: Path | str | None = None) -> None:
+        # Lecture À LA CONSTRUCTION : un déploiement peut changer l'artefact
+        # puis purger le cache du bridge sans réimporter ce module.
+        if artifact_dir is None:
+            surcharge = os.environ.get(_PROMOTED_DIR_ENV)
+            directory = Path(surcharge) if surcharge is not None else PROMOTED_DIR
+        else:
+            directory = Path(artifact_dir)
         # Import PARESSEUX (§7.1) — lightgbm absent => MLRouterLoadError,
         # jamais un ImportError nu (le bridge et les tests s'y fient).
         try:
