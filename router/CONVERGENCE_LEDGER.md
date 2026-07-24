@@ -42,7 +42,7 @@ RAM < 1 Go · artefacts : étage 1 < 20 Mo, étage 2 < 500 Mo · dépense API : 
 | R4       | Corpus de démarrage à froid                        | 2/2 (r4 & r5) | **CONVERGÉ** |
 | R5       | Pipeline d'entraînement & classifieur v0.5         | 2/2 (r4 & r5) | **CONVERGÉ** |
 | R6       | Étage 2 embeddings (construit, ÉTEINT ; geste fondateur différé) | 2/2 (r3 & r4) | **CONVERGÉ** |
-| R7       | Recalibration, monitoring & déploiement VPS        | 0/2           | à venir |
+| R7       | Recalibration, monitoring & déploiement VPS        | 2/2 (r0 & r1) | **CONVERGÉ** |
 
 ---
 
@@ -1866,3 +1866,41 @@ l'état machine (PROMOTED_DIR monkeypatché inexistant) ; 4 tests nouveaux
 processus servant, redémarrage = mécanisme concret v0). Le flake Postgres
 (1 run sur 2 chez eval-scientist, AdminShutdown) reste l'item de
 surveillance consigné — protocole RUNBOOK appliqué, run propre reproduit.
+
+## R7 — round 1 (commit a4af9ed, panel de confirmation tout Opus — archivé router/panels/R7-r1.json)
+
+| agent            | modèle | scores (dims)                                        | blocking | major | verdict |
+|------------------|--------|------------------------------------------------------|----------|-------|---------|
+| ml-architect (P) | opus   | spec5 chemins-env5 rechargement5 opérabilité4 ext5   | 0        | 0     | GREEN   |
+| eval-scientist   | opus   | éval5 monitoring5 honnêteté5 repro5 budgets5         | 0        | 0     | GREEN   |
+| data-quality     | opus   | intégrité5 robustesse5 traça5 périmètre5 global5     | 0        | 0     | GREEN   |
+| qa-auditor       | opus   | couverture5 contrat5 erreurs5 clarté5 régressions5   | 0        | 0     | GREEN   |
+| privacy-sentinel | opus   | — (bytecode servi byte-identique, no-leak verts)     | PASS     | —     | PASS    |
+| cost-guard       | opus   | — (0,00 $, gardes toutes vertes, refus rejoués)      | PASS     | —     | PASS    |
+
+→ **Ronde VERTE — 2/2 consécutives (r0 & r1) : CHANTIER R7 CONVERGÉ.
+TOUS LES CHANTIERS (R1-R7) SONT CLOS.** (Sentinelle privacy reprise via
+resume après blocage transitoire du classificateur — aucun verdict
+fabriqué, patron R6-r4.)
+
+## Clôture R7 et CLÔTURE DES CHANTIERS (2026-07-24)
+
+**Convention de comptes consignée (minors eval/qa r1)** : les comptes de
+tests du ledger portent désormais leur PÉRIMÈTRE. Référence au HEAD
+a4af9ed : **673 verts + 4 skips sur router+api** (périmètre canonique des
+chantiers routeur) ; **723 verts + 4 skips sur make test complet**
+(router api connector warehouse report — +50 tests data-dépendants verts
+grâce aux artefacts locaux du poste : corpus + modèle promu ; zéro échec
+dans les deux périmètres, profil de skips identique). Le nombre canonique
+de référence est celui de l'environnement de mesure du panel.
+
+R7 livré convergé en 2 rondes (0 correction majeure — premier chantier de
+la mission sans ronde jaune/rouge) : surcharges env, rechargement par
+purge in-process documenté, recalibration fail-closed, RUNBOOK opérateur
+complet, hygiène format/lint/bytecode verrouillée. Régime codex/Opus
+validé en conditions réelles : builders GPT, vérification et panels Opus,
+qualité de jugement maintenue (mutants démontrés, subtilités attrapées).
+
+**Sortie de mission : rapport final orchestrateur déposé dans
+router/RAPPORT_FINAL_ORCHESTRATEUR.md (§8), 4 gestes fondateurs en
+attente de décision humaine.**

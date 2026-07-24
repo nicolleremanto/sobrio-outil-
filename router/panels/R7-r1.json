@@ -1,0 +1,123 @@
+{
+  "chantier": "R7",
+  "round": 1,
+  "head": "a4af9ed",
+  "date": "2026-07-24",
+  "ronde": "VERTE — R7 CONVERGE (2/2), TOUS CHANTIERS CLOS",
+  "note": "privacy-sentinel repris via resume après blocage transitoire du classificateur (verdicts acquis servis du cache) — aucun verdict fabriqué",
+  "juges": [
+    {
+      "agent": "ml-architect",
+      "chantier": "R7",
+      "round": 1,
+      "scores": {
+        "spec": 5,
+        "chemins_env": 5,
+        "rechargement": 5,
+        "operabilite": 4,
+        "extensibilite": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "eval-scientist",
+      "chantier": "R7",
+      "round": 1,
+      "scores": {
+        "evaluation": 5,
+        "monitoring": 5,
+        "honnetete": 5,
+        "repro": 5,
+        "budgets": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "R7-r1-honn-min-1",
+          "quoi": "La ligne de poli consignee au ledger dit 'suite 673 verts + 4 skips' sans nommer son perimetre. Verifie par rejeu : 673 passed + 4 skipped correspond EXACTEMENT au scope router+api (router/tests 625 + api/tests 52 = 677 collectes, 673 passes), et non au scope complet de make test qui donne 723 passed + 4 skipped (727 collectes sur router api connector warehouse report). Le perimetre 'router+api' n'est documente qu'en arriere-plan a R6 (ledger l.1596 '662 router+api verts'). Un lecteur qui deroule make test litteralement voit 723+4, pas 673+4 : meme ambiguite de perimetre-sur-un-compte que la rectification 104 (depot entier) / 103 (make lint) vient elle-meme de corriger pour ruff. Aucune incidence sur la substance (les deux scopes sont verts), simple annotation de perimetre manquante.",
+          "ou": "router/CONVERGENCE_LEDGER.md (bloc poli ronde 0, ligne 'suite 673 verts + 4 skips')",
+          "correction": "Annoter le chiffre avec son perimetre ('673 router+api verts + 4 skips'), ou mentionner le compte make-test complet (723+4), comme cela a ete fait pour 104 depot-entier / 103 make lint."
+        }
+      ],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "data-quality",
+      "chantier": "R7",
+      "round": 1,
+      "scores": {
+        "integrite": 5,
+        "robustesse_pipeline": 5,
+        "tracabilite": 5,
+        "perimetre": 5,
+        "global": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [],
+      "verdict": "GREEN"
+    },
+    {
+      "agent": "qa-auditor",
+      "chantier": "R7",
+      "round": 1,
+      "scores": {
+        "couverture": 5,
+        "contrat": 5,
+        "erreurs": 5,
+        "clarte": 5,
+        "regressions": 5
+      },
+      "blocking": [],
+      "major": [],
+      "minor": [
+        {
+          "id": "qa-r1-min-baseline-count",
+          "quoi": "La suite complete (router api connector warehouse report) donne 723 passed + 4 skipped sur ce poste, contre l'attendu 673 + 4 du mandat (= 669 du run propre eval r0 + 4 tests du delta). L'ecart est de +50 tests VERTS, 0 echec, avec un profil de skips IDENTIQUE (onnxruntime absent x3 + modele e5 absent x1) et deux runs deterministes (723/4 les deux fois). Arbre gele/propre : le code des tests est byte-identique au commit, donc l'ecart ne vient pas du delta (qui ajoute exactement +4) mais d'un etat sur-disque/deps plus riche sur le poste du juge que dans l'environnement de mesure du panel/orchestrateur (ex. corpus router/data/artifacts et artefact promu router/artifacts/models/promoted peuples ici). Ce n'est PAS une regression de code (une regression se manifesterait par des echecs, il y en a zero) — mais le nombre canonique consigne devrait etre reconcilie avant le rapport final §8 pour ne pas laisser une divergence non expliquee au dossier de convergence.",
+          "ou": "router/CONVERGENCE_LEDGER.md (entree R7 round 0, mention 'suite 673 verts + 4 skips') ; suite make test (perimetre router/tests api/tests connector/tests warehouse/tests report/tests)",
+          "correction": "Reconcilier le compte de reference : soit documenter que le total est dependant de l'etat sur-disque du poste (corpus/artefacts presents => plus de cas data-dependants verts) et fixer le nombre canonique sur l'environnement CI/build de reference, soit re-mesurer sur cet environnement et consigner le total exact. Aucune action code."
+        }
+      ],
+      "verdict": "GREEN"
+    }
+  ],
+  "sentinelles": [
+    {
+      "agent": "privacy-sentinel",
+      "chantier": "R7",
+      "round": 1,
+      "verdict": "PASS",
+      "violations": [],
+      "preuves": [
+        "git show a4af9ed integral (7 fichiers, +281/-16) : aucune ligne ajoutee ne porte de contenu textuel sensible. Seules occurrences 'prompt' du depot = identifiants de flag/politique (send_prompt_text a router/RUNBOOK.md:92 et docstring router/sobrio_router/types.py:23) et docstring de garde api/tests/test_api_no_leak.py:1 ; jamais du contenu. Le delta ml.py:109-111 / embed.py:300-302 = normalisation d'une surcharge d'env vide vers None (resolution de CHEMIN a la construction), aucun nouveau flux de donnees, aucun chemin de fuite.",
+        "Scans anti-serialisation + no-leak E2E rejoues verts : .venv/bin/pytest router/tests/test_router_embed_privacy.py api/tests/test_api_no_leak.py router/tests/test_router_recalibrate.py = 68 passed. Verrou __reduce__ (deux branches, tous protocoles pickle + deepcopy) sans fuite du jeton sentinelle aleatoire ; scan statique en GLOB (router/sobrio_router,eval,train,tools + api/app) sans motif pickle/asdict/astuple/vars, controle negatif par injection en copie tmp positif ; message d'exception du verrou FIXE (router/tests/test_router_embed_privacy.py:237, aucune interpolation) ; recalibrate.py fail-closed sans fuite.",
+        "test_scan_couvre_les_modules_attendus (router/tests/test_router_embed_privacy.py:77-96) confirme que le glob voit bien router/sobrio_router/ml.py et le dossier de embed.py : les deux fichiers modifies par le lot restent dans le perimetre de la garde anti-serialisation.",
+        "Invariant 'le code qui tourne = le code juge' verifie sur echantillon ml.py + embed.py : corps marshalle du .pyc servi (router/sobrio_router/__pycache__/ml.cpython-312.pyc, embed.cpython-312.pyc) byte-identique a une compilation fraiche de la source courante (ml 11862 o, embed 21344 o ; co_code/co_consts/co_names concordants ; magic sur disque == importlib MAGIC_NUMBER 3.12).",
+        "Non-regression du perimetre : .venv/bin/pytest api/tests/test_api_router_bridge.py router/tests/test_router_ml.py router/tests/test_router_embed.py router/tests/test_router_embed_optional_dep.py = 115 passed, 3 skipped ; reinitialiser_routeurs = unique _router_for_version.cache_clear() (api/app/router_bridge.py:143), pas de route HTTP, cache par processus, aucune exposition par logs/exceptions.",
+        "Clause RUNBOOK 'sans persistance de texte' toujours presente (router/RUNBOOK.md:83) ; r0 privacy-sentinel avait 0 violation (rien a re-corriger), et le poli codex du lot n'introduit aucune serialisation/journalisation de texte.",
+        "Etat GELE confirme : HEAD == origin/main == a4af9ed, arbre propre (git status --porcelain vide hors gitignore) ; toutes preuves relevees en lecture seule sur fichiers, mutation bytecode faite en copie tmp scratchpad."
+      ]
+    },
+    {
+      "agent": "cost-guard",
+      "chantier": "R7",
+      "round": 1,
+      "verdict": "PASS",
+      "violations": [],
+      "preuves": [
+        "Delta HEAD a4af9ed lu integralement (git show, 7 fichiers) : les seules mutations de code sont router/sobrio_router/embed.py:300-302 et router/sobrio_router/ml.py:109-111 = traitement d'une surcharge d'env vide/blanche comme absente (strip -> None), pure manipulation de chaine, AUCUN import ni chemin reseau ; les 5 autres fichiers = tests + docs (ledger, RUNBOOK, panel R7-r0.json). ci.yml, router/data/distill.py, router/tools/fetch_embed_model.py et router/requirements-embed.txt NON TOUCHES au HEAD (verifie git show --stat).",
+        "Anti-reseau toutes vertes : grep de motifs urllib/urlopen/requests/httpx/socket/Anthropic/openai/http(s):// sur les deux fichiers source modifies = zero occurrence ; suites de gardes rejouees (.venv pytest) = 238 passed, 4 skipped, incluant test_no_network_imports_in_router_{data,root,train}_modules + _in_router_eval_modules + _in_sobrio_router_modules (glob parametrize) et les meta-gardes *_couvert_par_la_garde qui confirment que embed.py/ml.py sont bien vus par le glob sobrio_router.",
+        "fetch refuse proprement (EXECUTE, SOBRIO_ALLOW_MODEL_DOWNLOAD=1) : REFUS exit 2 'source non approuvee : geste fondateur requis — champ source_repo non renseigne pour la variante int8'. La garde de flag PRECEDE la lecture du manifest, la validation _fichiers_approuves leve AVANT _check_disk_space/mkdir/_download : AUCUN acces reseau, AUCUNE ecriture. Manifest committe verifie encore entierement null (source_repo/url/sha256/size_bytes = null pour int8 et fp32).",
+        "bench refuse proprement (EXECUTE) : REFUS exit 2 'bench reel impossible — dependances embed indisponibles : ModuleNotFoundError'. promote refuse proprement (EXECUTE) : REFUS exit 2 'preuve bench impossible : sha256 de l'encodeur int8 non consigne dans le manifest — geste fondateur non advenu, promotion effective refusee (D8) ; heads/promoted/ reste vide (D4)'. recalibrate fail-closed (EXECUTE) : REFUS exit 2 'recalibration impossible — telemetrie v1 requise'. Les 4 points d'entree de depense refusent tous exit 2 avant toute orchestration/reseau.",
+        "CI verrouillee : .github/workflows/ci.yml (lu integralement, non modifie au HEAD) ne pose AUCUN flag SOBRIO_* (bloc env = DATABASE_URL seul), installe uniquement api/connector/warehouse/report + editable warehouse/router (jamais requirements-embed ni requirements-ml), porte l'etape executable 'Garde R6' (grep ^SOBRIO_ -> exit 1 si present ; find_spec onnxruntime/tokenizers -> exit si presents), lint = ruff check, tests = pytest. test_router_ci_workflow.py (6 tests : flag/telechargement/deps-optionnelles/suite/garde-R6) verts.",
+        "requirements-embed TOUJOURS non installe : .venv/bin/python find_spec('onnxruntime') = None, find_spec('tokenizers') = None (numpy present, autorise). router/requirements-embed.txt inchange, marque 'NON INSTALLE a ce jour — premiere installation = geste fondateur', pins onnxruntime/tokenizers en commentaire, seul numpy epingle.",
+        "Aucun chemin de depense : garde-fous distill.py inchanges (defaut dry-run ; double gate simultane SOBRIO_ALLOW_PAID_CALLS==1 + SOBRIO_MAX_SPEND_USD fini strictement positif via _parse_spend_cap qui rejette nan/inf/<=0 ; defaut 20 USD ; refus AVANT tout appel). Les minors cost-guard de la ronde 0 = zero (PASS sans violation) : rien a re-corriger ; le poli codex (env-vide, tests mutant-killer/precedence, RUNBOOK) n'introduit aucun chemin de depense.",
+        "Depense mission = 0,00 $ : verification menee exclusivement en local (lectures fichiers, pytest/ruff sous abonnement, refus CLI locaux) ; regime codex couvert par l'abonnement fondateur ; zero appel API payante ; aucune installation, aucun telechargement (fetch a refuse avant reseau)."
+      ]
+    }
+  ]
+}
